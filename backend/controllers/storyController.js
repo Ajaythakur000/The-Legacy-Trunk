@@ -1,4 +1,5 @@
 const Story = require('../models/storyModel.js'); // Sahi path aur filename
+const FamilyCircle = require('../models/familyCircleModel.js'); // Circle model ko import karna
 
 /**
  * @desc    Create a new story
@@ -40,13 +41,25 @@ const createStory = async (req, res) => {
 };
 
 /**
- * @desc    Get stories for a logged-in user
+ * @desc    Get stories for a logged-in user (THE LOGIC IS UPDATED)
  * @route   GET /api/stories
  * @access  Private
  */
 const getMyStories = async (req, res) => {
     try {
-        const stories = await Story.find({ user: req.user._id });
+        // 1. Un saare circles ko dhoondo jinka current user member hai
+        const userCircles = await FamilyCircle.find({ members: req.user._id });
+        const circleIds = userCircles.map(circle => circle._id);
+
+        // 2. Aisi stories dhoondo jo ya to user ne khud banayi hain,
+        //    YA fir un circles mein share ki gayi hain jinka woh member hai.
+        const stories = await Story.find({
+            $or: [
+                { user: req.user._id },
+                { sharedWith: { $in: circleIds } }
+            ]
+        }).populate('user', 'name'); // Author ka naam bhi saath mein bhej rahe hain
+
         res.json(stories);
     } catch (error) {
         res.status(500).json({ message: 'Server Error: ' + error.message });
@@ -130,5 +143,56 @@ const deleteStory = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Share a story with a circle
+ * @route   PUT /api/stories/:id/share
+ * @access  Private
+ */
+const shareStoryWithCircle = async (req, res) => {
+    try {
+        const { circleId } = req.body;
+        const storyId = req.params.id;
+
+        const story = await Story.findById(storyId);
+        const circle = await FamilyCircle.findById(circleId);
+
+        // 
+        console.log("--- DEBUGGING SHARE STORY ---");
+        console.log("Fetched Story Object:", story);
+        console.log("Fetched Circle Object:", circle);
+        console.log("---------------------------");
+        // 
+
+        if (!story || !circle) {
+            return res.status(404).json({ message: 'Story or Circle not found' });
+        }
+
+        if (story.user.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ message: 'Not authorized to share this story' });
+        }
+
+        if (!circle.members.includes(req.user._id)) {
+            return res.status(401).json({ message: 'Cannot share to a circle you are not a member of' });
+        }
+
+        if (!story.sharedWith.includes(circleId)) {
+            story.sharedWith.push(circleId);
+            await story.save();
+        }
+
+        res.json(story);
+    } catch (error) {
+        console.error(error); // Yeh line error ko terminal mein print karegi
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+};
+
 // Sabhi functions ko export karna
-module.exports = { createStory, getMyStories, getStoryById, updateStory, deleteStory };
+module.exports = {
+    createStory,
+    getMyStories,
+    getStoryById,
+    updateStory,
+    deleteStory,
+    shareStoryWithCircle
+};

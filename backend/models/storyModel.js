@@ -24,13 +24,18 @@ const storySchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    mediaType: { // [cite: 68]
+     mediaType: {
         type: String,
         enum: ['text', 'photo', 'audio', 'video'],
         default: 'text'
-    }
+    },
+    // Yeh array un sabhi circles ki ID store karega jinke saath yeh story shared hai.
+   sharedWith: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'FamilyCircle'
+}]
 }, {
-    timestamps: true // Yeh automatically 'createdAt' aur 'updatedAt' fields add kar dega
+    timestamps: true
 });
 
 const Story = mongoose.model('Story', storySchema);

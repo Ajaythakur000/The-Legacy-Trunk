@@ -8,7 +8,7 @@ const protect = async (req, res, next) => {
     // Check karo ki request ke header mein authorization hai aur woh 'Bearer' se shuru hota hai
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            // Header se token nikalo (e.g., "Bearer eyJhbGci...") -> "eyJhbGci..."
+            // Header se token nikalo (e.g. "eyJhbGci..."
             token = req.headers.authorization.split(' ')[1];
 
             // Token ko verify karo. Yeh check karega ki token valid hai ya nahi.

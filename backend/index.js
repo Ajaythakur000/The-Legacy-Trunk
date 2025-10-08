@@ -5,6 +5,8 @@ require('dotenv').config(); // .env file ki variables ko load karne ke liye
 const userRoutes = require('./routes/userRoutes');
 const storyRoutes = require('./routes/storyRoutes');
 const timelineRoutes = require('./routes/timelineRoutes');
+const circleRoutes = require('./routes/circleRoutes'); 
+const searchRoutes = require('./routes/searchRoutes'); 
 
 // Express app initialize karna
 const app = express();
@@ -17,7 +19,10 @@ const MONGO_URI = process.env.MONGO_URI;
 app.use('/api/users', userRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/timelines', timelineRoutes);
+app.use('/api/circles', circleRoutes); // Family Circle ke routes
+app.use('/api/search', searchRoutes); 
 // Database se connect karne ka function
+
 const connectDB = async () => {
     try {
         await mongoose.connect(MONGO_URI);
