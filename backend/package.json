@@ -18,7 +18,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.0",
     "multer": "^2.0.2",
-    "multer-storage-cloudinary": "^4.0.0"
+    "multer-storage-cloudinary": "^4.0.0",
+    "puppeteer": "^24.24.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
