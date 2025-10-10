@@ -51,9 +51,9 @@ To get a local copy up and running, follow these simple steps.
 
 ### Prerequisites
 
-* Node.js (LTS version recommended)
+* Node.js
 * NPM
-* MongoDB Atlas account (or a local MongoDB instance)
+* MongoDB Atlas account 
 
 ### Installation & Setup
 
@@ -118,3 +118,4 @@ To get a local copy up and running, follow these simple steps.
 ## 📜 License
 
 Distributed under the MIT License. See `LICENSE` file for more information.
+
