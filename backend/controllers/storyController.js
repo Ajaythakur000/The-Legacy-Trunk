@@ -1,6 +1,6 @@
 const Story = require('../models/storyModel.js'); // Sahi path aur filename
 const FamilyCircle = require('../models/familyCircleModel.js'); // Circle model ko import karna
-
+const FamilyMember = require('../models/familyMember.js');
 /**
  * @desc    Create a new story
  * @route   POST /api/stories
@@ -101,7 +101,13 @@ const updateStory = async (req, res) => {
             return res.status(404).json({ message: 'Story not found' });
         }
 
-        if (story.user.toString() !== req.user._id.toString()) {
+        const requester = await FamilyMember.findById(req.user._id);
+
+        // User ya to story ka author ho, YA fir woh ek 'parent' ho aur story uske child ki ho.
+        const isAuthor = story.user.toString() === req.user._id.toString();
+        const isParentOfAuthor = requester.role === 'parent' && requester.children.includes(story.user);
+
+        if (!isAuthor && !isParentOfAuthor) {
             return res.status(401).json({ message: 'User not authorized' });
         }
 
@@ -116,7 +122,6 @@ const updateStory = async (req, res) => {
         res.status(500).json({ message: 'Server Error: ' + error.message });
     }
 };
-
 /**
  * @desc    Delete a story
  * @route   DELETE /api/stories/:id
@@ -130,7 +135,13 @@ const deleteStory = async (req, res) => {
             return res.status(404).json({ message: 'Story not found' });
         }
 
-        if (story.user.toString() !== req.user._id.toString()) {
+        const requester = await FamilyMember.findById(req.user._id);
+
+        // NAYA SECURITY CHECK (same as update):
+        const isAuthor = story.user.toString() === req.user._id.toString();
+        const isParentOfAuthor = requester.role === 'parent' && requester.children.includes(story.user);
+
+        if (!isAuthor && !isParentOfAuthor) {
             return res.status(401).json({ message: 'User not authorized' });
         }
 
@@ -156,12 +167,7 @@ const shareStoryWithCircle = async (req, res) => {
         const story = await Story.findById(storyId);
         const circle = await FamilyCircle.findById(circleId);
 
-        // 
-        console.log("--- DEBUGGING SHARE STORY ---");
-        console.log("Fetched Story Object:", story);
-        console.log("Fetched Circle Object:", circle);
-        console.log("---------------------------");
-        // 
+       
 
         if (!story || !circle) {
             return res.status(404).json({ message: 'Story or Circle not found' });

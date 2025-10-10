@@ -90,5 +90,43 @@ const getUserProfile = async (req, res) => {
     }
 };
 
-// Ab hum naye function ko bhi export karenge
-module.exports = { registerUser, loginUser, getUserProfile };
+
+/**
+ * @desc    Add a child to a parent's profile
+ * @route   POST /api/users/me/children
+ * @access  Private
+ */
+const addChild = async (req, res) => {
+    try {
+        const { email: childEmail } = req.body; // Child ka email request body se lena
+
+        if (!childEmail) {
+            return res.status(400).json({ message: 'Child email is required' });
+        }
+
+        // Child user ko email se dhoondhna
+        const child = await FamilyMember.findOne({ email: childEmail });
+        if (!child) {
+            return res.status(404).json({ message: 'Child with this email not found' });
+        }
+
+        // Parent user (jo logged-in hai) ko dhoondhna
+        const parent = await FamilyMember.findById(req.user._id);
+
+        // Check karna ki child pehle se added to nahi hai
+        if (parent.children.includes(child._id)) {
+            return res.status(400).json({ message: 'Child is already added' });
+        }
+
+        // Child ki ID ko parent ke 'children' array mein add karna
+        parent.children.push(child._id);
+        await parent.save();
+
+        res.json(parent);
+
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile, addChild }; 
