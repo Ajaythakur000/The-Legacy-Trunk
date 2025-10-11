@@ -115,6 +115,3 @@ To get a local copy up and running, follow these simple steps.
 * **Aayush Kohli**
 * **Abhishek Pachlaniya**
 
-## 📜 License
-
-Distributed under the MIT License. See `LICENSE` file for more information.
