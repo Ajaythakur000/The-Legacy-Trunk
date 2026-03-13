@@ -12,7 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+<<<<<<< HEAD
     "cloudinary": "^2.7.0",
+=======
+    "cloudinary": "^1.41.3",
+    "cors": "^2.8.5",
+>>>>>>> 129fbcd (1. setup frontend skeleton with vite, basic folder structure, initial pages and router configuration)
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
