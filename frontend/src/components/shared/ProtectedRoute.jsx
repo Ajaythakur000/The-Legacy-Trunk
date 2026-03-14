@@ -2,12 +2,16 @@ import { Navigate } from "react-router-dom"
 
 function ProtectedRoute({ children }) {
 
-  const user = true
+  // localStorage se token read kar rahe hain
+  const token = localStorage.getItem("token")
 
-  if (!user) {
+  // agar token nahi mila to user login nahi hai
+  if (!token) {
+    // login page par redirect kar denge
     return <Navigate to="/login" />
   }
 
+  // agar token hai to page access allow
   return children
 }
 
