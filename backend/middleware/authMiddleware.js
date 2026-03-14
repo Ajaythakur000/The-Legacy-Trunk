@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken'); // Token ko verify karne ke liye library
-const FamilyMember = require('../models/familyMember.js'); // User model taaki database se user dhoondh sakein
+const FamilyMember = require('../models/familyMember.js').default; // User model taaki database se user dhoondh sakein
 
 // 'protect' naam ka middleware function
 const protect = async (req, res, next) => {

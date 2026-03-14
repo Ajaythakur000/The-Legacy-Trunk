@@ -13,8 +13,10 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'legacy_trunk_stories', // Cloudinary mein is folder ke andar images save hongi
-       allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'mp3'],
+        folder: 'legacy_trunk_stories', 
+        allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'mp3'],
+        // NAYA (THE FIX): Video aur Audio support ke liye auto detect on karna
+        resource_type: 'auto'
     },
 });
 
