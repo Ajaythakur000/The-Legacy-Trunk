@@ -1,4 +1,6 @@
 const FamilyMember = require('../models/familyMember.js');
+// Naya import: Auto-vault creation ke liye
+const FamilyCircle = require('../models/familyCircleModel.js'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -9,27 +11,71 @@ const generateToken = (id) => {
     });
 };
 
-// @desc    Register a new family member
+// @desc    Register a new family member & Auto-Join/Create Vault
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        // Naye fields: familyCode (to join) aur relationToAdmin
+        const { name, email, password, role, familyCode, relationToAdmin } = req.body;
 
         const userExists = await FamilyMember.findOne({ email });
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        let circleId = null;
+        let generatedCode = null;
 
+        // LOGIC 1: Agar Admin register kar raha hai (Nayi Family banani hai)
+        if (role === 'admin') {
+            // Naya unique code generate karo (e.g., ZNT-1234)
+            generatedCode = `FAM-${Math.floor(1000 + Math.random() * 9000)}`;
+            
+            // Naya Family Vault create karo
+            const newCircle = await FamilyCircle.create({
+                circleName: `${name}'s Family Vault`,
+                familyCode: generatedCode,
+                admin: null // Thodi der me update karenge jab user ban jayega
+            });
+            circleId = newCircle._id;
+        } 
+        // LOGIC 2: Agar Member register kar raha hai (Existing Family join karni hai)
+        else {
+            if (!familyCode) {
+                return res.status(400).json({ message: 'Family invite code is required for members' });
+            }
+            const existingCircle = await FamilyCircle.findOne({ familyCode });
+            if (!existingCircle) {
+                return res.status(404).json({ message: 'Invalid Family Code' });
+            }
+            circleId = existingCircle._id;
+            generatedCode = familyCode;
+        }
+
+        // Hashing manual yahan se hata di hai kyunki models/familyMember.js me schema.pre('save') laga hua hai.
         const user = await FamilyMember.create({
             name,
             email,
-            password: hashedPassword,
-            role
+            password, 
+            role: role || 'member',
+            relationToAdmin: relationToAdmin || 'Admin',
+            familyCode: generatedCode,
+            activeCircleId: circleId
         });
+
+        // Agar admin ne vault banaya tha, toh vault me admin ka ID update kar do aur member list me daal do
+        if (role === 'admin') {
+            await FamilyCircle.findByIdAndUpdate(circleId, { 
+                admin: user._id,
+                $push: { members: user._id } 
+            });
+        } else {
+             // Agar member join kar raha hai, bas use member list me daal do
+             await FamilyCircle.findByIdAndUpdate(circleId, { 
+                $push: { members: user._id } 
+            });
+        }
 
         if (user) {
             res.status(201).json({
@@ -37,6 +83,8 @@ const registerUser = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                relationToAdmin: user.relationToAdmin,
+                familyCode: user.familyCode,
                 token: generateToken(user._id)
             });
         } else {
@@ -54,14 +102,16 @@ const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await FamilyMember.findOne({ email });
+        // .select('+password') zaruri hai kyunki schema me humne password ko select: false kiya tha
+        const user = await FamilyMember.findOne({ email }).select('+password');
 
-        if (user && (await bcrypt.compare(password, user.password))) {
+        if (user && (await user.matchPassword(password))) {
              res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                familyCode: user.familyCode,
                 token: generateToken(user._id)
             });
         } else {
@@ -74,59 +124,25 @@ const loginUser = async (req, res) => {
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
-// @access  Private (Sirf logged-in user access kar sakta hai)
+// @access  Private 
 const getUserProfile = async (req, res) => {
-    // Hamara 'protect' middleware user ki details dhoond kar 'req.user' mein daal dega.
-    // Humein bas uss data ko response mein wapas bhejna hai.
     if (req.user) {
         res.json({
             _id: req.user._id,
             name: req.user.name,
             email: req.user.email,
             role: req.user.role,
+            relationToAdmin: req.user.relationToAdmin,
+            familyCode: req.user.familyCode,
+            activeCircleId: req.user.activeCircleId
         });
     } else {
         res.status(404).json({ message: 'User not found' });
     }
 };
 
+// addChild wala logic ab hume private vault me utna kaam nahi aayega, 
+// kyunki hum members ko seedha 'FamilyCircle' (Vault) me add kar rahe hain. 
+// Par reference ke liye abhi yahan chhod diya hai.
 
-/**
- * @desc    Add a child to a parent's profile
- * @route   POST /api/users/me/children
- * @access  Private
- */
-const addChild = async (req, res) => {
-    try {
-        const { email: childEmail } = req.body; // Child ka email request body se lena
-
-        if (!childEmail) {
-            return res.status(400).json({ message: 'Child email is required' });
-        }
-
-        // Child user ko email se dhoondhna
-        const child = await FamilyMember.findOne({ email: childEmail });
-        if (!child) {
-            return res.status(404).json({ message: 'Child with this email not found' });
-        }
-
-        // Parent user (jo logged-in hai) ko dhoondhna
-        const parent = await FamilyMember.findById(req.user._id);
-
-        // Check karna ki child pehle se added to nahi hai
-        if (parent.children.includes(child._id)) {
-            return res.status(400).json({ message: 'Child is already added' });
-        }
-
-        // Child ki ID ko parent ke 'children' array mein add karna
-        parent.children.push(child._id);
-        await parent.save();
-
-        res.json(parent);
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
-    }
-};
-
-module.exports = { registerUser, loginUser, getUserProfile, addChild }; 
+module.exports = { registerUser, loginUser, getUserProfile };
