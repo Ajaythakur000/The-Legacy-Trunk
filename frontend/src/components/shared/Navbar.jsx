@@ -26,6 +26,7 @@ function Navbar() {
       <Link to="/">Home</Link> | 
 
       <Link to="/dashboard">Dashboard</Link> | 
+      <Link to="/profile">Profile</Link> |
 
       <Link to="/story/create">Create Story</Link> | 
 

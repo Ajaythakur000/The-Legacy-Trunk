@@ -7,6 +7,8 @@ import Dashboard from "./components/dashboard/Dashboard"
 import CreateStory from "./components/story/CreateStory"
 import Navbar from "./components/shared/Navbar"
 import ProtectedRoute from "./components/shared/ProtectedRoute"
+import Profile from "./components/profile/Profile"
+import EditStory from "./components/story/EditStory"
 
 const appRouter = createBrowserRouter([
   {
@@ -40,7 +42,7 @@ const appRouter = createBrowserRouter([
     path: "/dashboard",
     element: (
       <ProtectedRoute>
-        <Navbar />
+       
         <Dashboard />
       </ProtectedRoute>
     ),
@@ -49,11 +51,19 @@ const appRouter = createBrowserRouter([
     path: "/story/create",
     element: (
       <ProtectedRoute>
-        <Navbar />
+        
         <CreateStory />
       </ProtectedRoute>
     ),
   },
+  {
+  path: "/profile",
+  element: <ProtectedRoute><Profile /></ProtectedRoute>
+},
+  {
+  path: "/story/edit/:id",
+  element: <EditStory />
+},
 ])
 
 function App() {
