@@ -1,27 +1,28 @@
 const mongoose = require('mongoose');
 
 const familyCircleSchema = new mongoose.Schema({
-    circleName: { //
-        type: String,
-        required: [true, 'Please provide a name for the circle'],
-        trim: true,
+    circleName: { 
+        type: String, 
+        required: true 
     },
-    // Har circle ka ek owner (creator) hoga.
-    owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'FamilyMember', // Yeh FamilyMember model se जुड़ा है
+    familyCode: { 
+        type: String, 
+        required: true, 
+        unique: true 
     },
-    // Circle ke saare members ki ID is array mein store hogi.
-    // Shuru mein, owner hi member hoga.
-    members: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'FamilyMember',
+    admin: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'FamilyMember' 
+    },
+    members: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'FamilyMember' 
+    }],
+    // The Bridge for Phase 3 (Global Share)
+    savedGlobalStories: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Story' 
     }]
-}, {
-    timestamps: true
-});
+}, { timestamps: true });
 
-const FamilyCircle = mongoose.model('FamilyCircle', familyCircleSchema);
-
-module.exports = FamilyCircle;
+module.exports = mongoose.model('FamilyCircle', familyCircleSchema);
