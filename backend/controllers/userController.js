@@ -1,4 +1,4 @@
-const FamilyMember = require('../models/familyMember.js');
+const FamilyMember = require('../models/familyMember.js').default;
 // Naya import: Auto-vault creation ke liye
 const FamilyCircle = require('../models/familyCircleModel.js'); 
 const bcrypt = require('bcryptjs');

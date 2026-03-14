@@ -1,204 +1,163 @@
-const Story = require('../models/storyModel.js'); // Sahi path aur filename
-const FamilyCircle = require('../models/familyCircleModel.js'); // Circle model ko import karna
-const FamilyMember = require('../models/familyMember.js');
+// ✅ FIX - Add .default to all three imports
+const Story = require('../models/storyModel.js').default;
+const FamilyCircle = require('../models/familyCircleModel.js').default;
+const FamilyMember = require('../models/familyMember.js').default;
+
 /**
- * @desc    Create a new story
+ * @desc    Create a new story (Private by default, can be Global)
  * @route   POST /api/stories
  * @access  Private
  */
 const createStory = async (req, res) => {
-    try {
-        const { title, content, tags } = req.body;
+  try {
+    const { title, content, tags, isGlobalPublic } = req.body;
 
-        if (!title || !content) {
-            return res.status(400).json({ message: 'Title and content are required' });
-        }
-
-        let mediaUrl = '';
-        let mediaType = 'text';
-
-        if (req.file) {
-            mediaUrl = req.file.path;
-            if (req.file.mimetype.startsWith('image')) mediaType = 'photo';
-            if (req.file.mimetype.startsWith('video')) mediaType = 'video';
-            if (req.file.mimetype.startsWith('audio')) mediaType = 'audio';
-        }
-
-        const story = new Story({
-            title,
-            content,
-            tags: tags ? tags.split(',') : [],
-            user: req.user._id,
-            mediaUrl,
-            mediaType,
-        });
-
-        const createdStory = await story.save();
-        res.status(201).json(createdStory);
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+    if (!title || !content) {
+      return res.status(400).json({ message: 'Title and content are required' });
     }
+
+    let mediaUrl = '';
+    let mediaType = 'text';
+
+    if (req.file) {
+      mediaUrl = req.file.path;
+      if (req.file.mimetype?.startsWith('image')) mediaType = 'photo';
+      else if (req.file.mimetype?.startsWith('video')) mediaType = 'video';
+      else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
+    }
+
+    const story = new Story({
+      title,
+      content,
+      tags: tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : [],
+      user: req.user._id,
+      originCircleId: req.user.activeCircleId,
+      isGlobalPublic: isGlobalPublic === 'true' || isGlobalPublic === true,
+      mediaUrl,
+      mediaType,
+    });
+
+    const createdStory = await story.save();
+    return res.status(201).json(createdStory);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
 };
 
-/**
- * @desc    Get stories for a logged-in user (THE LOGIC IS UPDATED)
- * @route   GET /api/stories
- * @access  Private
- */
-const getMyStories = async (req, res) => {
-    try {
-        // 1. Un saare circles ko dhoondo jinka current user member hai
-        const userCircles = await FamilyCircle.find({ members: req.user._id });
-        const circleIds = userCircles.map(circle => circle._id);
+const getMyFamilyStories = async (req, res) => {
+  try {
+    const stories = await Story.find({
+      $or: [
+        { originCircleId: req.user.activeCircleId },
+        { sharedWith: req.user.activeCircleId },
+      ],
+    })
+      .populate('user', 'name relationToAdmin')
+      .sort({ createdAt: -1 });
 
-        // 2. Aisi stories dhoondo jo ya to user ne khud banayi hain,
-        //    YA fir un circles mein share ki gayi hain jinka woh member hai.
-        const stories = await Story.find({
-            $or: [
-                { user: req.user._id },
-                { sharedWith: { $in: circleIds } }
-            ]
-        }).populate('user', 'name'); // Author ka naam bhi saath mein bhej rahe hain
-
-        res.json(stories);
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
-    }
+    return res.json(stories);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
 };
 
-/**
- * @desc    Get a single story by ID
- * @route   GET /api/stories/:id
- * @access  Private
- */
+const getGlobalStories = async (req, res) => {
+  try {
+    const stories = await Story.find({ isGlobalPublic: true })
+      .populate('user', 'name')
+      .populate('originCircleId', 'circleName')
+      .sort({ createdAt: -1 });
+
+    return res.json(stories);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
+};
+
 const getStoryById = async (req, res) => {
-    try {
-        const story = await Story.findById(req.params.id);
+  try {
+    const story = await Story.findById(req.params.id)
+      .populate('user', 'name')
+      .populate('comments.user', 'name');
 
-        if (story) {
-            if (story.user.toString() !== req.user._id.toString()) {
-                return res.status(401).json({ message: 'User not authorized' });
-            }
-            res.json(story);
-        } else {
-            res.status(404).json({ message: 'Story not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+    if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    if (
+      !story.isGlobalPublic &&
+      story.originCircleId.toString() !== req.user.activeCircleId.toString()
+    ) {
+      return res
+        .status(401)
+        .json({ message: 'Not authorized to view this private family story' });
     }
+
+    return res.json(story);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
 };
 
-/**
- * @desc    Update a story
- * @route   PUT /api/stories/:id
- * @access  Private
- */
 const updateStory = async (req, res) => {
-    try {
-        const story = await Story.findById(req.params.id);
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ message: 'Story not found' });
 
-        if (!story) {
-            return res.status(404).json({ message: 'Story not found' });
-        }
+    const isAuthor = story.user.toString() === req.user._id.toString();
+    const isAdmin =
+      req.user.role === 'admin' &&
+      story.originCircleId.toString() === req.user.activeCircleId.toString();
 
-        const requester = await FamilyMember.findById(req.user._id);
-
-        // User ya to story ka author ho, YA fir woh ek 'parent' ho aur story uske child ki ho.
-        const isAuthor = story.user.toString() === req.user._id.toString();
-        const isParentOfAuthor = requester.role === 'parent' && requester.children.includes(story.user);
-
-        if (!isAuthor && !isParentOfAuthor) {
-            return res.status(401).json({ message: 'User not authorized' });
-        }
-
-        story.title = req.body.title || story.title;
-        story.content = req.body.content || story.content;
-        story.tags = req.body.tags ? req.body.tags.split(',') : story.tags;
-
-        const updatedStory = await story.save();
-        res.json(updatedStory);
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+    if (!isAuthor && !isAdmin) {
+      return res.status(401).json({ message: 'Not authorized to edit this story' });
     }
+
+    story.title = req.body.title ?? story.title;
+    story.content = req.body.content ?? story.content;
+
+    if (req.body.tags !== undefined) {
+      story.tags = String(req.body.tags)
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean);
+    }
+
+    if (req.body.isGlobalPublic !== undefined) {
+      story.isGlobalPublic = req.body.isGlobalPublic === 'true' || req.body.isGlobalPublic === true;
+    }
+
+    const updatedStory = await story.save();
+    return res.json(updatedStory);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
 };
-/**
- * @desc    Delete a story
- * @route   DELETE /api/stories/:id
- * @access  Private
- */
+
 const deleteStory = async (req, res) => {
-    try {
-        const story = await Story.findById(req.params.id);
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ message: 'Story not found' });
 
-        if (!story) {
-            return res.status(404).json({ message: 'Story not found' });
-        }
+    const isAuthor = story.user.toString() === req.user._id.toString();
+    const isAdmin =
+      req.user.role === 'admin' &&
+      story.originCircleId.toString() === req.user.activeCircleId.toString();
 
-        const requester = await FamilyMember.findById(req.user._id);
-
-        // NAYA SECURITY CHECK (same as update):
-        const isAuthor = story.user.toString() === req.user._id.toString();
-        const isParentOfAuthor = requester.role === 'parent' && requester.children.includes(story.user);
-
-        if (!isAuthor && !isParentOfAuthor) {
-            return res.status(401).json({ message: 'User not authorized' });
-        }
-
-        await Story.deleteOne({ _id: req.params.id });
-
-        res.json({ message: 'Story removed successfully', id: req.params.id });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+    if (!isAuthor && !isAdmin) {
+      return res.status(401).json({ message: 'Not authorized to delete this story' });
     }
+
+    await Story.deleteOne({ _id: req.params.id });
+    return res.json({ message: 'Story removed successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
 };
 
-/**
- * @desc    Share a story with a circle
- * @route   PUT /api/stories/:id/share
- * @access  Private
- */
-const shareStoryWithCircle = async (req, res) => {
-    try {
-        const { circleId } = req.body;
-        const storyId = req.params.id;
-
-        const story = await Story.findById(storyId);
-        const circle = await FamilyCircle.findById(circleId);
-
-       
-
-        if (!story || !circle) {
-            return res.status(404).json({ message: 'Story or Circle not found' });
-        }
-
-        if (story.user.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ message: 'Not authorized to share this story' });
-        }
-
-        if (!circle.members.includes(req.user._id)) {
-            return res.status(401).json({ message: 'Cannot share to a circle you are not a member of' });
-        }
-
-        if (!story.sharedWith.includes(circleId)) {
-            story.sharedWith.push(circleId);
-            await story.save();
-        }
-
-        res.json(story);
-    } catch (error) {
-        console.error(error); // Yeh line error ko terminal mein print karegi
-        res.status(500).json({ message: 'Server Error: ' + error.message });
-    }
-};
-
-// Sabhi functions ko export karna
 module.exports = {
-    createStory,
-    getMyStories,
-    getStoryById,
-    updateStory,
-    deleteStory,
-    shareStoryWithCircle
+  createStory,
+  getMyFamilyStories,
+  getGlobalStories,
+  getStoryById,
+  updateStory,
+  deleteStory,
 };

@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // NAYA: Security ke liye
+import { Schema, model } from 'mongoose';
+import { genSalt, hash, compare } from 'bcryptjs'; // NAYA: Security ke liye
 
 // Yeh humara database ka blueprint hai
-const familyMemberSchema = new mongoose.Schema({
+const familyMemberSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -34,7 +34,7 @@ const familyMemberSchema = new mongoose.Schema({
     },
     // Yeh array 'parent' user ke saare 'kid' users ki ID store karega.
     children: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'FamilyMember'
     }],
     // ---- THE HERITAGE NETWORK UPGRADE (NAYE FIELDS) ----
@@ -42,7 +42,7 @@ const familyMemberSchema = new mongoose.Schema({
         type: String, // Jaise "ZNT-492X"
     },
     activeCircleId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'FamilyCircle'
     }
 }, {
@@ -54,17 +54,17 @@ familyMemberSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         next();
     }
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    const salt = await genSalt(10);
+    this.password = await hash(this.password, salt);
 });
 
 // NAYA: Password compare karne ka method (Login ke time kaam aayega)
 familyMemberSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
+    return await compare(enteredPassword, this.password);
 };
 
 // Schema se Model banana
-const FamilyMember = mongoose.model('FamilyMember', familyMemberSchema);
+const FamilyMember = model('FamilyMember', familyMemberSchema);
 
 // Is Model ko doosri files mein use karne ke liye export karna
-module.exports = FamilyMember;
+export default FamilyMember;
