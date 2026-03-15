@@ -1,4 +1,5 @@
 import FamilyMember from '../models/familyMember.js';
+import { io } from '../index.js';
 
 /**
  * Helper: compute activity status from timestamp
@@ -58,6 +59,19 @@ const updateMyLocation = async (req, res) => {
     user.lastLocationUpdatedAt = new Date();
 
     await user.save();
+
+    // ✅ REAL-TIME BROADCAST TO SAME FAMILY ROOM
+    if (user.activeCircleId) {
+      io.to(String(user.activeCircleId)).emit('member_location_changed', {
+        userId: user._id,
+        name: user.name,
+        latitude: lat,
+        longitude: lng,
+        currentLocation: user.currentLocation,
+        lastLocationUpdatedAt: user.lastLocationUpdatedAt,
+        status: getActivityStatus(user.lastLocationUpdatedAt),
+      });
+    }
 
     return res.json({
       message: 'Location updated successfully',
