@@ -1,16 +1,40 @@
 const express = require('express');
 const router = express.Router();
+<<<<<<< HEAD
 const { createTimeline, getMyTimelines, addEventToTimeline, getTimelineById } = require('../controllers/timelineController.js');
 const { protect } = require('../middleware/authMiddleware.js'); // Hamara gatekeeper
+=======
 
-// Ek nayi timeline banane aur apni saari timelines get karne ke liye route
-// Yeh dono actions protected hain, isliye 'protect' middleware ka use kiya hai.
-router.route('/').post(protect, createTimeline).get(protect, getMyTimelines);
+const {
+  createTimelineEvent,
+  getMyFamilyTimeline,
+  getGlobalTimeline,
+  getTimelineEventById,
+  updateTimelineEvent,
+  deleteTimelineEvent,
+} = require('../controllers/timelineController.js');
+>>>>>>> cf9119e (4.feat(timeline): refactor to family-vault event model with chronological feeds and CRUD)
 
-// Nested route: Ek specific timeline ke andar naya event add karne ke liye
-router.route('/:id/events').post(protect, addEventToTimeline);
-// Route for getting a single timeline by its ID
-router.route('/:id').get(protect, getTimelineById);
+const { protect } = require('../middleware/authMiddleware.js');
+const upload = require('../middleware/uploadMiddleware.js');
 
+// Create new timeline event
+router.route('/').post(protect, upload.single('media'), createTimelineEvent);
+
+<<<<<<< HEAD
+=======
+// Family timeline feed
+router.route('/my-family').get(protect, getMyFamilyTimeline);
+
+// Global timeline feed
+router.route('/global').get(protect, getGlobalTimeline);
+
+// Single event operations
+router
+  .route('/:id')
+  .get(protect, getTimelineEventById)
+  .put(protect, updateTimelineEvent)
+  .delete(protect, deleteTimelineEvent);
+>>>>>>> cf9119e (4.feat(timeline): refactor to family-vault event model with chronological feeds and CRUD)
 
 module.exports = router;
