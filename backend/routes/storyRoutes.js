@@ -1,8 +1,5 @@
-const express = require('express');
-const router = express.Router();
-
-const storyController = require('../controllers/storyController.js');
-const {
+import { Router } from 'express';
+import {
   createStory,
   getMyFamilyStories,
   getGlobalStories,
@@ -11,10 +8,12 @@ const {
   deleteStory,
   toggleLikeStory,
   addCommentToStory,
-} = storyController;
+} from '../controllers/storyController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
-const { protect } = require('../middleware/authMiddleware.js');
-const upload = require('../middleware/uploadMiddleware.js');
+const router = Router();
+
 
 // 1. Create a new story (with media upload)
 router.route('/').post(protect, upload.single('media'), createStory);
@@ -35,5 +34,4 @@ router
   .get(protect, getStoryById)
   .put(protect, updateStory)
   .delete(protect, deleteStory);
-
-module.exports = router;
+export default router;

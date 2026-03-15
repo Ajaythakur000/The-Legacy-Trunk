@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const eventSchema = new mongoose.Schema({
+const eventSchema = new Schema({
     eventName: { // [cite: 107]
         type: String,
         required: true,
@@ -17,7 +17,7 @@ const eventSchema = new mongoose.Schema({
     // Har event ek timeline se juda hoga.
     // Yeh field uss parent timeline ki ID store karegi.
     timeline: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         required: true,
         ref: 'Timeline' 
     }
@@ -25,6 +25,6 @@ const eventSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Event = mongoose.model('Event', eventSchema);
+const Event = model('Event', eventSchema);
 
-module.exports = Event;
+export default Event;

@@ -1,65 +1,86 @@
-const Story = require('../models/storyModel.js');
-const Timeline = require('../models/timelineModel.js');
-const Event = require('../models/eventModel.js');
-const FamilyCircle = require('../models/familyCircleModel.js');
+import Story from '../models/storyModel.js';
+import Timeline from '../models/timelineModel.js';
+import FamilyMember from '../models/familyMember.js';
 
 /**
- * @desc    Search across stories, timelines, and events
+ * @desc    Search across stories, timeline events, and family members
  * @route   GET /api/search?q=keyword
  * @access  Private
  */
 const searchContent = async (req, res) => {
-    try {
-        const { q } = req.query; // URL se search query (keyword) nikalna
+  try {
+    const { q } = req.query;
 
-        if (!q) {
-            return res.status(400).json({ message: 'Please provide a search query' });
-        }
-
-        const userId = req.user._id;
-
-        // == Authorization Setup ==
-        // Pehle user ke saare circles aur timelines dhoondh lo
-        const userCircles = await FamilyCircle.find({ members: userId });
-        const circleIds = userCircles.map(circle => circle._id);
-
-        const userTimelines = await Timeline.find({ user: userId });
-        const timelineIds = userTimelines.map(timeline => timeline._id);
-
-        // == Search Queries ==
-        // 1. Stories mein search karo (jo user ki ho ya shared ho)
-        const storyQuery = Story.find({
-            $text: { $search: q },
-            $or: [
-                { user: userId },
-                { sharedWith: { $in: circleIds } }
-            ]
-        }).populate('user', 'name');
-
-        // 2. Timelines mein search karo (jo user ki ho)
-        const timelineQuery = Timeline.find({
-            $text: { $search: q },
-            user: userId
-        });
-
-        // 3. Events mein search karo (jo user ki timelines se judi ho)
-        const eventQuery = Event.find({
-            $text: { $search: q },
-            timeline: { $in: timelineIds }
-        });
-
-        // Saari queries ko ek saath (parallel) run karo
-        const [stories, timelines, events] = await Promise.all([
-            storyQuery,
-            timelineQuery,
-            eventQuery
-        ]);
-
-        res.json({ stories, timelines, events });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+    if (!q || !String(q).trim()) {
+      return res.status(400).json({ message: 'Please provide a search query' });
     }
+
+    const keyword = String(q).trim();
+    const regex = new RegExp(keyword, 'i');
+    const activeCircleId = req.user.activeCircleId;
+
+    // 1) Stories: private family + global searchable
+    const storiesQuery = Story.find({
+      $and: [
+        {
+          $or: [{ title: regex }, { content: regex }, { tags: regex }],
+        },
+        {
+          $or: [{ originCircleId: activeCircleId }, { isGlobalPublic: true }],
+        },
+      ],
+    })
+      .populate('user', 'name relationToAdmin')
+      .sort({ createdAt: -1 })
+      .limit(25);
+
+    // 2) Timeline events: private family + global searchable
+    const timelinesQuery = Timeline.find({
+      $and: [
+        {
+          $or: [{ title: regex }, { description: regex }, { tags: regex }],
+        },
+        {
+          $or: [{ originCircleId: activeCircleId }, { isGlobalPublic: true }],
+        },
+      ],
+    })
+      .populate('user', 'name relationToAdmin')
+      .sort({ year: 1, eventDate: 1, createdAt: 1 })
+      .limit(25);
+
+    // 3) Family members: only from same family circle (privacy first)
+    const membersQuery = FamilyMember.find({
+      $and: [
+        {
+          $or: [{ name: regex }, { email: regex }, { relationToAdmin: regex }],
+        },
+        { activeCircleId: activeCircleId },
+      ],
+    })
+      .select('name email relationToAdmin role')
+      .limit(25);
+
+    const [stories, timelines, members] = await Promise.all([
+      storiesQuery,
+      timelinesQuery,
+      membersQuery,
+    ]);
+
+    return res.json({
+      query: keyword,
+      counts: {
+        stories: stories.length,
+        timelines: timelines.length,
+        members: members.length,
+      },
+      stories,
+      timelines,
+      members,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
 };
 
-module.exports = { searchContent };
+export { searchContent };

@@ -1,7 +1,6 @@
-// ✅ Keeping your current import style (.default) for compatibility with your setup
-const Story = require('../models/storyModel.js').default;
-const FamilyCircle = require('../models/familyCircleModel.js').default;
-const FamilyMember = require('../models/familyMember.js').default;
+import Story from '../models/storyModel.js';
+import FamilyCircle from '../models/familyCircleModel.js';
+import FamilyMember from '../models/familyMember.js';
 
 /**
  * Helper: private story access check
@@ -235,7 +234,7 @@ const addCommentToStory = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createStory,
   getMyFamilyStories,
   getGlobalStories,

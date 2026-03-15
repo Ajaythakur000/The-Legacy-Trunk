@@ -1,17 +1,17 @@
-const express = require('express');
-const router = express.Router();
+import { Router } from 'express';
+const router = Router();
 
-const {
+import {
   createTimelineEvent,
   getMyFamilyTimeline,
   getGlobalTimeline,
   getTimelineEventById,
   updateTimelineEvent,
   deleteTimelineEvent,
-} = require('../controllers/timelineController.js');
+} from '../controllers/timelineController.js';
 
-const { protect } = require('../middleware/authMiddleware.js');
-const upload = require('../middleware/uploadMiddleware.js');
+import { protect } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 // Create new timeline event
 router.route('/').post(protect, upload.single('media'), createTimelineEvent);
@@ -29,4 +29,4 @@ router
   .put(protect, updateTimelineEvent)
   .delete(protect, deleteTimelineEvent);
 
-module.exports = router;
+export default router;
