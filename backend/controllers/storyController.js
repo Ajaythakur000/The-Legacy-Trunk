@@ -1,7 +1,15 @@
-// ✅ FIX - Add .default to all three imports
+// ✅ Keeping your current import style (.default) for compatibility with your setup
 const Story = require('../models/storyModel.js').default;
 const FamilyCircle = require('../models/familyCircleModel.js').default;
 const FamilyMember = require('../models/familyMember.js').default;
+
+/**
+ * Helper: private story access check
+ */
+const canAccessStory = (story, user) => {
+  if (story.isGlobalPublic) return true;
+  return story.originCircleId.toString() === user.activeCircleId.toString();
+};
 
 /**
  * @desc    Create a new story (Private by default, can be Global)
@@ -82,10 +90,7 @@ const getStoryById = async (req, res) => {
 
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    if (
-      !story.isGlobalPublic &&
-      story.originCircleId.toString() !== req.user.activeCircleId.toString()
-    ) {
+    if (!canAccessStory(story, req.user)) {
       return res
         .status(401)
         .json({ message: 'Not authorized to view this private family story' });
@@ -122,7 +127,8 @@ const updateStory = async (req, res) => {
     }
 
     if (req.body.isGlobalPublic !== undefined) {
-      story.isGlobalPublic = req.body.isGlobalPublic === 'true' || req.body.isGlobalPublic === true;
+      story.isGlobalPublic =
+        req.body.isGlobalPublic === 'true' || req.body.isGlobalPublic === true;
     }
 
     const updatedStory = await story.save();
@@ -153,6 +159,82 @@ const deleteStory = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Toggle like/unlike on a story
+ * @route   PUT /api/stories/:id/like
+ * @access  Private
+ */
+const toggleLikeStory = async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    if (!canAccessStory(story, req.user)) {
+      return res.status(401).json({ message: 'Not authorized to like this story' });
+    }
+
+    const userId = req.user._id.toString();
+    const alreadyLiked = story.likes.some((id) => id.toString() === userId);
+
+    if (alreadyLiked) {
+      story.likes = story.likes.filter((id) => id.toString() !== userId);
+    } else {
+      story.likes.push(req.user._id);
+    }
+
+    await story.save();
+
+    return res.json({
+      message: alreadyLiked ? 'Story unliked' : 'Story liked',
+      likesCount: story.likes.length,
+      likes: story.likes,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
+};
+
+/**
+ * @desc    Add comment to a story
+ * @route   POST /api/stories/:id/comments
+ * @access  Private
+ */
+const addCommentToStory = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text || !String(text).trim()) {
+      return res.status(400).json({ message: 'Comment text is required' });
+    }
+
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    if (!canAccessStory(story, req.user)) {
+      return res.status(401).json({ message: 'Not authorized to comment on this story' });
+    }
+
+    story.comments.push({
+      user: req.user._id,
+      text: String(text).trim(),
+    });
+
+    await story.save();
+
+    const populatedStory = await Story.findById(story._id)
+      .populate('comments.user', 'name')
+      .populate('user', 'name');
+
+    return res.status(201).json({
+      message: 'Comment added successfully',
+      commentsCount: populatedStory.comments.length,
+      comments: populatedStory.comments,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
+};
+
 module.exports = {
   createStory,
   getMyFamilyStories,
@@ -160,4 +242,6 @@ module.exports = {
   getStoryById,
   updateStory,
   deleteStory,
+  toggleLikeStory,
+  addCommentToStory,
 };
