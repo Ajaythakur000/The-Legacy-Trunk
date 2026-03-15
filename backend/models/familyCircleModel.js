@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const familyCircleSchema = new mongoose.Schema({
+const familyCircleSchema = new Schema({
     circleName: { 
         type: String, 
         required: true 
@@ -11,18 +11,18 @@ const familyCircleSchema = new mongoose.Schema({
         unique: true 
     },
     admin: { 
-        type: mongoose.Schema.Types.ObjectId, 
+        type: Schema.Types.ObjectId, 
         ref: 'FamilyMember' 
     },
     members: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
+        type: Schema.Types.ObjectId, 
         ref: 'FamilyMember' 
     }],
     // The Bridge for Phase 3 (Global Share)
     savedGlobalStories: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
+        type: Schema.Types.ObjectId, 
         ref: 'Story' 
     }]
 }, { timestamps: true });
 
-module.exports = mongoose.model('FamilyCircle', familyCircleSchema);
+export default model('FamilyCircle', familyCircleSchema);

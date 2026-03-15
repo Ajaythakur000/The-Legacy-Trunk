@@ -1,18 +1,11 @@
-const Timeline = require('../models/timelineModel.js');
+import Timeline from '../models/timelineModel.js';
 
-/**
- * Helper: private event access check
- */
 const canAccessTimelineEvent = (event, user) => {
   if (event.isGlobalPublic) return true;
+  if (!event.originCircleId || !user.activeCircleId) return false;
   return event.originCircleId.toString() === user.activeCircleId.toString();
 };
 
-/**
- * @desc    Create a new timeline event
- * @route   POST /api/timelines
- * @access  Private
- */
 const createTimelineEvent = async (req, res) => {
   try {
     const { title, description, year, eventDate, tags, isGlobalPublic } = req.body;
@@ -31,7 +24,7 @@ const createTimelineEvent = async (req, res) => {
       else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
     }
 
-    const timelineEvent = new Timeline({
+    const event = await Timeline.create({
       originCircleId: req.user.activeCircleId,
       user: req.user._id,
       title: String(title).trim(),
@@ -44,25 +37,15 @@ const createTimelineEvent = async (req, res) => {
       mediaType,
     });
 
-    const created = await timelineEvent.save();
-    return res.status(201).json(created);
+    return res.status(201).json(event);
   } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
 
-/**
- * @desc    Get private family timeline events (chronological)
- * @route   GET /api/timelines/my-family
- * @access  Private
- */
 const getMyFamilyTimeline = async (req, res) => {
   try {
-    const events = await Timeline.find({
-      $or: [
-        { originCircleId: req.user.activeCircleId },
-      ],
-    })
+    const events = await Timeline.find({ originCircleId: req.user.activeCircleId })
       .populate('user', 'name relationToAdmin')
       .sort({ year: 1, eventDate: 1, createdAt: 1 });
 
@@ -72,11 +55,6 @@ const getMyFamilyTimeline = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get global public timeline events
- * @route   GET /api/timelines/global
- * @access  Private
- */
 const getGlobalTimeline = async (req, res) => {
   try {
     const events = await Timeline.find({ isGlobalPublic: true })
@@ -90,11 +68,6 @@ const getGlobalTimeline = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single timeline event by ID
- * @route   GET /api/timelines/:id
- * @access  Private
- */
 const getTimelineEventById = async (req, res) => {
   try {
     const event = await Timeline.findById(req.params.id)
@@ -113,11 +86,6 @@ const getTimelineEventById = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update timeline event
- * @route   PUT /api/timelines/:id
- * @access  Private
- */
 const updateTimelineEvent = async (req, res) => {
   try {
     const event = await Timeline.findById(req.params.id);
@@ -126,7 +94,7 @@ const updateTimelineEvent = async (req, res) => {
     const isAuthor = event.user.toString() === req.user._id.toString();
     const isAdmin =
       req.user.role === 'admin' &&
-      event.originCircleId.toString() === req.user.activeCircleId.toString();
+      event.originCircleId?.toString() === req.user.activeCircleId?.toString();
 
     if (!isAuthor && !isAdmin) {
       return res.status(401).json({ message: 'Not authorized to edit this timeline event' });
@@ -153,6 +121,7 @@ const updateTimelineEvent = async (req, res) => {
 };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 module.exports = { createTimeline, getMyTimelines, addEventToTimeline, getTimelineById }; // Naya function export kiya
 =======
 /**
@@ -160,6 +129,8 @@ module.exports = { createTimeline, getMyTimelines, addEventToTimeline, getTimeli
  * @route   DELETE /api/timelines/:id
  * @access  Private
  */
+=======
+>>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
 const deleteTimelineEvent = async (req, res) => {
   try {
     const event = await Timeline.findById(req.params.id);
@@ -168,7 +139,7 @@ const deleteTimelineEvent = async (req, res) => {
     const isAuthor = event.user.toString() === req.user._id.toString();
     const isAdmin =
       req.user.role === 'admin' &&
-      event.originCircleId.toString() === req.user.activeCircleId.toString();
+      event.originCircleId?.toString() === req.user.activeCircleId?.toString();
 
     if (!isAuthor && !isAdmin) {
       return res.status(401).json({ message: 'Not authorized to delete this timeline event' });
@@ -181,7 +152,7 @@ const deleteTimelineEvent = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createTimelineEvent,
   getMyFamilyTimeline,
   getGlobalTimeline,

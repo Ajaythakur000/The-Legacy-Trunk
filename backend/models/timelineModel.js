@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const timelineSchema = new mongoose.Schema(
+const timelineSchema = new Schema(
   {
     // Kis family vault/circle ki history event hai
     originCircleId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'FamilyCircle',
       required: true,
       index: true,
@@ -12,7 +12,7 @@ const timelineSchema = new mongoose.Schema(
 
     // Event kisne create kiya
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'FamilyMember',
       required: true,
     },
@@ -76,6 +76,6 @@ const timelineSchema = new mongoose.Schema(
 // Family timeline fetch fast banane ke liye compound index
 timelineSchema.index({ originCircleId: 1, year: 1, createdAt: -1 });
 
-const Timeline = mongoose.model('Timeline', timelineSchema);
+const Timeline = model('Timeline', timelineSchema);
 
-module.exports = Timeline;
+export default Timeline;

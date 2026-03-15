@@ -1,6 +1,6 @@
-const puppeteer = require('puppeteer');
-const Story = require('../models/storyModel.js');
-const FamilyCircle = require('../models/familyCircleModel.js');
+import { launch } from 'puppeteer';
+import Story from '../models/storyModel.js';
+import FamilyCircle from '../models/familyCircleModel.js';
 
 /**
  * @desc    Export selected stories to a PDF
@@ -107,7 +107,7 @@ const exportToPdf = async (req, res) => {
         htmlContent += `</div></body></html>`;
         
         // --- PDF Generation using Puppeteer ---
-        const browser = await puppeteer.launch();
+        const browser = await launch();
         const page = await browser.newPage();
         
         await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
@@ -129,4 +129,4 @@ const exportToPdf = async (req, res) => {
     }
 };
 
-module.exports = { exportToPdf };
+export default { exportToPdf };

@@ -1,5 +1,5 @@
-const FamilyCircle = require('../models/familyCircleModel.js');
-const FamilyMember = require('../models/familyMember.js'); 
+import FamilyCircle from '../models/familyCircleModel.js';
+import FamilyMember from '../models/familyMember.js'; 
 /**
  * @desc    Create a new family circle
  * @route   POST /api/circles
@@ -122,4 +122,4 @@ const removeMemberFromCircle = async (req, res) => {
     }
 };
 
-module.exports = { createCircle, addMemberToCircle, getMyCircles, removeMemberFromCircle };
+export default { createCircle, addMemberToCircle, getMyCircles, removeMemberFromCircle };

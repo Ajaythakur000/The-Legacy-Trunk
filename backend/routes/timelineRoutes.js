@@ -1,22 +1,31 @@
+<<<<<<< HEAD
 const express = require('express');
 const router = express.Router();
 <<<<<<< HEAD
 const { createTimeline, getMyTimelines, addEventToTimeline, getTimelineById } = require('../controllers/timelineController.js');
 const { protect } = require('../middleware/authMiddleware.js'); // Hamara gatekeeper
 =======
+=======
+import { Router } from 'express';
+const router = Router();
+>>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
 
-const {
+import {
   createTimelineEvent,
   getMyFamilyTimeline,
   getGlobalTimeline,
   getTimelineEventById,
   updateTimelineEvent,
   deleteTimelineEvent,
+<<<<<<< HEAD
 } = require('../controllers/timelineController.js');
 >>>>>>> cf9119e (4.feat(timeline): refactor to family-vault event model with chronological feeds and CRUD)
+=======
+} from '../controllers/timelineController.js';
+>>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
 
-const { protect } = require('../middleware/authMiddleware.js');
-const upload = require('../middleware/uploadMiddleware.js');
+import { protect } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 // Create new timeline event
 router.route('/').post(protect, upload.single('media'), createTimelineEvent);
@@ -37,4 +46,4 @@ router
   .delete(protect, deleteTimelineEvent);
 >>>>>>> cf9119e (4.feat(timeline): refactor to family-vault event model with chronological feeds and CRUD)
 
-module.exports = router;
+export default router;
