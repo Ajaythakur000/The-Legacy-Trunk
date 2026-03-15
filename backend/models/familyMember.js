@@ -1,70 +1,124 @@
 import { Schema, model } from 'mongoose';
-import { genSalt, hash, compare } from 'bcryptjs'; // NAYA: Security ke liye
+import { genSalt, hash, compare } from 'bcryptjs';
 
-// Yeh humara database ka blueprint hai
-const familyMemberSchema = new Schema({
+// Family Member Schema
+const familyMemberSchema = new Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        trim: true 
+      type: String,
+      required: true,
+      trim: true,
     },
+
     email: {
-        type: String,
-        required: true,
-        unique: true, 
-        trim: true,
-        lowercase: true 
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
     },
+
     password: {
-        type: String,
-        required: true,
-        select: false // NAYA: Taaki fetch karte waqt password frontend par leak na ho
+      type: String,
+      required: true,
+      select: false, // password query results me by default nahi aayega
     },
-    // 1. FOR BACKEND PERMISSIONS (Security)
+
+    // Backend authorization role
     role: {
-        type: String,
-        enum: ['admin', 'member', 'restricted'], 
-        default: 'member' // Jo bhi invite code se join karega, by default member hoga
+      type: String,
+      enum: ['admin', 'member', 'restricted'],
+      default: 'member',
     },
-    // 2. FOR FRONTEND UI & FAMILY TREE
+
+    // UI relationship label (Father, Brother, etc.)
     relationToAdmin: {
-        type: String,
-        trim: true
-        // Yahan aayega: "Father", "Brother", "Wife", "Cousin" etc.
+      type: String,
+      trim: true,
     },
-    // Yeh array 'parent' user ke saare 'kid' users ki ID store karega.
-    children: [{
+
+    children: [
+      {
         type: Schema.Types.ObjectId,
-        ref: 'FamilyMember'
-    }],
-    // ---- THE HERITAGE NETWORK UPGRADE (NAYE FIELDS) ----
+        ref: 'FamilyMember',
+      },
+    ],
+
     familyCode: {
-        type: String, // Jaise "ZNT-492X"
+      type: String,
     },
+
     activeCircleId: {
-        type: Schema.Types.ObjectId,
-        ref: 'FamilyCircle'
-    }
-}, {
-    timestamps: true 
-});
+      type: Schema.Types.ObjectId,
+      ref: 'FamilyCircle',
+    },
 
-// NAYA: Mongoose Pre-Save Hook (Database me save hone se pehle password hash karna)
+    // ==============================
+    //  FAMILY RADAR FIELDS
+    // ==============================
+
+    /**
+     * GeoJSON format:
+     * {
+     *   type: "Point",
+     *   coordinates: [longitude, latitude]
+     * }
+     *
+     * IMPORTANT:
+     * - coordinates order ALWAYS [lng, lat]
+     * - not [lat, lng]
+     */
+    currentLocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // [lng, lat]
+        default: [0, 0],
+      },
+    },
+
+    // last time when location was updated
+    lastLocationUpdatedAt: {
+      type: Date,
+      default: null,
+    },
+
+    // Privacy toggle: true => hidden from family radar
+    isGhostModeOn: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+/**
+ * Geo index for location queries.
+ * This is required for geospatial operations ($near, etc.) in future.
+ */
+familyMemberSchema.index({ currentLocation: '2dsphere' });
+
+// Password hash before save
 familyMemberSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        next();
-    }
-    const salt = await genSalt(10);
-    this.password = await hash(this.password, salt);
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  const salt = await genSalt(10);
+  this.password = await hash(this.password, salt);
+  return next();
 });
 
-// NAYA: Password compare karne ka method (Login ke time kaam aayega)
+// Password compare helper (login)
 familyMemberSchema.methods.matchPassword = async function (enteredPassword) {
-    return await compare(enteredPassword, this.password);
+  return compare(enteredPassword, this.password);
 };
 
-// Schema se Model banana
 const FamilyMember = model('FamilyMember', familyMemberSchema);
 
-// Is Model ko doosri files mein use karne ke liye export karna
 export default FamilyMember;
