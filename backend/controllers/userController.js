@@ -2,68 +2,93 @@ import FamilyMember from '../models/familyMember.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import jwt from 'jsonwebtoken';
 
-// Generate JWT
+// JWT token banane ka helper
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
-  });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// @desc    Register a new family member & Auto-Join/Create Vault
-// @route   POST /api/users/register
-// @access  Public
+// Simple unique family code generator
+const generateFamilyCode = async () => {
+  let code = '';
+  let found = true;
+
+  while (found) {
+    code = `FAM-${Math.floor(1000 + Math.random() * 9000)}`;
+    const circle = await FamilyCircle.findOne({ familyCode: code });
+    found = !!circle;
+  }
+
+  return code;
+};
+
+// @desc Register
+// @route POST /api/users/register
+// @access Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, familyCode, relationToAdmin } = req.body;
+    let { name, email, password, role, familyCode, relationToAdmin } = req.body;
 
+    // Basic validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'name, email and password are required' });
+    }
+
+    // Input normalize
+    name = name.trim();
+    email = email.trim().toLowerCase();
+    role = role ? role.trim().toLowerCase() : 'member';
+    relationToAdmin = relationToAdmin ? relationToAdmin.trim() : '';
+
+    // Check existing email
     const userExists = await FamilyMember.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    let circleId = null;
-    let generatedCode = null;
+    let circleId;
+    let finalFamilyCode;
 
-    // Admin creates new family vault
+    // Admin => new circle create
     if (role === 'admin') {
-      generatedCode = `FAM-${Math.floor(1000 + Math.random() * 9000)}`;
+      finalFamilyCode = await generateFamilyCode();
 
       const newCircle = await FamilyCircle.create({
         circleName: `${name}'s Family Vault`,
-        familyCode: generatedCode,
+        familyCode: finalFamilyCode,
         admin: null,
         members: [],
       });
 
       circleId = newCircle._id;
     } else {
-      // Member joins existing family
+      // Member/Restricted => existing code required
       if (!familyCode) {
-        return res
-          .status(400)
-          .json({ message: 'Family invite code is required for members' });
+        return res.status(400).json({ message: 'Family invite code is required' });
       }
 
-      const existingCircle = await FamilyCircle.findOne({ familyCode });
+      const normalizedCode = familyCode.trim().toUpperCase();
+      const existingCircle = await FamilyCircle.findOne({ familyCode: normalizedCode });
+
       if (!existingCircle) {
         return res.status(404).json({ message: 'Invalid Family Code' });
       }
 
       circleId = existingCircle._id;
-      generatedCode = familyCode;
+      finalFamilyCode = normalizedCode;
     }
 
+    // Create user
     const user = await FamilyMember.create({
       name,
       email,
-      password, // hashed by pre-save hook in model
-      role: role || 'member',
+      password, // model pre-save hook hashes this
+      role,
       relationToAdmin: relationToAdmin || (role === 'admin' ? 'Admin' : ''),
-      familyCode: generatedCode,
+      familyCode: finalFamilyCode,
       activeCircleId: circleId,
     });
 
-    // Update circle with user membership/admin
+    // Update circle (admin + member list)
     if (role === 'admin') {
       await FamilyCircle.findByIdAndUpdate(circleId, {
         admin: user._id,
@@ -90,12 +115,18 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Authenticate user & get token
-// @route   POST /api/users/login
-// @access  Public
+// @desc Login
+// @route POST /api/users/login
+// @access Public
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'email and password are required' });
+    }
+
+    email = email.trim().toLowerCase();
 
     const user = await FamilyMember.findOne({ email }).select('+password');
 
@@ -118,9 +149,9 @@ const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
-// @access  Private
+// @desc Get profile
+// @route GET /api/users/profile
+// @access Private
 const getUserProfile = async (req, res) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });

@@ -17,6 +17,7 @@ import searchRoutes from './routes/searchRoutes.js';
 import exportRoutes from './routes/exportRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
 
+
 dotenv.config();
 
 const app = express();
