@@ -15,6 +15,7 @@ import timelineRoutes from './routes/timelineRoutes.js';
 import circleRoutes from './routes/circleRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import exportRoutes from './routes/exportRoutes.js';
+import locationRoutes from './routes/locationRoutes.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api/timelines', timelineRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/location', locationRoutes);
 
 const connectDB = async () => {
   try {
