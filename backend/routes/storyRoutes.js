@@ -9,6 +9,8 @@ const {
   getStoryById,
   updateStory,
   deleteStory,
+  toggleLikeStory,
+  addCommentToStory,
 } = storyController;
 
 const { protect } = require('../middleware/authMiddleware.js');
@@ -23,7 +25,11 @@ router.route('/my-family').get(protect, getMyFamilyStories);
 // 3. Fetch Global Explore Feed Stories
 router.route('/global').get(protect, getGlobalStories);
 
-// 4. Single story operations (GET, PUT, DELETE chained together)
+// 4. Social actions
+router.route('/:id/like').put(protect, toggleLikeStory);
+router.route('/:id/comments').post(protect, addCommentToStory);
+
+// 5. Single story operations (GET, PUT, DELETE chained together)
 router
   .route('/:id')
   .get(protect, getStoryById)
