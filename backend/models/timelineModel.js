@@ -1,30 +1,80 @@
 const mongoose = require('mongoose');
 
-const timelineSchema = new mongoose.Schema({
-    title: { // [cite: 89]
-        type: String,
-        required: true,
-        trim: true,
+const timelineSchema = new mongoose.Schema(
+  {
+    // Kis family vault/circle ki history event hai
+    originCircleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'FamilyCircle',
+      required: true,
+      index: true,
     },
-    description: { // [cite: 90]
-        type: String,
-        default: '',
-    },
-    // Har timeline ek user dwara banayi jaayegi.
+
+    // Event kisne create kiya
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'FamilyMember'
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'FamilyMember',
+      required: true,
     },
-    // Ek timeline ke andar kai events ho sakte hain.
-    // Hum yahan un sabhi events ki IDs ka ek array store karenge.
-    events: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event'
-    }]
-}, {
-    timestamps: true
-});
+
+    // Event title
+    title: {
+      type: String,
+      required: [true, 'Please add a timeline title'],
+      trim: true,
+    },
+
+    // Optional details
+    description: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+    // Chronology key (sort ke liye)
+    year: {
+      type: Number,
+      required: [true, 'Please add event year'],
+      min: 1000,
+      max: 3000,
+      index: true,
+    },
+
+    // Optional exact date (if available)
+    eventDate: {
+      type: Date,
+      default: null,
+    },
+
+    // Optional media
+    mediaUrl: {
+      type: String,
+      default: '',
+    },
+
+    mediaType: {
+      type: String,
+      enum: ['text', 'photo', 'audio', 'video'],
+      default: 'text',
+    },
+
+    // Public explore me dikhana hai ya nahi
+    isGlobalPublic: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Optional tags
+    tags: {
+      type: [String],
+      default: [],
+    },
+  },
+  { timestamps: true }
+);
+
+// Family timeline fetch fast banane ke liye compound index
+timelineSchema.index({ originCircleId: 1, year: 1, createdAt: -1 });
 
 const Timeline = mongoose.model('Timeline', timelineSchema);
 
