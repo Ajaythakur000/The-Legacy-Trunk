@@ -109,9 +109,4 @@ To get a local copy up and running, follow these simple steps.
         ```
         Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-## 🤝 Team TRIDENT
-
-* **Ajay Thakur**
-* **Aayush Kohli**
-* **Abhishek Pachlaniya**
 
