@@ -1,18 +1,18 @@
-import { Navigate } from "react-router-dom"
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
+/**
+ * Agar logged in nahi hai => login page bhejo
+ * Agar logged in hai => requested page render karo
+ */
 function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useAuth();
 
-  // localStorage se token read kar rahe hain
-  const token = localStorage.getItem("token")
-
-  // agar token nahi mila to user login nahi hai
-  if (!token) {
-    // login page par redirect kar denge
-    return <Navigate to="/login" />
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
-  // agar token hai to page access allow
-  return children
+  return children;
 }
 
-export default ProtectedRoute
+export default ProtectedRoute;
