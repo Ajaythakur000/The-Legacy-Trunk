@@ -1,73 +1,60 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-import Home from "./components/Home"
-import Login from "./components/auth/Login"
-import Signup from "./components/auth/Signup"
-import Dashboard from "./components/dashboard/Dashboard"
-import CreateStory from "./components/story/CreateStory"
-import Navbar from "./components/shared/Navbar"
-import ProtectedRoute from "./components/shared/ProtectedRoute"
-import Profile from "./components/profile/Profile"
-import EditStory from "./components/story/EditStory"
+import Navbar from './components/shared/Navbar';
+import ProtectedRoute from './components/shared/ProtectedRoute';
 
-const appRouter = createBrowserRouter([
-  {
-    path: "/",
-    element: (
-    <>
-    <Navbar />
-    <Home />
-      </>
-    ),
-  },
-  {
-    path: "/login",
-    element: (
-      <>
-        <Navbar />
-        <Login />
-      </>
-    ),
-  },
-  {
-    path: "/signup",
-    element: (
-      <>
-        <Navbar />
-        <Signup />
-      </>
-    ),
-  },
-  {
-    path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-       
-        <Dashboard />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/story/create",
-    element: (
-      <ProtectedRoute>
-        
-        <CreateStory />
-      </ProtectedRoute>
-    ),
-  },
-  {
-  path: "/profile",
-  element: <ProtectedRoute><Profile /></ProtectedRoute>
-},
-  {
-  path: "/story/edit/:id",
-  element: <EditStory />
-},
-])
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import DashboardPage from './pages/DashboardPage';
+import VaultRoomPage from './pages/VaultRoomPage';
+import FamilyRadarPage from './pages/FamilyRadarPage';
 
 function App() {
-  return <RouterProvider router={appRouter} />
+  return (
+    <>
+      <Navbar />
+
+      <Routes>
+        {/* Default route */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vault"
+          element={
+            <ProtectedRoute>
+              <VaultRoomPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/radar"
+          element={
+            <ProtectedRoute>
+              <FamilyRadarPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </>
+  );
 }
 
-export default App
+export default App;
