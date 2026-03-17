@@ -22,6 +22,7 @@ import searchRoutes from './routes/searchRoutes.js';
 import exportRoutes from './routes/exportRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
 import { initializeSocket } from './socket/socketHandler.js';
+import messageRoutes from './routes/messageRoutes.js';
 
 dotenv.config();
 
@@ -44,6 +45,8 @@ app.use('/api/circles', circleRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/location', locationRoutes);
+app.use('/api/messages', messageRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('Welcome to The Legacy Trunk API!');
@@ -61,6 +64,7 @@ const connectDB = async () => {
 
 // HTTP server + Socket.io setup
 const server = http.createServer(app);
+
 
 export const io = new Server(server, {
   cors: {

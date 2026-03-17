@@ -3,7 +3,7 @@ import { io } from '../index.js';
 
 /**
  * Helper: compute activity status from timestamp
- * Rules locked:
+ * Rules:
  * - online: <= 5 min
  * - recently_active: > 5 min and <= 60 min
  * - offline: > 60 min or null
@@ -29,7 +29,6 @@ const updateMyLocation = async (req, res) => {
   try {
     const { latitude, longitude } = req.body;
 
-    // Basic validation
     if (latitude === undefined || longitude === undefined) {
       return res.status(400).json({ message: 'latitude and longitude are required' });
     }
@@ -54,13 +53,13 @@ const updateMyLocation = async (req, res) => {
 
     user.currentLocation = {
       type: 'Point',
-      coordinates: [lng, lat], // IMPORTANT: [longitude, latitude]
+      coordinates: [lng, lat], // GeoJSON format: [longitude, latitude]
     };
     user.lastLocationUpdatedAt = new Date();
 
     await user.save();
 
-    // ✅ REAL-TIME BROADCAST TO SAME FAMILY ROOM
+    // Real-time location broadcast to same family room
     if (user.activeCircleId) {
       io.to(String(user.activeCircleId)).emit('member_location_changed', {
         userId: user._id,
@@ -129,6 +128,17 @@ const toggleGhostMode = async (req, res) => {
     user.isGhostModeOn = isGhostModeOn;
     await user.save();
 
+    // ✅ Real-time privacy state sync
+    // Frontend can instantly hide/show user on map/list
+    if (user.activeCircleId) {
+      io.to(String(user.activeCircleId)).emit('member_privacy_changed', {
+        userId: user._id,
+        name: user.name,
+        isGhostModeOn: user.isGhostModeOn,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
     return res.json({
       message: `Ghost mode ${isGhostModeOn ? 'enabled' : 'disabled'}`,
       isGhostModeOn: user.isGhostModeOn,
@@ -149,16 +159,15 @@ const getFamilyRadar = async (req, res) => {
       return res.status(400).json({ message: 'No active family circle found for user' });
     }
 
-    // Same family vault members
     const members = await FamilyMember.find({
       activeCircleId: req.user.activeCircleId,
     }).select(
       'name role relationToAdmin currentLocation lastLocationUpdatedAt isGhostModeOn activeCircleId'
     );
 
-    // Privacy rules:
+    // Privacy rule:
     // - self always visible
-    // - others visible only when ghost mode is OFF
+    // - others visible only when ghost mode OFF
     const radarMembers = members
       .filter((m) => {
         const isSelf = m._id.toString() === req.user._id.toString();
