@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
@@ -13,16 +13,14 @@ function App() {
   return (
     <>
       <Navbar />
-
       <Routes>
-        {/* Default route */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Public routes */}
+        {/* Public */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-        {/* Protected routes */}
+        {/* Private */}
         <Route
           path="/dashboard"
           element={
@@ -31,7 +29,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/vault"
           element={
@@ -40,7 +37,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/radar"
           element={
@@ -50,7 +46,6 @@ function App() {
           }
         />
 
-        {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </>
