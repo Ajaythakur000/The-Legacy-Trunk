@@ -58,6 +58,29 @@ function FamilyRadarPage() {
     }
   };
 
+  const timeAgo = (iso) => {
+    if (!iso) return 'unknown';
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hr ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days} day ago`;
+  };
+
+  const haversineKm = (lat1, lon1, lat2, lon2) => {
+    const toRad = (v) => (v * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  };
+
   const normalizeMembers = (rawList) => {
     if (!Array.isArray(rawList)) return [];
 
@@ -88,7 +111,7 @@ function FamilyRadarPage() {
           updatedAt: m?.updatedAt || m?.lastLocationUpdatedAt || m?.lastSeenAt || null,
         };
       })
-      .filter((m) => m._id !== myUserId); // remove self duplicate
+      .filter((m) => m._id !== myUserId);
   };
 
   const loadFamilyRadar = async () => {
@@ -110,13 +133,11 @@ function FamilyRadarPage() {
     }
   };
 
-  // initial load
   useEffect(() => {
     loadFamilyRadar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // polling fallback every 20 sec
   useEffect(() => {
     const id = setInterval(() => {
       loadFamilyRadar();
@@ -125,7 +146,6 @@ function FamilyRadarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // geolocation + backend update
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocError('Geolocation is not supported in this browser.');
@@ -159,7 +179,6 @@ function FamilyRadarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // socket realtime location event
   useEffect(() => {
     const socket = getSocket();
     if (!socket || !familyCircleId) return;
@@ -208,6 +227,12 @@ function FamilyRadarPage() {
     (m) => !m.isGhostModeOn && Number.isFinite(m.latitude) && Number.isFinite(m.longitude)
   );
 
+  const getDistanceLabel = (m) => {
+    if (!myLocation || !Number.isFinite(m.latitude) || !Number.isFinite(m.longitude)) return '--';
+    const km = haversineKm(myLocation.lat, myLocation.lng, m.latitude, m.longitude);
+    return `${km.toFixed(1)} km away`;
+  };
+
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
       <div
@@ -223,14 +248,14 @@ function FamilyRadarPage() {
         <div>
           <h1 style={{ margin: 0 }}>Family Radar</h1>
           <p style={{ margin: '6px 0 0', color: '#666' }}>
-            Live family location (Phase 4: realtime + polling)
+            Live family location with privacy controls
           </p>
         </div>
 
         <button
           onClick={handleToggleGhostMode}
           style={{
-            border: '1px solid #ccc',
+            border: '1px solid #d1d5db',
             background: isGhostModeOn ? '#111827' : '#fff',
             color: isGhostModeOn ? '#fff' : '#111827',
             borderRadius: 999,
@@ -248,12 +273,18 @@ function FamilyRadarPage() {
       {radarLoading ? <p>Loading family radar...</p> : null}
       {radarError ? <p style={{ color: 'crimson' }}>{radarError}</p> : null}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 14 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.2fr) minmax(320px, 0.8fr)',
+          gap: 14,
+        }}
+      >
         <div
           style={{
-            height: 460,
-            border: '1px solid #ddd',
-            borderRadius: 12,
+            height: 470,
+            border: '1px solid #e5e7eb',
+            borderRadius: 14,
             overflow: 'hidden',
             background: '#fff',
           }}
@@ -271,7 +302,7 @@ function FamilyRadarPage() {
                 </Marker>
                 <Circle
                   center={[myLocation.lat, myLocation.lng]}
-                  radius={100}
+                  radius={120}
                   pathOptions={{ color: '#2563eb', fillOpacity: 0.08 }}
                 />
               </>
@@ -282,8 +313,8 @@ function FamilyRadarPage() {
                 <Popup>
                   <div>
                     <b>{m.name}</b>
-                    <div>Status: {m.isOnline ? 'Active' : 'Offline'}</div>
-                    <div>Updated: {formatTime(m.updatedAt)}</div>
+                    <div>{m.isOnline ? 'Active now' : `Last seen ${timeAgo(m.updatedAt)}`}</div>
+                    <div>{getDistanceLabel(m)}</div>
                   </div>
                 </Popup>
               </Marker>
@@ -293,28 +324,28 @@ function FamilyRadarPage() {
 
         <div
           style={{
-            border: '1px solid #ddd',
-            borderRadius: 12,
+            border: '1px solid #e5e7eb',
+            borderRadius: 14,
             padding: 12,
             background: '#fff',
-            maxHeight: 460,
+            maxHeight: 470,
             overflowY: 'auto',
           }}
         >
-          <h3 style={{ marginTop: 0 }}>Family Members</h3>
+          <h3 style={{ marginTop: 0, marginBottom: 10 }}>Family Members</h3>
 
           <div
             style={{
-              padding: 10,
-              borderRadius: 10,
+              padding: 12,
+              borderRadius: 12,
               background: '#f8fafc',
               border: '1px solid #e2e8f0',
               marginBottom: 10,
             }}
           >
             <div style={{ fontWeight: 700 }}>{user?.name || 'You'} (You)</div>
-            <div style={{ fontSize: 13, color: '#555' }}>
-              Status: {isGhostModeOn ? 'Hidden (Ghost)' : 'Visible'}
+            <div style={{ fontSize: 13, color: '#555', marginTop: 4 }}>
+              {isGhostModeOn ? 'Hidden (Ghost Mode ON)' : 'Visible to family'}
             </div>
           </div>
 
@@ -325,19 +356,39 @@ function FamilyRadarPage() {
               <div
                 key={m._id}
                 style={{
-                  padding: 10,
-                  borderRadius: 10,
+                  padding: 12,
+                  borderRadius: 12,
                   background: '#f8fafc',
                   border: '1px solid #e2e8f0',
                   marginBottom: 10,
                 }}
               >
-                <div style={{ fontWeight: 700 }}>{m.name}</div>
-                <div style={{ fontSize: 13, color: '#555' }}>
-                  {m.isGhostModeOn ? 'Ghost Mode ON 👻' : m.isOnline ? 'Active' : 'Offline'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                  <div style={{ fontWeight: 700 }}>{m.name}</div>
+                  <div style={{ fontSize: 12, color: '#374151' }}>{getDistanceLabel(m)}</div>
                 </div>
-                <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-                  Last seen: {formatTime(m.updatedAt)}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
+                  <span
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: m.isGhostModeOn ? '#6b7280' : m.isOnline ? '#16a34a' : '#9ca3af',
+                      boxShadow: m.isOnline ? '0 0 0 4px rgba(22,163,74,0.15)' : 'none',
+                    }}
+                  />
+                  <span style={{ fontSize: 13, color: '#4b5563' }}>
+                    {m.isGhostModeOn
+                      ? 'Ghost Mode ON'
+                      : m.isOnline
+                      ? 'Active now'
+                      : `Last seen ${timeAgo(m.updatedAt)}`}
+                  </span>
+                </div>
+
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 5 }}>
+                  Updated at: {formatTime(m.updatedAt)}
                 </div>
               </div>
             ))
