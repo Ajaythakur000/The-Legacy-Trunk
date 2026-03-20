@@ -21,6 +21,22 @@ const generateFamilyCode = async () => {
   return code;
 };
 
+// Shared response shape (single source of truth)
+const buildUserResponse = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  relationToAdmin: user.relationToAdmin,
+  familyCode: user.familyCode,
+
+  // canonical + alias
+  activeCircleId: user.activeCircleId || null,
+  familyCircleId: user.activeCircleId || null,
+
+  token: generateToken(user._id),
+});
+
 // @desc Register
 // @route POST /api/users/register
 // @access Public
@@ -28,18 +44,15 @@ const registerUser = async (req, res) => {
   try {
     let { name, email, password, role, familyCode, relationToAdmin } = req.body;
 
-    // Basic validation
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'name, email and password are required' });
     }
 
-    // Input normalize
     name = name.trim();
     email = email.trim().toLowerCase();
     role = role ? role.trim().toLowerCase() : 'member';
     relationToAdmin = relationToAdmin ? relationToAdmin.trim() : '';
 
-    // Check existing email
     const userExists = await FamilyMember.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
@@ -48,7 +61,6 @@ const registerUser = async (req, res) => {
     let circleId;
     let finalFamilyCode;
 
-    // Admin => new circle create
     if (role === 'admin') {
       finalFamilyCode = await generateFamilyCode();
 
@@ -61,7 +73,6 @@ const registerUser = async (req, res) => {
 
       circleId = newCircle._id;
     } else {
-      // Member/Restricted => existing code required
       if (!familyCode) {
         return res.status(400).json({ message: 'Family invite code is required' });
       }
@@ -77,18 +88,16 @@ const registerUser = async (req, res) => {
       finalFamilyCode = normalizedCode;
     }
 
-    // Create user
     const user = await FamilyMember.create({
       name,
       email,
-      password, // model pre-save hook hashes this
+      password,
       role,
       relationToAdmin: relationToAdmin || (role === 'admin' ? 'Admin' : ''),
       familyCode: finalFamilyCode,
       activeCircleId: circleId,
     });
 
-    // Update circle (admin + member list)
     if (role === 'admin') {
       await FamilyCircle.findByIdAndUpdate(circleId, {
         admin: user._id,
@@ -100,16 +109,7 @@ const registerUser = async (req, res) => {
       });
     }
 
-    return res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      relationToAdmin: user.relationToAdmin,
-      familyCode: user.familyCode,
-      activeCircleId: user.activeCircleId,
-      token: generateToken(user._id),
-    });
+    return res.status(201).json(buildUserResponse(user));
   } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
@@ -131,16 +131,7 @@ const loginUser = async (req, res) => {
     const user = await FamilyMember.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
-      return res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        relationToAdmin: user.relationToAdmin,
-        familyCode: user.familyCode,
-        activeCircleId: user.activeCircleId,
-        token: generateToken(user._id),
-      });
+      return res.json(buildUserResponse(user));
     }
 
     return res.status(401).json({ message: 'Invalid email or password' });
@@ -164,7 +155,8 @@ const getUserProfile = async (req, res) => {
     role: req.user.role,
     relationToAdmin: req.user.relationToAdmin,
     familyCode: req.user.familyCode,
-    activeCircleId: req.user.activeCircleId,
+    activeCircleId: req.user.activeCircleId || null,
+    familyCircleId: req.user.activeCircleId || null,
   });
 };
 

@@ -6,33 +6,58 @@ function SignupPage() {
   const navigate = useNavigate();
   const { signup, loading } = useAuth();
 
-  // backend ke expected fields ke according names rakho
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
+    role: 'admin', // default admin: create new family
+    familyCode: '',
+    relationToAdmin: '',
   });
 
   const [error, setError] = useState('');
 
+  const isAdmin = form.role === 'admin';
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => {
+      const next = { ...prev, [name]: value };
+
+      // if admin selected, familyCode not needed
+      if (name === 'role' && value === 'admin') {
+        next.familyCode = '';
+        next.relationToAdmin = 'Admin';
+      }
+
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const result = await signup(form);
+    // payload clean
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password,
+      role: form.role,
+      relationToAdmin: isAdmin
+        ? 'Admin'
+        : form.relationToAdmin?.trim() || '',
+      ...(isAdmin ? {} : { familyCode: form.familyCode.trim().toUpperCase() }),
+    };
+
+    const result = await signup(payload);
 
     if (!result.success) {
       setError(result.message);
       return;
     }
 
-    // Agar signup token return karta hai -> direct dashboard
-    // warna login page pe bhej do
     if (result?.data?.token) {
       navigate('/dashboard', { replace: true });
     } else {
@@ -41,7 +66,7 @@ function SignupPage() {
   };
 
   return (
-    <div style={{ maxWidth: 420, margin: '40px auto', padding: 20 }}>
+    <div style={{ maxWidth: 460, margin: '40px auto', padding: 20 }}>
       <h2 style={{ marginBottom: 16 }}>Signup</h2>
 
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
@@ -71,6 +96,41 @@ function SignupPage() {
           onChange={handleChange}
           required
         />
+
+        <label>
+          Role
+          <select
+            name="role"
+            value={form.role}
+            onChange={handleChange}
+            style={{ width: '100%', marginTop: 6, padding: 8 }}
+          >
+            <option value="admin">Admin (Create new family)</option>
+            <option value="member">Member (Join family)</option>
+            <option value="restricted">Restricted (Join family)</option>
+          </select>
+        </label>
+
+        {!isAdmin && (
+          <>
+            <input
+              type="text"
+              name="familyCode"
+              placeholder="Enter family invite code (e.g. FAM-1234)"
+              value={form.familyCode}
+              onChange={handleChange}
+              required={!isAdmin}
+            />
+
+            <input
+              type="text"
+              name="relationToAdmin"
+              placeholder="Relation to admin (e.g. Brother, Mother)"
+              value={form.relationToAdmin}
+              onChange={handleChange}
+            />
+          </>
+        )}
 
         {error ? <p style={{ color: 'crimson', margin: 0 }}>{error}</p> : null}
 
