@@ -164,37 +164,35 @@ export const initializeSocket = (io) => {
      * payload: { familyCircleId, userId, name }
      */
     socket.on('typing_start', (payload) => {
-      try {
-        const { familyCircleId, userId, name } = payload || {};
-        if (!familyCircleId || !userId) return;
+  try {
+    const { familyCircleId, senderId, senderName } = payload || {};
+    if (!familyCircleId || !senderId) return;
 
-        // Send to others only, not self
-        socket.to(String(familyCircleId)).emit('member_typing', {
-          userId,
-          name: name || socket.data.name || 'Unknown User',
-        });
-      } catch (error) {
-        // typing event fail ko silent rakhna okay hai
-      }
+    socket.to(String(familyCircleId)).emit('member_typing', {
+      senderId: String(senderId),
+      senderName: senderName || socket.data.name || 'Unknown User',
     });
+  } catch (error) {
+    // silent
+  }
+});
 
     /**
      * 4) typing_stop
      * payload: { familyCircleId, userId }
      */
     socket.on('typing_stop', (payload) => {
-      try {
-        const { familyCircleId, userId } = payload || {};
-        if (!familyCircleId || !userId) return;
+  try {
+    const { familyCircleId, senderId } = payload || {};
+    if (!familyCircleId || !senderId) return;
 
-        socket.to(String(familyCircleId)).emit('member_stop_typing', {
-          userId,
-        });
-      } catch (error) {
-        // silent
-      }
+    socket.to(String(familyCircleId)).emit('member_stop_typing', {
+      senderId: String(senderId),
     });
-
+  } catch (error) {
+    // silent
+  }
+});
     /**
      * 5) live_location_update (optional direct socket event)
      * Note: Main update should still come from REST controller for DB consistency
