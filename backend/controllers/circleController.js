@@ -1,125 +1,160 @@
 import FamilyCircle from '../models/familyCircleModel.js';
-import FamilyMember from '../models/familyMember.js'; 
-/**
- * @desc    Create a new family circle
- * @route   POST /api/circles
- * @access  Private
- */
+import FamilyMember from '../models/familyMember.js';
+
+const generateFamilyCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let rand = '';
+  for (let i = 0; i < 6; i += 1) rand += chars[Math.floor(Math.random() * chars.length)];
+  return `TRUNK-${rand}`;
+};
+
+const createUniqueFamilyCode = async () => {
+  let code = generateFamilyCode();
+  // eslint-disable-next-line no-await-in-loop
+  while (await FamilyCircle.findOne({ familyCode: code })) {
+    code = generateFamilyCode();
+  }
+  return code;
+};
+
 const createCircle = async (req, res) => {
-    try {
-        const { circleName } = req.body;
-
-        if (!circleName) {
-            return res.status(400).json({ message: 'Circle name is required' });
-        }
-
-        // Naya circle create karna
-        const circle = new FamilyCircle({
-            circleName,
-            owner: req.user._id, // Jo user logged-in hai, woh owner ban jaayega
-            members: [req.user._id] // Owner shuru mein member bhi hoga
-        });
-
-        const createdCircle = await circle.save();
-        res.status(201).json(createdCircle);
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+  try {
+    const { circleName } = req.body;
+    if (!circleName?.trim()) {
+      return res.status(400).json({ message: 'Circle name is required' });
     }
+
+    const familyCode = await createUniqueFamilyCode();
+
+    const created = await FamilyCircle.create({
+      circleName: circleName.trim(),
+      familyCode,
+      admin: req.user._id,
+      members: [req.user._id],
+    });
+
+    await FamilyMember.findByIdAndUpdate(req.user._id, {
+      activeCircleId: created._id,
+      familyCode: created.familyCode,
+    });
+
+    const circle = await FamilyCircle.findById(created._id)
+      .populate('admin', 'name email role')
+      .populate('members', 'name email role relationToAdmin');
+
+    return res.status(201).json(circle);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to create circle' });
+  }
 };
 
-/**
- * @desc    Add a member to a family circle
- * @route   POST /api/circles/:id/members
- * @access  Private
- */
-const addMemberToCircle = async (req, res) => {
-    try {
-        const circleId = req.params.id;
-        const { email } = req.body; // Hum member ko uske email se add karenge
-
-        // 1. Circle ko dhoondho
-        const circle = await FamilyCircle.findById(circleId);
-        if (!circle) {
-            return res.status(404).json({ message: 'Circle not found' });
-        }
-
-        // 2. Security Check: Kya request karne wala user is circle ka owner hai?
-        if (circle.owner.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ message: 'Not authorized, only the owner can add members' });
-        }
-
-        // 3. Jise add karna hai, uss member ko email se dhoondho
-        const memberToAdd = await FamilyMember.findOne({ email });
-        if (!memberToAdd) {
-            return res.status(404).json({ message: 'User with this email not found' });
-        }
-
-        // 4. Check karo ki member pehle se added to nahi hai
-        if (circle.members.includes(memberToAdd._id)) {
-            return res.status(400).json({ message: 'User is already a member of this circle' });
-        }
-
-        // 5. Member ko circle mein add karo
-        circle.members.push(memberToAdd._id);
-        await circle.save();
-
-        res.json(circle);
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
-    }
-};
-
-
-/**
- * @desc    Get all circles the user is a member of
- * @route   GET /api/circles
- * @access  Private
- */
 const getMyCircles = async (req, res) => {
-    try {
-        // Aise saare circles dhoondo jinke 'members' array mein current user ki ID ho.
-        const circles = await FamilyCircle.find({ members: req.user._id });
-        res.json(circles);
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
-    }
+  try {
+    const circles = await FamilyCircle.find({ members: req.user._id })
+      .populate('admin', 'name email role')
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json(circles);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to load circles' });
+  }
 };
 
-/**
- * @desc    Remove a member from a family circle
- * @route   DELETE /api/circles/:circleId/members/:memberId
- * @access  Private
- */
+const getCircleById = async (req, res) => {
+  try {
+    const circle = await FamilyCircle.findById(req.params.id)
+      .populate('admin', 'name email role relationToAdmin')
+      .populate('members', 'name email role relationToAdmin activeCircleId familyCode');
+
+    if (!circle) return res.status(404).json({ message: 'Circle not found' });
+
+    const allowed = circle.members.some((m) => String(m._id) === String(req.user._id));
+    if (!allowed) return res.status(403).json({ message: 'Not authorized to view this circle' });
+
+    return res.status(200).json(circle);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to load circle' });
+  }
+};
+
+const addMemberToCircle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const email = req.body?.email?.toLowerCase()?.trim();
+
+    if (!email) return res.status(400).json({ message: 'Member email is required' });
+
+    const circle = await FamilyCircle.findById(id);
+    if (!circle) return res.status(404).json({ message: 'Circle not found' });
+
+    if (String(circle.admin) !== String(req.user._id)) {
+      return res.status(401).json({ message: 'Only admin can add members' });
+    }
+
+    const member = await FamilyMember.findOne({ email });
+    if (!member) return res.status(404).json({ message: 'User with this email not found' });
+
+    if (circle.members.some((m) => String(m) === String(member._id))) {
+      return res.status(400).json({ message: 'User already in this circle' });
+    }
+
+    circle.members.push(member._id);
+    await circle.save();
+
+    await FamilyMember.findByIdAndUpdate(member._id, {
+      activeCircleId: circle._id,
+      familyCode: circle.familyCode,
+    });
+
+    const updated = await FamilyCircle.findById(circle._id)
+      .populate('admin', 'name email role')
+      .populate('members', 'name email role relationToAdmin');
+
+    return res.status(200).json(updated);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to add member' });
+  }
+};
+
 const removeMemberFromCircle = async (req, res) => {
-    try {
-        const { circleId, memberId } = req.params;
+  try {
+    const { circleId, memberId } = req.params;
 
-        const circle = await FamilyCircle.findById(circleId);
-        if (!circle) {
-            return res.status(404).json({ message: 'Circle not found' });
-        }
+    const circle = await FamilyCircle.findById(circleId);
+    if (!circle) return res.status(404).json({ message: 'Circle not found' });
 
-        // Security Check: Sirf circle ka owner hi member remove kar sakta hai.
-        if (circle.owner.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ message: 'Not authorized, only the owner can remove members' });
-        }
-
-        // Security Check: Owner khud ko remove nahi kar sakta.
-        if (circle.owner.toString() === memberId) {
-            return res.status(400).json({ message: 'Owner cannot be removed from the circle' });
-        }
-
-        // Member ko 'members' array se hatao
-        circle.members.pull(memberId);
-        await circle.save();
-
-        res.json(circle);
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error: ' + error.message });
+    if (String(circle.admin) !== String(req.user._id)) {
+      return res.status(401).json({ message: 'Only admin can remove members' });
     }
+
+    if (String(circle.admin) === String(memberId)) {
+      return res.status(400).json({ message: 'Admin cannot be removed' });
+    }
+
+    circle.members.pull(memberId);
+    await circle.save();
+
+    const userToUpdate = await FamilyMember.findById(memberId);
+    if (userToUpdate && String(userToUpdate.activeCircleId || '') === String(circle._id)) {
+      userToUpdate.activeCircleId = null;
+      userToUpdate.familyCode = null;
+      await userToUpdate.save();
+    }
+
+    const updated = await FamilyCircle.findById(circle._id)
+      .populate('admin', 'name email role')
+      .populate('members', 'name email role relationToAdmin');
+
+    return res.status(200).json(updated);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to remove member' });
+  }
 };
 
-export default { createCircle, addMemberToCircle, getMyCircles, removeMemberFromCircle };
+export default {
+  createCircle,
+  addMemberToCircle,
+  getMyCircles,
+  getCircleById,
+  removeMemberFromCircle,
+};

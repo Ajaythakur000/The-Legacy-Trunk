@@ -11,12 +11,13 @@ const familyCircleSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      uppercase: true, // code always uppercase store hoga
+      uppercase: true,
       trim: true,
     },
     admin: {
       type: Schema.Types.ObjectId,
       ref: 'FamilyMember',
+      required: true,
     },
     members: [
       {
@@ -24,7 +25,6 @@ const familyCircleSchema = new Schema(
         ref: 'FamilyMember',
       },
     ],
-    // Phase 3 bridge
     savedGlobalStories: [
       {
         type: Schema.Types.ObjectId,
