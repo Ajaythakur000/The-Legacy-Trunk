@@ -8,6 +8,7 @@ import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
 import VaultRoomPage from './pages/VaultRoomPage';
 import FamilyRadarPage from './pages/FamilyRadarPage';
+import VaultStoriesPage from './pages/VaultStoriesPage';
 
 function App() {
   return (
@@ -34,6 +35,14 @@ function App() {
           element={
             <ProtectedRoute>
               <VaultRoomPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vault-stories"
+          element={
+            <ProtectedRoute>
+              <VaultStoriesPage />
             </ProtectedRoute>
           }
         />
