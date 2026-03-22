@@ -189,6 +189,16 @@ export const initializeSocket = (io) => {
     socket.to(String(familyCircleId)).emit('member_stop_typing', {
       senderId: String(senderId),
     });
+
+  } catch (error) {
+    // silent
+  }
+});
+socket.on('leave_vault', (payload) => {
+  try {
+    const { familyCircleId } = payload || {};
+    if (!familyCircleId) return;
+    socket.leave(String(familyCircleId));
   } catch (error) {
     // silent
   }

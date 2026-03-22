@@ -26,8 +26,10 @@ function Navbar() {
       {isAuthenticated ? (
         <>
           <Link to="/dashboard">Dashboard</Link>
-          <Link to="/vault">Vault</Link>
+          <Link to="/vault">Vault Chat</Link>
+          <Link to="/vault-stories">Vault Stories</Link>
           <Link to="/radar">Radar</Link>
+
           <span style={{ marginLeft: 'auto' }}>
             Hi, <b>{user?.name || 'User'}</b>
           </span>
