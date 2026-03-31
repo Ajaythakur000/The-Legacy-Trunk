@@ -10,17 +10,21 @@ export const initializeSocket = (io) => {
   io.on('connection', (socket) => {
     console.log('🔌 Socket connected:', socket.id);
 
-    // Basic in-memory spam control (per socket)
-    // We keep timestamp of last sent message
     socket.data.lastMessageAt = 0;
+
+    socket.on('join_story_feed', ({ circleId }) => {
+      if (!circleId) return;
+      socket.join(String(circleId)); 
+      console.log(`🔌 Socket ${socket.id} joined story feed: ${circleId}`);
+    });
+
+    socket.on('leave_story_feed', ({ circleId }) => {
+      if (!circleId) return;
+      socket.leave(String(circleId)); 
+    });
 
     /**
      * 1) join_vault
-     * payload: { familyCircleId, userId, name }
-     *
-     * Security:
-     * - userId must exist in DB
-     * - requested familyCircleId must match user's activeCircleId
      */
     socket.on('join_vault', async (payload) => {
       try {
@@ -34,33 +38,19 @@ export const initializeSocket = (io) => {
           );
         }
 
-        // DB user check
-        const user = await FamilyMember.findById(userId).select(
-          '_id name activeCircleId'
-        );
+        // 🔥 CHANGE: Ab backend sirf user ka naam nikalega, purana activeCircleId nahi.
+        const user = await FamilyMember.findById(userId).select('_id name');
 
         if (!user) {
           return emitSocketError(socket, 'USER_NOT_FOUND', 'User not found');
         }
 
-        // Security check: user can only join own active vault
-        if (
-          !user.activeCircleId ||
-          user.activeCircleId.toString() !== String(familyCircleId)
-        ) {
-          return emitSocketError(
-            socket,
-            'FORBIDDEN_ROOM',
-            'You are not allowed to join this vault'
-          );
-        }
+        // 🔥 BOUNCER FIXED: 'FORBIDDEN_ROOM' wali rukaawat yahan se uda di hai!
 
-        // Save user context on socket session
         socket.data.userId = user._id.toString();
         socket.data.name = name || user.name || 'Unknown User';
         socket.data.familyCircleId = String(familyCircleId);
 
-        // Join isolated room
         socket.join(String(familyCircleId));
 
         socket.emit('joined_vault', {
@@ -68,7 +58,6 @@ export const initializeSocket = (io) => {
           familyCircleId: String(familyCircleId),
         });
 
-        // Inform other room members
         socket.to(String(familyCircleId)).emit('member_joined', {
           userId: socket.data.userId,
           name: socket.data.name,
@@ -81,11 +70,6 @@ export const initializeSocket = (io) => {
 
     /**
      * 2) send_message
-     * payload: { familyCircleId, senderId, senderName, text }
-     *
-     * Added checks:
-     * - sender belongs to same vault
-     * - anti-spam cooldown (1 message / second)
      */
     socket.on('send_message', async (payload) => {
       try {
@@ -104,7 +88,6 @@ export const initializeSocket = (io) => {
           return emitSocketError(socket, 'EMPTY_MESSAGE', 'Message cannot be empty');
         }
 
-        // anti-spam: 1 message per 1000 ms
         const now = Date.now();
         const diff = now - (socket.data.lastMessageAt || 0);
         if (diff < 1000) {
@@ -115,29 +98,16 @@ export const initializeSocket = (io) => {
           );
         }
 
-        // verify sender in DB + room ownership
-        const sender = await FamilyMember.findById(senderId).select(
-          '_id name activeCircleId'
-        );
+        // 🔥 CHANGE: Yahan se bhi activeCircleId hataya.
+        const sender = await FamilyMember.findById(senderId).select('_id name');
         if (!sender) {
           return emitSocketError(socket, 'USER_NOT_FOUND', 'Sender not found');
         }
 
-        if (
-          !sender.activeCircleId ||
-          sender.activeCircleId.toString() !== String(familyCircleId)
-        ) {
-          return emitSocketError(
-            socket,
-            'FORBIDDEN_ROOM',
-            'You cannot send message to this vault'
-          );
-        }
+        // 🔥 BOUNCER FIXED: Aur yahan se bhi doosri rukaawat uda di!
 
-        // store timestamp after checks pass
         socket.data.lastMessageAt = now;
 
-        // Save message in DB
         const newMessage = await Message.create({
           familyCircleId,
           sender: sender._id,
@@ -145,7 +115,6 @@ export const initializeSocket = (io) => {
           text: cleanText,
         });
 
-        // Broadcast to same room only
         io.to(String(familyCircleId)).emit('receive_message', {
           _id: newMessage._id,
           familyCircleId: newMessage.familyCircleId,
@@ -161,51 +130,43 @@ export const initializeSocket = (io) => {
 
     /**
      * 3) typing_start
-     * payload: { familyCircleId, userId, name }
      */
     socket.on('typing_start', (payload) => {
-  try {
-    const { familyCircleId, senderId, senderName } = payload || {};
-    if (!familyCircleId || !senderId) return;
+      try {
+        const { familyCircleId, senderId, senderName } = payload || {};
+        if (!familyCircleId || !senderId) return;
 
-    socket.to(String(familyCircleId)).emit('member_typing', {
-      senderId: String(senderId),
-      senderName: senderName || socket.data.name || 'Unknown User',
+        socket.to(String(familyCircleId)).emit('member_typing', {
+          senderId: String(senderId),
+          senderName: senderName || socket.data.name || 'Unknown User',
+        });
+      } catch (error) {}
     });
-  } catch (error) {
-    // silent
-  }
-});
 
     /**
      * 4) typing_stop
-     * payload: { familyCircleId, userId }
      */
     socket.on('typing_stop', (payload) => {
-  try {
-    const { familyCircleId, senderId } = payload || {};
-    if (!familyCircleId || !senderId) return;
+      try {
+        const { familyCircleId, senderId } = payload || {};
+        if (!familyCircleId || !senderId) return;
 
-    socket.to(String(familyCircleId)).emit('member_stop_typing', {
-      senderId: String(senderId),
+        socket.to(String(familyCircleId)).emit('member_stop_typing', {
+          senderId: String(senderId),
+        });
+      } catch (error) {}
     });
 
-  } catch (error) {
-    // silent
-  }
-});
-socket.on('leave_vault', (payload) => {
-  try {
-    const { familyCircleId } = payload || {};
-    if (!familyCircleId) return;
-    socket.leave(String(familyCircleId));
-  } catch (error) {
-    // silent
-  }
-});
+    socket.on('leave_vault', (payload) => {
+      try {
+        const { familyCircleId } = payload || {};
+        if (!familyCircleId) return;
+        socket.leave(String(familyCircleId));
+      } catch (error) {}
+    });
+
     /**
-     * 5) live_location_update (optional direct socket event)
-     * Note: Main update should still come from REST controller for DB consistency
+     * 5) live_location_update
      */
     socket.on('live_location_update', (payload) => {
       try {

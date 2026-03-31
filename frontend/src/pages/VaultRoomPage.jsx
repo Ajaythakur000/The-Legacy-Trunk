@@ -6,9 +6,10 @@ import { getSocket } from '../services/socket';
 function VaultRoomPage() {
   const { user } = useAuth();
 
+  // 🔥 STRICT BINDING: Ab yeh sirf Navbar wale active circle ko maanega
   const familyCircleId = useMemo(() => {
-    return user?.familyCircleId || user?.activeCircleId || user?.familyCircle?._id || null;
-  }, [user]);
+    return user?.activeCircleId || null;
+  }, [user?.activeCircleId]);
 
   const [messages, setMessages] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -23,6 +24,7 @@ function VaultRoomPage() {
   const myUserId = String(user?._id || '');
   const myEmail = String(user?.email || '').toLowerCase();
 
+  // 🔥 AUTO-REFETCH: Jab bhi familyCircleId change hoga, purani chat clear hogi aur nayi aayegi
   useEffect(() => {
     if (!familyCircleId) {
       setMessages([]);
@@ -34,6 +36,7 @@ function VaultRoomPage() {
     const run = async () => {
       setLoadingHistory(true);
       setError('');
+      setMessages([]); // Clear previous circle's messages
       try {
         const data = await getMessagesApi(familyCircleId, 50);
         const history = data?.messages || data?.data?.messages || data || [];
@@ -207,7 +210,7 @@ function VaultRoomPage() {
 
       {noFamilyCircle ? (
         <p style={{ color: '#92400e', background: '#fffbeb', padding: 8, borderRadius: 8 }}>
-          Your account is not linked to any family circle yet.
+          Please select a family circle from the top navigation to chat.
         </p>
       ) : null}
 
@@ -232,9 +235,9 @@ function VaultRoomPage() {
           background: '#fafafa',
         }}
       >
-        {messages.length === 0 ? (
+        {messages.length === 0 && !loadingHistory ? (
           <p style={{ color: '#666' }}>
-            {noFamilyCircle ? 'No vault available.' : 'No messages yet.'}
+            {noFamilyCircle ? 'No vault available.' : 'No messages yet in this family.'}
           </p>
         ) : (
           messages.map((m, i) => {
@@ -289,7 +292,7 @@ function VaultRoomPage() {
         <input
           ref={inputRef}
           name="message"
-          placeholder={noFamilyCircle ? 'Family circle required...' : 'Type a message...'}
+          placeholder={noFamilyCircle ? 'Select family to type...' : 'Type a message...'}
           style={{ flex: 1, padding: '10px 12px' }}
           disabled={noFamilyCircle || loadingHistory || !isConnected}
           onChange={emitTyping}

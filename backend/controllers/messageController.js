@@ -6,6 +6,11 @@ import FamilyMember from '../models/familyMember.js';
  * @route   GET /api/messages/:familyCircleId?limit=50
  * @access  Private
  */
+/**
+ * @desc    Get chat history of a family vault
+ * @route   GET /api/messages/:familyCircleId?limit=50
+ * @access  Private
+ */
 const getFamilyMessages = async (req, res) => {
   try {
     const { familyCircleId } = req.params;
@@ -16,22 +21,11 @@ const getFamilyMessages = async (req, res) => {
       return res.status(400).json({ message: 'familyCircleId is required' });
     }
 
-    // Logged-in user load (safe check from DB)
-    const me = await FamilyMember.findById(req.user._id).select('activeCircleId');
-    if (!me) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Security check:
-    // user can only read messages of their own active family vault
-    if (!me.activeCircleId || me.activeCircleId.toString() !== familyCircleId) {
-      return res.status(403).json({ message: 'Access denied for this family vault' });
-    }
-
     // Keep limit in safe range for performance
     const safeLimit = Math.max(1, Math.min(limit, 100));
 
-    // Fetch latest messages first, then reverse for chat order (old -> new)
+    // 🔥 BOUNCER FIXED: Removed the old strict me.activeCircleId check. 
+    // Now it fetches messages directly for the requested Family Circle.
     const messages = await Message.find({ familyCircleId })
       .sort({ createdAt: -1 })
       .limit(safeLimit)

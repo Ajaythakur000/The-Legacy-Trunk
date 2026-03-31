@@ -84,6 +84,19 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  // ==========================================
+  // 🔥 NEW FUNCTION: Switch Active Circle
+  // ==========================================
+  const switchActiveCircle = (circleId) => {
+    if (!user) return;
+    
+    const updatedUser = { ...user, activeCircleId: circleId };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Optional: Agar tera backend bhi user profile update mangta hai, toh yahan ek API call bhi laga sakta hai future mein.
+  };
+
   const isAuthenticated = !!token;
 
   const value = {
@@ -95,6 +108,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     setUser,
+    switchActiveCircle, // <-- Isko expose kar diya
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

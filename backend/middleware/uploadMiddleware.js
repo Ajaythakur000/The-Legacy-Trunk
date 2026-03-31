@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -10,13 +12,27 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
+  params: async (req, file) => ({
     folder: 'legacy_trunk_stories',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'mp3'],
     resource_type: 'auto',
-  },
+    public_id: `story_${Date.now()}_${Math.round(Math.random() * 1e9)}`,
+    // ❌ remove allowed_formats here to avoid false rejects
+  }),
 });
 
-const upload = multer({ storage });
+const fileFilter = (req, file, cb) => {
+  const ok =
+    file.mimetype.startsWith('image/') ||
+    file.mimetype.startsWith('video/') ||
+    file.mimetype.startsWith('audio/');
+  if (!ok) return cb(new Error('Only image/video/audio files are allowed'));
+  cb(null, true);
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+});
 
 export default upload;

@@ -9,20 +9,20 @@ import api from './axios';
  * - isGlobalPublic (optional, boolean/string)
  * - media (optional file)
  */
+/**
+ * Create Story (multipart/form-data)
+ */
 export const createStoryApi = async (formData) => {
-  const response = await api.post('/stories', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  // ✅ Bas seedha formData pass kar de, Axios baaki khud sambhal lega
+  const response = await api.post('/stories', formData);
   return response.data;
 };
-
 /**
  * Active Circle Feed
  */
-export const getCircleFeedApi = async () => {
-  const response = await api.get('/stories/feed');
+export const getCircleFeedApi = async (circleId) => {
+  // 🔥 Ab hum explicitly circleId bhej rahe hain backend ko
+  const response = await api.get(`/stories/feed?circleId=${circleId}`);
   return response.data;
 };
 
