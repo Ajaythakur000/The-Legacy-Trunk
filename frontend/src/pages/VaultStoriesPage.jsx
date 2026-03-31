@@ -9,23 +9,19 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { getSocket } from '../services/socket.js';
 
+// 🔥 Naye Components Import kiye
+import StoryComposer from '../components/story/StoryComposer';
+import StoryCard from '../components/story/StoryCard';
+
 function VaultStoriesPage() {
   const { user } = useAuth();
   
-  // 🔥 STRICT BINDING
+  // STRICT BINDING
   const activeCircleId = user?.activeCircleId || null;
 
   const [stories, setStories] = useState([]);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [tags, setTags] = useState('');
-  const [isGlobalPublic, setIsGlobalPublic] = useState(false);
-  const [mediaFile, setMediaFile] = useState(null);
-  const [mediaPreviewUrl, setMediaPreviewUrl] = useState('');
-  const [commentTextByStory, setCommentTextByStory] = useState({});
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [actionLoadingId, setActionLoadingId] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -34,7 +30,6 @@ function VaultStoriesPage() {
     setLoadingFeed(true);
     setError('');
     try {
-      // Future proofing: Agar teri API parameterized hui toh yeh activeCircleId use karegi
       const data = await getCircleFeedApi(activeCircleId); 
       setStories(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -44,16 +39,17 @@ function VaultStoriesPage() {
     }
   };
 
-  // 🔥 AUTO-REFETCH: Dropdown se circle change hone pe automatically naya feed aayega
+  // AUTO-REFETCH
   useEffect(() => {
     if (activeCircleId) {
       loadFeed();
     } else {
-      setStories([]); // Clear screen if no circle selected
+      setStories([]); 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCircleId]);
 
+  // SOCKET INTEGRATION
   useEffect(() => {
     const socket = getSocket();
 
@@ -77,85 +73,48 @@ function VaultStoriesPage() {
     };
   }, [activeCircleId]);
 
-  useEffect(() => {
-    if (!mediaFile) return setMediaPreviewUrl('');
-    const url = URL.createObjectURL(mediaFile);
-    setMediaPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [mediaFile]);
-
-  const handleCreateStory = async (e) => {
-    e.preventDefault();
+  // ACTIONS PROPS FOR CHILD COMPONENTS
+  const handlePostStory = async (formData) => {
     setError('');
     setSuccess('');
-
-    if (!activeCircleId) {
-      setError('Please select an Active Family from the top navigation first.');
-      return;
-    }
-
-    if (!title.trim() || !content.trim()) {
-      setError('Title and content are required');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('title', title.trim());
-    formData.append('content', content.trim());
-    if (tags.trim()) formData.append('tags', tags.trim());
-    formData.append('isGlobalPublic', isGlobalPublic ? 'true' : 'false');
-    if (mediaFile) formData.append('media', mediaFile);
-    
-    // 🔥 EXPLICIT DATA: Backend ko batana ki yeh story KIS circle ki hai
-    formData.append('circleId', activeCircleId); 
-
     setUploading(true);
     try {
       await createStoryApi(formData);
       setSuccess('Story created successfully');
-      setTitle('');
-      setContent('');
-      setTags('');
-      setIsGlobalPublic(false);
-      setMediaFile(null);
-      setMediaPreviewUrl('');
       await loadFeed();
-    } catch (e2) {
-      console.error('createStory failed:', e2?.response?.data || e2);
-      setError(
-        e2?.response?.data?.message ||
-        e2?.message ||
-        'Failed to create story'
-      );
+    } catch (e) {
+      console.error('createStory failed:', e?.response?.data || e);
+      setError(e?.response?.data?.message || e?.message || 'Failed to create story');
+      throw e; // Error ko composer tak phekna taaki wo dikha sake
     } finally {
       setUploading(false);
     }
   };
 
   const handleLike = async (storyId) => {
-    setActionLoadingId(storyId);
     try {
       await toggleLikeStoryApi(storyId);
       await loadFeed();
     } catch (e) {
-      setError(e?.response?.data?.message || 'Failed to like/unlike story');
-    } finally {
-      setActionLoadingId('');
+      alert(e?.response?.data?.message || 'Failed to like/unlike story');
     }
   };
 
-  const handleCommentSubmit = async (storyId) => {
-    const text = (commentTextByStory[storyId] || '').trim();
-    if (!text) return;
-    setActionLoadingId(storyId);
+  const handleCommentSubmit = async (storyId, text) => {
     try {
       await addCommentToStoryApi(storyId, text);
-      setCommentTextByStory((p) => ({ ...p, [storyId]: '' }));
       await loadFeed();
     } catch (e) {
-      setError(e?.response?.data?.message || 'Failed to add comment');
-    } finally {
-      setActionLoadingId('');
+      alert(e?.response?.data?.message || 'Failed to add comment');
+    }
+  };
+
+  const handleDelete = async (storyId) => {
+    try {
+      await deleteStoryApi(storyId);
+      await loadFeed();
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to delete story');
     }
   };
 
@@ -165,156 +124,54 @@ function VaultStoriesPage() {
   );
 
   return (
-    <div style={{ maxWidth: 980, margin: '0 auto', padding: 16 }}>
-      <h1>Vault Stories</h1>
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ marginBottom: '8px', color: '#111827' }}>Vault Stories</h1>
       
       {!activeCircleId ? (
-        <p style={{ color: '#92400e', background: '#fffbeb', padding: 12, borderRadius: 8 }}>
+        <p style={{ color: '#92400e', background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fef3c7' }}>
           Please select a Family Circle from the top navigation to view or post stories.
         </p>
       ) : (
-        <p>Posting to: <b>{activeCircleId}</b></p>
+        <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+          Posting to: <b style={{ color: '#374151' }}>{activeCircleId}</b>
+        </p>
       )}
 
-      {error ? <p style={{ color: 'crimson' }}>{error}</p> : null}
-      {success ? <p style={{ color: 'green' }}>{success}</p> : null}
+      {error ? <p style={{ color: 'crimson', background: '#fef2f2', padding: '12px', borderRadius: '8px' }}>{error}</p> : null}
+      {success ? <p style={{ color: '#166534', background: '#f0fdf4', padding: '12px', borderRadius: '8px' }}>{success}</p> : null}
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 12, padding: 12, marginBottom: 16 }}>
-        <h3>Create Story</h3>
-        <form onSubmit={handleCreateStory}>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title"
-            style={{ width: '100%', padding: 10, marginBottom: 8 }}
-            disabled={!activeCircleId}
-          />
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Content"
-            rows={4}
-            style={{ width: '100%', padding: 10, marginBottom: 8 }}
-            disabled={!activeCircleId}
-          />
-          <input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="Tags (comma separated)"
-            style={{ width: '100%', padding: 10, marginBottom: 8 }}
-            disabled={!activeCircleId}
-          />
-          <input
-            type="file"
-            accept="image/*,video/*,audio/*"
-            onChange={(e) => setMediaFile(e.target.files?.[0] || null)}
-            disabled={!activeCircleId}
-          />
-          <div style={{ marginTop: 8 }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={isGlobalPublic}
-                onChange={(e) => setIsGlobalPublic(e.target.checked)}
-                disabled={!activeCircleId}
-              />{' '}
-              Make global public
-            </label>
-          </div>
-          <button type="submit" disabled={uploading || !activeCircleId} style={{ marginTop: 10 }}>
-            {uploading ? 'Uploading...' : 'Post Story'}
-          </button>
-        </form>
-      </div>
+      {/* 🔥 KACHRA GONE! Sirf ek line mein Composer aa gaya */}
+      <StoryComposer 
+        activeCircleId={activeCircleId} 
+        onPostStory={handlePostStory} 
+        uploading={uploading} 
+      />
 
-      <div style={{ border: '1px solid #ddd', borderRadius: 12, padding: 12 }}>
-        <h3>Circle Feed</h3>
-        {loadingFeed ? <p>Loading...</p> : null}
+      <div>
+        <h3 style={{ borderBottom: '2px solid #e5e7eb', paddingBottom: '8px', marginBottom: '16px', color: '#1f2937' }}>
+          Circle Feed
+        </h3>
+        
+        {loadingFeed ? <p style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>Loading stories...</p> : null}
 
         {sortedStories.length === 0 && !loadingFeed ? (
-          <p style={{ color: '#666' }}>No stories available in this circle.</p>
+          <p style={{ textAlign: 'center', color: '#6b7280', padding: '40px', background: '#f9fafb', borderRadius: '12px' }}>
+            No stories available in this circle. Be the first to post!
+          </p>
         ) : (
-          sortedStories.map((s) => (
-            <div key={s._id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 10, marginBottom: 10 }}>
-              <b>{s.title}</b>
-              <p>{s.content}</p>
-
-              {/* Media */}
-              {s?.mediaUrl &&
-                (s?.mediaType === 'photo' || s?.mediaType === 'image' || s?.mediaType === 'img') && (
-                  <img
-                    src={s.mediaUrl}
-                    alt={s.title || 'story-media'}
-                    style={{ width: '100%', maxHeight: 360, objectFit: 'cover', borderRadius: 8, marginTop: 8 }}
-                  />
-                )}
-
-              {s?.mediaUrl && s?.mediaType === 'video' && (
-                <video controls style={{ width: '100%', maxHeight: 360, borderRadius: 8, marginTop: 8 }}>
-                  <source src={s.mediaUrl} />
-                </video>
-              )}
-
-              {s?.mediaUrl && s?.mediaType === 'audio' && (
-                <audio controls style={{ width: '100%', marginTop: 8 }}>
-                  <source src={s.mediaUrl} />
-                </audio>
-              )}
-
-              <small>by {s?.user?.name || 'Unknown'}</small>
-
-              <div style={{ marginTop: 8 }}>
-                <button onClick={() => handleLike(s._id)} disabled={actionLoadingId === s._id}>
-                  Like/Unlike
-                </button>
-                <span style={{ marginLeft: 8 }}>Likes: {s?.likes?.length || 0}</span>
-              </div>
-
-              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <input
-                  value={commentTextByStory[s._id] || ''}
-                  onChange={(e) => setCommentTextByStory((p) => ({ ...p, [s._id]: e.target.value }))}
-                  placeholder="Comment..."
-                  style={{ flex: 1 }}
-                />
-                <button onClick={() => handleCommentSubmit(s._id)} disabled={actionLoadingId === s._id}>
-                  Comment
-                </button>
-
-                {/* 🔥 COMMENTS LIST DIKHANE KA CODE */}
-              {s?.comments && s.comments.length > 0 && (
-                <div style={{ marginTop: 12, padding: 8, background: '#f9fafb', borderRadius: 8 }}>
-                  <b style={{ fontSize: '13px', color: '#555' }}>Comments:</b>
-                  {s.comments.map((c, idx) => (
-                    <div key={c._id || idx} style={{ fontSize: '14px', marginTop: 4 }}>
-                      <b>{c?.user?.name || 'Someone'}:</b> {c.text}
-                    </div>
-                  ))}
-                </div>
-              )}
-                {/* 🔥 DELETE STORY BUTTON (Sirf agar user author hai) */}
-              {user && s?.user?._id === user._id && (
-                <div style={{ marginTop: 12 }}>
-                  <button 
-                    onClick={async () => {
-                      if(window.confirm('Are you sure you want to delete this story?')) {
-                        try {
-                          await deleteStoryApi(s._id); // API Call
-                          await loadFeed(); // Naya data laane ke liye screen refresh
-                        } catch (err) {
-                          alert(err?.response?.data?.message || 'Failed to delete story');
-                        }
-                      }
-                    }} 
-                    style={{ background: '#ef4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    🗑️ Delete Story
-                  </button>
-                </div>
-              )}
-              </div>
-            </div>
-          ))
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* 🔥 KACHRA GONE! Har story ab apne aap ek Card mein dikhegi */}
+            {sortedStories.map((s) => (
+              <StoryCard 
+                key={s._id} 
+                story={s} 
+                currentUser={user}
+                onLike={handleLike}
+                onComment={handleCommentSubmit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

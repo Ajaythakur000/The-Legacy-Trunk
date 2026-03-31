@@ -9,6 +9,8 @@ import DashboardPage from './pages/DashboardPage';
 import VaultRoomPage from './pages/VaultRoomPage';
 import FamilyRadarPage from './pages/FamilyRadarPage';
 import VaultStoriesPage from './pages/VaultStoriesPage';
+import StoryDetailPage from './pages/StoryDetailPage';
+import MyStoriesPage from './pages/MyStoriesPage';
 
 function App() {
   return (
@@ -56,6 +58,9 @@ function App() {
         />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/my-stories" element={<MyStoriesPage />} />
+        <Route path="/vault-stories/:storyId" element={<StoryDetailPage />} />
+
       </Routes>
     </>
   );
