@@ -3,7 +3,7 @@ import {
   createStory,
   getMyFamilyStories,
   getGlobalStories,
-  getCircleFeed, // add
+  getCircleFeed,
   getStoryById,
   updateStory,
   deleteStory,
@@ -15,10 +15,24 @@ import upload from '../middleware/uploadMiddleware.js';
 
 const router = Router();
 
-// Create story
-router.route('/').post(protect, upload.single('media'), createStory);
+const uploadStoryMedia = (req, res, next) => {
+  upload.single('media')(req, res, (err) => {
+    if (err) {
+      console.error('❌ uploadStoryMedia error:', err); // <-- add
+      return res.status(400).json({
+        message: err.message || 'Media upload failed',
+        code: err.code || 'UPLOAD_ERROR',
+        name: err.name || 'UploadError',
+      });
+    }
+    next();
+  });
+};
 
-// NEW: Active circle feed
+// Create story
+router.route('/').post(protect, uploadStoryMedia, createStory);
+
+// Active circle feed
 router.route('/feed').get(protect, getCircleFeed);
 
 // Existing endpoints

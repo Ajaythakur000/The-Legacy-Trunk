@@ -72,7 +72,7 @@ export const io = new Server(server, {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   },
 });
-
+app.set('io', io);
 // initialize all socket events
 initializeSocket(io);
 

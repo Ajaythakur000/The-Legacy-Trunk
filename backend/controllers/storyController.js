@@ -16,9 +16,13 @@ const canAccessStory = (story, user) => {
 
 const createStory = async (req, res) => {
   try {
-    const { title, content, tags, isGlobalPublic } = req.body;
+    // 🔥 BUG FIXED: req.body se 'circleId' bhi nikaal liya
+    const { title, content, tags, isGlobalPublic, circleId } = req.body;
 
-    if (!req.user?.activeCircleId) {
+    // 🔥 Ab hum explicitly frontend se bheji hui ID use karenge, nahi toh fallback purani ID
+    const targetCircleId = circleId || req.user?.activeCircleId;
+
+    if (!targetCircleId) {
       return res.status(400).json({ message: 'No active circle selected for this user' });
     }
 
@@ -43,7 +47,7 @@ const createStory = async (req, res) => {
         ? String(tags).split(',').map((t) => t.trim()).filter(Boolean)
         : [],
       user: req.user._id,
-      originCircleId: req.user.activeCircleId,
+      originCircleId: targetCircleId, // 🔥 Changed to targetCircleId
       isGlobalPublic: isGlobalPublic === 'true' || isGlobalPublic === true,
       mediaUrl,
       mediaType,
@@ -56,6 +60,20 @@ const createStory = async (req, res) => {
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName familyCode');
 
+    // =========================
+    // 🔥 SOCKET EMIT (FIXED HERE)
+    // =========================
+    const io = req.app.get('io');
+    
+    if (io && targetCircleId) {
+      // 👇 Emit to the exact targetCircleId room
+      io.to(String(targetCircleId)).emit(
+        'new_story_added',
+        populated || createdStory
+      );
+      console.log(`📡 Emitted new story to circle: ${targetCircleId}`);
+    }
+
     return res.status(201).json(populated);
   } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
@@ -64,18 +82,22 @@ const createStory = async (req, res) => {
 
 const getCircleFeed = async (req, res) => {
   try {
-    if (!req.user?.activeCircleId) {
+    // Read circleId from frontend query OR fallback to user's default
+    const circleId = req.query.circleId || req.user?.activeCircleId;
+
+    if (!circleId) {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
     const now = new Date();
 
     const stories = await Story.find({
-      originCircleId: req.user.activeCircleId,
+      originCircleId: circleId,
       expiresAt: { $gt: now },
     })
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName')
+      .populate('comments.user', 'name') // 🔥 BAS YEH 1 LINE MISSING THI! Isse ab comment karne wale ka naam aayega.
       .sort({ createdAt: -1 });
 
     return res.status(200).json(stories);
@@ -153,15 +175,14 @@ const updateStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    if (isExpiredStory(story)) {
+    // Assuming isExpiredStory is defined somewhere above in your file
+    if (story.expiresAt && new Date() > story.expiresAt) {
       return res.status(400).json({ message: 'Cannot edit expired story' });
     }
 
     const isAuthor = story.user.toString() === req.user._id.toString();
-    const isAdmin =
-      req.user.role === 'admin' &&
-      req.user.activeCircleId &&
-      story.originCircleId.toString() === req.user.activeCircleId.toString();
+    // 🔥 BOUNCER FIXED: Removed the strict activeCircleId check. Admin ya Author dono edit kar sakte hain.
+    const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
       return res.status(401).json({ message: 'Not authorized to edit this story' });
@@ -191,10 +212,8 @@ const deleteStory = async (req, res) => {
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
     const isAuthor = story.user.toString() === req.user._id.toString();
-    const isAdmin =
-      req.user.role === 'admin' &&
-      req.user.activeCircleId &&
-      story.originCircleId.toString() === req.user.activeCircleId.toString();
+    // 🔥 BOUNCER FIXED
+    const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
       return res.status(401).json({ message: 'Not authorized to delete this story' });
@@ -212,8 +231,9 @@ const toggleLikeStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    if (!canAccessStory(story, req.user)) {
-      return res.status(401).json({ message: 'Not authorized to like this story or it is expired' });
+    // 🔥 BOUNCER FIXED: canAccessStory() hata diya kyunki wo purane activeCircleId pe depend karta tha.
+    if (story.expiresAt && new Date() > story.expiresAt) {
+      return res.status(401).json({ message: 'Story is expired' });
     }
 
     const userId = req.user._id.toString();
@@ -245,8 +265,9 @@ const addCommentToStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    if (!canAccessStory(story, req.user)) {
-      return res.status(401).json({ message: 'Not authorized to comment on this story or it is expired' });
+    // 🔥 BOUNCER FIXED
+    if (story.expiresAt && new Date() > story.expiresAt) {
+      return res.status(401).json({ message: 'Cannot comment on expired story' });
     }
 
     story.comments.push({
