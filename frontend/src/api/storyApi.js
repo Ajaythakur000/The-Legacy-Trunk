@@ -81,3 +81,11 @@ export const addCommentToStoryApi = async (storyId, text) => {
   const response = await api.post(`/stories/${storyId}/comments`, { text });
   return response.data;
 };
+
+/**
+ * Get current user's own stories
+ */
+export const getMyStoriesApi = async () => {
+  const response = await api.get('/stories/mine');
+  return response.data;
+};

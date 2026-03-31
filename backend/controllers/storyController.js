@@ -155,14 +155,16 @@ const getGlobalStories = async (req, res) => {
 const getStoryById = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id)
-      .populate('user', 'name')
-      .populate('comments.user', 'name');
+      .populate('user', 'name email relationToAdmin')
+      .populate('originCircleId', 'circleName')
+      .populate('comments.user', 'name'); // Yahan bhi comment karne wale ka naam aayega
 
-    if (!story) return res.status(404).json({ message: 'Story not found' });
-
-    if (!canAccessStory(story, req.user)) {
-      return res.status(401).json({ message: 'Not authorized to view this story or it is expired' });
+    if (!story) {
+      return res.status(404).json({ message: 'Story not found' });
     }
+
+    // 🔥 BOUNCER FIXED: Purana strict activeCircleId check yahan se hamesha ke liye uda diya gaya hai!
+    // Ab user aaram se detail page dekh sakta hai.
 
     return res.status(200).json(story);
   } catch (error) {
@@ -290,7 +292,20 @@ const addCommentToStory = async (req, res) => {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
+// 🔥 Naya function: Sirf logged-in user ki stories laane ke liye
+const getMyStories = async (req, res) => {
+  try {
+    const stories = await Story.find({ user: req.user._id }) // Sirf is user ki stories
+      .populate('user', 'name')
+      .populate('originCircleId', 'circleName')
+      .populate('comments.user', 'name')
+      .sort({ createdAt: -1 });
 
+    return res.status(200).json(stories);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
+};
 export {
   createStory,
   getMyFamilyStories,
@@ -301,4 +316,5 @@ export {
   deleteStory,
   toggleLikeStory,
   addCommentToStory,
+  getMyStories
 };
