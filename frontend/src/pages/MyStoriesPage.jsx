@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { getMyStoriesApi, deleteStoryApi, toggleLikeStoryApi, addCommentToStoryApi } from '../api/storyApi';
+import { getMyStoriesApi, deleteStoryApi, toggleLikeStoryApi, addCommentToStoryApi, updateStoryApi } from '../api/storyApi';
 import StoryCard from '../components/story/StoryCard';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/shared/Navbar';
-
+import toast from 'react-hot-toast';
 function MyStoriesPage() {
   const { user } = useAuth();
   const [stories, setStories] = useState([]);
@@ -27,25 +27,47 @@ function MyStoriesPage() {
 
   // Actions
   const handleLike = async (id) => {
-    await toggleLikeStoryApi(id);
-    await loadMyStories();
-  };
-
-  const handleComment = async (id, text) => {
-    await addCommentToStoryApi(id, text);
-    await loadMyStories();
-  };
-
-  const handleDelete = async (id) => {
     try {
-      await deleteStoryApi(id);
-      alert('Story deleted successfully');
-      await loadMyStories(); // Screen se gayab karne ke liye reload
+      await toggleLikeStoryApi(id);
+      await loadMyStories();
+      toast.success('Liked! 👍');
     } catch (err) {
-      alert(err?.response?.data?.message || 'Failed to delete story');
+      toast.error('Failed to like ❌');
     }
   };
 
+  const handleComment = async (id, text) => {
+    const tId = toast.loading('Posting comment...');
+    try {
+      await addCommentToStoryApi(id, text);
+      await loadMyStories();
+      toast.success('Comment added! 💬', { id: tId });
+    } catch (err) {
+      toast.error('Could not post comment ❌', { id: tId });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const tId = toast.loading('Deleting story...');
+    try {
+      await deleteStoryApi(id);
+      await loadMyStories(); // Screen se gayab karne ke liye reload
+      toast.success('Story deleted successfully 🗑️', { id: tId });
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to delete story ❌', { id: tId });
+    }
+  };
+
+  const handleEdit = async (storyId, updatedData) => {
+    const tId = toast.loading('Updating story...');
+    try {
+      await updateStoryApi(storyId, updatedData);
+      await loadMyStories(); // Data refresh karne ke liye
+      toast.success('Hogyi edit, ja maje kar! 🎉', { id: tId });
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to update story ❌', { id: tId });
+    }
+  };
   return (
     <div>
       
@@ -70,6 +92,7 @@ function MyStoriesPage() {
                 onLike={handleLike}
                 onComment={handleComment}
                 onDelete={handleDelete}
+                onEdit={handleEdit}
               />
             ))}
           </div>

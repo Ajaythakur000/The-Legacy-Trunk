@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   addCommentToStoryApi,
   createStoryApi,
@@ -95,26 +96,32 @@ function VaultStoriesPage() {
     try {
       await toggleLikeStoryApi(storyId);
       await loadFeed();
+      // Like ke liye loading nahi daalenge kyunki ye fast hota hai, direct success!
+      toast.success('Like updated! 👍'); 
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to like/unlike story');
+      toast.error(e?.response?.data?.message || 'Failed to like/unlike story ❌');
     }
   };
 
   const handleCommentSubmit = async (storyId, text) => {
+    const tId = toast.loading('Posting comment... ✍️');
     try {
       await addCommentToStoryApi(storyId, text);
       await loadFeed();
+      toast.success('Comment added! 💬', { id: tId });
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to add comment');
+      toast.error(e?.response?.data?.message || 'Failed to add comment ❌', { id: tId });
     }
   };
 
   const handleDelete = async (storyId) => {
+    const tId = toast.loading('Deleting story... 🗑️');
     try {
       await deleteStoryApi(storyId);
       await loadFeed();
+      toast.success('Story deleted permanently! 💥', { id: tId });
     } catch (err) {
-      alert(err?.response?.data?.message || 'Failed to delete story');
+      toast.error(err?.response?.data?.message || 'Failed to delete story ❌', { id: tId });
     }
   };
 
