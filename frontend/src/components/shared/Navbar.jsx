@@ -81,6 +81,8 @@ function Navbar() {
             <Link to="/vault-stories" style={linkStyle}>Vault Stories</Link>
             {/* 🔥 YEH RAHA NAYA LINK */}
             <Link to="/my-stories" style={{ ...linkStyle, color: '#10b981' }}>My Stories</Link>
+
+            <Link to="/explore" style={{ ...linkStyle, color: '#8b5cf6', fontWeight: 'bold' }}>🌍 Explore</Link>
             <Link to="/radar" style={linkStyle}>Radar</Link>
           </div>
 

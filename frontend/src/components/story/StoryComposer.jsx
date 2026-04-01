@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import toast from 'react-hot-toast';
 function StoryComposer({ activeCircleId, onPostStory, uploading }) {
   // 📝 Saari Form State ab iske andar local rahegi
   const [title, setTitle] = useState('');
@@ -20,15 +20,15 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLocalError('');
+    // setLocalError(''); <-- 🔥 Iski ab zaroorat nahi, Toaster sab sambhal lega!
 
     if (!activeCircleId) {
-      setLocalError('Please select an Active Family from the top navigation first.');
+      toast.error('Please select an Active Family from the top navigation first. 👨‍👩‍👧‍👦'); // ❌ ERROR TOAST
       return;
     }
 
     if (!title.trim() || !content.trim()) {
-      setLocalError('Title and content are required');
+      toast.error('Title and content are required ⚠️'); // ❌ ERROR TOAST
       return;
     }
 
@@ -39,13 +39,19 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
     if (tags.trim()) formData.append('tags', tags.trim());
     formData.append('isGlobalPublic', isGlobalPublic ? 'true' : 'false');
     if (mediaFile) formData.append('media', mediaFile);
-    formData.append('circleId', activeCircleId); // 🔥 Explicit circleId
+    formData.append('circleId', activeCircleId);
+
+    // ⏳ LOADING TOAST SHURU (ID save kar rahe hain taaki baad mein isko success/error mein badal sakein)
+    const toastId = toast.loading('Uploading to Vault... 🚀');
 
     try {
       // Parent component (Page) ko data bhej do API call ke liye
       await onPostStory(formData);
       
-      // ✅ Success hone par form clear kar do
+      // ✅ SUCCESS TOAST (Wahi loading wala toast ab hare rang ka success ban jayega)
+      toast.success('Story posted successfully! 🎉', { id: toastId });
+
+      // form clear kar do
       setTitle('');
       setContent('');
       setTags('');
@@ -53,7 +59,8 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
       setMediaFile(null);
       setMediaPreviewUrl('');
     } catch (err) {
-      setLocalError(err?.message || 'Failed to post story');
+      // ❌ API ERROR TOAST (Agar upload fail ho gaya)
+      toast.error(err?.message || 'Failed to post story ❌', { id: toastId });
     }
   };
 
@@ -64,22 +71,33 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
       {localError ? <p style={{ color: 'crimson', margin: '0 0 12px 0', fontSize: '14px' }}>{localError}</p> : null}
 
       <form onSubmit={handleSubmit}>
+        
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Give your story a catchy title..."
-          style={{ width: '100%', padding: '10px 12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }}
+          maxLength={150} 
+          style={{ width: '100%', padding: '10px 12px', marginBottom: '4px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }}
           disabled={!activeCircleId || uploading}
         />
+        {/* Chota sa counter dikhane ke liye */}
+        <div style={{ textAlign: 'right', fontSize: '12px', color: '#9ca3af', marginBottom: '12px' }}>
+          {title.length}/100
+        </div>
+        
         
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="What's happening in the family?"
           rows={4}
-          style={{ width: '100%', padding: '10px 12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box', resize: 'vertical' }}
+          maxLength={2000} 
+          style={{ width: '100%', padding: '10px 12px', marginBottom: '4px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box', resize: 'vertical' }}
           disabled={!activeCircleId || uploading}
         />
+        <div style={{ textAlign: 'right', fontSize: '12px', color: '#9ca3af', marginBottom: '12px' }}>
+          {content.length}/2000
+        </div>
         
         <input
           value={tags}
