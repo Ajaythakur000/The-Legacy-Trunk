@@ -49,17 +49,22 @@ function VaultStoriesPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCircleId]);
+    
 
+    
   // SOCKET INTEGRATION
   useEffect(() => {
     const socket = getSocket();
-
     if (!activeCircleId || !socket) return;
 
     socket.emit('join_story_feed', { circleId: activeCircleId });
 
+    // 🔥 Duplicate event listeners na bane isliye pehle purana hatao
+    socket.off('new_story_added'); 
+
     const onNewStory = (incoming) => {
       setStories((prev) => {
+        // 🔥 Strict duplicate check
         const exists = prev.some((x) => x._id === incoming._id);
         if (exists) return prev;
         return [incoming, ...prev];
@@ -93,15 +98,31 @@ function VaultStoriesPage() {
   };
 
   const handleLike = async (storyId) => {
+    // ⚡ Optimistic UI: Turant UI pe like count/status change karo (API se pehle)
+    setStories((prev) => 
+      prev.map((s) => {
+        if (s._id === storyId) {
+          const hasLiked = s.likes?.includes(user._id);
+          const newLikes = hasLiked 
+            ? s.likes.filter(id => id !== user._id) // Unlike kiya
+            : [...(s.likes || []), user._id];       // Like kiya
+          return { ...s, likes: newLikes };
+        }
+        return s;
+      })
+    );
+
     try {
+      // Piche API call jayegi chupchaap
       await toggleLikeStoryApi(storyId);
-      await loadFeed();
-      // Like ke liye loading nahi daalenge kyunki ye fast hota hai, direct success!
+      
       toast.success('Like updated! 👍'); 
     } catch (e) {
-      toast.error(e?.response?.data?.message || 'Failed to like/unlike story ❌');
+      toast.error(e?.response?.data?.message || 'Failed to update like ❌');
+      // ❌ Agar API fail hui, to UI original jaisa karne ke liye `loadFeed()` call kardo
+      loadFeed(); 
     }
-  };
+  };;
 
   const handleCommentSubmit = async (storyId, text) => {
     const tId = toast.loading('Posting comment... ✍️');

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { loginApi, signupApi } from '../api/authApi';
 import { connectSocket, disconnectSocket } from '../services/socket';
 
+// 🛑 Vite Fast Refresh Rule: Context object ko yahan se export NAHI karna hai
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -85,7 +86,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ==========================================
-  // 🔥 NEW FUNCTION: Switch Active Circle
+  // 🔥 Switch Active Circle
   // ==========================================
   const switchActiveCircle = (circleId) => {
     if (!user) return;
@@ -93,8 +94,6 @@ export const AuthProvider = ({ children }) => {
     const updatedUser = { ...user, activeCircleId: circleId };
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
-    
-    // Optional: Agar tera backend bhi user profile update mangta hai, toh yahan ek API call bhi laga sakta hai future mein.
   };
 
   const isAuthenticated = !!token;
@@ -108,12 +107,13 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     setUser,
-    switchActiveCircle, // <-- Isko expose kar diya
+    switchActiveCircle,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// ✅ Custom hook ko hi export karna hai (Vite loves this)
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used inside AuthProvider');

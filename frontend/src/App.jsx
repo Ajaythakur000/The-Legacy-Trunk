@@ -12,6 +12,7 @@ import VaultStoriesPage from './pages/VaultStoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './pages/MyStoriesPage';
 import ExploreStoriesPage from './pages/ExploreStoriesPage';
+import ProfilePage from './pages/ProfilePage'; // <-- Path check kar lena apne hisaab se
 
 function App() {
   return (
@@ -38,6 +39,8 @@ function App() {
         <Route path="/explore" element={<ProtectedRoute><ExploreStoriesPage /></ProtectedRoute>} />
         <Route path="/my-stories" element={<ProtectedRoute><MyStoriesPage /></ProtectedRoute>} />
         <Route path="/vault-stories/:storyId" element={<ProtectedRoute><StoryDetailPage /></ProtectedRoute>} />
+
+        <Route path="/profile" element={<ProfilePage />} />
 
         {/* ✅ Catch-All Route: Yeh hamesha SABSE AAKHRI mein aana chahiye */}
         <Route path="*" element={<Navigate to="/login" replace />} />

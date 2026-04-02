@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast'; // 🔥 Naya Toast Import
 import { getStoryByIdApi, toggleLikeStoryApi, addCommentToStoryApi, deleteStoryApi } from '../api/storyApi';
 import StoryCard from '../components/story/StoryCard';
+import Navbar from '../components/shared/Navbar';
 import { useAuth } from '../context/AuthContext';
 
 function StoryDetailPage() {
-  const { storyId } = useParams(); // 🔥 URL se ID nikal li
+  const { storyId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -31,57 +33,91 @@ function StoryDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storyId]);
 
-  // Actions
+  // 🔥 Optimistic Like Logic
   const handleLike = async (id) => {
+    // 1. Turant UI update karo (API call se pehle)
+    setStory((prev) => {
+      if (!prev) return prev;
+      const hasLiked = prev.likes?.includes(user._id);
+      const newLikes = hasLiked 
+        ? prev.likes.filter(uid => uid !== user._id) 
+        : [...(prev.likes || []), user._id];
+      return { ...prev, likes: newLikes };
+    });
+
+    // 2. Chupchaap API call bhejo
     try {
       await toggleLikeStoryApi(id);
-      await loadStory(); // Refresh story data to show new likes
+      toast.success('Liked! 👍');
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to like story');
+      toast.error(e?.response?.data?.message || 'Failed to like story ❌');
+      loadStory(); // API fail hui toh rollback kar lo
     }
   };
 
   const handleComment = async (id, text) => {
+    const tId = toast.loading('Posting comment... ✍️');
     try {
       await addCommentToStoryApi(id, text);
       await loadStory(); // Refresh story data to show new comments
+      toast.success('Comment added! 💬', { id: tId });
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to add comment');
+      toast.error(e?.response?.data?.message || 'Failed to add comment ❌', { id: tId });
     }
   };
 
   const handleDelete = async (id) => {
+    const tId = toast.loading('Deleting story... 🗑️');
     try {
       await deleteStoryApi(id);
-      alert('Story deleted successfully');
+      toast.success('Story deleted successfully 💥', { id: tId });
       navigate('/vault-stories'); // Delete hone ke baad feed par wapas bhej do
     } catch (err) {
-      alert(err?.response?.data?.message || 'Failed to delete story');
+      toast.error(err?.response?.data?.message || 'Failed to delete story ❌', { id: tId });
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: '50px' }}>Loading Story... ⏳</div>;
-  if (error) return <div style={{ textAlign: 'center', marginTop: '50px', color: 'crimson' }}>{error}</div>;
-  if (!story) return <div style={{ textAlign: 'center', marginTop: '50px' }}>Story not found! 🕵️‍♂️</div>;
+  if (loading) return (
+    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ textAlign: 'center', marginTop: '50px', color: '#6b7280' }}>Loading Story... ⏳</div>
+    </div>
+  );
+  
+  if (error) return (
+    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ textAlign: 'center', marginTop: '50px', color: 'crimson', fontWeight: 'bold' }}>{error}</div>
+    </div>
+  );
+  
+  if (!story) return (
+    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+      <Navbar />
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>Story not found! 🕵️‍♂️</div>
+    </div>
+  );
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
-      <button 
-        onClick={() => navigate('/vault-stories')}
-        style={{ marginBottom: '16px', padding: '8px 12px', cursor: 'pointer', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '6px' }}
-      >
-        ⬅️ Back to Feed
-      </button>
+    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '40px' }}>
+      <Navbar />
+      <div style={{ maxWidth: 800, margin: '20px auto', padding: '0 16px', fontFamily: 'system-ui, sans-serif' }}>
+        <button 
+          onClick={() => navigate('/vault-stories')}
+          style={{ marginBottom: '20px', padding: '8px 16px', cursor: 'pointer', background: '#fff', border: '1px solid #d1d5db', borderRadius: '8px', fontWeight: 'bold', color: '#374151', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+        >
+          ⬅️ Back to Feed
+        </button>
 
-      {/* 🔥 Reuse kar liya apna smart component */}
-      <StoryCard 
-        story={story} 
-        currentUser={user} 
-        onLike={handleLike} 
-        onComment={handleComment} 
-        onDelete={handleDelete}
-        isDetailView={true} // Taki isme title dobara clickable na ho aur photo badi dikhe
-      />
+        <StoryCard 
+          story={story} 
+          currentUser={user} 
+          onLike={handleLike} 
+          onComment={handleComment} 
+          onDelete={handleDelete}
+          isDetailView={true} 
+        />
+      </div>
     </div>
   );
 }

@@ -22,6 +22,7 @@ const generateFamilyCode = async () => {
 };
 
 // Shared response shape (single source of truth)
+// 🔥 Added new profile fields here
 const buildUserResponse = (user) => ({
   _id: user._id,
   name: user.name,
@@ -29,6 +30,11 @@ const buildUserResponse = (user) => ({
   role: user.role,
   relationToAdmin: user.relationToAdmin,
   familyCode: user.familyCode,
+  
+  // New Identity fields
+  avatar: user.avatar,
+  bio: user.bio,
+  dateOfBirth: user.dateOfBirth,
 
   // canonical + alias
   activeCircleId: user.activeCircleId || null,
@@ -61,7 +67,6 @@ const registerUser = async (req, res) => {
     let circleId;
     let finalFamilyCode;
 
-    // 🔥 STEP 1: Sirf validation aur Code generation karenge, Circle abhi nahi banayenge
     if (role === 'admin') {
       finalFamilyCode = await generateFamilyCode();
     } else {
@@ -80,7 +85,6 @@ const registerUser = async (req, res) => {
       finalFamilyCode = normalizedCode;
     }
 
-    // 🔥 STEP 2: Pehle User create karo (Admin ke case mein circleId abhi undefined hai)
     const user = await FamilyMember.create({
       name,
       email,
@@ -91,26 +95,22 @@ const registerUser = async (req, res) => {
       activeCircleId: circleId || null, 
     });
 
-    // 🔥 STEP 3: Ab Admin ka ID mil gaya, toh Circle banao aur aapas mein link karo
     if (role === 'admin') {
       const newCircle = await FamilyCircle.create({
         circleName: `${name}'s Family Vault`,
         familyCode: finalFamilyCode,
-        admin: user._id,            // ✅ FIX: Ab admin ki ID properly mil jayegi
-        members: [user._id],        // ✅ FIX: Admin ko turant member list mein bhi daal diya
+        admin: user._id,           
+        members: [user._id],        
       });
 
-      // User ke andar naye Circle ki ID update kar do
       user.activeCircleId = newCircle._id;
       await user.save();
     } else {
-      // Normal member ke case mein purane circle mein member ko add karo
       await FamilyCircle.findByIdAndUpdate(circleId, {
         $addToSet: { members: user._id },
       });
     }
 
-    // Note: Make sure tera `buildUserResponse` function file mein pehle se ho
     return res.status(201).json(buildUserResponse(user));
   } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
@@ -150,6 +150,7 @@ const getUserProfile = async (req, res) => {
     return res.status(404).json({ message: 'User not found' });
   }
 
+  // Refactored to just use the new builder
   return res.json({
     _id: req.user._id,
     name: req.user.name,
@@ -157,9 +158,48 @@ const getUserProfile = async (req, res) => {
     role: req.user.role,
     relationToAdmin: req.user.relationToAdmin,
     familyCode: req.user.familyCode,
+    avatar: req.user.avatar,
+    bio: req.user.bio,
+    dateOfBirth: req.user.dateOfBirth,
     activeCircleId: req.user.activeCircleId || null,
     familyCircleId: req.user.activeCircleId || null,
   });
 };
 
-export { registerUser, loginUser, getUserProfile };
+// ==========================================
+// 🔥 NEW: Update Profile (DP, Bio, etc.)
+// @route PUT /api/users/profile
+// @access Private
+// ==========================================
+const updateUserProfile = async (req, res) => {
+  try {
+    const user = await FamilyMember.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update details if they exist in request body
+    if (req.body.name) user.name = req.body.name.trim();
+    if (req.body.bio) user.bio = req.body.bio.trim();
+    if (req.body.dateOfBirth) user.dateOfBirth = req.body.dateOfBirth;
+    
+    // Cloudinary URL if uploaded from frontend
+    if (req.body.avatar) user.avatar = req.body.avatar;
+
+    // Optional: Allow password change from profile
+    if (req.body.password) {
+      user.password = req.body.password; // Will be hashed by pre-save hook in model
+    }
+
+    const updatedUser = await user.save();
+
+    // Return updated data
+    return res.json(buildUserResponse(updatedUser));
+  } catch (error) {
+    return res.status(500).json({ message: 'Error updating profile: ' + error.message });
+  }
+};
+
+// Make sure to export the new function
+export { registerUser, loginUser, getUserProfile, updateUserProfile };
