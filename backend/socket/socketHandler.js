@@ -14,8 +14,13 @@ export const initializeSocket = (io) => {
 
     socket.on('join_story_feed', ({ circleId }) => {
       if (!circleId) return;
-      socket.join(String(circleId)); 
-      console.log(`🔌 Socket ${socket.id} joined story feed: ${circleId}`);
+      
+      // 🔥 Memory Leak rokne ka tareeka: Agar pehle se joined hai to do nothing
+      const roomName = String(circleId);
+      if (!socket.rooms.has(roomName)) {
+        socket.join(roomName); 
+        console.log(`🔌 Socket ${socket.id} joined story feed: ${roomName}`);
+      }
     });
 
     socket.on('leave_story_feed', ({ circleId }) => {

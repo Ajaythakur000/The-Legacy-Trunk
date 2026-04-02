@@ -86,7 +86,15 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit, is
 
       {/* 🖼️ Media Section */}
       {!isEditing && story?.mediaUrl && (story?.mediaType === 'photo' || story?.mediaType === 'image' || story?.mediaType === 'img') && (
-        <img src={story.mediaUrl} alt={story.title} style={{ width: '100%', maxHeight: isDetailView ? '600px' : '400px', objectFit: 'contain', borderRadius: '8px', marginTop: '12px', background: '#f3f4f6' }} />
+        <img 
+          src={story.mediaUrl} 
+          alt={story.title} 
+          onError={(e) => { 
+            e.target.onerror = null; 
+            e.target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Available'; 
+          }}
+          style={{ width: '100%', maxHeight: isDetailView ? '600px' : '400px', objectFit: 'contain', borderRadius: '8px', marginTop: '12px', background: '#f3f4f6' }} 
+        />
       )}
       
       {!isEditing && story?.mediaUrl && story?.mediaType === 'video' && (

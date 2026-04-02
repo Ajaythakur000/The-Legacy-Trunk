@@ -24,7 +24,26 @@ const familyMemberSchema = new Schema(
       select: false, // password query results me by default nahi aayega
     },
 
-    // Backend authorization role
+    // ==============================
+    // 👤 USER PROFILE FIELDS (Day 1)
+    // ==============================
+    avatar: {
+      type: String,
+      default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg", // Default placeholder image
+    },
+    bio: {
+      type: String,
+      maxLength: 150, // Lamba text rokne ke liye
+      default: "Hey there! I am using FamilyVault.",
+    },
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
+
+    // ==============================
+    // 🛡️ ROLES & RELATIONSHIPS
+    // ==============================
     role: {
       type: String,
       enum: ['admin', 'member', 'restricted'],
@@ -54,14 +73,14 @@ const familyMemberSchema = new Schema(
     },
 
     // ==============================
-    //  FAMILY RADAR FIELDS
+    // 📡 FAMILY RADAR FIELDS
     // ==============================
 
     /**
      * GeoJSON format:
      * {
-     *   type: "Point",
-     *   coordinates: [longitude, latitude]
+     * type: "Point",
+     * coordinates: [longitude, latitude]
      * }
      *
      * IMPORTANT:
