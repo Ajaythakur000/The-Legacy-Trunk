@@ -12,7 +12,8 @@ import VaultStoriesPage from './pages/VaultStoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './pages/MyStoriesPage';
 import ExploreStoriesPage from './pages/ExploreStoriesPage';
-import ProfilePage from './pages/ProfilePage'; // <-- Path check kar lena apne hisaab se
+import ProfilePage from './pages/ProfilePage'; 
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/vault-stories/:storyId" element={<ProtectedRoute><StoryDetailPage /></ProtectedRoute>} />
 
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/home" element={<HomePage />} />
 
         {/* ✅ Catch-All Route: Yeh hamesha SABSE AAKHRI mein aana chahiye */}
         <Route path="*" element={<Navigate to="/login" replace />} />
