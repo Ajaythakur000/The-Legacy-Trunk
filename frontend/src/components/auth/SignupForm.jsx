@@ -35,7 +35,7 @@ function Signup() {
       localStorage.setItem("token", res.data.token)
 
       // dashboard redirect
-      navigate("/dashboard")
+     navigate("/home")
 
     } catch (error) {
 

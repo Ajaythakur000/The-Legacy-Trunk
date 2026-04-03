@@ -16,10 +16,9 @@ const canAccessStory = (story, user) => {
 
 const createStory = async (req, res) => {
   try {
-    // 🔥 BUG FIXED: req.body se 'circleId' bhi nikaal liya
     const { title, content, tags, isGlobalPublic, circleId } = req.body;
-
-    // 🔥 Ab hum explicitly frontend se bheji hui ID use karenge, nahi toh fallback purani ID
+    
+    // Explicitly target the selected circle
     const targetCircleId = circleId || req.user?.activeCircleId;
 
     if (!targetCircleId) {
@@ -33,6 +32,7 @@ const createStory = async (req, res) => {
     let mediaUrl = '';
     let mediaType = 'text';
 
+    // Process File if exists
     if (req.file) {
       mediaUrl = req.file.path || req.file.secure_url || '';
       if (req.file.mimetype?.startsWith('image')) mediaType = 'photo';
@@ -40,14 +40,13 @@ const createStory = async (req, res) => {
       else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
     }
 
+    // Create Story
     const story = new Story({
       title: String(title).trim(),
       content: String(content).trim(),
-      tags: tags
-        ? String(tags).split(',').map((t) => t.trim()).filter(Boolean)
-        : [],
+      tags: tags ? String(tags).split(',').map((t) => t.trim()).filter(Boolean) : [],
       user: req.user._id,
-      originCircleId: targetCircleId, // 🔥 Changed to targetCircleId
+      originCircleId: targetCircleId,
       isGlobalPublic: isGlobalPublic === 'true' || isGlobalPublic === true,
       mediaUrl,
       mediaType,
@@ -56,26 +55,22 @@ const createStory = async (req, res) => {
 
     const createdStory = await story.save();
 
+    // Populate user and circle info for frontend
     const populated = await Story.findById(createdStory._id)
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName familyCode');
 
-    // =========================
-    // 🔥 SOCKET EMIT (FIXED HERE)
-    // =========================
+    // 📡 Socket Emit
     const io = req.app.get('io');
-    
     if (io && targetCircleId) {
-      // 👇 Emit to the exact targetCircleId room
-      io.to(String(targetCircleId)).emit(
-        'new_story_added',
-        populated || createdStory
-      );
-      console.log(`📡 Emitted new story to circle: ${targetCircleId}`);
+      io.to(String(targetCircleId)).emit('new_story_added', populated || createdStory);
     }
 
+    // Success response
     return res.status(201).json(populated);
+    
   } catch (error) {
+    console.error("Story Creation Error:", error);
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
