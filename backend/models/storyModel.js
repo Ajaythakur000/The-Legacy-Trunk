@@ -46,7 +46,6 @@ const storySchema = new Schema(
       enum: ['text', 'photo', 'audio', 'video'],
       default: 'text',
     },
-
     originCircleId: {
       type: Schema.Types.ObjectId,
       ref: 'FamilyCircle',
@@ -56,6 +55,20 @@ const storySchema = new Schema(
       type: Boolean,
       default: false,
     },
+    
+    // ==========================================
+    // 🔥 NEW: MEMORY LANE (MILESTONE) FEATURES
+    // ==========================================
+    isMilestone: {
+      type: Boolean,
+      default: false, // Normal story by default
+    },
+    milestoneDate: {
+      type: Date,
+      default: Date.now, // Agar date nahi di, toh aaj ki set hogi
+    },
+    // ==========================================
+
     likes: [
       {
         type: Schema.Types.ObjectId,
@@ -70,11 +83,10 @@ const storySchema = new Schema(
       },
     ],
 
-    // NEW: 24h expiry support
+    // 🕒 FIXED: 24h expiry support (Made optional so Milestones don't delete!)
     expiresAt: {
       type: Date,
-      required: true,
-      default: () => new Date(Date.now() + 24 * 60 * 60 * 1000),
+      required: false, // Changed from true to false
     },
   },
   {
@@ -85,7 +97,7 @@ const storySchema = new Schema(
 // Fast feed query: by circle + latest first
 storySchema.index({ originCircleId: 1, createdAt: -1 });
 
-// TTL index: document auto-delete after expiresAt
+// TTL index: document auto-delete after expiresAt (Only deletes if expiresAt is present)
 storySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Story = model('Story', storySchema);
