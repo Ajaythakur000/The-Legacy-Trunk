@@ -2,17 +2,20 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
+import ProfilePage from './components/profile/ProfilePage'; 
+import DashboardPage from './components/dashboard/DashboardPage';
+import FamilyRadarPage from './components/radar/FamilyRadarPage';
 
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
+import LoginPage from './components/auth/LoginPage';
+import SignupPage from './components/auth/SignupPage';
+
 import VaultRoomPage from './pages/VaultRoomPage';
-import FamilyRadarPage from './pages/FamilyRadarPage';
+
 import VaultStoriesPage from './pages/VaultStoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './pages/MyStoriesPage';
 import ExploreStoriesPage from './pages/ExploreStoriesPage';
-import ProfilePage from './pages/ProfilePage'; 
+
 import HomePage from './pages/HomePage';
 
 function App() {

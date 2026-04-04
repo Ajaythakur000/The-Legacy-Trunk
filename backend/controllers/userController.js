@@ -31,10 +31,13 @@ const buildUserResponse = (user) => ({
   relationToAdmin: user.relationToAdmin,
   familyCode: user.familyCode,
   
-  // New Identity fields
+  // Identity fields
   avatar: user.avatar,
   bio: user.bio,
   dateOfBirth: user.dateOfBirth,
+
+  // 🔥 YAHAN ADD KIYA: The Bond Points
+  bondPoints: user.bondPoints || 0,
 
   // canonical + alias
   activeCircleId: user.activeCircleId || null,
@@ -161,6 +164,10 @@ const getUserProfile = async (req, res) => {
     avatar: req.user.avatar,
     bio: req.user.bio,
     dateOfBirth: req.user.dateOfBirth,
+    
+    bondPoints: req.user.bondPoints || 0,
+
+
     activeCircleId: req.user.activeCircleId || null,
     familyCircleId: req.user.activeCircleId || null,
   });

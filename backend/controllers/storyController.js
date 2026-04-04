@@ -40,6 +40,8 @@ const createStory = async (req, res) => {
       else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
     }
 
+
+    
     // Create Story
     const story = new Story({
       title: String(title).trim(),
@@ -55,10 +57,21 @@ const createStory = async (req, res) => {
 
     const createdStory = await story.save();
 
+    // ==========================================
+    // 🔥 BOND POINTS ENGINE: Post Creation (+10)
+    // ==========================================
+    // NOTE: Agar tera User model ka naam kuch aur hai (e.g., FamilyMember), toh usko yahan replace kar lena.
+    await FamilyMember.findByIdAndUpdate(req.user._id, {
+      $inc: { bondPoints: 10 }
+    });
+    // ==========================================
+
     // Populate user and circle info for frontend
     const populated = await Story.findById(createdStory._id)
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName familyCode');
+
+    // ... tera baaki ka socket aur response code ...
 
     // 📡 Socket Emit
     const io = req.app.get('io');
@@ -228,18 +241,52 @@ const toggleLikeStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    // 🔥 BOUNCER FIXED: canAccessStory() hata diya kyunki wo purane activeCircleId pe depend karta tha.
     if (story.expiresAt && new Date() > story.expiresAt) {
       return res.status(401).json({ message: 'Story is expired' });
     }
 
     const userId = req.user._id.toString();
+    const storyOwnerId = story.user.toString();
     const alreadyLiked = story.likes.some((id) => id.toString() === userId);
 
-    if (alreadyLiked) story.likes = story.likes.filter((id) => id.toString() !== userId);
-    else story.likes.push(req.user._id);
+    // ==========================================
+    // 🔥 THE MASTERSTROKE: Global vs Internal Like
+    // ==========================================
+    // Check agar liker aur story creator alag-alag family se hain
+    const isDifferentFamily = 
+      story.originCircleId && 
+      req.user.activeCircleId && 
+      story.originCircleId.toString() !== req.user.activeCircleId.toString();
+
+    // Agar story global public hai aur liker dusri family ka hai, toh 10 points! Warna 5 points.
+    const isGlobalLike = story.isGlobalPublic && isDifferentFamily;
+    const pointsToAward = isGlobalLike ? 10 : 5;
+
+    // Like / Unlike logic
+    if (alreadyLiked) {
+      story.likes = story.likes.filter((id) => id.toString() !== userId);
+    } else {
+      story.likes.push(req.user._id);
+    }
 
     await story.save();
+
+    // ==========================================
+    // 💎 BOND POINTS ENGINE: Award/Deduct Points
+    // ==========================================
+    // Anti-Cheat: Khud ki post like karne par points nahi milenge
+    if (userId !== storyOwnerId) {
+      // Agar unlike kiya hai toh points kaat lo, warna de do
+      const pointModifier = alreadyLiked ? -pointsToAward : pointsToAward;
+      
+      // NOTE: Agar tera User model kisi aur naam se import hua hai (jaise FamilyMember), 
+      // toh niche 'User' ki jagah wo naam likh dena.
+      await FamilyMember.findByIdAndUpdate(storyOwnerId, {
+        $inc: { bondPoints: pointModifier }
+      });
+      
+      console.log(`💎 Bond Points Engine: ${pointModifier} points to user ${storyOwnerId}`);
+    }
 
     return res.status(200).json({
       message: alreadyLiked ? 'Story unliked' : 'Story liked',
@@ -262,7 +309,6 @@ const addCommentToStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    // 🔥 BOUNCER FIXED
     if (story.expiresAt && new Date() > story.expiresAt) {
       return res.status(401).json({ message: 'Cannot comment on expired story' });
     }
@@ -273,6 +319,17 @@ const addCommentToStory = async (req, res) => {
     });
 
     await story.save();
+
+    // ==========================================
+    // 💎 BOND POINTS ENGINE: Comment Reward (+5)
+    // ==========================================
+    // Anti-Cheat: Khud ki post par comment karne se points nahi badhenge
+    if (story.user.toString() !== req.user._id.toString()) {
+      await FamilyMember.findByIdAndUpdate(story.user, {
+        $inc: { bondPoints: 5 }
+      });
+      console.log(`💎 Bond Points Engine: +5 points to user ${story.user} for a new comment!`);
+    }
 
     const populatedStory = await Story.findById(story._id)
       .populate('comments.user', 'name')

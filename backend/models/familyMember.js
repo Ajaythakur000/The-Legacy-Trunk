@@ -110,6 +110,26 @@ const familyMemberSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    // ... existing fields ...
+    avatar: {
+      type: String,
+      default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+    },
+    bio: {
+      type: String,
+      maxLength: 150,
+      default: "Hey there! I am using FamilyVault.",
+    },
+    // 🔥 NAYA FIELD: Aura Engine
+    // User Schema ke andar add kar de:
+    bondPoints: {
+      type: Number,
+      default: 0,
+    },
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
