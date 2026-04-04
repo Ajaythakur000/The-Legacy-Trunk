@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   addMemberToCircleApi,
   createCircleApi,
   getCircleByIdApi,
   getMyCirclesApi,
   removeMemberFromCircleApi,
-} from '../api/circleApi';
+} from '../../api/circleApi';
 
 function DashboardPage() {
   const { user, switchActiveCircle } = useAuth();
