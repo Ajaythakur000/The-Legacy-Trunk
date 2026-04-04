@@ -43,14 +43,11 @@ export const initializeSocket = (io) => {
           );
         }
 
-        // 🔥 CHANGE: Ab backend sirf user ka naam nikalega, purana activeCircleId nahi.
         const user = await FamilyMember.findById(userId).select('_id name');
 
         if (!user) {
           return emitSocketError(socket, 'USER_NOT_FOUND', 'User not found');
         }
-
-        // 🔥 BOUNCER FIXED: 'FORBIDDEN_ROOM' wali rukaawat yahan se uda di hai!
 
         socket.data.userId = user._id.toString();
         socket.data.name = name || user.name || 'Unknown User';
@@ -78,7 +75,8 @@ export const initializeSocket = (io) => {
      */
     socket.on('send_message', async (payload) => {
       try {
-        const { familyCircleId, senderId, senderName, text } = payload || {};
+        // 🔥 DOUBLE MSG FIX: clientMsgId bhi extract karo
+        const { familyCircleId, senderId, senderName, text, clientMsgId } = payload || {};
 
         if (!familyCircleId || !senderId || !text) {
           return emitSocketError(
@@ -103,13 +101,10 @@ export const initializeSocket = (io) => {
           );
         }
 
-        // 🔥 CHANGE: Yahan se bhi activeCircleId hataya.
         const sender = await FamilyMember.findById(senderId).select('_id name');
         if (!sender) {
           return emitSocketError(socket, 'USER_NOT_FOUND', 'Sender not found');
         }
-
-        // 🔥 BOUNCER FIXED: Aur yahan se bhi doosri rukaawat uda di!
 
         socket.data.lastMessageAt = now;
 
@@ -120,13 +115,16 @@ export const initializeSocket = (io) => {
           text: cleanText,
         });
 
+        // 🔥 DOUBLE MSG & ALIGNMENT FIX: clientMsgId aur senderId wapas bhejo!
         io.to(String(familyCircleId)).emit('receive_message', {
           _id: newMessage._id,
           familyCircleId: newMessage.familyCircleId,
+          senderId: newMessage.sender, // Yeh frontend use karega alignment ke liye
           sender: newMessage.sender,
           senderName: newMessage.senderName,
           text: newMessage.text,
           createdAt: newMessage.createdAt,
+          clientMsgId: clientMsgId || null // Yeh fix karega double msg
         });
       } catch (error) {
         return emitSocketError(socket, 'SERVER_ERROR', error.message);
@@ -138,12 +136,13 @@ export const initializeSocket = (io) => {
      */
     socket.on('typing_start', (payload) => {
       try {
-        const { familyCircleId, senderId, senderName } = payload || {};
+        const { familyCircleId, senderId, senderName, name } = payload || {};
         if (!familyCircleId || !senderId) return;
 
         socket.to(String(familyCircleId)).emit('member_typing', {
           senderId: String(senderId),
-          senderName: senderName || socket.data.name || 'Unknown User',
+          senderName: senderName || name || socket.data.name || 'Unknown User',
+          name: senderName || name || socket.data.name || 'Unknown User'
         });
       } catch (error) {}
     });
@@ -153,11 +152,14 @@ export const initializeSocket = (io) => {
      */
     socket.on('typing_stop', (payload) => {
       try {
-        const { familyCircleId, senderId } = payload || {};
+        // 🔥 TYPING STUCK FIX: Ab senderName bhi bhej rahe hain taaki frontend clear kar sake!
+        const { familyCircleId, senderId, senderName, name } = payload || {};
         if (!familyCircleId || !senderId) return;
 
         socket.to(String(familyCircleId)).emit('member_stop_typing', {
           senderId: String(senderId),
+          senderName: senderName || name || socket.data.name || 'Unknown User',
+          name: senderName || name || socket.data.name || 'Unknown User'
         });
       } catch (error) {}
     });

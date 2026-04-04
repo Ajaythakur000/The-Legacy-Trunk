@@ -1,55 +1,64 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+
+// Layout & Shared
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
-import ProfilePage from './components/profile/ProfilePage'; 
-import DashboardPage from './components/dashboard/DashboardPage';
-import FamilyRadarPage from './components/radar/FamilyRadarPage';
 
+// Auth Pages
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 
-import VaultRoomPage from './pages/VaultRoomPage';
+// Core Pages
+import HomePage from './pages/HomePage';
+import DashboardPage from './components/dashboard/DashboardPage';
+import ProfilePage from './components/profile/ProfilePage';
 
+// Feature Pages
+import VaultRoomPage from './components/chat/VaultRoomPage';
+import FamilyRadarPage from './components/radar/FamilyRadarPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+
+// Stories Pages
 import VaultStoriesPage from './pages/VaultStoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './pages/MyStoriesPage';
-import ExploreStoriesPage from './pages/ExploreStoriesPage';
 
-import HomePage from './pages/HomePage';
 
 function App() {
   return (
     <>
       <Navbar />
       
-      {/* ✅ TOASTER KO ROUTES SE BAHAR RAKHNA HAI! */}
+      {/* Notifications setup */}
       <Toaster position="top-center" reverseOrder={false} />
       
       <Routes>
+        {/* 1. INITIAL REDIRECT */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Public */}
+        {/* 2. PUBLIC ROUTES */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
-        {/* Private Routes */}
+        {/* 3. PROTECTED PRIVATE ROUTES */}
+        <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/vault" element={<ProtectedRoute><VaultRoomPage /></ProtectedRoute>} />
-        <Route path="/vault-stories" element={<ProtectedRoute><VaultStoriesPage /></ProtectedRoute>} />
-        <Route path="/radar" element={<ProtectedRoute><FamilyRadarPage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         
-        {/* 🔥 Naye Routes (Inko bhi Protected banaya hai taaki login ke bina koi na ghuse) */}
-        <Route path="/explore" element={<ProtectedRoute><ExploreStoriesPage /></ProtectedRoute>} />
-        <Route path="/my-stories" element={<ProtectedRoute><MyStoriesPage /></ProtectedRoute>} />
+        {/* Features */}
+        <Route path="/vault" element={<ProtectedRoute><VaultRoomPage /></ProtectedRoute>} />
+        <Route path="/radar" element={<ProtectedRoute><FamilyRadarPage /></ProtectedRoute>} />
+        <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+        
+        {/* Stories Engine */}
+        <Route path="/vault-stories" element={<ProtectedRoute><VaultStoriesPage /></ProtectedRoute>} />
         <Route path="/vault-stories/:storyId" element={<ProtectedRoute><StoryDetailPage /></ProtectedRoute>} />
+        <Route path="/my-stories" element={<ProtectedRoute><MyStoriesPage /></ProtectedRoute>} />
+      
 
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/home" element={<HomePage />} />
-
-        {/* ✅ Catch-All Route: Yeh hamesha SABSE AAKHRI mein aana chahiye */}
+        {/* 4. CATCH-ALL REDIRECT (Security) */}
         <Route path="*" element={<Navigate to="/login" replace />} />
-
       </Routes>
     </>
   );
