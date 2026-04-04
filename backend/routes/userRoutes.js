@@ -1,20 +1,22 @@
 import { Router } from 'express';
-const router = Router();
-
-// 🔥 Yahan updateUserProfile ko import list mein add kiya
 import { registerUser, loginUser, getUserProfile, updateUserProfile } from '../controllers/userController.js';
-
-// Middleware se gatekeeper function ko import karna
 import { protect } from '../middleware/authMiddleware.js';
+
+// 🔥 NAYA: Apna multer/cloudinary middleware import kar. 
+// (Tere folder structure ke hisaab se path adjust kar lena agar naam alag ho)
+import upload from '../middleware/uploadMiddleware.js'; 
+
+const router = Router();
 
 // Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser); 
 
-// Private Routes (Inhe sirf logged-in user hi access kar sakta hai)
+// Private Routes
 router.get('/profile', protect, getUserProfile);
 
-// 🔥 NAYA ROUTE: Profile update karne ke liye (DP, Bio, etc.)
-router.put('/profile', protect, updateUserProfile);
+// 🔥 THE FIX: 'upload.single("avatar")' gatekeeper yahan lagana hai!
+// Ye request aane par image pakdega, Cloudinary pe dalega, aur req.file bana dega.
+router.put('/profile', protect, upload.single('avatar'), updateUserProfile);
 
 export default router;

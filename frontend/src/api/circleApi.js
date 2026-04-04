@@ -41,3 +41,14 @@ export const removeMemberFromCircleApi = async (circleId, memberId) => {
   const response = await api.delete(`/circles/${circleId}/members/${memberId}`);
   return response.data;
 };
+
+// ==========================================
+// 🏆 THE LEADERBOARD API
+// ==========================================
+/**
+ * Fetch Top 10 Families by Bond Points
+ */
+export const getLeaderboardApi = async () => {
+  const response = await api.get('/circles/leaderboard');
+  return response.data;
+};

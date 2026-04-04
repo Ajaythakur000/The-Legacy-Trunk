@@ -40,8 +40,6 @@ const createStory = async (req, res) => {
       else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
     }
 
-
-    
     // Create Story
     const story = new Story({
       title: String(title).trim(),
@@ -60,18 +58,19 @@ const createStory = async (req, res) => {
     // ==========================================
     // 🔥 BOND POINTS ENGINE: Post Creation (+10)
     // ==========================================
-    // NOTE: Agar tera User model ka naam kuch aur hai (e.g., FamilyMember), toh usko yahan replace kar lena.
-    await FamilyMember.findByIdAndUpdate(req.user._id, {
-      $inc: { bondPoints: 10 }
-    });
+    // 🔥 CHANGED: Ab points Family Circle ko milenge, Individual user ko nahi!
+    if (targetCircleId) {
+      await FamilyCircle.findByIdAndUpdate(targetCircleId, {
+        $inc: { familyBondPoints: 10 }
+      });
+      console.log(`💎 Bond Points Engine: +10 points to Family Circle ${targetCircleId}`);
+    }
     // ==========================================
 
     // Populate user and circle info for frontend
     const populated = await Story.findById(createdStory._id)
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName familyCode');
-
-    // ... tera baaki ka socket aur response code ...
 
     // 📡 Socket Emit
     const io = req.app.get('io');
@@ -105,7 +104,7 @@ const getCircleFeed = async (req, res) => {
     })
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName')
-      .populate('comments.user', 'name') // 🔥 BAS YEH 1 LINE MISSING THI! Isse ab comment karne wale ka naam aayega.
+      .populate('comments.user', 'name')
       .sort({ createdAt: -1 });
 
     return res.status(200).json(stories);
@@ -165,14 +164,11 @@ const getStoryById = async (req, res) => {
     const story = await Story.findById(req.params.id)
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName')
-      .populate('comments.user', 'name'); // Yahan bhi comment karne wale ka naam aayega
+      .populate('comments.user', 'name'); 
 
     if (!story) {
       return res.status(404).json({ message: 'Story not found' });
     }
-
-    // 🔥 BOUNCER FIXED: Purana strict activeCircleId check yahan se hamesha ke liye uda diya gaya hai!
-    // Ab user aaram se detail page dekh sakta hai.
 
     return res.status(200).json(story);
   } catch (error) {
@@ -185,13 +181,11 @@ const updateStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    // Assuming isExpiredStory is defined somewhere above in your file
     if (story.expiresAt && new Date() > story.expiresAt) {
       return res.status(400).json({ message: 'Cannot edit expired story' });
     }
 
     const isAuthor = story.user.toString() === req.user._id.toString();
-    // 🔥 BOUNCER FIXED: Removed the strict activeCircleId check. Admin ya Author dono edit kar sakte hain.
     const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
@@ -222,7 +216,6 @@ const deleteStory = async (req, res) => {
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
     const isAuthor = story.user.toString() === req.user._id.toString();
-    // 🔥 BOUNCER FIXED
     const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
@@ -252,7 +245,6 @@ const toggleLikeStory = async (req, res) => {
     // ==========================================
     // 🔥 THE MASTERSTROKE: Global vs Internal Like
     // ==========================================
-    // Check agar liker aur story creator alag-alag family se hain
     const isDifferentFamily = 
       story.originCircleId && 
       req.user.activeCircleId && 
@@ -275,17 +267,15 @@ const toggleLikeStory = async (req, res) => {
     // 💎 BOND POINTS ENGINE: Award/Deduct Points
     // ==========================================
     // Anti-Cheat: Khud ki post like karne par points nahi milenge
-    if (userId !== storyOwnerId) {
-      // Agar unlike kiya hai toh points kaat lo, warna de do
+    if (userId !== storyOwnerId && story.originCircleId) {
       const pointModifier = alreadyLiked ? -pointsToAward : pointsToAward;
       
-      // NOTE: Agar tera User model kisi aur naam se import hua hai (jaise FamilyMember), 
-      // toh niche 'User' ki jagah wo naam likh dena.
-      await FamilyMember.findByIdAndUpdate(storyOwnerId, {
-        $inc: { bondPoints: pointModifier }
+      // 🔥 CHANGED: Points ab 'originCircleId' (Family) ko jayenge
+      await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
+        $inc: { familyBondPoints: pointModifier }
       });
       
-      console.log(`💎 Bond Points Engine: ${pointModifier} points to user ${storyOwnerId}`);
+      console.log(`💎 Bond Points Engine: ${pointModifier} points to Family Circle ${story.originCircleId}`);
     }
 
     return res.status(200).json({
@@ -324,11 +314,13 @@ const addCommentToStory = async (req, res) => {
     // 💎 BOND POINTS ENGINE: Comment Reward (+5)
     // ==========================================
     // Anti-Cheat: Khud ki post par comment karne se points nahi badhenge
-    if (story.user.toString() !== req.user._id.toString()) {
-      await FamilyMember.findByIdAndUpdate(story.user, {
-        $inc: { bondPoints: 5 }
+    if (story.user.toString() !== req.user._id.toString() && story.originCircleId) {
+      
+      // 🔥 CHANGED: Points ab 'originCircleId' (Family) ko jayenge
+      await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
+        $inc: { familyBondPoints: 5 }
       });
-      console.log(`💎 Bond Points Engine: +5 points to user ${story.user} for a new comment!`);
+      console.log(`💎 Bond Points Engine: +5 points to Family Circle ${story.originCircleId} for a new comment!`);
     }
 
     const populatedStory = await Story.findById(story._id)
@@ -344,10 +336,10 @@ const addCommentToStory = async (req, res) => {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
-// 🔥 Naya function: Sirf logged-in user ki stories laane ke liye
+
 const getMyStories = async (req, res) => {
   try {
-    const stories = await Story.find({ user: req.user._id }) // Sirf is user ki stories
+    const stories = await Story.find({ user: req.user._id })
       .populate('user', 'name')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name')
@@ -358,6 +350,7 @@ const getMyStories = async (req, res) => {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
+
 export {
   createStory,
   getMyFamilyStories,

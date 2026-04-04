@@ -10,7 +10,6 @@ const generateFamilyCode = () => {
 
 const createUniqueFamilyCode = async () => {
   let code = generateFamilyCode();
-  // eslint-disable-next-line no-await-in-loop
   while (await FamilyCircle.findOne({ familyCode: code })) {
     code = generateFamilyCode();
   }
@@ -63,8 +62,8 @@ const getMyCircles = async (req, res) => {
 const getCircleById = async (req, res) => {
   try {
     const circle = await FamilyCircle.findById(req.params.id)
-      .populate('admin', 'name email role relationToAdmin')
-      .populate('members', 'name email role relationToAdmin activeCircleId familyCode');
+      .populate('admin', 'name email role relationToAdmin avatar')
+      .populate('members', 'name email role relationToAdmin activeCircleId familyCode avatar');
 
     if (!circle) return res.status(404).json({ message: 'Circle not found' });
 
@@ -151,10 +150,29 @@ const removeMemberFromCircle = async (req, res) => {
   }
 };
 
+// ==========================================
+// 🏆 THE LEADERBOARD ENGINE
+// ==========================================
+const getLeaderboard = async (req, res) => {
+  try {
+    // Top 10 families globally by familyBondPoints
+    const topFamilies = await FamilyCircle.find({})
+      .sort({ familyBondPoints: -1 }) // -1 means highest to lowest
+      .limit(10)
+      .populate('admin', 'name avatar') // Admin ka data chahiye taaki UI pe photo dikha sakein
+      .select('circleName familyCode familyBondPoints admin members');
+
+    return res.status(200).json(topFamilies);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to fetch leaderboard' });
+  }
+};
+
 export default {
   createCircle,
   addMemberToCircle,
   getMyCircles,
   getCircleById,
   removeMemberFromCircle,
+  getLeaderboard, // 🔥 Export kiya yahan
 };

@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { loginApi, signupApi } from '../api/authApi';
+import api from '../api/axios'; // 🔥 Ye import chahiye taaki hum directly profile fetch kar sakein
 import { connectSocket, disconnectSocket } from '../services/socket';
 
-// 🛑 Vite Fast Refresh Rule: Context object ko yahan se export NAHI karna hai
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -15,10 +15,28 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(false);
 
-  // token exists => auto socket connect (refresh case)
+  // token exists => auto socket connect & Fetch Fresh Profile Data!
   useEffect(() => {
-    if (token) connectSocket(token);
+    if (token) {
+      connectSocket(token);
+      fetchFreshProfile(); // 🔥 Jaise hi token mile, fresh data manga lo (Points sync karne ke liye)
+    }
   }, [token]);
+
+  // ==========================================
+  // 🔥 FETCH FRESH PROFILE DATA (SYNC FUNCTION)
+  // ==========================================
+  const fetchFreshProfile = async () => {
+    try {
+      const response = await api.get('/users/profile');
+      if (response.data) {
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      }
+    } catch (error) {
+      console.error("Failed to fetch fresh profile data:", error);
+    }
+  };
 
   const login = async (email, password) => {
     setLoading(true);
@@ -40,8 +58,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, data };
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error.message || 'Login failed';
+      const message = error?.response?.data?.message || error.message || 'Login failed';
       return { success: false, message };
     } finally {
       setLoading(false);
@@ -69,8 +86,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, data };
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error.message || 'Signup failed';
+      const message = error?.response?.data?.message || error.message || 'Signup failed';
       return { success: false, message };
     } finally {
       setLoading(false);
@@ -85,15 +101,27 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  // Switch Active Circle
   // ==========================================
-  // 🔥 Switch Active Circle
+  // 🔥 Switch Active Circle (FIXED)
   // ==========================================
-  const switchActiveCircle = (circleId) => {
+  const switchActiveCircle = async (circleId) => {
     if (!user) return;
     
+    // 1. Turant UI update kar (Optimistic update taaki fast lage)
     const updatedUser = { ...user, activeCircleId: circleId };
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    try {
+      // 2. Backend ko batao ki naya circle save kar le
+      await api.put('/users/profile', { activeCircleId: circleId });
+      
+      // 3. Ab fresh points aur data mangwa lo
+      fetchFreshProfile(); 
+    } catch (error) {
+      console.error("Failed to save switched circle to backend:", error);
+    }
   };
 
   const isAuthenticated = !!token;
@@ -108,12 +136,12 @@ export const AuthProvider = ({ children }) => {
     logout,
     setUser,
     switchActiveCircle,
+    fetchFreshProfile, // 🔥 Is function ko baahar export kar diya taaki doosre components bhi ise bula sakein
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// ✅ Custom hook ko hi export karna hai (Vite loves this)
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used inside AuthProvider');

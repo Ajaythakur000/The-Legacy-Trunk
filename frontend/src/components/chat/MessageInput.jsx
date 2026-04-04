@@ -1,44 +1,74 @@
 import { useState } from 'react';
 
-function MessageInput({ onSend, onTyping, disabled = false }) {
+function MessageInput({ onSend, onTyping, disabled }) {
   const [text, setText] = useState('');
-
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setText(value);
-
-    // Phase 5 typing indicator ke liye hook
-    if (onTyping) onTyping(value);
-  };
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!text.trim()) return;
 
-    const trimmed = text.trim();
-    if (!trimmed) return;
-
-    onSend(trimmed);
+    onSend(text.trim());
     setText('');
-    if (onTyping) onTyping(''); // typing stop trigger helper
+    onTyping(''); // stop typing indicator immediately
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+    <form onSubmit={handleSubmit} style={{
+      display: 'flex',
+      gap: '12px',
+      marginTop: '16px',
+      background: '#ffffff',
+      padding: '8px 12px',
+      borderRadius: '20px',
+      border: isFocused ? '2px solid #3b82f6' : '2px solid #e2e8f0',
+      boxShadow: isFocused ? '0 8px 25px rgba(59, 130, 246, 0.15)' : '0 4px 15px rgba(0,0,0,0.04)',
+      transition: 'all 0.3s ease',
+      alignItems: 'center'
+    }}>
       <input
         type="text"
-        placeholder="Type a message..."
         value={text}
-        onChange={handleChange}
+        placeholder={disabled ? "Connecting to Vault..." : "Share a thought..."}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        onChange={(e) => {
+          const val = e.target.value;
+          setText(val);
+
+          if (val.trim()) {
+            onTyping(val);   // trigger typing
+          } else {
+            onTyping('');    // clear typing
+          }
+        }}
         disabled={disabled}
+        autoComplete="off"
         style={{
           flex: 1,
-          border: '1px solid #ccc',
-          borderRadius: 10,
-          padding: '10px 12px',
+          border: 'none',
+          padding: '12px 8px',
+          outline: 'none',
+          background: 'transparent',
+          fontSize: '16px',
+          color: '#1e293b'
         }}
       />
-      <button type="submit" disabled={disabled}>
-        Send
+
+      <button type="submit" disabled={disabled || !text.trim()} style={{
+        padding: '12px 24px',
+        background: (disabled || !text.trim()) ? '#cbd5e1' : 'linear-gradient(135deg, #111827 0%, #334155 100%)',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '14px',
+        fontWeight: '800',
+        fontSize: '15px',
+        cursor: (disabled || !text.trim()) ? 'not-allowed' : 'pointer',
+        transition: 'all 0.2s ease',
+        transform: (disabled || !text.trim()) ? 'scale(1)' : 'scale(1.02)',
+        boxShadow: (disabled || !text.trim()) ? 'none' : '0 4px 12px rgba(17, 24, 39, 0.3)'
+      }}>
+        Send 🚀
       </button>
     </form>
   );
