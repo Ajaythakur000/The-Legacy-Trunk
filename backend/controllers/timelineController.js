@@ -1,48 +1,26 @@
-import Timeline from '../models/timelineModel.js';
+import Story from '../models/storyModel.js';
 
-const canAccessTimelineEvent = (event, user) => {
-  if (event.isGlobalPublic) return true;
-  if (!event.originCircleId || !user.activeCircleId) return false;
-  return event.originCircleId.toString() === user.activeCircleId.toString();
-};
-
-const createTimelineEvent = async (req, res) => {
+// @desc    Get all milestones (Memory Lane) for a specific circle
+// @route   GET /api/timeline/:circleId
+const getTimelineMilestones = async (req, res) => {
   try {
-    const { title, description, year, eventDate, tags, isGlobalPublic } = req.body;
+    const { circleId } = req.params;
 
-    if (!title || year === undefined || year === null) {
-      return res.status(400).json({ message: 'Title and year are required' });
-    }
+    // 🔥 Sirf wo stories laao jo isMilestone: true hain aur us circle ki hain
+    const milestones = await Story.find({
+      originCircleId: circleId,
+      isMilestone: true
+    })
+    .populate('user', 'name avatar relationToAdmin') // User ki detail taaki photo dikh sake
+    .sort({ milestoneDate: 1 }); // 1 matlab Oldest First (History ki tarah)
 
-    let mediaUrl = '';
-    let mediaType = 'text';
-
-    if (req.file) {
-      mediaUrl = req.file.path;
-      if (req.file.mimetype?.startsWith('image')) mediaType = 'photo';
-      else if (req.file.mimetype?.startsWith('video')) mediaType = 'video';
-      else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
-    }
-
-    const event = await Timeline.create({
-      originCircleId: req.user.activeCircleId,
-      user: req.user._id,
-      title: String(title).trim(),
-      description: description ? String(description).trim() : '',
-      year: Number(year),
-      eventDate: eventDate || null,
-      tags: tags ? String(tags).split(',').map((t) => t.trim()).filter(Boolean) : [],
-      isGlobalPublic: isGlobalPublic === 'true' || isGlobalPublic === true,
-      mediaUrl,
-      mediaType,
-    });
-
-    return res.status(201).json(event);
+    return res.status(200).json(milestones);
   } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
 
+<<<<<<< HEAD
 const getMyFamilyTimeline = async (req, res) => {
   try {
     const events = await Timeline.find({ originCircleId: req.user.activeCircleId })
@@ -161,3 +139,6 @@ export {
   deleteTimelineEvent,
 };
 >>>>>>> cf9119e (4.feat(timeline): refactor to family-vault event model with chronological feeds and CRUD)
+=======
+export { getTimelineMilestones };
+>>>>>>> fc16c9d (feat: Add milestone flag, toggle in composer, and timeline API sorted by date)

@@ -23,6 +23,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import VaultStoriesPage from './pages/VaultStoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './pages/MyStoriesPage';
+import FamilyTimelinePage from './pages/FamilyTimelinePage';
 
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
         <Route path="/vault" element={<ProtectedRoute><VaultRoomPage /></ProtectedRoute>} />
         <Route path="/radar" element={<ProtectedRoute><FamilyRadarPage /></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+        <Route path="/memory-lane" element={<ProtectedRoute><FamilyTimelinePage /></ProtectedRoute>} />
         
         {/* Stories Engine */}
         <Route path="/vault-stories" element={<ProtectedRoute><VaultStoriesPage /></ProtectedRoute>} />

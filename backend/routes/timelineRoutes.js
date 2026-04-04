@@ -8,6 +8,7 @@ const { protect } = require('../middleware/authMiddleware.js'); // Hamara gateke
 =======
 import { Router } from 'express';
 const router = Router();
+<<<<<<< HEAD
 >>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
 
 import {
@@ -24,9 +25,12 @@ import {
 } from '../controllers/timelineController.js';
 >>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
 
+=======
+import { getTimelineMilestones } from '../controllers/timelineController.js';
+>>>>>>> fc16c9d (feat: Add milestone flag, toggle in composer, and timeline API sorted by date)
 import { protect } from '../middleware/authMiddleware.js';
-import upload from '../middleware/uploadMiddleware.js';
 
+<<<<<<< HEAD
 // Create new timeline event
 router.route('/').post(protect, upload.single('media'), createTimelineEvent);
 
@@ -45,5 +49,10 @@ router
   .put(protect, updateTimelineEvent)
   .delete(protect, deleteTimelineEvent);
 >>>>>>> cf9119e (4.feat(timeline): refactor to family-vault event model with chronological feeds and CRUD)
+=======
+// GET /api/timeline/:circleId
+// Ye route strictly timeline date ke hisaab se sorted posts dega
+router.get('/:circleId', protect, getTimelineMilestones);
+>>>>>>> fc16c9d (feat: Add milestone flag, toggle in composer, and timeline API sorted by date)
 
 export default router;

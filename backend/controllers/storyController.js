@@ -16,9 +16,9 @@ const canAccessStory = (story, user) => {
 
 const createStory = async (req, res) => {
   try {
-    const { title, content, tags, isGlobalPublic, circleId } = req.body;
+    // 🔥 Naya: isMilestone aur milestoneDate ko req.body se nikala
+    const { title, content, tags, isGlobalPublic, circleId, isMilestone, milestoneDate } = req.body;
     
-    // Explicitly target the selected circle
     const targetCircleId = circleId || req.user?.activeCircleId;
 
     if (!targetCircleId) {
@@ -32,7 +32,6 @@ const createStory = async (req, res) => {
     let mediaUrl = '';
     let mediaType = 'text';
 
-    // Process File if exists
     if (req.file) {
       mediaUrl = req.file.path || req.file.secure_url || '';
       if (req.file.mimetype?.startsWith('image')) mediaType = 'photo';
@@ -40,7 +39,7 @@ const createStory = async (req, res) => {
       else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
     }
 
-    // Create Story
+    // Story Create karo nayi details ke sath
     const story = new Story({
       title: String(title).trim(),
       content: String(content).trim(),
@@ -50,35 +49,30 @@ const createStory = async (req, res) => {
       isGlobalPublic: isGlobalPublic === 'true' || isGlobalPublic === true,
       mediaUrl,
       mediaType,
+      // 🔥 Naya Logic
+      isMilestone: isMilestone === 'true' || isMilestone === true, 
+      milestoneDate: milestoneDate ? new Date(milestoneDate) : new Date(),
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
     const createdStory = await story.save();
 
-    // ==========================================
-    // 🔥 BOND POINTS ENGINE: Post Creation (+10)
-    // ==========================================
-    // 🔥 CHANGED: Ab points Family Circle ko milenge, Individual user ko nahi!
+    // Bond Points Engine (+10)
     if (targetCircleId) {
       await FamilyCircle.findByIdAndUpdate(targetCircleId, {
         $inc: { familyBondPoints: 10 }
       });
-      console.log(`💎 Bond Points Engine: +10 points to Family Circle ${targetCircleId}`);
     }
-    // ==========================================
 
-    // Populate user and circle info for frontend
     const populated = await Story.findById(createdStory._id)
-      .populate('user', 'name email relationToAdmin')
+      .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName familyCode');
 
-    // 📡 Socket Emit
     const io = req.app.get('io');
     if (io && targetCircleId) {
       io.to(String(targetCircleId)).emit('new_story_added', populated || createdStory);
     }
 
-    // Success response
     return res.status(201).json(populated);
     
   } catch (error) {
