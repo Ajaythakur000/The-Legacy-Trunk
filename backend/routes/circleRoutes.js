@@ -10,7 +10,8 @@ const {
   getMyCircles,
   getCircleById,
   removeMemberFromCircle,
-  getLeaderboard, // 🔥 Yahan leaderboard function import kiya
+  getLeaderboard,
+  getTopContributor, // 🔥 Naya function import kar liya
 } = circleController;
 
 // GET /api/circles
@@ -20,6 +21,10 @@ router.route('/').post(protect, createCircle).get(protect, getMyCircles);
 // 🔥 IMPORTANT: '/leaderboard' ko '/:id' se UPAR rakhna zaroori hai!
 // GET /api/circles/leaderboard
 router.route('/leaderboard').get(protect, getLeaderboard);
+
+// 🔥 NEW: Top Contributor Route
+// GET /api/circles/:id/top-contributor
+router.route('/:id/top-contributor').get(protect, getTopContributor);
 
 // GET /api/circles/:id
 router.route('/:id').get(protect, getCircleById);

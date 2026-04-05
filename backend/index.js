@@ -26,6 +26,8 @@ import messageRoutes from './routes/messageRoutes.js';
 
 import aiRoutes from './routes/aiRoutes.js';
 
+import notificationRoutes from './routes/notificationRoutes.js';
+
 dotenv.config();
 
 const app = express();
@@ -49,6 +51,8 @@ app.use('/api/export', exportRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/ai', aiRoutes);
+
+app.use('/api/notifications', notificationRoutes);
 
 
 app.get('/', (req, res) => {

@@ -1,8 +1,7 @@
 import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
-
-// 🔥 KACHRA GONE: Removed `isExpiredStory` and `canAccessStory` completely.
+import Notification from '../models/notificationModel.js'; // 🔥 IMPORTED NOTIFICATION MODEL
 
 const createStory = async (req, res) => {
   try {
@@ -18,7 +17,6 @@ const createStory = async (req, res) => {
       return res.status(400).json({ message: 'Title and content are required' });
     }
 
-    // 🔥 MULTI-FILE LOGIC
     let mediaUrls = [];
     let mediaType = 'text';
 
@@ -51,7 +49,6 @@ const createStory = async (req, res) => {
 
     const createdStory = await story.save();
 
-    // Bond Points Engine (+10)
     if (targetCircleId) {
       await FamilyCircle.findByIdAndUpdate(targetCircleId, {
         $inc: { familyBondPoints: 10 }
@@ -83,10 +80,7 @@ const getCircleFeed = async (req, res) => {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    // 🔥 FIX: No expiresAt condition anymore!
-    const stories = await Story.find({
-      originCircleId: circleId
-    })
+    const stories = await Story.find({ originCircleId: circleId })
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name')
@@ -104,7 +98,6 @@ const getMyFamilyStories = async (req, res) => {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    // 🔥 FIX: No expiresAt condition anymore!
     const stories = await Story.find({
       $or: [
         { originCircleId: req.user.activeCircleId },
@@ -122,10 +115,7 @@ const getMyFamilyStories = async (req, res) => {
 
 const getGlobalStories = async (req, res) => {
   try {
-    // 🔥 FIX: No expiresAt condition anymore! Global feed will work perfectly.
-    const stories = await Story.find({
-      isGlobalPublic: true
-    })
+    const stories = await Story.find({ isGlobalPublic: true })
       .populate('user', 'name')
       .populate('originCircleId', 'circleName')
       .sort({ createdAt: -1 });
@@ -143,9 +133,7 @@ const getStoryById = async (req, res) => {
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name'); 
 
-    if (!story) {
-      return res.status(404).json({ message: 'Story not found' });
-    }
+    if (!story) return res.status(404).json({ message: 'Story not found' });
 
     return res.status(200).json(story);
   } catch (error) {
@@ -223,18 +211,32 @@ const toggleLikeStory = async (req, res) => {
       story.likes = story.likes.filter((id) => id.toString() !== userId);
     } else {
       story.likes.push(req.user._id);
+      
+      // 🔥 NEW: NOTIFICATION ENGINE (Send Notification if someone else likes)
+      if (userId !== storyOwnerId) {
+        const io = req.app.get('io');
+        const newNotif = await Notification.create({
+          recipient: storyOwnerId,
+          sender: req.user._id,
+          type: 'like',
+          storyId: story._id,
+          message: `${req.user.name} liked your memory: "${story.title}"`
+        });
+        
+        // Emit real-time specific to the story owner
+        if (io) {
+          io.to(storyOwnerId).emit('new_notification', newNotif);
+        }
+      }
     }
 
     await story.save();
 
     if (userId !== storyOwnerId && story.originCircleId) {
       const pointModifier = alreadyLiked ? -pointsToAward : pointsToAward;
-      
       await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
         $inc: { familyBondPoints: pointModifier }
       });
-      
-      console.log(`💎 Bond Points Engine: ${pointModifier} points to Family Circle ${story.originCircleId}`);
     }
 
     return res.status(200).json({
@@ -265,11 +267,30 @@ const addCommentToStory = async (req, res) => {
 
     await story.save();
 
-    if (story.user.toString() !== req.user._id.toString() && story.originCircleId) {
+    const userId = req.user._id.toString();
+    const storyOwnerId = story.user.toString();
+
+    // 🔥 NEW: NOTIFICATION ENGINE (Send Notification if someone else comments)
+    if (userId !== storyOwnerId) {
+      const io = req.app.get('io');
+      const newNotif = await Notification.create({
+        recipient: storyOwnerId,
+        sender: req.user._id,
+        type: 'comment',
+        storyId: story._id,
+        message: `${req.user.name} commented: "${text.substring(0, 30)}..."`
+      });
+      
+      // Emit real-time specific to the story owner
+      if (io) {
+        io.to(storyOwnerId).emit('new_notification', newNotif);
+      }
+    }
+
+    if (userId !== storyOwnerId && story.originCircleId) {
       await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
         $inc: { familyBondPoints: 5 }
       });
-      console.log(`💎 Bond Points Engine: +5 points to Family Circle ${story.originCircleId} for a new comment!`);
     }
 
     const populatedStory = await Story.findById(story._id)
