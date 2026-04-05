@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
+import Story from '../models/storyModel.js'; // 🔥 Import Story for calculation
 
 const generateFamilyCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -150,21 +152,50 @@ const removeMemberFromCircle = async (req, res) => {
   }
 };
 
-// ==========================================
-// 🏆 THE LEADERBOARD ENGINE
-// ==========================================
 const getLeaderboard = async (req, res) => {
   try {
-    // Top 10 families globally by familyBondPoints
     const topFamilies = await FamilyCircle.find({})
-      .sort({ familyBondPoints: -1 }) // -1 means highest to lowest
+      .sort({ familyBondPoints: -1 }) 
       .limit(10)
-      .populate('admin', 'name avatar') // Admin ka data chahiye taaki UI pe photo dikha sakein
+      .populate('admin', 'name avatar') 
       .select('circleName familyCode familyBondPoints admin members');
 
     return res.status(200).json(topFamilies);
   } catch (error) {
     return res.status(500).json({ message: error.message || 'Failed to fetch leaderboard' });
+  }
+};
+
+// ==========================================
+// 👑 NEW: THE TOP CONTRIBUTOR (CHAMPION) ENGINE
+// ==========================================
+const getTopContributor = async (req, res) => {
+  try {
+    const circleId = req.params.id;
+
+    const circle = await FamilyCircle.findById(circleId);
+    if (!circle) return res.status(404).json({ message: 'Circle not found' });
+
+    // Step 1: Count stories per user in this specific circle
+    const topContributorData = await Story.aggregate([
+      { $match: { originCircleId: new mongoose.Types.ObjectId(circleId) } },
+      { $group: { _id: '$user', storyCount: { $sum: 1 } } },
+      { $sort: { storyCount: -1 } },
+      { $limit: 1 }
+    ]);
+
+    // Step 2: If no stories exist, fallback to the Admin as Champion
+    if (topContributorData.length === 0) {
+      const fallbackUser = await FamilyMember.findById(circle.admin).select('name avatar relationToAdmin');
+      return res.status(200).json(fallbackUser);
+    }
+
+    // Step 3: Fetch the champion's profile data
+    const championUser = await FamilyMember.findById(topContributorData[0]._id).select('name avatar relationToAdmin');
+    
+    return res.status(200).json(championUser);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to fetch top contributor' });
   }
 };
 
@@ -174,5 +205,6 @@ export default {
   getMyCircles,
   getCircleById,
   removeMemberFromCircle,
-  getLeaderboard, // 🔥 Export kiya yahan
+  getLeaderboard,
+  getTopContributor, // 🔥 Don't forget to export!
 };

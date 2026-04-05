@@ -12,6 +12,19 @@ export const initializeSocket = (io) => {
 
     socket.data.lastMessageAt = 0;
 
+    // ==========================================
+    // 🔥 NEW: PERSONAL ROOM FOR NOTIFICATIONS
+    // ==========================================
+    socket.on('setup_user', (userId) => {
+      if (!userId) return;
+      
+      const roomName = String(userId);
+      if (!socket.rooms.has(roomName)) {
+        socket.join(roomName); 
+        console.log(`👤 Socket ${socket.id} joined personal room: ${roomName}`);
+      }
+    });
+
     socket.on('join_story_feed', ({ circleId }) => {
       if (!circleId) return;
       
@@ -75,7 +88,6 @@ export const initializeSocket = (io) => {
      */
     socket.on('send_message', async (payload) => {
       try {
-        // 🔥 DOUBLE MSG FIX: clientMsgId bhi extract karo
         const { familyCircleId, senderId, senderName, text, clientMsgId } = payload || {};
 
         if (!familyCircleId || !senderId || !text) {
@@ -115,16 +127,15 @@ export const initializeSocket = (io) => {
           text: cleanText,
         });
 
-        // 🔥 DOUBLE MSG & ALIGNMENT FIX: clientMsgId aur senderId wapas bhejo!
         io.to(String(familyCircleId)).emit('receive_message', {
           _id: newMessage._id,
           familyCircleId: newMessage.familyCircleId,
-          senderId: newMessage.sender, // Yeh frontend use karega alignment ke liye
+          senderId: newMessage.sender, 
           sender: newMessage.sender,
           senderName: newMessage.senderName,
           text: newMessage.text,
           createdAt: newMessage.createdAt,
-          clientMsgId: clientMsgId || null // Yeh fix karega double msg
+          clientMsgId: clientMsgId || null 
         });
       } catch (error) {
         return emitSocketError(socket, 'SERVER_ERROR', error.message);
@@ -152,7 +163,6 @@ export const initializeSocket = (io) => {
      */
     socket.on('typing_stop', (payload) => {
       try {
-        // 🔥 TYPING STUCK FIX: Ab senderName bhi bhej rahe hain taaki frontend clear kar sake!
         const { familyCircleId, senderId, senderName, name } = payload || {};
         if (!familyCircleId || !senderId) return;
 
