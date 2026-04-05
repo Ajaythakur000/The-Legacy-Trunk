@@ -41,6 +41,20 @@ const storySchema = new Schema(
       type: String,
       default: '',
     },
+    
+    // ==========================================
+    // 🔥 NEW: MULTI-FILE & COLLAGE SUPPORT
+    // ==========================================
+    mediaUrls: {
+      type: [String],
+      default: [],
+    },
+    tone: {
+      type: String,
+      default: '', // Stores 'Nostalgic and Warm', etc.
+    },
+    // ==========================================
+
     mediaType: {
       type: String,
       enum: ['text', 'photo', 'audio', 'video'],
@@ -82,12 +96,6 @@ const storySchema = new Schema(
         ref: 'FamilyCircle',
       },
     ],
-
-    // 🕒 FIXED: 24h expiry support (Made optional so Milestones don't delete!)
-    expiresAt: {
-      type: Date,
-      required: false, // Changed from true to false
-    },
   },
   {
     timestamps: true,
@@ -97,8 +105,7 @@ const storySchema = new Schema(
 // Fast feed query: by circle + latest first
 storySchema.index({ originCircleId: 1, createdAt: -1 });
 
-// TTL index: document auto-delete after expiresAt (Only deletes if expiresAt is present)
-storySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// 🔥 KACHRA GONE: Auto-delete wala index yahan se hata diya gaya hai!
 
 const Story = model('Story', storySchema);
 

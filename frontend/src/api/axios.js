@@ -9,7 +9,7 @@ const api = axios.create({
   baseURL: 'http://localhost:8000/api',
 
   // Agar request 10 sec me complete na ho toh fail kar do
-  timeout: 30000,
+  timeout: 300000,
 });
 
 /**
