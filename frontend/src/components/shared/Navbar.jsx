@@ -10,10 +10,7 @@ function Navbar() {
   
   const [myCircles, setMyCircles] = useState([]);
   const [isHubOpen, setIsHubOpen] = useState(false);
-  const [isStoriesOpen, setIsStoriesOpen] = useState(false);
-  
   const hubRef = useRef(null);
-  const storiesRef = useRef(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -34,7 +31,6 @@ function Navbar() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (hubRef.current && !hubRef.current.contains(event.target)) setIsHubOpen(false);
-      if (storiesRef.current && !storiesRef.current.contains(event.target)) setIsStoriesOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -75,29 +71,17 @@ function Navbar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             
             <div style={navPillStyle}>
+              {/* ✨ Cleaned Up Navigation Links */}
               <Link to="/home" style={getNavLinkStyle('/home')}>🏠 Home</Link>
               <Link to="/dashboard" style={getNavLinkStyle('/dashboard')}>⚙️ Dashboard</Link>
-              <Link to="/radar" style={getNavLinkStyle('/radar')}>📡 Radar</Link>
-              <Link to="/leaderboard" style={getNavLinkStyle('/leaderboard')}>🏆 Leaderboard</Link>
-              
-              {/* 🔥 YAHAN ADD KIYA MEMORY LANE */}
               <Link to="/memory-lane" style={getNavLinkStyle('/memory-lane')}>🛤️ Memory Lane</Link>
+              <Link to="/my-stories" style={getNavLinkStyle('/my-stories')}>👤 My Stories</Link>
               
-              <Link to="/vault" style={getNavLinkStyle('/vault')}>💬 Chat</Link>
-
-              <div ref={storiesRef} style={{ position: 'relative' }}>
-                <button onClick={() => setIsStoriesOpen(!isStoriesOpen)} style={dropdownTriggerStyle(isStoriesOpen)}>
-                  📖 Stories {isStoriesOpen ? '▲' : '▼'}
-                </button>
-                {isStoriesOpen && (
-                  <div style={dropdownBoxStyle}>
-                    <Link to="/vault-stories" onClick={() => setIsStoriesOpen(false)} style={dropdownItemStyle}>📅 Vault Stories</Link>
-                    <Link to="/my-stories" onClick={() => setIsStoriesOpen(false)} style={dropdownItemStyle}>👤 My Stories</Link>
-                  </div>
-                )}
-              </div>
+              {/* 🔮 NEW ORACLE LINK */}
+              <Link to="/oracle" style={getNavLinkStyle('/oracle')}>🔮 Oracle</Link>
             </div>
 
+            {/* 🏰 Legacy Switcher */}
             <div ref={hubRef} style={{ position: 'relative' }}>
               <button onClick={() => setIsHubOpen(!isHubOpen)} style={hubButtonStyle(isHubOpen)}>
                 <span style={{ fontSize: '18px' }}>🏰</span>
@@ -117,11 +101,13 @@ function Navbar() {
               )}
             </div>
 
+            {/* 💎 Bond Badge */}
             <Link to="/profile" style={bondBadgeStyle}>
               <span style={{ fontSize: '18px' }}>💎</span>
               <span>{user?.bondPoints || 0}</span>
             </Link>
 
+            {/* 👤 User Profile & Logout */}
             <div style={userActionsStyle}>
               <Link to="/profile" style={avatarLinkStyle}>
                 <img src={user?.avatar} alt="DP" style={avatarImgStyle} />
@@ -154,10 +140,6 @@ const logoStyle = { textDecoration: 'none', display: 'flex', alignItems: 'center
 const logoIconStyle = { background: '#1e293b', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' };
 const logoTextStyle = { fontSize: '24px', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.8px' };
 const navPillStyle = { display: 'flex', gap: '6px', background: '#f1f5f9', padding: '6px', borderRadius: '18px', border: '1px solid #e2e8f0' };
-
-const dropdownTriggerStyle = (isOpen) => ({
-  background: 'transparent', border: 'none', cursor: 'pointer', padding: '10px 20px', borderRadius: '12px', fontSize: '14px', fontWeight: '700', color: isOpen ? '#2563eb' : '#475569', display: 'flex', alignItems: 'center', gap: '8px'
-});
 
 const dropdownBoxStyle = {
   position: 'absolute', top: '140%', right: 0, minWidth: '240px', background: '#fff', borderRadius: '20px', padding: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.12)', border: '1px solid #f1f5f9', zIndex: 100

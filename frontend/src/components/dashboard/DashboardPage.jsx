@@ -28,10 +28,7 @@ function DashboardPage() {
   const [copied, setCopied] = useState(false);
 
   // 🛡️ ROLE CHECKS
-  // 1. Is the logged-in user an overall 'admin' account?
   const isGlobalAdmin = user?.role === 'admin';
-  
-  // 2. Is the logged-in user the admin of the CURRENTLY selected circle?
   const isCircleAdmin = useMemo(() => {
     if (!selectedCircle || !user?._id) return false;
     return String(selectedCircle?.admin?._id || selectedCircle?.admin) === String(user._id);
@@ -49,7 +46,6 @@ function DashboardPage() {
       const list = Array.isArray(data) ? data : [];
       setCircles(list);
 
-      // Agar selectedCircleId nahi hai, toh pehla circle select kar lo
       if (!selectedCircleId && list.length > 0) {
         setSelectedCircleId(list[0]._id);
       }
@@ -84,7 +80,6 @@ function DashboardPage() {
   useEffect(() => {
     if (selectedCircleId) {
       loadCircleDetails(selectedCircleId);
-      // Optional: Agar tu chahta hai dashboard pe circle change karte hi pura app change ho jaye
       if (selectedCircleId !== user?.activeCircleId) {
         switchActiveCircle(selectedCircleId);
       }
@@ -177,7 +172,7 @@ function DashboardPage() {
         </p>
       </div>
 
-      {/* 🎴 THE 4 GRAND CARDS (The Hub) */}
+      {/* 🎴 THE 3 GRAND CARDS (The Hub) */}
       <div style={{ maxWidth: '1100px', margin: '-30px auto 40px', padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', position: 'relative', zIndex: 10 }}>
         
         <Link to="/vault-stories" style={{ textDecoration: 'none' }}>
@@ -204,12 +199,6 @@ function DashboardPage() {
           </div>
         </Link>
 
-        <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '24px', border: '2px dashed #cbd5e1', height: '100%', position: 'relative', opacity: 0.8 }}>
-          <div style={{ position: 'absolute', top: '-10px', right: '16px', background: '#f59e0b', color: '#fff', padding: '4px 10px', borderRadius: '99px', fontSize: '11px', fontWeight: 'bold' }}>COMING SOON</div>
-          <div style={{ fontSize: '36px', marginBottom: '12px', filter: 'grayscale(100%)' }}>🕰️</div>
-          <h2 style={{ margin: '0 0 6px 0', color: '#4b5563', fontSize: '1.2rem' }}>Memory Lane</h2>
-          <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px', lineHeight: '1.5' }}>A visual timeline of your family history.</p>
-        </div>
       </div>
 
       {/* ⚙️ SETTINGS & MANAGEMENT SECTION */}
@@ -218,7 +207,6 @@ function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #e5e7eb', paddingBottom: '12px', marginBottom: '24px' }}>
           <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#111827' }}>⚙️ Family Management</h2>
           
-          {/* Circle Switcher for Admin (or Members in multiple families) */}
           {circles.length > 1 && (
             <select 
               value={selectedCircleId} 
@@ -234,7 +222,8 @@ function DashboardPage() {
         {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #fca5a5', fontWeight: '500' }}>{error}</div>}
         {success && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #6ee7b7', fontWeight: '500' }}>{success}</div>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '24px', '@media (max-width: 800px)': { gridTemplateColumns: '1fr' } }}>
+        {/* 🔥 YAHAN FIX KIYA HAI GRID WALA ISSUE */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
           
           {/* LEFT: MEMBER LIST */}
           <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', border: '1px solid #e5e7eb' }}>
@@ -261,7 +250,6 @@ function DashboardPage() {
                         </div>
                       </div>
 
-                      {/* Remove Button (Only for Admin, and admin cannot remove themselves here) */}
                       {isCircleAdmin && !isThisMemberAdmin && (
                         <button 
                           onClick={() => handleRemoveMember(m._id, m.name)}
@@ -278,15 +266,13 @@ function DashboardPage() {
             )}
           </div>
 
-          {/* RIGHT: ADMIN CONTROLS (Only visible to Admins) */}
+          {/* RIGHT: ADMIN CONTROLS */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             
-            {/* 1. ADD MEMBER (Visible to Circle Admin) */}
             {isCircleAdmin ? (
               <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', border: '1px solid #e5e7eb' }}>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#111827' }}>✉️ Invite Member</h3>
                 
-                {/* Invite Code (Optional feature for admin) */}
                 {user?.familyCode && (
                   <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px dashed #cbd5e1', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '13px', color: '#6b7280' }}>Code: <b style={{ color: '#111827', fontSize: '16px' }}>{user.familyCode}</b></span>
@@ -311,7 +297,6 @@ function DashboardPage() {
               </div>
             )}
 
-            {/* 2. CREATE NEW CIRCLE (Visible ONLY to Global Admins) */}
             {isGlobalAdmin && (
               <div style={{ background: 'linear-gradient(to right, #f8fafc, #eff6ff)', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', border: '1px solid #bfdbfe' }}>
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#1e3a8a' }}>➕ Create New Family Circle</h3>
