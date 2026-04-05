@@ -15,6 +15,8 @@ import locationRoutes from './routes/locationRoutes.js';
 import { initializeSocket } from './socket/socketHandler.js';
 import messageRoutes from './routes/messageRoutes.js';
 
+import aiRoutes from './routes/aiRoutes.js';
+
 dotenv.config();
 
 const app = express();
@@ -33,6 +35,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/ai', aiRoutes);
 
 
 app.get('/', (req, res) => {

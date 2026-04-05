@@ -25,6 +25,8 @@ import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './pages/MyStoriesPage';
 import FamilyTimelinePage from './pages/FamilyTimelinePage';
 
+import FamilyOraclePage from './pages/FamilyOraclePage';
+
 
 function App() {
   return (
@@ -58,6 +60,7 @@ function App() {
         <Route path="/vault-stories/:storyId" element={<ProtectedRoute><StoryDetailPage /></ProtectedRoute>} />
         <Route path="/my-stories" element={<ProtectedRoute><MyStoriesPage /></ProtectedRoute>} />
       
+        <Route path="/oracle" element={<FamilyOraclePage />} />
 
         {/* 4. CATCH-ALL REDIRECT (Security) */}
         <Route path="*" element={<Navigate to="/login" replace />} />
