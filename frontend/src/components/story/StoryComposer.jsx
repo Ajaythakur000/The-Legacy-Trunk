@@ -162,7 +162,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                 When did this historical event happen? 📅
               </label>
               <input 
-                type="date" 
+                type="datetime-local" 
                 value={milestoneDate} 
                 onChange={(e) => setMilestoneDate(e.target.value)} 
                 disabled={uploading} 
