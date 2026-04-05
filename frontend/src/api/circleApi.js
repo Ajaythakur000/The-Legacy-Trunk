@@ -52,3 +52,44 @@ export const getLeaderboardApi = async () => {
   const response = await api.get('/circles/leaderboard');
   return response.data;
 };
+
+// ==========================================
+// 🌟 DASHBOARD WIDGETS API
+// ==========================================
+
+/**
+ * Fetch Upcoming Events (Birthdays & Milestones)
+ */
+export const getUpcomingEventsApi = async (circleId) => {
+  const response = await api.get(`/circles/${circleId}/upcoming-events`);
+  return response.data;
+};
+
+/**
+ * Fetch Top Contributor (Champion) for a specific circle
+ */
+export const getTopContributorApi = async (circleId) => {
+  const response = await api.get(`/circles/${circleId}/top-contributor`);
+  return response.data;
+};
+
+// ==========================================
+// 🪄 MAGIC INVITE API
+// ==========================================
+
+/**
+ * Generate Magic Invite Link (Admin Only)
+ */
+export const generateInviteLinkApi = async (circleId) => {
+  const response = await api.post(`/circles/${circleId}/invite-link`);
+  return response.data;
+};
+
+/**
+ * Join Family via Magic Invite Token
+ * body: { token }
+ */
+export const joinViaInviteApi = async (token) => {
+  const response = await api.post('/circles/join-invite', { token });
+  return response.data;
+};

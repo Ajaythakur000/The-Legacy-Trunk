@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
-import Story from '../models/storyModel.js'; // 🔥 Import Story for calculation
+import Story from '../models/storyModel.js';
+import Notification from '../models/notificationModel.js'; // 🔥 IMPORT NOTIFICATION MODEL
 
 const generateFamilyCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -65,7 +67,7 @@ const getCircleById = async (req, res) => {
   try {
     const circle = await FamilyCircle.findById(req.params.id)
       .populate('admin', 'name email role relationToAdmin avatar')
-      .populate('members', 'name email role relationToAdmin activeCircleId familyCode avatar');
+      .populate('members', 'name email role relationToAdmin activeCircleId familyCode avatar dateOfBirth');
 
     if (!circle) return res.status(404).json({ message: 'Circle not found' });
 
@@ -78,42 +80,48 @@ const getCircleById = async (req, res) => {
   }
 };
 
-const addMemberToCircle = async (req, res) => {
+// ==========================================
+// 🛡️ MODIFIED: SEND INVITE NOTIFICATION (Not Direct Add)
+// ==========================================
+const sendFamilyInvite = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id: circleId } = req.params;
     const email = req.body?.email?.toLowerCase()?.trim();
 
     if (!email) return res.status(400).json({ message: 'Member email is required' });
 
-    const circle = await FamilyCircle.findById(id);
+    const circle = await FamilyCircle.findById(circleId);
     if (!circle) return res.status(404).json({ message: 'Circle not found' });
 
     if (String(circle.admin) !== String(req.user._id)) {
-      return res.status(401).json({ message: 'Only admin can add members' });
+      return res.status(401).json({ message: 'Only admin can send invites' });
     }
 
-    const member = await FamilyMember.findOne({ email });
-    if (!member) return res.status(404).json({ message: 'User with this email not found' });
+    const targetUser = await FamilyMember.findOne({ email });
+    if (!targetUser) return res.status(404).json({ message: 'User with this email not found' });
 
-    if (circle.members.some((m) => String(m) === String(member._id))) {
-      return res.status(400).json({ message: 'User already in this circle' });
+    if (circle.members.some((m) => String(m) === String(targetUser._id))) {
+      return res.status(400).json({ message: 'User is already in this family' });
     }
 
-    circle.members.push(member._id);
-    await circle.save();
-
-    await FamilyMember.findByIdAndUpdate(member._id, {
-      activeCircleId: circle._id,
-      familyCode: circle.familyCode,
+    // CREATE NOTIFICATION INSTEAD OF DIRECTLY ADDING
+    const newNotif = await Notification.create({
+      recipient: targetUser._id,
+      sender: req.user._id,
+      type: 'invite', // Important type flag
+      circleId: circle._id, // Add this to your schema if not there (we'll use it in notificationController)
+      message: `${req.user.name} invited you to join ${circle.circleName}`
     });
 
-    const updated = await FamilyCircle.findById(circle._id)
-      .populate('admin', 'name email role')
-      .populate('members', 'name email role relationToAdmin');
+    // Fire real-time socket event if they are online
+    const io = req.app.get('io');
+    if (io) {
+      io.to(String(targetUser._id)).emit('new_notification', newNotif);
+    }
 
-    return res.status(200).json(updated);
+    return res.status(200).json({ message: `Invite sent to ${targetUser.name}` });
   } catch (error) {
-    return res.status(500).json({ message: error.message || 'Failed to add member' });
+    return res.status(500).json({ message: error.message || 'Failed to send invite' });
   }
 };
 
@@ -166,9 +174,6 @@ const getLeaderboard = async (req, res) => {
   }
 };
 
-// ==========================================
-// 👑 NEW: THE TOP CONTRIBUTOR (CHAMPION) ENGINE
-// ==========================================
 const getTopContributor = async (req, res) => {
   try {
     const circleId = req.params.id;
@@ -176,7 +181,6 @@ const getTopContributor = async (req, res) => {
     const circle = await FamilyCircle.findById(circleId);
     if (!circle) return res.status(404).json({ message: 'Circle not found' });
 
-    // Step 1: Count stories per user in this specific circle
     const topContributorData = await Story.aggregate([
       { $match: { originCircleId: new mongoose.Types.ObjectId(circleId) } },
       { $group: { _id: '$user', storyCount: { $sum: 1 } } },
@@ -184,13 +188,11 @@ const getTopContributor = async (req, res) => {
       { $limit: 1 }
     ]);
 
-    // Step 2: If no stories exist, fallback to the Admin as Champion
     if (topContributorData.length === 0) {
       const fallbackUser = await FamilyMember.findById(circle.admin).select('name avatar relationToAdmin');
       return res.status(200).json(fallbackUser);
     }
 
-    // Step 3: Fetch the champion's profile data
     const championUser = await FamilyMember.findById(topContributorData[0]._id).select('name avatar relationToAdmin');
     
     return res.status(200).json(championUser);
@@ -199,12 +201,148 @@ const getTopContributor = async (req, res) => {
   }
 };
 
+const getUpcomingEvents = async (req, res) => {
+  try {
+    const circleId = req.params.id;
+    const circle = await FamilyCircle.findById(circleId).populate('members', 'name dateOfBirth');
+    
+    if (!circle) return res.status(404).json({ message: 'Circle not found' });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const getNextOccurrence = (dateString) => {
+      if (!dateString) return null;
+      const originalDate = new Date(dateString);
+      let nextDate = new Date(today.getFullYear(), originalDate.getMonth(), originalDate.getDate());
+      
+      if (nextDate.getTime() < today.getTime()) {
+        nextDate.setFullYear(today.getFullYear() + 1);
+      }
+      return nextDate;
+    };
+
+    let events = [];
+
+    circle.members.forEach(member => {
+      if (member.dateOfBirth) {
+        const nextBday = getNextOccurrence(member.dateOfBirth);
+        if (nextBday) {
+          events.push({
+            type: 'birthday',
+            title: `${member.name}'s Birthday`,
+            date: nextBday,
+            originalDate: member.dateOfBirth
+          });
+        }
+      }
+    });
+
+    const milestoneStories = await Story.find({ 
+      originCircleId: circleId, 
+      isMilestone: true, 
+      milestoneDate: { $exists: true } 
+    }).select('title milestoneDate _id');
+
+    milestoneStories.forEach(story => {
+      const nextMilestone = getNextOccurrence(story.milestoneDate);
+      if (nextMilestone) {
+        events.push({
+          type: 'milestone',
+          title: `${story.title} Anniversary`,
+          date: nextMilestone,
+          storyId: story._id
+        });
+      }
+    });
+
+    events.sort((a, b) => a.date.getTime() - b.date.getTime());
+    const topEvents = events.slice(0, 3);
+
+    return res.status(200).json(topEvents);
+
+  } catch (error) {
+    console.error("Upcoming Events Error:", error);
+    return res.status(500).json({ message: 'Failed to fetch upcoming events' });
+  }
+};
+
+const generateInviteLink = async (req, res) => {
+  try {
+    const circleId = req.params.id;
+    const circle = await FamilyCircle.findById(circleId);
+
+    if (!circle) return res.status(404).json({ message: 'Circle not found' });
+
+    if (String(circle.admin) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'Only Admin can generate invite links' });
+    }
+
+    const inviteToken = jwt.sign(
+      { circleId: circle._id, inviterId: req.user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '48h' }
+    );
+
+    return res.status(200).json({
+      token: inviteToken,
+      message: 'Invite token generated successfully'
+    });
+  } catch (error) {
+    console.error("Generate Invite Error:", error);
+    return res.status(500).json({ message: 'Failed to generate invite link' });
+  }
+};
+
+const joinViaInvite = async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: 'Invite token is missing' });
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: 'Invite link is invalid or has expired.' });
+    }
+
+    const { circleId } = decoded;
+    const circle = await FamilyCircle.findById(circleId);
+
+    if (!circle) return res.status(404).json({ message: 'This Family Vault no longer exists.' });
+
+    if (circle.members.some(m => String(m) === String(req.user._id))) {
+      return res.status(400).json({ message: 'You are already a member of this family.' });
+    }
+
+    circle.members.push(req.user._id);
+    await circle.save();
+
+    await FamilyMember.findByIdAndUpdate(req.user._id, {
+      activeCircleId: circle._id,
+      familyCode: circle.familyCode,
+    });
+
+    return res.status(200).json({
+      message: `Welcome to ${circle.circleName}!`,
+      circleId: circle._id
+    });
+
+  } catch (error) {
+    console.error("Join Invite Error:", error);
+    return res.status(500).json({ message: 'Failed to join via invite link' });
+  }
+};
+
 export default {
   createCircle,
-  addMemberToCircle,
+  sendFamilyInvite, // 🔥 Changed from addMemberToCircle
   getMyCircles,
   getCircleById,
   removeMemberFromCircle,
   getLeaderboard,
-  getTopContributor, // 🔥 Don't forget to export!
+  getTopContributor,
+  getUpcomingEvents,
+  generateInviteLink,
+  joinViaInvite
 };

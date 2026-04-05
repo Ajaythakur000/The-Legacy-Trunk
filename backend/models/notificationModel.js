@@ -14,12 +14,18 @@ const notificationSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['like', 'comment', 'post', 'milestone', 'system'],
+      // 🔥 'invite' yahan add kiya hai
+      enum: ['like', 'comment', 'post', 'milestone', 'system', 'invite'],
       required: true,
     },
     storyId: {
       type: Schema.Types.ObjectId,
-      ref: 'Story', // Click karne par kis story pe jana hai
+      ref: 'Story', 
+    },
+    // 🔥 NEW: circleId field for invite notifications
+    circleId: {
+      type: Schema.Types.ObjectId,
+      ref: 'FamilyCircle',
     },
     message: {
       type: String,
