@@ -1,12 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import Navbar from '../components/shared/Navbar';
+import LegacyBookExporter from '../components/features/LegacyBookExporter'; // (Make sure path is correct)
 
 function FamilyTimelinePage() {
   const { user } = useAuth();
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 🔥 PDF Exporter Reference
+  const exporterRef = useRef();
 
   useEffect(() => {
     const fetchTimeline = async () => {
@@ -39,8 +43,7 @@ function FamilyTimelinePage() {
 
   return (
     <div className="starry-bg" style={{ backgroundColor: '#020617', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', color: '#f8fafc', overflowX: 'hidden' }}>
-     
-
+      
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px' }}>
         
         {/* 🎇 Header */}
@@ -48,11 +51,14 @@ function FamilyTimelinePage() {
           <h1 style={{ fontSize: '3.8rem', fontWeight: '900', margin: '0 0 10px 0', background: 'linear-gradient(135deg, #38bdf8, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 20px rgba(56,189,248,0.3))' }}>
             Memory Lane
           </h1>
-          <p style={{ fontSize: '1.2rem', color: '#94a3b8', fontStyle: 'italic' }}>
+          <p style={{ fontSize: '1.2rem', color: '#94a3b8', fontStyle: 'italic', marginBottom: '20px' }}>
             Hover over the magical nodes to unlock our legacy.
           </p>
         </div>
 
+        {/* 🛠️ THE HIDDEN EXPORTER COMPONENT */}
+        <LegacyBookExporter ref={exporterRef} milestones={milestones} circleName="Our Family" />
+        
         {/* ⏳ Loading / Empty States */}
         {loading ? (
           <div style={{ textAlign: 'center', color: '#38bdf8', padding: '50px', fontSize: '1.2rem', animation: 'pulse 1.5s infinite' }}>
@@ -81,7 +87,7 @@ function FamilyTimelinePage() {
               return (
                 <div key={node._id} className="snake-row" style={{ 
                   position: 'relative', width: '100%', height: `${ROW_HEIGHT}px`,
-                  overflow: 'visible' // 🔥 FIX 1: Ensures shadow isn't cut off by the row container
+                  overflow: 'visible' 
                 }}>
                   
                   {/* 〰️ THE PERMANENT THICK SOLID SVG LINE */}
@@ -90,7 +96,7 @@ function FamilyTimelinePage() {
                       position: 'absolute', top: '50%', left: 0, width: '100%', height: '100%', 
                       zIndex: 0, pointerEvents: 'none',
                       animation: 'fadeInLine 1s ease-in forwards',
-                      overflow: 'visible' // 🔥 FIX 2: Ensures SVG shadow isn't cut off
+                      overflow: 'visible' 
                     }} viewBox="0 0 100 100" preserveAspectRatio="none">
                       <path 
                         d={isEven 
@@ -129,7 +135,7 @@ function FamilyTimelinePage() {
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}></div>
 
-                    {/* 📅 The Date & Time Badge (Always Visible) */}
+                    {/* 📅 The Date & Time Badge */}
                     <div className="date-badge" style={{
                       position: 'absolute', [isEven ? 'left' : 'right']: '35px', 
                       background: 'rgba(15, 23, 42, 0.6)', color: '#e2e8f0', 
@@ -181,12 +187,43 @@ function FamilyTimelinePage() {
         )}
       </div>
 
-      {/* 🔥 FAST TRAVEL BUTTON (Scroll to bottom) */}
+      {/* 📥 FLOATING DOWNLOAD MEMORIES BUTTON (Kept on Right) */}
+      {milestones.length > 0 && (
+        <button 
+          onClick={() => exporterRef.current?.generatePDF()}
+          style={{
+            position: 'fixed', bottom: '40px', right: '40px', zIndex: 100, // Adjusted bottom margin since arrow moved
+            background: 'linear-gradient(135deg, #c084fc, #818cf8)',
+            color: 'white', border: '1px solid rgba(255,255,255,0.2)', 
+            borderRadius: '50px', 
+            padding: '14px 26px', fontSize: '16px', fontWeight: '800', cursor: 'pointer', 
+            boxShadow: '0 10px 25px rgba(192, 132, 252, 0.4)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex', alignItems: 'center', gap: '12px',
+            backdropFilter: 'blur(10px)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-5px) scale(1.05)';
+            e.currentTarget.style.boxShadow = '0 15px 35px rgba(192, 132, 252, 0.6)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, #a855f7, #6366f1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+            e.currentTarget.style.boxShadow = '0 10px 25px rgba(192, 132, 252, 0.4)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, #c084fc, #818cf8)';
+          }}
+        >
+          <span style={{ fontSize: '22px' }}>📥</span>
+          Download Your Memories
+        </button>
+      )}
+
+      {/* 🔥 FAST TRAVEL BUTTON (Moved to Left Side) */}
       {milestones.length > 0 && (
         <button 
           onClick={scrollToBottom}
           style={{
-            position: 'fixed', bottom: '30px', right: '30px', zIndex: 100,
+            position: 'fixed', bottom: '40px', left: '40px', zIndex: 100, // Changed right to left
             background: 'linear-gradient(135deg, #38bdf8, #818cf8)',
             color: 'white', border: 'none', borderRadius: '50%', width: '60px', height: '60px',
             fontSize: '24px', cursor: 'pointer', boxShadow: '0 10px 20px rgba(129, 140, 248, 0.4)',
@@ -216,7 +253,6 @@ function FamilyTimelinePage() {
 
         /* 🔥 PERMANENT NEON GLOW 🔥 */
         .neon-line {
-          /* Fixed filter to use multiple layers for a smoother glow without clipping */
           filter: drop-shadow(0 0 6px rgba(56,189,248,0.8)) drop-shadow(0 0 12px rgba(129,140,248,0.5));
           animation: breathGlow 3s infinite alternate;
         }
@@ -227,7 +263,7 @@ function FamilyTimelinePage() {
 
         /* ✨ HOVER MAGIC (THE SPARKLING EFFECT) ✨ */
         .hover-zone { z-index: 10; }
-        .hover-zone:hover { z-index: 100 !important; } /* Brings card strictly to front */
+        .hover-zone:hover { z-index: 100 !important; }
         
         .hover-zone:hover .popup-card {
           opacity: 1 !important;
@@ -240,7 +276,7 @@ function FamilyTimelinePage() {
           transform: scale(1.5);
           background: #c084fc !important;
           border-color: #fff !important;
-          box-shadow: 0 0 20px #fff, 0 0 40px #c084fc, 0 0 60px #818cf8 !important; /* Ultimate Sparkle */
+          box-shadow: 0 0 20px #fff, 0 0 40px #c084fc, 0 0 60px #818cf8 !important;
         }
         
         .hover-zone:hover .date-badge {
@@ -260,7 +296,6 @@ function FamilyTimelinePage() {
           .hover-zone { left: 40px !important; }
           .snake-svg { display: none !important; }
           
-          /* Fake straight thick line for mobile */
           .snake-row::before { 
             content: ''; position: absolute; top: 0; bottom: 0; left: 40px; width: 6px; 
             background: linear-gradient(to bottom, #38bdf8, #818cf8, #c084fc); 
