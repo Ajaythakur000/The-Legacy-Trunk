@@ -76,10 +76,13 @@ function Navbar() {
             
             <div style={navPillStyle}>
               <Link to="/home" style={getNavLinkStyle('/home')}>🏠 Home</Link>
-              {/* 🔥 Dashboard yahan baahar aagaya */}
               <Link to="/dashboard" style={getNavLinkStyle('/dashboard')}>⚙️ Dashboard</Link>
               <Link to="/radar" style={getNavLinkStyle('/radar')}>📡 Radar</Link>
               <Link to="/leaderboard" style={getNavLinkStyle('/leaderboard')}>🏆 Leaderboard</Link>
+              
+              {/* 🔥 YAHAN ADD KIYA MEMORY LANE */}
+              <Link to="/memory-lane" style={getNavLinkStyle('/memory-lane')}>🛤️ Memory Lane</Link>
+              
               <Link to="/vault" style={getNavLinkStyle('/vault')}>💬 Chat</Link>
 
               <div ref={storiesRef} style={{ position: 'relative' }}>
@@ -90,7 +93,6 @@ function Navbar() {
                   <div style={dropdownBoxStyle}>
                     <Link to="/vault-stories" onClick={() => setIsStoriesOpen(false)} style={dropdownItemStyle}>📅 Vault Stories</Link>
                     <Link to="/my-stories" onClick={() => setIsStoriesOpen(false)} style={dropdownItemStyle}>👤 My Stories</Link>
-                    {/* Global Explore removed as requested */}
                   </div>
                 )}
               </div>
@@ -111,7 +113,6 @@ function Navbar() {
                       {user?.activeCircleId === circle._id && <span>✓</span>}
                     </div>
                   ))}
-                  {/* Dashboard link yahan se hata diya gaya hai */}
                 </div>
               )}
             </div>

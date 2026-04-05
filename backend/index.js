@@ -27,7 +27,7 @@ const MONGO_URI = process.env.MONGO_URI;
 // REST APIs
 app.use('/api/users', userRoutes);
 app.use('/api/stories', storyRoutes);
-app.use('/api/timelines', timelineRoutes);
+app.use('/api/timeline', timelineRoutes);
 app.use('/api/circles', circleRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/export', exportRoutes);
