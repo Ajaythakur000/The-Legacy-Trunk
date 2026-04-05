@@ -27,6 +27,7 @@ import FamilyTimelinePage from './pages/FamilyTimelinePage';
 
 import FamilyOraclePage from './pages/FamilyOraclePage';
 
+import InvitePage from './pages/InvitePage';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
+        <Route path="/invite/:token" element={<InvitePage />} />
         {/* 3. PROTECTED PRIVATE ROUTES */}
         <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
