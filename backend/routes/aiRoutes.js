@@ -1,10 +1,14 @@
 import express from 'express';
-import { askOracle } from '../controllers/aiController.js';
-import { protect } from '../middleware/authMiddleware.js'; // Make sure your auth path is correct
+import { askOracle, enhanceStory, generateTitle } from '../controllers/aiController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Route: POST /api/ai/ask-oracle
+// 🔮 Oracle Route
 router.post('/ask-oracle', protect, askOracle);
+
+// ✨ AI Copilot Routes
+router.post('/enhance-story', protect, enhanceStory);
+router.post('/generate-title', protect, generateTitle);
 
 export default router;

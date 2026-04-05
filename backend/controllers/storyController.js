@@ -2,22 +2,11 @@ import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 
-const isExpiredStory = (story) => {
-  if (!story?.expiresAt) return false;
-  return new Date(story.expiresAt).getTime() <= Date.now();
-};
-
-const canAccessStory = (story, user) => {
-  if (isExpiredStory(story)) return false;
-  if (story.isGlobalPublic) return true;
-  if (!user?.activeCircleId || !story?.originCircleId) return false;
-  return story.originCircleId.toString() === user.activeCircleId.toString();
-};
+// 🔥 KACHRA GONE: Removed `isExpiredStory` and `canAccessStory` completely.
 
 const createStory = async (req, res) => {
   try {
-    // 🔥 Naya: isMilestone aur milestoneDate ko req.body se nikala
-    const { title, content, tags, isGlobalPublic, circleId, isMilestone, milestoneDate } = req.body;
+    const { title, content, tags, isGlobalPublic, circleId, isMilestone, milestoneDate, tone } = req.body;
     
     const targetCircleId = circleId || req.user?.activeCircleId;
 
@@ -29,17 +18,22 @@ const createStory = async (req, res) => {
       return res.status(400).json({ message: 'Title and content are required' });
     }
 
-    let mediaUrl = '';
+    // 🔥 MULTI-FILE LOGIC
+    let mediaUrls = [];
     let mediaType = 'text';
 
-    if (req.file) {
-      mediaUrl = req.file.path || req.file.secure_url || '';
-      if (req.file.mimetype?.startsWith('image')) mediaType = 'photo';
-      else if (req.file.mimetype?.startsWith('video')) mediaType = 'video';
-      else if (req.file.mimetype?.startsWith('audio')) mediaType = 'audio';
+    if (req.files && req.files.length > 0) {
+      mediaUrls = req.files.map(file => file.path || file.secure_url);
+      
+      const firstMimeType = req.files[0].mimetype;
+      if (firstMimeType?.startsWith('image')) mediaType = 'photo';
+      else if (firstMimeType?.startsWith('video')) mediaType = 'video';
+      else if (firstMimeType?.startsWith('audio')) mediaType = 'audio';
     }
 
-    // Story Create karo nayi details ke sath
+    const primaryMediaUrl = mediaUrls.length > 0 ? mediaUrls[0] : '';
+    const isThisAMilestone = isMilestone === 'true' || isMilestone === true;
+
     const story = new Story({
       title: String(title).trim(),
       content: String(content).trim(),
@@ -47,12 +41,12 @@ const createStory = async (req, res) => {
       user: req.user._id,
       originCircleId: targetCircleId,
       isGlobalPublic: isGlobalPublic === 'true' || isGlobalPublic === true,
-      mediaUrl,
+      mediaUrl: primaryMediaUrl, 
+      mediaUrls: mediaUrls, 
       mediaType,
-      // 🔥 Naya Logic
-      isMilestone: isMilestone === 'true' || isMilestone === true, 
-      milestoneDate: milestoneDate ? new Date(milestoneDate) : new Date(),
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      tone, 
+      isMilestone: isThisAMilestone, 
+      milestoneDate: milestoneDate ? new Date(milestoneDate) : new Date()
     });
 
     const createdStory = await story.save();
@@ -83,18 +77,15 @@ const createStory = async (req, res) => {
 
 const getCircleFeed = async (req, res) => {
   try {
-    // Read circleId from frontend query OR fallback to user's default
     const circleId = req.query.circleId || req.user?.activeCircleId;
 
     if (!circleId) {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    const now = new Date();
-
+    // 🔥 FIX: No expiresAt condition anymore!
     const stories = await Story.find({
-      originCircleId: circleId,
-      expiresAt: { $gt: now },
+      originCircleId: circleId
     })
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName')
@@ -113,18 +104,12 @@ const getMyFamilyStories = async (req, res) => {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    const now = new Date();
-
+    // 🔥 FIX: No expiresAt condition anymore!
     const stories = await Story.find({
-      $and: [
-        {
-          $or: [
-            { originCircleId: req.user.activeCircleId },
-            { sharedWith: req.user.activeCircleId },
-          ],
-        },
-        { expiresAt: { $gt: now } },
-      ],
+      $or: [
+        { originCircleId: req.user.activeCircleId },
+        { sharedWith: req.user.activeCircleId },
+      ]
     })
       .populate('user', 'name relationToAdmin')
       .sort({ createdAt: -1 });
@@ -137,11 +122,9 @@ const getMyFamilyStories = async (req, res) => {
 
 const getGlobalStories = async (req, res) => {
   try {
-    const now = new Date();
-
+    // 🔥 FIX: No expiresAt condition anymore! Global feed will work perfectly.
     const stories = await Story.find({
-      isGlobalPublic: true,
-      expiresAt: { $gt: now },
+      isGlobalPublic: true
     })
       .populate('user', 'name')
       .populate('originCircleId', 'circleName')
@@ -174,10 +157,6 @@ const updateStory = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
-
-    if (story.expiresAt && new Date() > story.expiresAt) {
-      return res.status(400).json({ message: 'Cannot edit expired story' });
-    }
 
     const isAuthor = story.user.toString() === req.user._id.toString();
     const isAdmin = req.user.role === 'admin';
@@ -228,27 +207,18 @@ const toggleLikeStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    if (story.expiresAt && new Date() > story.expiresAt) {
-      return res.status(401).json({ message: 'Story is expired' });
-    }
-
     const userId = req.user._id.toString();
     const storyOwnerId = story.user.toString();
     const alreadyLiked = story.likes.some((id) => id.toString() === userId);
 
-    // ==========================================
-    // 🔥 THE MASTERSTROKE: Global vs Internal Like
-    // ==========================================
     const isDifferentFamily = 
       story.originCircleId && 
       req.user.activeCircleId && 
       story.originCircleId.toString() !== req.user.activeCircleId.toString();
 
-    // Agar story global public hai aur liker dusri family ka hai, toh 10 points! Warna 5 points.
     const isGlobalLike = story.isGlobalPublic && isDifferentFamily;
     const pointsToAward = isGlobalLike ? 10 : 5;
 
-    // Like / Unlike logic
     if (alreadyLiked) {
       story.likes = story.likes.filter((id) => id.toString() !== userId);
     } else {
@@ -257,14 +227,9 @@ const toggleLikeStory = async (req, res) => {
 
     await story.save();
 
-    // ==========================================
-    // 💎 BOND POINTS ENGINE: Award/Deduct Points
-    // ==========================================
-    // Anti-Cheat: Khud ki post like karne par points nahi milenge
     if (userId !== storyOwnerId && story.originCircleId) {
       const pointModifier = alreadyLiked ? -pointsToAward : pointsToAward;
       
-      // 🔥 CHANGED: Points ab 'originCircleId' (Family) ko jayenge
       await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
         $inc: { familyBondPoints: pointModifier }
       });
@@ -293,10 +258,6 @@ const addCommentToStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    if (story.expiresAt && new Date() > story.expiresAt) {
-      return res.status(401).json({ message: 'Cannot comment on expired story' });
-    }
-
     story.comments.push({
       user: req.user._id,
       text: String(text).trim(),
@@ -304,13 +265,7 @@ const addCommentToStory = async (req, res) => {
 
     await story.save();
 
-    // ==========================================
-    // 💎 BOND POINTS ENGINE: Comment Reward (+5)
-    // ==========================================
-    // Anti-Cheat: Khud ki post par comment karne se points nahi badhenge
     if (story.user.toString() !== req.user._id.toString() && story.originCircleId) {
-      
-      // 🔥 CHANGED: Points ab 'originCircleId' (Family) ko jayenge
       await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
         $inc: { familyBondPoints: 5 }
       });

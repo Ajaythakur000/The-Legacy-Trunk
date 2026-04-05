@@ -9,19 +9,20 @@ import {
   deleteStory,
   toggleLikeStory,
   addCommentToStory,
-  getMyStories // ✅ Imported correctly
+  getMyStories 
 } from '../controllers/storyController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
 
 const router = Router();
 
+// 🔥 CHANGED: .single('media') is now .array('media', 5) to allow up to 5 photos!
 const uploadStoryMedia = (req, res, next) => {
-  upload.single('media')(req, res, (err) => {
+  upload.array('media', 5)(req, res, (err) => {
     if (err) {
       console.error('❌ uploadStoryMedia error:', err);
       return res.status(400).json({
-        message: err.message || 'Media upload failed',
+        message: err.message || 'Media upload failed (Max 5 files allowed)',
         code: err.code || 'UPLOAD_ERROR',
         name: err.name || 'UploadError',
       });
