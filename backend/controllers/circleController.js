@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 import Story from '../models/storyModel.js';
-import Notification from '../models/notificationModel.js'; // 🔥 IMPORT NOTIFICATION MODEL
+import Notification from '../models/notificationModel.js'; 
 
 const generateFamilyCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -81,7 +81,7 @@ const getCircleById = async (req, res) => {
 };
 
 // ==========================================
-// 🛡️ MODIFIED: SEND INVITE NOTIFICATION (Not Direct Add)
+// 🛡️ MODIFIED: SEND INVITE NOTIFICATION (Spam Protection Added)
 // ==========================================
 const sendFamilyInvite = async (req, res) => {
   try {
@@ -104,12 +104,24 @@ const sendFamilyInvite = async (req, res) => {
       return res.status(400).json({ message: 'User is already in this family' });
     }
 
+    // 🔥 SPAM PROTECTION: Check if an invite is already pending
+    // 'invite' type means it hasn't been accepted or rejected yet
+    const pendingInvite = await Notification.findOne({
+      recipient: targetUser._id,
+      circleId: circle._id,
+      type: 'invite' 
+    });
+
+    if (pendingInvite) {
+      return res.status(400).json({ message: 'An invite is already pending for this user!' });
+    }
+
     // CREATE NOTIFICATION INSTEAD OF DIRECTLY ADDING
     const newNotif = await Notification.create({
       recipient: targetUser._id,
       sender: req.user._id,
       type: 'invite', // Important type flag
-      circleId: circle._id, // Add this to your schema if not there (we'll use it in notificationController)
+      circleId: circle._id, 
       message: `${req.user.name} invited you to join ${circle.circleName}`
     });
 
@@ -334,9 +346,38 @@ const joinViaInvite = async (req, res) => {
   }
 };
 
+// ==========================================
+// 🗑️ NEW: DELETE CIRCLE LOGIC (Admin Only)
+// ==========================================
+const deleteCircle = async (req, res) => {
+  try {
+    const circleId = req.params.id;
+    const circle = await FamilyCircle.findById(circleId);
+
+    if (!circle) {
+      return res.status(404).json({ message: 'Circle not found' });
+    }
+
+    if (String(circle.admin) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'Only the admin can delete this family circle' });
+    }
+
+    await FamilyMember.updateMany(
+      { activeCircleId: circleId },
+      { activeCircleId: null, familyCode: null }
+    );
+
+    await FamilyCircle.findByIdAndDelete(circleId);
+
+    return res.status(200).json({ message: 'Family Vault deleted successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to delete circle' });
+  }
+};
+
 export default {
   createCircle,
-  sendFamilyInvite, // 🔥 Changed from addMemberToCircle
+  sendFamilyInvite, 
   getMyCircles,
   getCircleById,
   removeMemberFromCircle,
@@ -344,5 +385,6 @@ export default {
   getTopContributor,
   getUpcomingEvents,
   generateInviteLink,
-  joinViaInvite
+  joinViaInvite,
+  deleteCircle
 };

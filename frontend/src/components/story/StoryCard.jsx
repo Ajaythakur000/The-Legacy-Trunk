@@ -1,21 +1,35 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useRef } from 'react'; // 🔥 useRef add kiya yahan
 import toast from 'react-hot-toast';
 import StoryCommentBox from './StoryCommentBox';
 
-function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit, isDetailView = false }) {
+import StoryExportTemplate from './StoryExportTemplate'; // 🔥 Import kiya hua hai
+
+function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) {
   const isAuthor = currentUser && story?.user?._id === currentUser._id;
-  // 🔥 ADMIN GOD MODE CHECK
   const isAdmin = currentUser && currentUser?.role === 'admin';
   const canDelete = isAuthor || isAdmin;
   
-  // 🔥 Edit Mode States
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(story.title);
   const [editContent, setEditContent] = useState(story.content);
   
-  // 🔥 Comment Box Visibility Toggle (Reddit style)
-  const [showComments, setShowComments] = useState(isDetailView);
+  const [showComments, setShowComments] = useState(false);
+  const [showShieldAnim, setShowShieldAnim] = useState(false);
+  
+  // Track states locally for immediate UI feedback
+  const isLikedByMe = story?.likes?.includes(currentUser?._id);
+  const [isShared, setIsShared] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+
+  // 🔥 Yahan Export ke liye Ref banaya
+  const exportRef = useRef();
+
+  const images = [];
+  if (story?.mediaUrls && story.mediaUrls.length > 0) {
+    images.push(...story.mediaUrls);
+  } else if (story?.mediaUrl) {
+    images.push(story.mediaUrl);
+  }
 
   const handleSaveEdit = () => {
     if (onEdit) {
@@ -24,52 +38,33 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit, is
     }
   };
 
-  // Helper: Safely get all media URLs
-  const images = [];
-  if (story?.mediaUrls && story.mediaUrls.length > 0) {
-    images.push(...story.mediaUrls);
-  } else if (story?.mediaUrl) {
-    images.push(story.mediaUrl);
-  }
-
-  // 📅 Helper: Smart Date Logic & Time Travel
   const getFormattedDates = () => {
     const postDateObj = new Date(story.createdAt);
     const postDateStr = postDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    
     let eventDateStr = null;
     let timeTravelBadge = null;
 
     if (story.isMilestone && story.milestoneDate) {
       const eventDateObj = new Date(story.milestoneDate);
       eventDateStr = eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      
-      // Calculate year difference for the "Time Travel" badge
       const yearDiff = postDateObj.getFullYear() - eventDateObj.getFullYear();
       if (yearDiff > 0) {
         timeTravelBadge = `⏳ ${yearDiff} Year${yearDiff > 1 ? 's' : ''} Ago`;
       }
     }
 
-    // If Post Date and Event Date are exactly the same, just return the Post Date.
     if (eventDateStr === postDateStr) {
       return { displayDate: postDateStr, eventBadge: null, timeTravelBadge: null };
     }
-
-    return { 
-      displayDate: postDateStr, 
-      eventBadge: eventDateStr ? `Event: ${eventDateStr}` : null,
-      timeTravelBadge
-    };
+    return { displayDate: postDateStr, eventBadge: eventDateStr ? `Event: ${eventDateStr}` : null, timeTravelBadge };
   };
 
   const { displayDate, eventBadge, timeTravelBadge } = getFormattedDates();
 
-  // 📤 Helper: Native Share / Download
   const handleShare = async () => {
     const shareData = {
       title: story.title,
-      text: `Check out this memory: "${story.title}" on The Family Ledger.`,
+      text: `Check out this memory: "${story.title}"`,
       url: `${window.location.origin}/vault-stories/${story._id}`
     };
 
@@ -78,255 +73,282 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit, is
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(shareData.url);
-        toast.success("Link copied to clipboard! 📋", { style: { borderRadius: '20px', background: '#334155', color: '#fff' }});
+        toast.success("Link copied! 📋", { style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }});
+        setIsShared(true);
+        setTimeout(() => setIsShared(false), 2000);
       }
-    } catch (err) {
-      console.log('Share failed or was cancelled.', err);
-    }
+    } catch (err) { console.log('Share failed', err); }
   };
 
-  // 🖼️ Helper: Advanced Cinematic Collage Layout
+  // 🔥 UPDATE: Purana photo download hata ke ab humara naya template trigger hoga
+  const handleDownloadImage = async () => {
+      if (exportRef.current) {
+          exportRef.current.generateImage();
+      }
+  };
+
+  const handleDoubleTap = (e) => {
+    e.preventDefault();
+    if (!isLikedByMe) {
+      onLike(story._id);
+    }
+    setShowShieldAnim(true);
+    setTimeout(() => setShowShieldAnim(false), 1000);
+  };
+
   const renderMediaGrid = () => {
     if (images.length === 0) return null;
     
     if (story?.mediaType === 'video') {
       return (
-        <video controls style={{ width: '100%', maxHeight: isDetailView ? '600px' : '400px', borderRadius: '12px', marginTop: '20px' }}>
-          <source src={images[0]} />
-        </video>
+        <div style={{ marginTop: '24px', borderRadius: '4px', padding: '12px', background: '#0f172a', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 8px 25px rgba(0,0,0,0.15)' }}>
+            <video controls preload="metadata" style={{ width: '100%', maxHeight: '500px', borderRadius: '2px', background: '#000' }}>
+            <source src={images[0]} />
+            </video>
+        </div>
       );
     }
 
     const count = images.length;
+    const imgProps = { loading: "lazy", decoding: "async" };
 
     if (count === 1) {
       return (
-        <div style={{ marginTop: '20px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+        <div 
+          onDoubleClick={handleDoubleTap} 
+          style={{ position: 'relative', marginTop: '24px', padding: '12px', background: '#0f172a', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 8px 25px rgba(0,0,0,0.15)', cursor: 'pointer', userSelect: 'none' }}
+        >
           <img 
+            {...imgProps}
             src={images[0]} 
             alt={story.title} 
             onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Available'; }}
-            style={{ width: '100%', maxHeight: isDetailView ? '700px' : '450px', objectFit: 'cover', display: 'block', background: '#f1f5f9' }} 
+            style={{ width: '100%', maxHeight: '600px', objectFit: 'cover', display: 'block', border: '4px solid #faf9f6', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }} 
           />
+          {showShieldAnim && (
+             <div style={{
+                 position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                 animation: 'shieldPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards', pointerEvents: 'none',
+                 filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.6))'
+             }}>
+                {/* Large Blue Fill Shield for Animation */}
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="#3b82f6" stroke="rgba(255,255,255,0.5)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+             </div>
+          )}
         </div>
       );
     }
 
-    const gridStyles = {
-      display: 'grid', gap: '8px', marginTop: '20px', borderRadius: '16px', overflow: 'hidden', height: '400px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
-    };
-
+    // Grid logic 
+    const gridStyles = { display: 'grid', gap: '4px', marginTop: '24px', padding: '12px', background: '#0f172a', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 8px 25px rgba(0,0,0,0.15)', height: '450px', cursor: 'pointer' };
+    
     let layoutContent = null;
     if (count === 2) {
       layoutContent = (
-        <div style={{ ...gridStyles, gridTemplateColumns: '1fr 1fr' }}>
-          <img src={images[0]} alt="1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <img src={images[1]} alt="2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div onDoubleClick={handleDoubleTap} style={{ ...gridStyles, gridTemplateColumns: '1fr 1fr', position: 'relative' }}>
+          <img {...imgProps} src={images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', border: '2px solid #faf9f6' }} />
+          <img {...imgProps} src={images[1]} style={{ width: '100%', height: '100%', objectFit: 'cover', border: '2px solid #faf9f6' }} />
+          {showShieldAnim && <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', animation:'shieldPop 1s forwards', pointerEvents:'none'}}><svg width="100" height="100" viewBox="0 0 24 24" fill="#3b82f6" stroke="rgba(255,255,255,0.5)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>}
         </div>
       );
-    } else if (count === 3) {
-      layoutContent = (
-        <div style={{ ...gridStyles, gridTemplateColumns: '2fr 1fr', gridTemplateRows: '1fr 1fr' }}>
-          <img src={images[0]} alt="1" style={{ width: '100%', height: '100%', objectFit: 'cover', gridRow: '1 / span 2' }} />
-          <img src={images[1]} alt="2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <img src={images[2]} alt="3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-      );
-    } else if (count === 4) {
-      layoutContent = (
-        <div style={{ ...gridStyles, gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
-          {images.map((img, i) => <img key={i} src={img} alt={`${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />)}
-        </div>
-      );
-    } else if (count >= 5) {
-      layoutContent = (
-        <div style={{ ...gridStyles, gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
-          <img src={images[0]} alt="1" style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: '1 / span 2', gridRow: '1 / span 2' }} />
-          <img src={images[1]} alt="2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <img src={images[2]} alt="3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-      );
+    } else {
+        layoutContent = (
+            <div onDoubleClick={handleDoubleTap} style={{ ...gridStyles, gridTemplateColumns: '1fr 1fr', position: 'relative' }}>
+               <img {...imgProps} src={images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: 'span 2', border: '2px solid #faf9f6' }} />
+               {showShieldAnim && <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', animation:'shieldPop 1s forwards', pointerEvents:'none'}}><svg width="100" height="100" viewBox="0 0 24 24" fill="#3b82f6" stroke="rgba(255,255,255,0.5)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>}
+            </div>
+        )
     }
 
     return layoutContent;
   };
 
   return (
-    <div className="story-card" style={{ 
-      position: 'relative', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.03)'
+    <div style={{ 
+        background: '#fafaf9', // Ivory/Off-white paper feel
+        border: '1px solid #e5e5e5', 
+        borderRadius: '8px', // Softer, classic corners
+        padding: '32px 40px', 
+        boxShadow: '0 10px 30px -10px rgba(0,0,0,0.08)',
+        position: 'relative'
     }}>
       
-      {/* 🌟 MILESTONE BADGE */}
       {story.isMilestone && (
         <div style={{ 
-          position: 'absolute', top: '0', right: '32px', 
-          background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', 
-          padding: '8px 16px', borderRadius: '0 0 12px 12px', 
-          fontSize: '0.8rem', fontWeight: '800', letterSpacing: '1px',
-          boxShadow: '0 4px 10px rgba(217, 119, 6, 0.3)' 
+          position: 'absolute', top: '0', right: '40px', 
+          background: 'linear-gradient(135deg, #d4af37, #b48512)', color: '#fff', 
+          padding: '6px 14px', borderRadius: '0 0 8px 8px', 
+          fontSize: '0.75rem', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase',
+          boxShadow: '0 4px 10px rgba(212, 175, 55, 0.3)' 
         }}>
-          🌟 FAMILY MILESTONE
+          Family Milestone
         </div>
       )}
 
-      {/* 👤 Header: User Info & Actions */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', marginTop: story.isMilestone ? '10px' : '0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Avatar */}
-          <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #38bdf8, #818cf8)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(56, 189, 248, 0.3)' }}>
+      {/* 👤 Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', marginTop: story.isMilestone ? '12px' : '0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ 
+              width: '50px', height: '50px', borderRadius: '50%', 
+              background: '#f8fafc', border: '2px solid rgba(212, 175, 55, 0.6)', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              color: '#334155', fontWeight: 'bold', fontSize: '1.2rem',
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
+            }}>
             {story?.user?.name ? story.user.name.charAt(0).toUpperCase() : 'U'}
           </div>
-          
           <div>
-            <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'Georgia, serif' }}>
               {story?.user?.name || 'Unknown User'}
-              {timeTravelBadge && (
-                <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: '800' }}>
-                  {timeTravelBadge}
-                </span>
-              )}
+              {timeTravelBadge && <span style={{ background: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontFamily: 'system-ui, sans-serif', letterSpacing: '1px', textTransform: 'uppercase' }}>{timeTravelBadge}</span>}
             </div>
-            <div style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: '500' }}>
-              {displayDate} 
-              {eventBadge && <span style={{ color: '#d97706', fontWeight: 'bold' }}> • {eventBadge}</span>}
+            <div style={{ color: '#64748b', fontSize: '0.8rem', letterSpacing: '1px', textTransform: 'uppercase', marginTop: '4px' }}>
+              {displayDate} {eventBadge && <span style={{ color: '#b48512' }}> • {eventBadge}</span>}
             </div>
           </div>
         </div>
         
-        {/* 🔥 Actions: Edit & Delete (Admin Superpower Added) */}
         {!isEditing && (isAuthor || isAdmin) && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {isAuthor && onEdit && (
-              <button onClick={() => setIsEditing(true)} style={{ background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.2s' }}>
-                Edit
-              </button>
-            )}
-            {canDelete && onDelete && (
-              <button onClick={() => { if(window.confirm('Erase this memory permanently?')) onDelete(story._id); }} style={{ background: '#fef2f2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.2s' }}>
-                {isAdmin && !isAuthor ? 'Delete (Admin)' : 'Delete'}
-              </button>
-            )}
+          <div style={{ display: 'flex', gap: '12px' }}>
+             <button onClick={() => setIsEditing(true)} style={{ background: 'transparent', color: '#94a3b8', border: 'none', cursor: 'pointer', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Edit</button>
+             <button onClick={() => { if(window.confirm('Erase this memory?')) onDelete(story._id); }} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Delete</button>
           </div>
         )}
       </div>
 
-      {/* 📜 Content: Title & Text (Edit Mode vs Normal) */}
+      {/* 📜 Content */}
       {isEditing ? (
-        <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-          <input 
-            value={editTitle} 
-            onChange={(e) => setEditTitle(e.target.value)} 
-            style={{ width: '100%', padding: '12px', marginBottom: '12px', fontSize: '1.2rem', fontWeight: '800', color: '#0f172a', borderRadius: '8px', border: '1px solid #cbd5e1', outlineColor: '#3b82f6', boxSizing: 'border-box' }}
-          />
-          <textarea 
-            value={editContent} 
-            onChange={(e) => setEditContent(e.target.value)} 
-            rows={5}
-            style={{ width: '100%', padding: '12px', marginBottom: '16px', fontSize: '1rem', color: '#334155', borderRadius: '8px', border: '1px solid #cbd5e1', outlineColor: '#3b82f6', boxSizing: 'border-box', resize: 'vertical' }}
-          />
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={handleSaveEdit} style={{ background: '#0f172a', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '800' }}>Save Changes</button>
-            <button onClick={() => { setIsEditing(false); setEditTitle(story.title); setEditContent(story.content); }} style={{ background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '800' }}>Cancel</button>
-          </div>
-        </div>
+         <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+            <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} style={{ width: '100%', padding: '12px', marginBottom: '12px', fontSize: '1.2rem', fontFamily: 'Georgia, serif', border: '1px solid #cbd5e1' }} />
+            <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={5} style={{ width: '100%', padding: '12px', marginBottom: '16px', fontSize: '1rem', border: '1px solid #cbd5e1', resize: 'vertical' }} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={handleSaveEdit} style={{ background: '#0f172a', color: 'white', padding: '8px 16px', border:'none', cursor:'pointer' }}>Save</button>
+              <button onClick={() => setIsEditing(false)} style={{ background: 'transparent', border:'1px solid #ccc', padding: '8px 16px', cursor:'pointer' }}>Cancel</button>
+            </div>
+         </div>
       ) : (
         <div style={{ paddingLeft: '4px' }}>
-          {isDetailView ? (
-            <h3 style={{ margin: '0 0 12px 0', color: '#0f172a', fontSize: '1.8rem', fontWeight: '900', letterSpacing: '-0.5px' }}>{story.title}</h3>
-          ) : (
-            <Link to={`/vault-stories/${story._id}`} style={{ textDecoration: 'none' }}>
-              <h3 className="story-title" style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1.5rem', fontWeight: '900', letterSpacing: '-0.5px', transition: 'color 0.2s' }}>
-                {story.title}
-              </h3>
-            </Link>
-          )}
-
-          {/* AI Tone Badge */}
-          {story.tone && story.tone !== 'Nostalgic and Warm' && (
-            <div style={{ marginBottom: '12px' }}>
-              <span style={{ display: 'inline-block', padding: '4px 10px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#3b82f6', fontSize: '0.75rem', fontWeight: '800', borderRadius: '12px', textTransform: 'uppercase' }}>
-                ✨ {story.tone.replace(/[^\w\s-]/gi, '')}
-              </span>
-            </div>
-          )}
-
-          <p style={{ margin: '0', color: '#334155', fontSize: '1.1rem', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+            <h3 style={{ margin: '0 0 16px 0', color: '#0f172a', fontSize: '2rem', fontWeight: 'normal', fontFamily: 'Georgia, serif', lineHeight: '1.2' }}>{story.title}</h3>
+            {story.tone && story.tone !== 'Nostalgic and Warm' && (
+                <div style={{ marginBottom: '16px' }}>
+                <span style={{ display: 'inline-block', padding: '2px 8px', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Tone: {story.tone.replace(/[^\w\s-]/gi, '')}
+                </span>
+                </div>
+            )}
+            <p style={{ margin: '0', color: '#334155', fontSize: '1.1rem', lineHeight: '1.8', whiteSpace: 'pre-wrap', fontFamily: 'system-ui, sans-serif' }}>
             {story.content}
-          </p>
+            </p>
         </div>
       )}
 
-      {/* 🖼️ Media Section (DYNAMIC GRID/COLLAGE) */}
+      {/* 🖼️ Media */}
       {!isEditing && renderMediaGrid()}
 
-      {/* 🔴 REDDIT-STYLE ACTION BAR */}
+      {/* 🛡️ LEGACY ACTION BAR (Premium Icons) */}
       {!isEditing && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '24px', paddingTop: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid #e5e5e5' }}>
           
-          {/* Like Pill */}
+          {/* Protect (Like) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button 
+                  onClick={() => onLike(story._id)} 
+                  className="action-icon-btn"
+                  title="Protect Memory"
+              >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill={isLikedByMe ? "#2563eb" : "none"} stroke={isLikedByMe ? "#2563eb" : "#64748b"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+              </button>
+              <span style={{ fontWeight: '600', color: '#475569', fontSize: '14px', fontFamily: 'system-ui, sans-serif' }}>{story?.likes?.length || 0}</span>
+          </div>
+
+          {/* Reflect (Comment) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button 
+                  onClick={() => setShowComments(!showComments)} 
+                  className="action-icon-btn"
+                  title="Add Reflection"
+              >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill={showComments ? "#38bdf8" : "none"} stroke={showComments ? "#38bdf8" : "#64748b"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                     <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                  </svg>
+              </button>
+              <span style={{ fontWeight: '600', color: '#475569', fontSize: '14px', fontFamily: 'system-ui, sans-serif' }}>{story?.comments?.length || 0}</span>
+          </div>
+
+          {/* Pass On (Share) */}
           <button 
-            onClick={() => onLike(story._id)} 
-            className={`action-pill ${story?.likes?.includes(currentUser?._id) ? 'active-like' : ''}`}
+              onClick={handleShare} 
+              className="action-icon-btn"
+              title="Pass On Memory"
           >
-            {story?.likes?.includes(currentUser?._id) ? '❤️' : '🤍'} 
-            <span style={{ marginLeft: '6px', fontWeight: '800' }}>{story?.likes?.length || 0}</span>
+             <svg width="24" height="24" viewBox="0 0 24 24" fill={isShared ? "#10b981" : "none"} stroke={isShared ? "#10b981" : "#64748b"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+             </svg>
           </button>
 
-          {/* Comment Pill */}
-          <button 
-            onClick={() => setShowComments(!showComments)} 
-            className="action-pill"
-          >
-            💬 <span style={{ marginLeft: '6px', fontWeight: '800' }}>{story?.comments?.length || 0}</span>
-          </button>
-
-          {/* Share Pill */}
-          <button 
-            onClick={handleShare} 
-            className="action-pill"
-          >
-            📤 <span style={{ marginLeft: '6px', fontWeight: '700' }}>Share</span>
-          </button>
-
+          {/* Archive Image (Download) */}
+          {images.length > 0 && (
+              <button 
+                  onClick={handleDownloadImage} 
+                  className="action-icon-btn"
+                  style={{ marginLeft: 'auto' }}
+                  title="Archive Image"
+              >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill={isDownloaded ? "#0f172a" : "none"} stroke={isDownloaded ? "#0f172a" : "#64748b"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                     <polyline points="7 10 12 15 17 10"></polyline>
+                     <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+              </button>
+          )}
         </div>
       )}
 
-      {/* 💬 Comments Box (Togglable) */}
+      {/* ☁️ Cloud Reflection Box (Inline) */}
       {!isEditing && showComments && (
-        <div style={{ marginTop: '16px', animation: 'fadeIn 0.3s ease' }}>
+        <div style={{ marginTop: '24px', animation: 'fadeIn 0.3s ease', padding: '20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+          <div style={{ marginBottom: '12px', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#94a3b8', fontWeight: 'bold' }}>
+              Family Reflections
+          </div>
           <StoryCommentBox storyId={story._id} comments={story.comments} onCommentSubmit={onComment} />
         </div>
       )}
 
+      {/* 🔥 THE HIDDEN EXPORT TEMPLATE */}
+      <StoryExportTemplate ref={exportRef} story={story} />
+
+      {/* Styles */}
       <style>{`
-        .story-title:hover { color: #3b82f6 !important; }
-        
-        /* Reddit-style Pill Buttons */
-        .action-pill {
-          display: inline-flex;
-          align-items: center;
-          padding: 8px 16px;
-          background: #f1f5f9;
-          border: 1px solid #e2e8f0;
-          color: #475569;
-          border-radius: 99px;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: all 0.2s ease;
+        .action-icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
         }
-        .action-pill:hover {
-          background: #e2e8f0;
-          transform: translateY(-1px);
+        .action-icon-btn:hover {
+            background: rgba(0,0,0,0.03);
+            transform: translateY(-2px);
         }
-        .action-pill.active-like {
-          background: #ffe4e6;
-          border-color: #fda4af;
-          color: #e11d48;
+        .action-icon-btn:active {
+            transform: scale(0.9);
         }
-        .action-pill.active-like:hover {
-          background: #fecdd3;
+        @keyframes shieldPop {
+          0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+          15% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+          30% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
         }
-        
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-5px); }
           to { opacity: 1; transform: translateY(0); }

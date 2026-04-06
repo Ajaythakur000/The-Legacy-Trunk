@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import Confetti from 'react-confetti'; // 🔥 IMPORTED CONFETTI
+import Confetti from 'react-confetti'; 
 import {
   addCommentToStoryApi,
   createStoryApi,
@@ -13,6 +13,7 @@ import { getSocket } from '../services/socket.js';
 
 import StoryComposer from '../components/story/StoryComposer';
 import StoryCard from '../components/story/StoryCard';
+import StorySkeleton from '../components/shared/StorySkeleton';
 
 function VaultStoriesPage() {
   const { user } = useAuth();
@@ -24,19 +25,24 @@ function VaultStoriesPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // 🔥 CONFETTI STATE
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // 🔥 PREMIUM UX DELAY ADDED HERE
   const loadFeed = async () => {
     if (!activeCircleId) return;
     setLoadingFeed(true);
     setError('');
     try {
       const data = await getCircleFeedApi(activeCircleId); 
-      setStories(Array.isArray(data) ? data : []);
+      
+      // 0.6 seconds ka natural delay for premium skeleton feel
+      setTimeout(() => {
+        setStories(Array.isArray(data) ? data : []);
+        setLoadingFeed(false);
+      }, 600); 
+
     } catch (e) {
       setError(e?.response?.data?.message || 'Failed to load circle feed');
-    } finally {
       setLoadingFeed(false);
     }
   };
@@ -82,14 +88,13 @@ function VaultStoriesPage() {
       await createStoryApi(formData);
       setSuccess('Memory securely locked in the vault! 🔐');
       
-      // 🎉 FIRE THE CONFETTI ON SUCCESS!
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 6000); // Stop after 6 seconds
+      setTimeout(() => setShowConfetti(false), 6000); 
 
       await loadFeed();
     } catch (e) {
       console.error('createStory failed:', e?.response?.data || e);
-      setError(e?.response?.data?.message || e?.message || 'Failed to weave memory');
+      setError(e?.response?.data?.message || e?.message || 'Failed to save memory');
       throw e; 
     } finally {
       setUploading(false);
@@ -149,14 +154,14 @@ function VaultStoriesPage() {
   return (
     <div style={{ maxWidth: '850px', margin: '0 auto', padding: '60px 20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       
-      {/* 🎉 THE CONFETTI LAYER (Appears on top of everything) */}
+      {/* 🎉 THE CONFETTI LAYER */}
       {showConfetti && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 99999, pointerEvents: 'none' }}>
           <Confetti width={window.innerWidth} height={window.innerHeight} gravity={0.3} numberOfPieces={400} />
         </div>
       )}
 
-      {/* ✨ WOW HEADER SECTION */}
+      {/* ✨ UPDATED HEADER SECTION */}
       <div style={{ textAlign: 'center', marginBottom: '50px', animation: 'fadeInDown 0.8s ease' }}>
         <h1 style={{ 
           fontSize: '3.5rem', fontWeight: '900', margin: '0 0 12px 0', 
@@ -164,10 +169,10 @@ function VaultStoriesPage() {
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           letterSpacing: '-1px', lineHeight: '1.2'
         }}>
-          Weave a Memory ✨
+          Weave a Memory 📜
         </h1>
         <p style={{ fontSize: '1.15rem', color: '#64748b', margin: '0 auto', maxWidth: '500px', lineHeight: '1.5' }}>
-          Every family has a story. Chronicle yours for the generations to come.
+          Every family has a story. Save yours for the generations to come.
         </p>
         
         {activeCircleId && (
@@ -205,10 +210,12 @@ function VaultStoriesPage() {
               </span>
             </div>
             
+            {/* 🔥 SKELETON LOADERS */}
             {loadingFeed ? (
-               <div style={{ textAlign: 'center', padding: '60px 0' }}>
-                  <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #e2e8f0', borderTop: '4px solid #3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }}></div>
-                  <p style={{ color: '#64748b', marginTop: '20px', fontWeight: '600', letterSpacing: '1px' }}>Dusting off the old books...</p>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+                  <StorySkeleton />
+                  <StorySkeleton />
+                  <StorySkeleton />
                </div>
             ) : null}
 
@@ -216,7 +223,7 @@ function VaultStoriesPage() {
               <div style={{ textAlign: 'center', padding: '80px 20px', background: '#f8fafc', borderRadius: '32px', border: '2px dashed #cbd5e1' }}>
                 <span style={{ fontSize: '60px', opacity: 0.4, filter: 'grayscale(100%)', display: 'block', marginBottom: '20px' }}>📸</span>
                 <h3 style={{ color: '#334155', margin: '0 0 10px 0', fontSize: '1.5rem' }}>The vault is empty!</h3>
-                <p style={{ color: '#94a3b8', margin: 0, fontSize: '1.1rem' }}>Be the first to weave a memory into the family trunk.</p>
+                <p style={{ color: '#94a3b8', margin: 0, fontSize: '1.1rem' }}>Be the first to save a memory into the family trunk.</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>

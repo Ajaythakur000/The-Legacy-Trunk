@@ -26,47 +26,56 @@ import MyStoriesPage from './pages/MyStoriesPage';
 import FamilyTimelinePage from './pages/FamilyTimelinePage';
 
 import FamilyOraclePage from './pages/FamilyOraclePage';
-
 import InvitePage from './pages/InvitePage';
+
+// 1. Upar import add karo
+import SearchResultsPage from './pages/SearchResultsPage';
 
 function App() {
   return (
     <>
-      <Navbar />
-      
       {/* Notifications setup */}
       <Toaster position="top-center" reverseOrder={false} />
       
-      <Routes>
-        {/* 1. INITIAL REDIRECT */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* 🔥 NEW: Navbar is now the Grand Layout Wrapper */}
+      <Navbar>
+        <Routes>
+          {/* 1. INITIAL REDIRECT */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* 2. PUBLIC ROUTES */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+          {/* 2. PUBLIC ROUTES */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
 
-        <Route path="/invite/:token" element={<InvitePage />} />
-        {/* 3. PROTECTED PRIVATE ROUTES */}
-        <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/invite/:token" element={<InvitePage />} />
+          
+          {/* 3. PROTECTED PRIVATE ROUTES */}
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          
+          {/* Features */}
+          <Route path="/vault" element={<ProtectedRoute><VaultRoomPage /></ProtectedRoute>} />
+          <Route path="/radar" element={<ProtectedRoute><FamilyRadarPage /></ProtectedRoute>} />
+          <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+          <Route path="/memory-lane" element={<ProtectedRoute><FamilyTimelinePage /></ProtectedRoute>} />
+          
+
+          
+          {/* Stories Engine */}
+          <Route path="/vault-stories" element={<ProtectedRoute><VaultStoriesPage /></ProtectedRoute>} />
+          <Route path="/vault-stories/:storyId" element={<ProtectedRoute><StoryDetailPage /></ProtectedRoute>} />
+          <Route path="/my-stories" element={<ProtectedRoute><MyStoriesPage /></ProtectedRoute>} />
+
+              <Route path="/search" element={<ProtectedRoute><SearchResultsPage /></ProtectedRoute>} />
+
         
-        {/* Features */}
-        <Route path="/vault" element={<ProtectedRoute><VaultRoomPage /></ProtectedRoute>} />
-        <Route path="/radar" element={<ProtectedRoute><FamilyRadarPage /></ProtectedRoute>} />
-        <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
-        <Route path="/memory-lane" element={<ProtectedRoute><FamilyTimelinePage /></ProtectedRoute>} />
-        
-        {/* Stories Engine */}
-        <Route path="/vault-stories" element={<ProtectedRoute><VaultStoriesPage /></ProtectedRoute>} />
-        <Route path="/vault-stories/:storyId" element={<ProtectedRoute><StoryDetailPage /></ProtectedRoute>} />
-        <Route path="/my-stories" element={<ProtectedRoute><MyStoriesPage /></ProtectedRoute>} />
-      
-        <Route path="/oracle" element={<FamilyOraclePage />} />
+          <Route path="/oracle" element={<FamilyOraclePage />} />
 
-        {/* 4. CATCH-ALL REDIRECT (Security) */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+          {/* 4. CATCH-ALL REDIRECT (Security) */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Navbar>
     </>
   );
 }
