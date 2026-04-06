@@ -1,6 +1,7 @@
 import React from 'react';
 
-function ChampionDetailModal({ onClose, championUser }) {
+// 🔥 FIX: Changed 'championUser' to 'champion' to match Navbar
+function ChampionDetailModal({ onClose, champion }) {
   return (
     <div style={modalOverlayStyle}>
       <div style={modalContentStyle}>
@@ -12,8 +13,9 @@ function ChampionDetailModal({ onClose, championUser }) {
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
-          <img src={championUser?.avatar || "https://via.placeholder.com/150"} alt="Champion" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid #f59e0b', objectFit: 'cover' }} />
-          <h3 style={{ margin: '15px 0 5px 0', fontSize: '24px', color: '#1e293b' }}>{championUser?.name || "Unknown"}</h3>
+          {/* 🔥 FIX: Used 'champion' here */}
+          <img src={champion?.avatar || "https://via.placeholder.com/150"} alt="Champion" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '4px solid #f59e0b', objectFit: 'cover' }} />
+          <h3 style={{ margin: '15px 0 5px 0', fontSize: '24px', color: '#1e293b' }}>{champion?.name || "Unknown"}</h3>
           <span style={{ background: '#fef3c7', color: '#b45309', padding: '6px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: 'bold' }}>Most Active Member</span>
         </div>
       </div>

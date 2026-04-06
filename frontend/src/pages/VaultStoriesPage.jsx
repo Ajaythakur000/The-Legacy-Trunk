@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import Confetti from 'react-confetti'; 
+import { motion } from 'framer-motion'; // 🔥 IMPORTED FRAMER MOTION
 import {
   addCommentToStoryApi,
   createStoryApi,
@@ -27,7 +28,6 @@ function VaultStoriesPage() {
 
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // 🔥 PREMIUM UX DELAY ADDED HERE
   const loadFeed = async () => {
     if (!activeCircleId) return;
     setLoadingFeed(true);
@@ -227,15 +227,22 @@ function VaultStoriesPage() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                {sortedStories.map((s) => (
-                  <StoryCard 
-                    key={s._id} 
-                    story={s} 
-                    currentUser={user}
-                    onLike={handleLike}
-                    onComment={handleCommentSubmit}
-                    onDelete={handleDelete}
-                  />
+                {/* 🔥 PREMIUM STAGGERED FEED ANIMATION ADDED HERE */}
+                {sortedStories.map((s, index) => (
+                  <motion.div
+                    key={s._id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+                  >
+                    <StoryCard 
+                      story={s} 
+                      currentUser={user}
+                      onLike={handleLike}
+                      onComment={handleCommentSubmit}
+                      onDelete={handleDelete}
+                    />
+                  </motion.div>
                 ))}
               </div>
             )}
