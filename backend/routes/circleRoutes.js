@@ -14,7 +14,8 @@ const {
   getTopContributor,
   getUpcomingEvents,
   generateInviteLink,
-  joinViaInvite
+  joinViaInvite,
+  deleteCircle
 } = circleController;
 
 // GET /api/circles
@@ -39,6 +40,8 @@ router.route('/:id/invite-link').post(protect, generateInviteLink);
 
 // GET /api/circles/:id
 router.route('/:id').get(protect, getCircleById);
+
+router.route('/:id').get(protect, getCircleById).delete(protect, deleteCircle);
 
 // POST /api/circles/:id/members (Ab ye direct add nahi, invite bhejega)
 router.route('/:id/members').post(protect, sendFamilyInvite); // 🔥 Yahan handler update kar diya

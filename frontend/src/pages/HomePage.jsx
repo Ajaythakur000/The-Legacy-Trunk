@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-// 👇 NOTE: Apne API function ka naam check kar lena, jo 'Explore' page me use ho raha tha
-import { getGlobalStoriesApi } from '../api/storyApi'; 
+import { getGlobalStoriesApi, toggleLikeStoryApi, addCommentToStoryApi } from '../api/storyApi'; 
+// 🔥 WE IMPORT OUR NEW PREMIUM CARD
+import StoryCard from '../components/story/StoryCard'; 
 
 function HomePage() {
   const { user } = useAuth();
@@ -23,90 +23,79 @@ function HomePage() {
     fetchFeed();
   }, []);
 
-  const timeAgo = (dateString) => {
-    const diff = Date.now() - new Date(dateString).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+  // 🔥 HANDLE INLINE PROTECT (LIKE)
+  const handleLike = async (storyId) => {
+    try {
+      const data = await toggleLikeStoryApi(storyId);
+      // Optimistic update so UI feels instant
+      setStories(stories.map(s => {
+        if (s._id === storyId) {
+          const hasLiked = s.likes.includes(user._id);
+          const newLikes = hasLiked 
+            ? s.likes.filter(id => id !== user._id) 
+            : [...s.likes, user._id];
+          return { ...s, likes: newLikes };
+        }
+        return s;
+      }));
+    } catch (err) { console.error('Like failed', err); }
+  };
+
+  // 🔥 HANDLE INLINE REFLECTION (COMMENT)
+  const handleComment = async (storyId, text) => {
+    try {
+      const data = await addCommentToStoryApi(storyId, text);
+      // Update state immediately
+      setStories(stories.map(s => {
+        if (s._id === storyId) {
+          return { ...s, comments: data.comments }; 
+        }
+        return s;
+      }));
+    } catch (err) { console.error('Comment failed', err); }
   };
 
   return (
-    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '40px' }}>
-      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px 16px' }}>
+    // Background matches the Journal vibe
+    <div style={{ backgroundColor: '#f1f5f9', minHeight: '100vh', paddingBottom: '40px', paddingTop: '40px' }}>
+      <div style={{ maxWidth: '680px', margin: '0 auto', padding: '0 16px' }}>
         
-        {/* Header */}
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ margin: 0, fontSize: '2rem', color: '#111827', fontWeight: '800' }}>Global Feed 🌍</h1>
-          <p style={{ margin: '4px 0 0', color: '#6b7280' }}>Discover public stories from all families.</p>
+        {/* Elegant Header */}
+        <div style={{ marginBottom: '32px', textAlign: 'center' }}>
+          <h1 style={{ margin: 0, fontSize: '2.5rem', color: '#0f172a', fontWeight: '900', fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>
+            The Global Vault 🌍
+          </h1>
+          <p style={{ margin: '8px 0 0', color: '#64748b', fontSize: '1.1rem' }}>
+            Discover and cherish legacy stories from around the world.
+          </p>
+          <div style={{ width: '60px', height: '3px', background: '#d4af37', margin: '20px auto 0 auto', borderRadius: '2px' }}></div>
         </div>
 
         {/* Loading State */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>Loading stories... ⏳</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontSize: '1.1rem', fontWeight: '500' }}>
+            Dusting off the archives... ⏳
+          </div>
         ) : stories.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', background: '#fff', borderRadius: '16px', border: '1px dashed #d1d5db' }}>
-            <span style={{ fontSize: '30px' }}>📭</span>
-            <p style={{ color: '#4b5563', fontWeight: '600' }}>No public stories yet.</p>
+          <div style={{ textAlign: 'center', padding: '60px', background: '#fafaf9', borderRadius: '12px', border: '1px dashed #cbd5e1', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+            <span style={{ fontSize: '40px' }}>📭</span>
+            <p style={{ color: '#475569', fontWeight: '700', fontSize: '18px', marginTop: '16px' }}>
+              The vault is currently empty.
+            </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            {/* 🔥 RENDER OUR PREMIUM STORY CARDS */}
             {stories.map((story) => (
-              <div 
+              <StoryCard 
                 key={story._id} 
-                style={{ 
-                  background: '#fff', 
-                  borderRadius: '16px', 
-                  border: '1px solid #e5e7eb', 
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.03)',
-                  overflow: 'hidden'
-                }}
-              >
-                {/* 👤 Card Header: Avatar + Info */}
-                <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #f3f4f6' }}>
-                  <img 
-                    src={story.user?.avatar || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} 
-                    alt="Author DP" 
-                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #e5e7eb' }} 
-                  />
-                  <div>
-                    <div style={{ fontWeight: '700', color: '#111827', fontSize: '15px' }}>
-                      {story.user?.name || 'Unknown User'}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                      {timeAgo(story.createdAt)} • {story.familyCircle?.circleName || 'Public'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 📝 Card Body: Content */}
-                <div style={{ padding: '16px' }}>
-                  <h3 style={{ margin: '0 0 8px 0', color: '#111827', fontSize: '18px' }}>{story.title}</h3>
-                  <p style={{ margin: 0, color: '#4b5563', lineHeight: '1.5', fontSize: '15px', whiteSpace: 'pre-wrap' }}>
-                    {story.content}
-                  </p>
-                </div>
-
-                {/* 📸 Card Media (If any) */}
-                {story.mediaUrl && (
-                  <div style={{ width: '100%', maxHeight: '400px', backgroundColor: '#f3f4f6' }}>
-                    {story.mediaType?.includes('video') ? (
-                      <video src={story.mediaUrl} controls style={{ width: '100%', maxHeight: '400px', objectFit: 'contain' }} />
-                    ) : (
-                      <img src={story.mediaUrl} alt="Story Media" style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }} />
-                    )}
-                  </div>
-                )}
-
-                {/* 👍 Card Footer (Actions) */}
-                <div style={{ padding: '12px 16px', background: '#f8fafc', display: 'flex', gap: '16px', borderTop: '1px solid #f3f4f6' }}>
-                  <Link to={`/vault-stories/${story._id}`} style={{ textDecoration: 'none', color: '#4b5563', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    💬 View Details
-                  </Link>
-                </div>
-
-              </div>
+                story={story} 
+                currentUser={user}
+                onLike={handleLike}
+                onComment={handleComment}
+                // No onDelete/onEdit here because it's the global feed. 
+                // Only allow edits on "My Stories" page.
+              />
             ))}
           </div>
         )}
