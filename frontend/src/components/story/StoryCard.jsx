@@ -5,6 +5,9 @@ import StoryCommentBox from './StoryCommentBox';
 
 function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit, isDetailView = false }) {
   const isAuthor = currentUser && story?.user?._id === currentUser._id;
+  // 🔥 ADMIN GOD MODE CHECK
+  const isAdmin = currentUser && currentUser?.role === 'admin';
+  const canDelete = isAuthor || isAdmin;
   
   // 🔥 Edit Mode States
   const [isEditing, setIsEditing] = useState(false);
@@ -190,17 +193,17 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit, is
           </div>
         </div>
         
-        {/* 🔥 Actions: Edit & Delete */}
-        {isAuthor && !isEditing && (
+        {/* 🔥 Actions: Edit & Delete (Admin Superpower Added) */}
+        {!isEditing && (isAuthor || isAdmin) && (
           <div style={{ display: 'flex', gap: '8px' }}>
-            {onEdit && (
+            {isAuthor && onEdit && (
               <button onClick={() => setIsEditing(true)} style={{ background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.2s' }}>
                 Edit
               </button>
             )}
-            {onDelete && (
+            {canDelete && onDelete && (
               <button onClick={() => { if(window.confirm('Erase this memory permanently?')) onDelete(story._id); }} style={{ background: '#fef2f2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '700', transition: 'all 0.2s' }}>
-                Delete
+                {isAdmin && !isAuthor ? 'Delete (Admin)' : 'Delete'}
               </button>
             )}
           </div>

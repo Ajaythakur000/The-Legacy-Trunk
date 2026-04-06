@@ -9,338 +9,343 @@ import { io } from 'socket.io-client';
 import ChampionDetailModal from '../modals/ChampionDetailModal';
 
 function Navbar() {
-  const { isAuthenticated, user, logout, switchActiveCircle } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation(); 
-  
-  const [myCircles, setMyCircles] = useState([]);
-  
-  // States for Hub
-  const [isHubOpen, setIsHubOpen] = useState(false);
-  const hubRef = useRef(null);
+  const { isAuthenticated, user, logout, switchActiveCircle } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation(); 
+  
+  const [myCircles, setMyCircles] = useState([]);
+  
+  // States for Hub
+  const [isHubOpen, setIsHubOpen] = useState(false);
+  const hubRef = useRef(null);
 
-  // States for Notifications
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const notifRef = useRef(null);
-  const [notifications, setNotifications] = useState([]);
-  const [socket, setSocket] = useState(null);
+  // States for Notifications
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifRef = useRef(null);
+  const [notifications, setNotifications] = useState([]);
+  const [socket, setSocket] = useState(null);
 
-  // States for User Profile Dropdown
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [showChampionModal, setShowChampionModal] = useState(false);
-  
-  // 🔥 DYNAMIC CHAMPION STATE
-  const [championUser, setChampionUser] = useState(null);
+  const [showChampionModal, setShowChampionModal] = useState(false);
+  
+  // 🔥 DYNAMIC CHAMPION STATE
+  const [championUser, setChampionUser] = useState(null);
 
-  // Fetch Circles, Notifications & Champion
-  useEffect(() => {
-    if (isAuthenticated) {
-      const fetchCircles = async () => {
-        try {
-          const res = await getMyCirclesApi(); 
-          const circleList = Array.isArray(res) ? res : (res?.data || res?.circles || []);
-          setMyCircles(circleList);
-          if (circleList.length > 0 && !user?.activeCircleId) {
-            switchActiveCircle(circleList[0]._id);
-          }
-        } catch (error) { console.error("Navbar circles error", error); }
-      };
+  // Fetch Circles, Notifications & Champion
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchCircles = async () => {
+        try {
+          const res = await getMyCirclesApi(); 
+          const circleList = Array.isArray(res) ? res : (res?.data || res?.circles || []);
+          setMyCircles(circleList);
+          if (circleList.length > 0 && !user?.activeCircleId) {
+            switchActiveCircle(circleList[0]._id);
+          }
+        } catch (error) { console.error("Navbar circles error", error); }
+      };
 
-      const fetchNotifications = async () => {
-        try {
-          const res = await api.get('/notifications');
-          setNotifications(res.data);
-        } catch (err) { console.error("Failed to load notifications", err); }
-      };
+      const fetchNotifications = async () => {
+        try {
+          const res = await api.get('/notifications');
+          setNotifications(res.data);
+        } catch (err) { console.error("Failed to load notifications", err); }
+      };
 
-      fetchCircles();
-      fetchNotifications();
+      fetchCircles();
+      fetchNotifications();
 
-      // Socket setup
-      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:8000');
-      setSocket(newSocket);
-      
-      newSocket.on('connect', () => {
-        newSocket.emit('setup_user', user._id);
-      });
+      // Socket setup
+      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:8000');
+      setSocket(newSocket);
+      
+      newSocket.on('connect', () => {
+        newSocket.emit('setup_user', user._id);
+      });
 
-      newSocket.on('new_notification', (newNotif) => {
-        setNotifications(prev => [newNotif, ...prev]);
-      });
+      newSocket.on('new_notification', (newNotif) => {
+        setNotifications(prev => [newNotif, ...prev]);
+      });
 
-      return () => newSocket.disconnect();
-    }
-  }, [isAuthenticated, user]);
+      return () => newSocket.disconnect();
+    }
+  }, [isAuthenticated, user]);
 
-  useEffect(() => {
-    if (user?.activeCircleId) {
-      const fetchChampion = async () => {
-        try {
-          const res = await api.get(`/circles/${user.activeCircleId}/top-contributor`);
-          setChampionUser(res.data);
-        } catch (err) { console.error("Failed to fetch champion", err); }
-      };
-      fetchChampion();
-    }
-  }, [user?.activeCircleId]);
+  useEffect(() => {
+    if (user?.activeCircleId) {
+      const fetchChampion = async () => {
+        try {
+          const res = await api.get(`/circles/${user.activeCircleId}/top-contributor`);
+          setChampionUser(res.data);
+        } catch (err) { console.error("Failed to fetch champion", err); }
+      };
+      fetchChampion();
+    }
+  }, [user?.activeCircleId]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (hubRef.current && !hubRef.current.contains(event.target)) setIsHubOpen(false);
-      if (notifRef.current && !notifRef.current.contains(event.target)) setIsNotifOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (hubRef.current && !hubRef.current.contains(event.target)) setIsHubOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target)) setIsNotifOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => { logout(); navigate('/login'); };
 
-  const markAsRead = async (id) => {
-    try {
-      await api.put(`/notifications/${id}/read`);
-      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
-    } catch (err) { console.error(err); }
-  };
+  const markAsRead = async (id) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+    } catch (err) { console.error(err); }
+  };
 
-  // ==========================================
-  // 🔥 ACTION: ACCEPT INVITE
-  // ==========================================
-  const handleAcceptInvite = async (id) => {
-    try {
-      await api.post(`/notifications/${id}/accept`);
-      
-      // Refresh Notifications
-      const notifRes = await api.get('/notifications');
-      setNotifications(notifRes.data);
+  // ==========================================
+  // 🔥 ACTION: ACCEPT INVITE
+  // ==========================================
+  const handleAcceptInvite = async (id) => {
+    try {
+      await api.post(`/notifications/${id}/accept`);
+      
+      // Refresh Notifications
+      const notifRes = await api.get('/notifications');
+      setNotifications(notifRes.data);
 
-      // Refresh Circles list because we just joined a new one!
-      const circlesRes = await getMyCirclesApi();
-      const circleList = Array.isArray(circlesRes) ? circlesRes : (circlesRes?.data || circlesRes?.circles || []);
-      setMyCircles(circleList);
+      // Refresh Circles list because we just joined a new one!
+      const circlesRes = await getMyCirclesApi();
+      const circleList = Array.isArray(circlesRes) ? circlesRes : (circlesRes?.data || circlesRes?.circles || []);
+      setMyCircles(circleList);
 
-    } catch (err) { console.error("Failed to accept invite", err); }
-  };
+    } catch (err) { console.error("Failed to accept invite", err); }
+  };
 
-  // ==========================================
-  // 🔴 ACTION: REJECT INVITE
-  // ==========================================
-  const handleRejectInvite = async (id) => {
-    try {
-      await api.post(`/notifications/${id}/reject`);
-      // Refresh Notifications
-      const notifRes = await api.get('/notifications');
-      setNotifications(notifRes.data);
-    } catch (err) { console.error("Failed to reject invite", err); }
-  };
+  // ==========================================
+  // 🔴 ACTION: REJECT INVITE
+  // ==========================================
+  const handleRejectInvite = async (id) => {
+    try {
+      await api.post(`/notifications/${id}/reject`);
+      // Refresh Notifications
+      const notifRes = await api.get('/notifications');
+      setNotifications(notifRes.data);
+    } catch (err) { console.error("Failed to reject invite", err); }
+  };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  const getNavLinkStyle = (path) => {
-    const isActive = location.pathname === path;
-    return {
-      textDecoration: 'none', fontSize: '14px', fontWeight: '700', padding: '10px 20px', borderRadius: '12px',
-      display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s',
-      color: isActive ? '#fff' : '#475569',
-      background: isActive ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'transparent',
-      boxShadow: isActive ? '0 8px 15px rgba(37, 99, 235, 0.25)' : 'none',
-    };
-  };
+  const getNavLinkStyle = (path) => {
+    const isActive = location.pathname === path;
+    return {
+      textDecoration: 'none', fontSize: '14px', fontWeight: '700', padding: '10px 20px', borderRadius: '12px',
+      display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s',
+      color: isActive ? '#fff' : '#475569',
+      background: isActive ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'transparent',
+      boxShadow: isActive ? '0 8px 15px rgba(37, 99, 235, 0.25)' : 'none',
+    };
+  };
 
-  const activeCircleName = myCircles.find(c => c._id === user?.activeCircleId)?.circleName || 'Select Family';
+  const activeCircleName = myCircles.find(c => c._id === user?.activeCircleId)?.circleName || 'Select Family';
 
-  return (
-    <>
-      <nav style={navBarStyle}>
-        <div style={containerStyle}>
-          
-          <Link to="/home" style={logoStyle}>
-            <div style={logoIconStyle}>🛡️</div>
-            <span style={logoTextStyle}>FamilyVault</span>
-          </Link>
+  return (
+    <>
+      <nav style={navBarStyle}>
+        <div style={containerStyle}>
+          
+          <Link to="/home" style={logoStyle}>
+            <div style={logoIconStyle}>🛡️</div>
+            <span style={logoTextStyle}>FamilyVault</span>
+          </Link>
 
-          {isAuthenticated && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-              
-              <div style={navPillStyle}>
-                <Link to="/home" style={getNavLinkStyle('/home')}>🏠 Home</Link>
-                <Link to="/dashboard" style={getNavLinkStyle('/dashboard')}>⚙️ Dashboard</Link>
-                <Link to="/memory-lane" style={getNavLinkStyle('/memory-lane')}>🛤️ Memory Lane</Link>
-                <Link to="/my-stories" style={getNavLinkStyle('/my-stories')}>👤 My Stories</Link>
-                <Link to="/oracle" style={getNavLinkStyle('/oracle')}>🔮 Oracle</Link>
-                <Link to="/leaderboard" style={getNavLinkStyle('/leaderboard')}>🏆 Leaderboard</Link>
-              </div>
+          {isAuthenticated && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+              
+              <div style={navPillStyle}>
+                <Link to="/home" style={getNavLinkStyle('/home')}>🏠 Home</Link>
+                <Link to="/dashboard" style={getNavLinkStyle('/dashboard')}>⚙️ Dashboard</Link>
+                <Link to="/memory-lane" style={getNavLinkStyle('/memory-lane')}>🛤️ Memory Lane</Link>
+                <Link to="/my-stories" style={getNavLinkStyle('/my-stories')}>👤 My Stories</Link>
+                <Link to="/oracle" style={getNavLinkStyle('/oracle')}>🔮 Oracle</Link>
+                <Link to="/leaderboard" style={getNavLinkStyle('/leaderboard')}>🏆 Leaderboard</Link>
+              </div>
 
-              {/* 🏰 Legacy Switcher */}
-              <div ref={hubRef} style={{ position: 'relative' }}>
-                <button onClick={() => setIsHubOpen(!isHubOpen)} style={hubButtonStyle(isHubOpen)}>
-                  <span style={{ fontSize: '18px' }}>🏰</span>
-                  <span style={hubNameStyle}>{activeCircleName}</span>
-                  <span style={{ fontSize: '10px', opacity: 0.5 }}>▼</span>
-                </button>
-                {isHubOpen && (
-                  <div style={dropdownWrapperStyle}>
-                    <div style={dropdownBoxStyle}>
-                      <div style={dropdownHeaderStyle}>SWITCH LEGACY</div>
-                      {myCircles.map(circle => (
-                        <div key={circle._id} onClick={() => { switchActiveCircle(circle._id); setIsHubOpen(false); }} style={circleItemStyle(user?.activeCircleId === circle._id)}>
-                          {circle.circleName}
-                          {user?.activeCircleId === circle._id && <span>✓</span>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* 🏰 Legacy Switcher */}
+              <div ref={hubRef} style={{ position: 'relative' }}>
+                <button onClick={() => setIsHubOpen(!isHubOpen)} style={hubButtonStyle(isHubOpen)}>
+                  <span style={{ fontSize: '18px' }}>🏰</span>
+                  <span style={hubNameStyle}>{activeCircleName}</span>
+                  <span style={{ fontSize: '10px', opacity: 0.5 }}>▼</span>
+                </button>
+                {isHubOpen && (
+                  <div style={dropdownWrapperStyle}>
+                    <div style={dropdownBoxStyle}>
+                      <div style={dropdownHeaderStyle}>SWITCH LEGACY</div>
+                      {myCircles.map(circle => (
+                        <div key={circle._id} onClick={() => { switchActiveCircle(circle._id); setIsHubOpen(false); }} style={circleItemStyle(user?.activeCircleId === circle._id)}>
+                          {circle.circleName}
+                          {user?.activeCircleId === circle._id && <span>✓</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-              {/* 🔔 Notifications (PREMIUM UI UPDATE) */}
-              <div ref={notifRef} style={{ position: 'relative' }}>
-                <button onClick={() => setIsNotifOpen(!isNotifOpen)} style={iconButtonStyle}>
-                  🔔 {unreadCount > 0 && <span style={badgeStyle}>{unreadCount}</span>}
-                </button>
-                
-                {isNotifOpen && (
-                  <div style={dropdownWrapperStyle}>
-                    <div style={notifDropdownStyle}>
-                      <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-                        <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px' }}>Notifications</span>
-                        {unreadCount > 0 && <span style={{ background: '#e0e7ff', color: '#4f46e5', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{unreadCount} New</span>}
-                      </div>
-                      
-                      <div style={{ maxHeight: '380px', overflowY: 'auto' }}>
-                        {notifications.length === 0 ? (
-                          <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94a3b8' }}>
-                            <div style={{ fontSize: '30px', marginBottom: '8px' }}>📭</div>
-                            <div style={{ fontWeight: '600' }}>All caught up!</div>
-                          </div>
-                        ) : (
-                          notifications.map(notif => {
-                            const isInvite = notif.type === 'invite';
-                            let icon = '📌';
-                            if (notif.type === 'like') icon = '❤️';
-                            if (notif.type === 'comment') icon = '💬';
-                            if (isInvite) icon = '✉️';
-                            if (notif.type === 'system') icon = '🛡️';
+              {/* 🔔 Notifications */}
+              <div ref={notifRef} style={{ position: 'relative' }}>
+                <button onClick={() => setIsNotifOpen(!isNotifOpen)} style={iconButtonStyle}>
+                  🔔 {unreadCount > 0 && <span style={badgeStyle}>{unreadCount}</span>}
+                </button>
+                
+                {isNotifOpen && (
+                  <div style={dropdownWrapperStyle}>
+                    <div style={notifDropdownStyle}>
+                      <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                        <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px' }}>Notifications</span>
+                        {unreadCount > 0 && <span style={{ background: '#e0e7ff', color: '#4f46e5', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>{unreadCount} New</span>}
+                      </div>
+                      
+                      <div style={{ maxHeight: '380px', overflowY: 'auto' }}>
+                        {notifications.length === 0 ? (
+                          <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                            <div style={{ fontSize: '30px', marginBottom: '8px' }}>📭</div>
+                            <div style={{ fontWeight: '600' }}>All caught up!</div>
+                          </div>
+                        ) : (
+                          notifications.map(notif => {
+                            const isInvite = notif.type === 'invite';
+                            let icon = '📌';
+                            if (notif.type === 'like') icon = '❤️';
+                            if (notif.type === 'comment') icon = '💬';
+                            if (isInvite) icon = '✉️';
+                            if (notif.type === 'system') icon = '🛡️';
 
-                            return (
-                              <div 
-                                key={notif._id} 
-                                onClick={() => !isInvite && markAsRead(notif._id)} // Normal notifs clicking marks read
-                                style={{ 
-                                  padding: '16px', 
-                                  borderBottom: '1px solid #f1f5f9', 
-                                  background: notif.isRead ? '#fff' : '#f0f9ff', 
-                                  cursor: isInvite && !notif.isRead ? 'default' : 'pointer', 
-                                  transition: 'background 0.2s',
-                                  display: 'flex',
-                                  gap: '14px',
-                                  alignItems: 'flex-start'
-                                }}
-                              >
-                                {/* Sleek Icon Container */}
-                                <div style={{ fontSize: '18px', background: '#fff', border: '1px solid #e2e8f0', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 5px rgba(0,0,0,0.02)' }}>
-                                  {icon}
-                                </div>
-                                
-                                <div style={{ flex: 1 }}>
-                                  <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#0f172a', fontWeight: notif.isRead ? '500' : '700', lineHeight: '1.4' }}>
-                                    {notif.message}
-                                  </p>
-                                  <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', letterSpacing: '0.5px' }}>
-                                    {new Date(notif.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                  </span>
+                            return (
+                              <div 
+                                key={notif._id} 
+                                onClick={() => !isInvite && markAsRead(notif._id)} // Normal notifs clicking marks read
+                                style={{ 
+                                  padding: '16px', 
+                                  borderBottom: '1px solid #f1f5f9', 
+                                  background: notif.isRead ? '#fff' : '#f0f9ff', 
+                                  cursor: isInvite && !notif.isRead ? 'default' : 'pointer', 
+                                  transition: 'background 0.2s',
+                                  display: 'flex',
+                                  gap: '14px',
+                                  alignItems: 'flex-start'
+                                }}
+                              >
+                                <div style={{ fontSize: '18px', background: '#fff', border: '1px solid #e2e8f0', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 5px rgba(0,0,0,0.02)' }}>
+                                  {icon}
+                                </div>
+                                
+                                <div style={{ flex: 1 }}>
+                                  <p style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#0f172a', fontWeight: notif.isRead ? '500' : '700', lineHeight: '1.4' }}>
+                                    {notif.message}
+                                  </p>
+                                  <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', letterSpacing: '0.5px' }}>
+                                    {new Date(notif.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                  </span>
 
-                                  {/* 🔥 PREMIUM ACTION BUTTONS FOR INVITE */}
-                                  {isInvite && !notif.isRead && (
-                                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                                      <button 
-                                        onClick={(e) => { e.stopPropagation(); handleAcceptInvite(notif._id); }}
-                                        style={{ flex: 1, background: '#10b981', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'transform 0.1s', boxShadow: '0 2px 10px rgba(16, 185, 129, 0.2)' }}
-                                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-                                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                      >
-                                        Accept
-                                      </button>
-                                      <button 
-                                        onClick={(e) => { e.stopPropagation(); handleRejectInvite(notif._id); }}
-                                        style={{ flex: 1, background: '#fff', color: '#ef4444', border: '1px solid #fecaca', padding: '8px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'background 0.2s' }}
-                                        onMouseOver={(e) => e.currentTarget.style.background = '#fef2f2'}
-                                        onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
-                                      >
-                                        Decline
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+                                  {isInvite && !notif.isRead && (
+                                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); handleAcceptInvite(notif._id); }}
+                                        style={{ flex: 1, background: '#10b981', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'transform 0.1s', boxShadow: '0 2px 10px rgba(16, 185, 129, 0.2)' }}
+                                        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
+                                        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                      >
+                                        Accept
+                                      </button>
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); handleRejectInvite(notif._id); }}
+                                        style={{ flex: 1, background: '#fff', color: '#ef4444', border: '1px solid #fecaca', padding: '8px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'background 0.2s' }}
+                                        onMouseOver={(e) => e.currentTarget.style.background = '#fef2f2'}
+                                        onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
+                                      >
+                                        Decline
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-              {/* 👤 User Profile (HOVER LOGIC + CLEAN MENU) */}
-              <div 
-                style={{ position: 'relative' }}
-                onMouseEnter={() => setIsProfileOpen(true)}
-                onMouseLeave={() => setIsProfileOpen(false)}
-              >
-                <button onClick={() => navigate('/profile')} style={avatarBtnStyle}>
-                  <img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={avatarImgStyle} />
-                </button>
-                
-                {isProfileOpen && (
-                  <div style={dropdownWrapperStyle}>
-                    <div style={profileDropdownStyle}>
-                      
-                      <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc' }}>
-                        <img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                        <div>
-                          <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px' }}>{user?.name || 'User'}</div>
-                          <div style={{ color: '#64748b', fontSize: '12px', fontWeight: '500' }}>{user?.email}</div>
-                        </div>
-                      </div>
+              {/* 👤 User Profile (CSS ONLY HOVER) */}
+              <div className="profile-dropdown-container" style={{ position: 'relative' }}>
+                <button onClick={() => navigate('/profile')} style={avatarBtnStyle}>
+                  <img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={avatarImgStyle} />
+                </button>
+                
+                <div className="profile-dropdown-menu" style={dropdownWrapperStyle}>
+                  <div style={profileDropdownStyle}>
+                    
+                    <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc' }}>
+                      <img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div>
+                        <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px' }}>{user?.name || 'User'}</div>
+                        <div style={{ color: '#64748b', fontSize: '12px', fontWeight: '500' }}>{user?.email}</div>
+                      </div>
+                    </div>
 
-                      <div style={{ padding: '8px' }}>
-                        <button 
-                          onClick={() => { setIsProfileOpen(false); setShowChampionModal(true); }} 
-                          style={dropdownLinkStyle}
-                        >
-                          👑 Top Contributor
-                        </button>
-                        
-                        <Link to="/profile?edit=true" onClick={() => setIsProfileOpen(false)} style={dropdownLinkStyle}>
-                          ✏️ Edit Profile
-                        </Link>
-                        
-                        <div style={{ height: '1px', background: '#e2e8f0', margin: '8px 0' }}></div>
-                        
-                        <button onClick={handleLogout} style={{ ...dropdownLinkStyle, color: '#ef4444' }}>
-                          🚪 Signout
-                        </button>
-                      </div>
+                    <div style={{ padding: '8px' }}>
+                      <button 
+                        onClick={() => setShowChampionModal(true)} 
+                        style={dropdownLinkStyle}
+                      >
+                        👑 Top Contributor
+                      </button>
+                      
+                      <Link to="/profile?edit=true" style={dropdownLinkStyle}>
+                        ✏️ Edit Profile
+                      </Link>
+                      
+                      <div style={{ height: '1px', background: '#e2e8f0', margin: '8px 0' }}></div>
+                      
+                      <button onClick={handleLogout} style={{ ...dropdownLinkStyle, color: '#ef4444' }}>
+                        🚪 Signout
+                      </button>
+                    </div>
 
-                    </div>
-                  </div>
-                )}
-              </div>
+                  </div>
+                </div>
+              </div>
 
-            </div>
-          )}
-        </div>
-      </nav>
+            </div>
+          )}
+        </div>
+      </nav>
 
-      {/* 🔥 Render Extracted Champion Modal Component */}
-      {showChampionModal && (
-        <ChampionDetailModal 
-          onClose={() => setShowChampionModal(false)} 
-          championUser={championUser} 
-        />
-      )}
-    </>
-  );
+      {/* 🔥 CSS FOR PROFILE HOVER */}
+      <style>{`
+        .profile-dropdown-menu {
+          visibility: hidden;
+          opacity: 0;
+          transform: translateY(-10px);
+          transition: all 0.2s ease-in-out;
+        }
+        .profile-dropdown-container:hover .profile-dropdown-menu {
+          visibility: visible;
+          opacity: 1;
+          transform: translateY(0);
+        }
+      `}</style>
+
+      {/* 🔥 Render Extracted Champion Modal Component */}
+      {showChampionModal && (
+        <ChampionDetailModal 
+          onClose={() => setShowChampionModal(false)} 
+          championUser={championUser} 
+        />
+      )}
+    </>
+  );
 }
 
 // ==========================================

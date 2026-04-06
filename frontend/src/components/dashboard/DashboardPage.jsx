@@ -7,11 +7,13 @@ import {
   getCircleByIdApi,
   getMyCirclesApi,
   removeMemberFromCircleApi,
-  generateInviteLinkApi 
+  generateInviteLinkApi,
+  sendFamilyInviteApi, 
+  deleteCircleApi      
 } from '../../api/circleApi';
 
 import UpcomingEventsWidget from '../../components/dashboard/UpcomingEventsWidget';
-
+import VaultGateway from "../modals/VaultGateway";
 function DashboardPage() {
   const { user, switchActiveCircle } = useAuth();
 
@@ -20,21 +22,25 @@ function DashboardPage() {
   const [selectedCircle, setSelectedCircle] = useState(null);
 
   const [newCircleName, setNewCircleName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState(''); 
 
   const [loadingCircles, setLoadingCircles] = useState(false);
   const [loadingCircleDetails, setLoadingCircleDetails] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [activeAction, setActiveAction] = useState(null);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  // State for Magic Link Copy
   const [linkCopied, setLinkCopied] = useState(false);
-  // State for Family Code Copy
   const [codeCopied, setCodeCopied] = useState(false);
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
+
+  const [inviteTab, setInviteTab] = useState('magic'); 
+
+  // 🔥 VAULT GATEWAY STATE
+  const [showGateway, setShowGateway] = useState(false);
 
   const isGlobalAdmin = user?.role === 'admin';
   const isCircleAdmin = useMemo(() => {
@@ -76,13 +82,21 @@ function DashboardPage() {
     }
   };
 
-  // 🔥 FIX 1: Auto Sync when activeCircleId changes globally
+  // 🔥 CHECK FOR GATEWAY ON FIRST LOAD
   useEffect(() => {
+    const hasSeenGateway = localStorage.getItem('vault_gateway_seen');
+    if (!hasSeenGateway) {
+      setShowGateway(true);
+    }
     loadMyCircles();
   }, []);
 
+  const handleCloseGateway = () => {
+    localStorage.setItem('vault_gateway_seen', 'true');
+    setShowGateway(false);
+  };
+
   useEffect(() => {
-    // Agar Navbar se family change hui, toh local state ko bhi update karo
     if (user?.activeCircleId && user.activeCircleId !== selectedCircleId) {
       setSelectedCircleId(user.activeCircleId);
     }
@@ -104,7 +118,7 @@ function DashboardPage() {
     clearFlash();
     if (!newCircleName.trim()) return setError('Circle name is required');
 
-    setActionLoading(true);
+    setActiveAction('createCircle'); 
     try {
       const created = await createCircleApi({ circleName: newCircleName.trim() });
       setSuccess(`🎉 Family "${created.circleName}" created successfully!`);
@@ -114,7 +128,7 @@ function DashboardPage() {
     } catch (e2) {
       setError(e2?.response?.data?.message || 'Failed to create circle');
     } finally {
-      setActionLoading(false);
+      setActiveAction(null);
     }
   };
 
@@ -125,7 +139,7 @@ function DashboardPage() {
     const ok = window.confirm(`Are you sure you want to remove ${memberName} from this family?`);
     if (!ok) return;
 
-    setActionLoading(true);
+    setActiveAction(`remove_${memberId}`); 
     try {
       await removeMemberFromCircleApi(selectedCircleId, memberId);
       setSuccess(`🗑️ ${memberName} removed successfully.`);
@@ -133,13 +147,61 @@ function DashboardPage() {
     } catch (e2) {
       setError(e2?.response?.data?.message || 'Failed to remove member');
     } finally {
-      setActionLoading(false);
+      setActiveAction(null);
+    }
+  };
+
+  const handleSendDirectInvite = async (e) => {
+    e.preventDefault();
+    clearFlash();
+    if (!inviteEmail.trim()) return setError('Please enter an email address.');
+
+    setActiveAction('sendInvite'); 
+    try {
+      const res = await sendFamilyInviteApi(selectedCircleId, { email: inviteEmail.trim() });
+      setSuccess(`📨 ${res.message}`);
+      setInviteEmail('');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to send invite. Ensure the user is registered.');
+    } finally {
+      setActiveAction(null);
+    }
+  };
+
+  const handleDeleteCircle = async () => {
+    clearFlash();
+    const confirmName = window.prompt(`DANGER ZONE: Are you sure you want to delete "${selectedCircle?.circleName}" permanently?\n\nType the family name to confirm:`);
+    
+    if (confirmName !== selectedCircle?.circleName) {
+      if (confirmName !== null) setError('Family name did not match. Deletion cancelled.');
+      return;
+    }
+
+    setActiveAction('deleteCircle'); 
+    try {
+      await deleteCircleApi(selectedCircleId);
+      setSuccess(`🗑️ Family "${selectedCircle?.circleName}" has been deleted.`);
+      
+      const data = await getMyCirclesApi();
+      const list = Array.isArray(data) ? data : [];
+      setCircles(list);
+      
+      if (list.length > 0) {
+        setSelectedCircleId(list[0]._id);
+      } else {
+        setSelectedCircleId('');
+        setSelectedCircle(null);
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to delete family circle.');
+    } finally {
+      setActiveAction(null);
     }
   };
 
   const handleGenerateInvite = async () => {
     clearFlash();
-    setActionLoading(true);
+    setActiveAction('generateLink'); 
     try {
       const data = await generateInviteLinkApi(selectedCircleId);
       const fullUrl = `${window.location.origin}/invite/${data.token}`;
@@ -148,7 +210,7 @@ function DashboardPage() {
     } catch (err) {
       setError(err?.response?.data?.message || 'Failed to generate invite link');
     } finally {
-      setActionLoading(false);
+      setActiveAction(null);
     }
   };
 
@@ -160,7 +222,6 @@ function DashboardPage() {
     }
   };
 
-  // 🔥 FIX 2: Better Copy Code Handler
   const handleCopyCode = () => {
     const code = selectedCircle?.familyCode || user?.familyCode;
     if (code) {
@@ -171,6 +232,9 @@ function DashboardPage() {
   };
 
   const familyName = selectedCircle?.circleName || selectedCircle?.name || 'Your Family';
+
+  const activeTabStyle = { background: '#fff', color: '#0f172a', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', fontWeight: '700', borderRadius: '8px', padding: '8px 12px', flex: 1, border: 'none', cursor: 'pointer', transition: 'all 0.2s', fontSize: '13px' };
+  const inactiveTabStyle = { background: 'transparent', color: '#64748b', fontWeight: '600', borderRadius: '8px', padding: '8px 12px', flex: 1, border: 'none', cursor: 'pointer', transition: 'all 0.2s', fontSize: '13px' };
 
   return (
     <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '60px', fontFamily: 'system-ui, sans-serif' }}>
@@ -185,7 +249,6 @@ function DashboardPage() {
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '-30px auto 40px', padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', position: 'relative', zIndex: 10 }}>
-        
         <Link to="/vault-stories" style={{ textDecoration: 'none' }}>
           <div className="dash-card" style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'transform 0.2s' }}>
             <div style={{ fontSize: '36px', marginBottom: '12px' }}>📸</div>
@@ -209,7 +272,6 @@ function DashboardPage() {
             <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Track family locations and activity.</p>
           </div>
         </Link>
-
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
@@ -217,11 +279,11 @@ function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #e5e7eb', paddingBottom: '12px', marginBottom: '24px' }}>
           <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#111827' }}>⚙️ Family Management</h2>
           
-          {circles.length > 1 && (
+          {circles.length > 0 && (
             <select 
               value={selectedCircleId} 
               onChange={(e) => setSelectedCircleId(e.target.value)}
-              style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontWeight: '600', color: '#374151', cursor: 'pointer' }}
+              style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontWeight: '600', color: '#374151', cursor: 'pointer', outline: 'none' }}
             >
               {circles.map(c => <option key={c._id} value={c._id}>{c.circleName || c.name}</option>)}
             </select>
@@ -241,6 +303,7 @@ function DashboardPage() {
                 {selectedCircle?.members?.map(m => {
                   const isSelf = String(m._id) === String(user?._id);
                   const isThisMemberAdmin = String(selectedCircle?.admin?._id || selectedCircle?.admin) === String(m._id);
+                  const isRemovingThis = activeAction === `remove_${m._id}`;
 
                   return (
                     <div key={m._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: isSelf ? '#eff6ff' : '#f8fafc', borderRadius: '12px', border: `1px solid ${isSelf ? '#bfdbfe' : '#f1f5f9'}` }}>
@@ -260,10 +323,10 @@ function DashboardPage() {
                       {isCircleAdmin && !isThisMemberAdmin && (
                         <button 
                           onClick={() => handleRemoveMember(m._id, m.name)}
-                          disabled={actionLoading}
-                          style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s' }}
+                          disabled={!!activeAction} 
+                          style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s', opacity: isRemovingThis ? 0.6 : 1 }}
                         >
-                          Remove
+                          {isRemovingThis ? '...' : 'Remove'}
                         </button>
                       )}
                     </div>
@@ -280,71 +343,85 @@ function DashboardPage() {
             )}
             
             {isCircleAdmin ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', border: '1px solid #e5e7eb', boxShadow: '0 4px 10px rgba(0,0,0,0.03)' }}>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#111827' }}>➕ Invite Members</h3>
                 
-                {/* OPTION 1: THE MANUAL SHORT CODE */}
-                <div style={{ background: '#fff', borderRadius: '20px', padding: '20px', border: '1px solid #e5e7eb', boxShadow: '0 4px 10px rgba(0,0,0,0.02)' }}>
-                  <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#111827' }}>🔑 Family Code</h3>
-                  <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Share this short code for manual signups.</p>
-                  
-                  <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '12px', border: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '18px', fontWeight: '900', color: '#0f172a', letterSpacing: '1px' }}>
-                      {selectedCircle?.familyCode || user?.familyCode || 'Loading...'}
-                    </span>
+                <div style={{ display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '12px', marginBottom: '20px', gap: '4px' }}>
+                  <button onClick={() => setInviteTab('magic')} style={inviteTab === 'magic' ? activeTabStyle : inactiveTabStyle}>🪄 Magic Link</button>
+                  <button onClick={() => setInviteTab('direct')} style={inviteTab === 'direct' ? activeTabStyle : inactiveTabStyle}>📨 Direct</button>
+                  <button onClick={() => setInviteTab('code')} style={inviteTab === 'code' ? activeTabStyle : inactiveTabStyle}>🔑 Code</button>
+                </div>
+
+                {inviteTab === 'magic' && (
+                  <div style={{ animation: 'fadeIn 0.3s' }}>
+                    <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Generate a secure link or QR code to let members join instantly.</p>
                     <button 
-                      onClick={handleCopyCode} // 🔥 Using new safe copy handler
-                      style={{ 
-                        background: codeCopied ? '#10b981' : '#e2e8f0', 
-                        color: codeCopied ? '#fff' : '#475569', 
-                        border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s' 
-                      }}
+                      onClick={handleGenerateInvite} 
+                      disabled={!!activeAction} 
+                      style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '12px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', width: '100%', fontSize: '14px', transition: 'all 0.2s', opacity: activeAction === 'generateLink' ? 0.7 : 1 }}
                     >
-                      {codeCopied ? 'Copied!' : 'Copy Code'}
+                      {activeAction === 'generateLink' ? 'Generating...' : 'Generate Magic Invite'}
                     </button>
                   </div>
-                </div>
+                )}
 
-                {/* OPTION 2: THE MAGIC LINK */}
-                <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: '20px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', color: '#fff' }}>
-                  <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>🪄</span> Magic Invite Link
-                  </h3>
-                  <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px', lineHeight: '1.5' }}>
-                    Generate a secure link or QR code to let family members join instantly without typing a code.
-                  </p>
-                  
-                  <button 
-                    onClick={handleGenerateInvite} 
-                    disabled={actionLoading} 
-                    style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '14px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', width: '100%', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'background 0.2s', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}
-                    onMouseOver={(e) => e.currentTarget.style.background = '#2563eb'}
-                    onMouseOut={(e) => e.currentTarget.style.background = '#3b82f6'}
-                  >
-                    {actionLoading ? 'Generating Link...' : 'Generate Invite Link'}
-                  </button>
-                </div>
+                {inviteTab === 'direct' && (
+                  <div style={{ animation: 'fadeIn 0.3s' }}>
+                    <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Send a join request directly to a registered user's notification bell.</p>
+                    <form onSubmit={handleSendDirectInvite} style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="email" placeholder="User's email..." 
+                        value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} 
+                        required 
+                        style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }} 
+                      />
+                      <button type="submit" disabled={!!activeAction} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '0 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: activeAction === 'sendInvite' ? 0.7 : 1 }}>
+                        {activeAction === 'sendInvite' ? '...' : 'Send'}
+                      </button>
+                    </form>
+                  </div>
+                )}
 
+                {inviteTab === 'code' && (
+                  <div style={{ animation: 'fadeIn 0.3s' }}>
+                    <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Share this short code for manual signups on the registration page.</p>
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '12px', border: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '18px', fontWeight: '900', color: '#0f172a', letterSpacing: '1px' }}>
+                        {selectedCircle?.familyCode || user?.familyCode || '---'}
+                      </span>
+                      <button 
+                        onClick={handleCopyCode} 
+                        style={{ background: codeCopied ? '#10b981' : '#e2e8f0', color: codeCopied ? '#fff' : '#475569', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s' }}
+                      >
+                        {codeCopied ? 'Copied!' : 'Copy Code'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{ background: '#f8fafc', borderRadius: '20px', padding: '24px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
                 <div style={{ fontSize: '30px', marginBottom: '8px' }}>🔒</div>
                 <h3 style={{ margin: '0 0 8px 0', color: '#374151', fontSize: '1.1rem' }}>Admin Access Required</h3>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Only the family admin can invite new members.</p>
+                <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Only the family admin can invite members or manage settings.</p>
               </div>
             )}
 
-            {isGlobalAdmin && (
-              <div style={{ background: 'linear-gradient(to right, #f8fafc, #eff6ff)', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', border: '1px solid #bfdbfe' }}>
-                <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#1e3a8a' }}>➕ Create New Family Circle</h3>
-                <form onSubmit={handleCreateCircle} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <input type="text" value={newCircleName} onChange={(e) => setNewCircleName(e.target.value)} placeholder="e.g. The Thakur Extended Family" required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #93c5fd', width: '100%', boxSizing: 'border-box' }} />
-                  <button type="submit" disabled={actionLoading} style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', transition: 'background 0.2s' }}>
-                    {actionLoading ? 'Creating...' : 'Create Circle'}
-                  </button>
-                </form>
+            {isCircleAdmin && selectedCircleId && (
+              <div style={{ background: '#fef2f2', borderRadius: '20px', padding: '20px', border: '1px dashed #f87171' }}>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', color: '#b91c1c' }}>🚨 Danger Zone</h3>
+                <p style={{ color: '#7f1d1d', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Permanently delete this family circle. This action cannot be undone.</p>
+                <button 
+                  onClick={handleDeleteCircle} 
+                  disabled={!!activeAction}
+                  style={{ background: '#dc2626', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s', opacity: activeAction === 'deleteCircle' ? 0.7 : 1 }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#b91c1c'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#dc2626'}
+                >
+                  {activeAction === 'deleteCircle' ? 'Deleting...' : 'Delete Family Vault'}
+                </button>
               </div>
             )}
-
           </div>
         </div>
       </div>
@@ -353,9 +430,7 @@ function DashboardPage() {
       {showInviteModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '32px', width: '100%', maxWidth: '400px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', textAlign: 'center', position: 'relative', animation: 'scaleUp 0.3s ease-out' }}>
-            
             <button onClick={() => setShowInviteModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', color: '#64748b', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
-
             <h2 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800' }}>Scan to Join</h2>
             <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>Have them scan this QR code or share the link below. Valid for 48 hours.</p>
 
@@ -364,30 +439,22 @@ function DashboardPage() {
             </div>
 
             <div style={{ background: '#f1f5f9', borderRadius: '12px', display: 'flex', padding: '6px', border: '1px solid #e2e8f0' }}>
-              <input 
-                type="text" 
-                value={inviteLink} 
-                readOnly 
-                style={{ flex: 1, background: 'transparent', border: 'none', padding: '10px', fontSize: '13px', color: '#475569', outline: 'none' }} 
-              />
-              <button 
-                onClick={handleCopyLink} 
-                style={{ background: linkCopied ? '#10b981' : '#0f172a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s' }}
-              >
+              <input type="text" value={inviteLink} readOnly style={{ flex: 1, background: 'transparent', border: 'none', padding: '10px', fontSize: '13px', color: '#475569', outline: 'none' }} />
+              <button onClick={handleCopyLink} style={{ background: linkCopied ? '#10b981' : '#0f172a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s' }}>
                 {linkCopied ? 'Copied!' : 'Copy'}
               </button>
             </div>
-
           </div>
         </div>
       )}
 
+      {/* 🎬 VAULT GATEWAY COMPONENT */}
+      {showGateway && <VaultGateway onClose={handleCloseGateway} />}
+
       <style>{`
         .dash-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08) !important; border-color: #d1d5db !important; }
-        @keyframes scaleUp {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   );
