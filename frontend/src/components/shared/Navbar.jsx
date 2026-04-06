@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { getMyCirclesApi } from '../../api/circleApi';
 import api from '../../api/axios';
 import { io } from 'socket.io-client';
-import ChampionDetailModal from '../modals/ChampionDetailModal'; // 🔥 Ye modal yahan imported hai
+import ChampionDetailModal from '../modals/ChampionDetailModal'; 
 import { motion } from 'framer-motion';
 
 // 🔥 Layout Wrapper
@@ -28,6 +28,10 @@ function Navbar({ children }) {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // 🔥 STREAK LOGIC
+  // Current streak backend se aayegi. Jab user login hai, hum assume kar rahe hain aaj visit ho gaya (always filled).
+  const currentStreak = user?.currentStreak || 0;
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -225,6 +229,7 @@ function Navbar({ children }) {
               )}
             </div>
 
+            {/* 🔔 Notifications */}
             <div ref={notifRef} style={{ position: 'relative' }}>
               <motion.button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)} 
@@ -258,6 +263,32 @@ function Navbar({ children }) {
               )}
             </div>
 
+            {/* 🔥 THE LEGACY FLAME (STREAK INDICATOR) - Placed correctly! */}
+            <div 
+              title="Your active legacy streak!"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '6px 12px', borderRadius: '99px',
+                background: 'linear-gradient(135deg, #fef08a 0%, #fde047 100%)', // Always filled gold
+                border: '1px solid #facc15',
+                boxShadow: '0 0 10px rgba(234, 179, 8, 0.4)', // Glowing effect
+                color: '#a16207',
+                fontWeight: '800', fontSize: '14px',
+                transition: 'all 0.3s ease', cursor: 'default'
+              }}
+            >
+              <svg 
+                width="18" height="18" viewBox="0 0 24 24" 
+                fill="#eab308" // Solid fill
+                stroke="#ca8a04" 
+                strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+              </svg>
+              <span>{currentStreak}</span>
+            </div>
+
+            {/* 👤 Profile */}
             <div className="profile-dropdown-container" style={{ position: 'relative' }}>
               <motion.button 
                 onClick={() => navigate('/profile')} 
@@ -272,7 +303,6 @@ function Navbar({ children }) {
                  <div style={profileDropdownStyle} className="profile-dropdown-box">
                      <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc' }}><img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} /><div style={{ overflow: 'hidden' }}><div style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'User'}</div><div style={{ color: '#64748b', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div></div></div>
                   <div style={{ padding: '8px' }}>
-                    {/* 🔥 THE BUTTON THAT TRIGGERS THE MODAL IS HERE */}
                     <button onClick={() => setShowChampionModal(true)} style={dropdownLinkStyle}>👑 Top Contributor</button>
                     <Link to="/profile?edit=true" style={dropdownLinkStyle}>✏️ Edit Profile</Link>
                     <div style={{ height: '1px', background: '#e2e8f0', margin: '8px 0' }}></div>
@@ -286,7 +316,6 @@ function Navbar({ children }) {
         <main className="page-wrapper">{children}</main>
       </div>
 
-      {/* 🔥 CHAMPION MODAL RESTORED HERE 🔥 */}
       {showChampionModal && (
         <ChampionDetailModal 
           champion={championUser} 
@@ -309,7 +338,7 @@ function Navbar({ children }) {
         .hamburger-btn { background: transparent; border: none; color: #334155; cursor: pointer; padding: 10px; border-radius: 12px; display: flex; align-items: center; transition: background 0.2s; z-index: 60; }
         .hamburger-btn:hover { background: #f1f5f9; color: #0f172a; }
 
-        /* 🔥 BRAND LOGO IN HEADER */
+        /* BRAND LOGO IN HEADER */
         .header-brand { display: flex; align-items: center; gap: 10px; margin-left: 8px; text-decoration: none; cursor: pointer; transition: opacity 0.3s; }
         .header-brand-text { font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; transition: color 0.2s ease; }
         .header-brand:hover .header-brand-text { color: #3b82f6; }

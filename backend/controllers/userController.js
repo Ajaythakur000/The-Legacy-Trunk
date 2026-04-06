@@ -1,6 +1,8 @@
 import FamilyMember from '../models/familyMember.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import jwt from 'jsonwebtoken';
+// 🔥 IMPORT GAMIFICATION SERVICE
+import { handleDailyLogin } from './gamificationService.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -33,6 +35,10 @@ const buildUserResponse = (user) => ({
   
   // Login ke time temporary 0 bhejo, profile aate hi update ho jayega
   bondPoints: 0, 
+
+  // 🔥 SENDING NEW STREAK DATA TO FRONTEND
+  currentStreak: user.currentStreak || 0,
+  maxStreak: user.maxStreak || 0,
 
   activeCircleId: user.activeCircleId || null,
   familyCircleId: user.activeCircleId || null,
@@ -97,7 +103,12 @@ const registerUser = async (req, res) => {
       });
     }
 
-    return res.status(201).json(buildUserResponse(user));
+    // 🔥 Call logic for first login registration streak
+    await handleDailyLogin(user._id, user.activeCircleId);
+
+    // Fetch fresh user for updated streak data
+    const freshUser = await FamilyMember.findById(user._id);
+    return res.status(201).json(buildUserResponse(freshUser));
   } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
@@ -114,7 +125,12 @@ const loginUser = async (req, res) => {
     const user = await FamilyMember.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
-      return res.json(buildUserResponse(user));
+      // 🔥 TRIGGER LOGIN GAMIFICATION BEFORE SENDING RESPONSE
+      await handleDailyLogin(user._id, user.activeCircleId);
+      
+      // Fetch user again to get updated streak info
+      const freshUser = await FamilyMember.findById(user._id);
+      return res.json(buildUserResponse(freshUser));
     }
     return res.status(401).json({ message: 'Invalid email or password' });
   } catch (error) {
@@ -123,15 +139,22 @@ const loginUser = async (req, res) => {
 };
 
 // ==========================================
-// 🔥 PROFILE WITH FAMILY BOND POINTS
+// 🔥 PROFILE WITH FAMILY BOND POINTS & GRAPH DATA
 // ==========================================
 const getUserProfile = async (req, res) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });
   }
 
-  // Active Circle populate karke points nikal rahe hain
   const userWithCircle = await FamilyMember.findById(req.user._id).populate('activeCircleId', 'familyBondPoints');
+
+  // Activity map conversion to plain JS object for frontend
+  const activityMapPlain = {};
+  if (userWithCircle.activityMap) {
+    for (let [key, value] of userWithCircle.activityMap.entries()) {
+      activityMapPlain[key] = value;
+    }
+  }
 
   return res.json({
     _id: userWithCircle._id,
@@ -144,8 +167,12 @@ const getUserProfile = async (req, res) => {
     bio: userWithCircle.bio,
     dateOfBirth: userWithCircle.dateOfBirth,
     
-    // 💎 Family Points assigned to User UI
+    // 💎 Points & Streaks
     bondPoints: userWithCircle.activeCircleId?.familyBondPoints || 0,
+    currentStreak: userWithCircle.currentStreak || 0,
+    maxStreak: userWithCircle.maxStreak || 0,
+    totalContributionPoints: userWithCircle.totalContributionPoints || 0,
+    activityMap: activityMapPlain, // 🔥 Sent to frontend for Heatmap Graph
 
     activeCircleId: userWithCircle.activeCircleId?._id || null,
     familyCircleId: userWithCircle.activeCircleId?._id || null,
@@ -159,22 +186,15 @@ const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Normal text fields update
     if (req.body.name) user.name = req.body.name.trim();
     if (req.body.bio) user.bio = req.body.bio.trim();
     if (req.body.dateOfBirth) user.dateOfBirth = req.body.dateOfBirth;
     if (req.body.password) user.password = req.body.password; 
 
-    // ==========================================
-    // 🔥 NAYA: Family Circle Switch Logic
-    // ==========================================
     if (req.body.activeCircleId) {
       user.activeCircleId = req.body.activeCircleId;
     }
 
-    // ==========================================
-    // 📸 IMAGE UPLOAD LOGIC (Cloudinary Magic)
-    // ==========================================
     if (req.file) {
       user.avatar = req.file.path || req.file.secure_url;
     } else if (req.body.avatar && typeof req.body.avatar === 'string') {
@@ -183,9 +203,7 @@ const updateUserProfile = async (req, res) => {
 
     const updatedUser = await user.save();
     
-    // Fresh points lene ke liye populate
     const freshUser = await FamilyMember.findById(updatedUser._id).populate('activeCircleId', 'familyBondPoints');
-
     const response = buildUserResponse(freshUser);
     response.bondPoints = freshUser.activeCircleId?.familyBondPoints || 0; 
 

@@ -86,6 +86,40 @@ const familyMemberSchema = new Schema(
       type: Boolean,
       default: false,
     },
+
+    // ==============================
+    // 🔥 GAMIFICATION & STREAKS (NEW)
+    // ==============================
+    
+    // 1. Daily Login Streak System
+    currentStreak: {
+      type: Number,
+      default: 0
+    },
+    maxStreak: {
+      type: Number,
+      default: 0
+    },
+    lastLoginDate: {
+      type: String, // Store as "YYYY-MM-DD" for easy comparison
+      default: null
+    },
+
+    // 2. Activity Heatmap Graph Data (The Yellow GitHub Graph)
+    // Keys will be dates "2026-04-07", values will be the point score for that day.
+    activityMap: {
+      type: Map,
+      of: Number,
+      default: {}
+    },
+
+    // 3. User's Personal Contribution to the Family Bond
+    // To track who is the "Top Contributor"
+    totalContributionPoints: {
+      type: Number,
+      default: 0,
+      min: 0
+    }
   },
   {
     timestamps: true,

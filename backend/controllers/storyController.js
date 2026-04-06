@@ -1,7 +1,9 @@
 import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
-import Notification from '../models/notificationModel.js'; // 🔥 IMPORTED NOTIFICATION MODEL
+import Notification from '../models/notificationModel.js';
+// 🔥 IMPORT GAMIFICATION SERVICE (Adjust path if needed)
+import { awardPoints } from './gamificationService.js'; 
 
 const createStory = async (req, res) => {
   try {
@@ -49,10 +51,9 @@ const createStory = async (req, res) => {
 
     const createdStory = await story.save();
 
+    // 🔥 NEW: Award 10 points for posting a story (to both User Heatmap & Family)
     if (targetCircleId) {
-      await FamilyCircle.findByIdAndUpdate(targetCircleId, {
-        $inc: { familyBondPoints: 10 }
-      });
+      await awardPoints(req.user._id, targetCircleId, 10);
     }
 
     const populated = await Story.findById(createdStory._id)
@@ -68,6 +69,148 @@ const createStory = async (req, res) => {
     
   } catch (error) {
     console.error("Story Creation Error:", error);
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
+};
+
+const deleteStory = async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    const isAuthor = story.user.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isAuthor && !isAdmin) {
+      return res.status(401).json({ message: 'Not authorized to delete this story' });
+    }
+
+    // 🔥 NEW: Deduct 10 points when story is deleted
+    if (story.originCircleId) {
+      await awardPoints(story.user, story.originCircleId, -10);
+    }
+
+    await Story.deleteOne({ _id: req.params.id });
+    return res.status(200).json({ message: 'Story removed successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
+};
+
+const toggleLikeStory = async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    const userId = req.user._id.toString();
+    const storyOwnerId = story.user.toString();
+    const alreadyLiked = story.likes.some((id) => id.toString() === userId);
+
+    const isDifferentFamily = 
+      story.originCircleId && 
+      req.user.activeCircleId && 
+      story.originCircleId.toString() !== req.user.activeCircleId.toString();
+
+    const isGlobalLike = story.isGlobalPublic && isDifferentFamily;
+    
+    // 🔥 UPDATED LOGIC: Global Like = 4 points, Family Like = 2 points
+    const pointsToAward = isGlobalLike ? 4 : 2;
+
+    if (alreadyLiked) {
+      story.likes = story.likes.filter((id) => id.toString() !== userId);
+    } else {
+      story.likes.push(req.user._id);
+      
+      // Send Notification
+      if (userId !== storyOwnerId) {
+        const io = req.app.get('io');
+        const newNotif = await Notification.create({
+          recipient: storyOwnerId,
+          sender: req.user._id,
+          type: 'like',
+          storyId: story._id,
+          message: `${req.user.name} liked your memory: "${story.title}"`
+        });
+        if (io) {
+          io.to(storyOwnerId).emit('new_notification', newNotif);
+        }
+      }
+    }
+
+    await story.save();
+
+    // 🔥 NEW: Award points to the USER WHO LIKED IT (for their heatmap)
+    if (userId !== storyOwnerId && story.originCircleId) {
+      const pointModifier = alreadyLiked ? -pointsToAward : pointsToAward;
+      await awardPoints(req.user._id, story.originCircleId, pointModifier);
+    }
+
+    return res.status(200).json({
+      message: alreadyLiked ? 'Story unliked' : 'Story liked',
+      likesCount: story.likes.length,
+      likes: story.likes,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server Error: ' + error.message });
+  }
+};
+
+const addCommentToStory = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text || !String(text).trim()) {
+      return res.status(400).json({ message: 'Comment text is required' });
+    }
+
+    const story = await Story.findById(req.params.id);
+    if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    story.comments.push({
+      user: req.user._id,
+      text: String(text).trim(),
+    });
+
+    await story.save();
+
+    const userId = req.user._id.toString();
+    const storyOwnerId = story.user.toString();
+
+    // Notification Logic
+    if (userId !== storyOwnerId) {
+      const io = req.app.get('io');
+      const newNotif = await Notification.create({
+        recipient: storyOwnerId,
+        sender: req.user._id,
+        type: 'comment',
+        storyId: story._id,
+        message: `${req.user.name} commented: "${text.substring(0, 30)}..."`
+      });
+      if (io) {
+        io.to(storyOwnerId).emit('new_notification', newNotif);
+      }
+    }
+
+    // 🔥 NEW LOGIC: Family Comment = 4 points, Global Comment = 8 points
+    const isDifferentFamily = story.originCircleId && req.user.activeCircleId && story.originCircleId.toString() !== req.user.activeCircleId.toString();
+    const isGlobalComment = story.isGlobalPublic && isDifferentFamily;
+    const pointsToAward = isGlobalComment ? 8 : 4;
+
+    if (userId !== storyOwnerId && story.originCircleId) {
+      // Award points to the USER WHO COMMENTED
+      await awardPoints(req.user._id, story.originCircleId, pointsToAward);
+    }
+
+    const populatedStory = await Story.findById(story._id)
+      .populate('comments.user', 'name')
+      .populate('user', 'name');
+
+    return res.status(201).json({
+      message: 'Comment added successfully',
+      commentsCount: populatedStory.comments.length,
+      comments: populatedStory.comments,
+    });
+  } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }
 };
@@ -166,142 +309,6 @@ const updateStory = async (req, res) => {
 
     const updatedStory = await story.save();
     return res.status(200).json(updatedStory);
-  } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
-  }
-};
-
-const deleteStory = async (req, res) => {
-  try {
-    const story = await Story.findById(req.params.id);
-    if (!story) return res.status(404).json({ message: 'Story not found' });
-
-    const isAuthor = story.user.toString() === req.user._id.toString();
-    const isAdmin = req.user.role === 'admin';
-
-    if (!isAuthor && !isAdmin) {
-      return res.status(401).json({ message: 'Not authorized to delete this story' });
-    }
-
-    await Story.deleteOne({ _id: req.params.id });
-    return res.status(200).json({ message: 'Story removed successfully' });
-  } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
-  }
-};
-
-const toggleLikeStory = async (req, res) => {
-  try {
-    const story = await Story.findById(req.params.id);
-    if (!story) return res.status(404).json({ message: 'Story not found' });
-
-    const userId = req.user._id.toString();
-    const storyOwnerId = story.user.toString();
-    const alreadyLiked = story.likes.some((id) => id.toString() === userId);
-
-    const isDifferentFamily = 
-      story.originCircleId && 
-      req.user.activeCircleId && 
-      story.originCircleId.toString() !== req.user.activeCircleId.toString();
-
-    const isGlobalLike = story.isGlobalPublic && isDifferentFamily;
-    const pointsToAward = isGlobalLike ? 10 : 5;
-
-    if (alreadyLiked) {
-      story.likes = story.likes.filter((id) => id.toString() !== userId);
-    } else {
-      story.likes.push(req.user._id);
-      
-      // 🔥 NEW: NOTIFICATION ENGINE (Send Notification if someone else likes)
-      if (userId !== storyOwnerId) {
-        const io = req.app.get('io');
-        const newNotif = await Notification.create({
-          recipient: storyOwnerId,
-          sender: req.user._id,
-          type: 'like',
-          storyId: story._id,
-          message: `${req.user.name} liked your memory: "${story.title}"`
-        });
-        
-        // Emit real-time specific to the story owner
-        if (io) {
-          io.to(storyOwnerId).emit('new_notification', newNotif);
-        }
-      }
-    }
-
-    await story.save();
-
-    if (userId !== storyOwnerId && story.originCircleId) {
-      const pointModifier = alreadyLiked ? -pointsToAward : pointsToAward;
-      await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
-        $inc: { familyBondPoints: pointModifier }
-      });
-    }
-
-    return res.status(200).json({
-      message: alreadyLiked ? 'Story unliked' : 'Story liked',
-      likesCount: story.likes.length,
-      likes: story.likes,
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
-  }
-};
-
-const addCommentToStory = async (req, res) => {
-  try {
-    const { text } = req.body;
-
-    if (!text || !String(text).trim()) {
-      return res.status(400).json({ message: 'Comment text is required' });
-    }
-
-    const story = await Story.findById(req.params.id);
-    if (!story) return res.status(404).json({ message: 'Story not found' });
-
-    story.comments.push({
-      user: req.user._id,
-      text: String(text).trim(),
-    });
-
-    await story.save();
-
-    const userId = req.user._id.toString();
-    const storyOwnerId = story.user.toString();
-
-    // 🔥 NEW: NOTIFICATION ENGINE (Send Notification if someone else comments)
-    if (userId !== storyOwnerId) {
-      const io = req.app.get('io');
-      const newNotif = await Notification.create({
-        recipient: storyOwnerId,
-        sender: req.user._id,
-        type: 'comment',
-        storyId: story._id,
-        message: `${req.user.name} commented: "${text.substring(0, 30)}..."`
-      });
-      
-      // Emit real-time specific to the story owner
-      if (io) {
-        io.to(storyOwnerId).emit('new_notification', newNotif);
-      }
-    }
-
-    if (userId !== storyOwnerId && story.originCircleId) {
-      await FamilyCircle.findByIdAndUpdate(story.originCircleId, {
-        $inc: { familyBondPoints: 5 }
-      });
-    }
-
-    const populatedStory = await Story.findById(story._id)
-      .populate('comments.user', 'name')
-      .populate('user', 'name');
-
-    return res.status(201).json({
-      message: 'Comment added successfully',
-      commentsCount: populatedStory.comments.length,
-      comments: populatedStory.comments,
-    });
   } catch (error) {
     return res.status(500).json({ message: 'Server Error: ' + error.message });
   }

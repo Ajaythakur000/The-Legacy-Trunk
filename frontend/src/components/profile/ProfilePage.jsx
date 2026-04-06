@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { updateUserProfileApi } from '../../api/authApi';
 import FamilyLegacyCard from './FamilyLegacyCard';
+import ActivityHeatmap from './ActivityHeatmap'; // 🔥 Import the new graph
 
 function ProfilePage() {
   const { user } = useAuth(); 
@@ -74,57 +75,72 @@ function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div style={{ backgroundColor: '#f3f4f6', minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '40px 32px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         
-        {/* 🏆 PREMIUM PROFILE CARD */}
-        <div style={{ background: '#fff', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
-          <div style={{ height: '160px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}></div>
+        {/* 🔥 SIDE-BY-SIDE LAYOUT: Grid container */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
           
-          <div style={{ padding: '0 40px 40px', marginTop: '-80px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ width: '160px', height: '160px', borderRadius: '50%', border: '8px solid #fff', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', background: '#f3f4f6' }}>
-              <img src={user?.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#111827', margin: '20px 0 5px' }}>{user?.name}</h1>
-            <p style={{ color: '#6b7280', fontWeight: '600', fontSize: '1.1rem' }}>{user?.email}</p>
+          {/* 🏆 PREMIUM PROFILE CARD (LEFT) */}
+          <div style={{ background: '#fff', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ height: '120px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}></div>
             
-            <p style={{ marginTop: '20px', textAlign: 'center', color: '#4b5563', maxWidth: '600px', fontSize: '1.1rem', fontStyle: 'italic', lineHeight: '1.6' }}>
-              "{user?.bio || 'Preserving our family legacy, one story at a time.'}"
-            </p>
+            <div style={{ padding: '0 40px 40px', marginTop: '-60px', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+              <div style={{ width: '120px', height: '120px', borderRadius: '50%', border: '6px solid #fff', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', background: '#f3f4f6' }}>
+                <img src={user?.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
 
-            <button 
-              onClick={() => setIsEditing(true)}
-              style={{ marginTop: '30px', padding: '12px 30px', background: '#111827', color: '#fff', borderRadius: '16px', border: 'none', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
-            >
-              ✏️ Edit Profile
-            </button>
+              <h1 style={{ fontSize: '2rem', fontWeight: '900', color: '#111827', margin: '16px 0 4px' }}>{user?.name}</h1>
+              <p style={{ color: '#64748b', fontWeight: '600', fontSize: '1rem', marginBottom: '16px' }}>{user?.email}</p>
+              
+              <p style={{ textAlign: 'center', color: '#475569', fontSize: '1rem', fontStyle: 'italic', lineHeight: '1.5', flex: 1 }}>
+                "{user?.bio || 'Preserving our family legacy, one story at a time.'}"
+              </p>
+
+              <button 
+                onClick={() => setIsEditing(true)}
+                style={{ marginTop: '24px', padding: '12px 24px', background: '#f1f5f9', color: '#0f172a', borderRadius: '12px', border: '1px solid #e2e8f0', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s', width: '100%' }}
+                onMouseOver={e=>e.currentTarget.style.background='#e2e8f0'}
+                onMouseOut={e=>e.currentTarget.style.background='#f1f5f9'}
+              >
+                ✏️ Edit Profile
+              </button>
+            </div>
           </div>
+
+          {/* 💎 THE IMPORTED FAMILY LEGACY CARD (RIGHT) */}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <FamilyLegacyCard familyPoints={familyPoints} />
+          </div>
+
         </div>
 
-        {/* 💎 THE IMPORTED FAMILY LEGACY CARD */}
-        <FamilyLegacyCard familyPoints={familyPoints} />
-
+        {/* 🔥 THE YELLOW ACTIVITY HEATMAP (BOTTOM - FULL WIDTH) */}
+        {/* In ProfilePage.jsx at the bottom */}
+<ActivityHeatmap 
+  activityMap={user?.activityMap || {}} 
+  currentStreak={user?.currentStreak || 0}
+  maxStreak={user?.maxStreak || 0}
+/>
       </div>
 
-      {/* 🛠️ EDIT PROFILE MODAL (FIXED SCROLL & UI) */}
+      {/* 🛠️ EDIT PROFILE MODAL */}
       {isEditing && (
         <div style={{ 
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
           backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', 
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, 
           padding: '20px', 
-          overflowY: 'auto' // 🔥 THIS FIXES THE SCROLL ISSUE
+          overflowY: 'auto' 
         }}>
           
           <div style={{ 
             background: '#fff', borderRadius: '24px', width: '100%', maxWidth: '450px', 
             padding: '32px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', 
             animation: 'fadeIn 0.2s ease-out', position: 'relative',
-            marginTop: 'auto', marginBottom: 'auto' // Helps center vertically if taller than screen
+            marginTop: 'auto', marginBottom: 'auto' 
           }}>
             
-            {/* ✕ CLOSE BUTTON */}
             <button 
               onClick={() => setIsEditing(false)} 
               style={{ position: 'absolute', top: '24px', right: '24px', background: '#f1f5f9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', color: '#64748b', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
@@ -138,7 +154,7 @@ function ProfilePage() {
             
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* 🔥 IMAGE UPLOAD SECTION */}
+              {/* IMAGE UPLOAD SECTION */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
                 <div 
                   onClick={() => fileInputRef.current.click()}
