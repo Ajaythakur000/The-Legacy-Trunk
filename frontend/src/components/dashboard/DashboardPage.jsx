@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react'; 
+import { motion, AnimatePresence } from 'framer-motion'; // 🔥 IMPORTED FRAMER MOTION
 import {
   createCircleApi,
   getCircleByIdApi,
@@ -14,6 +15,7 @@ import {
 
 import UpcomingEventsWidget from '../../components/dashboard/UpcomingEventsWidget';
 import VaultGateway from "../modals/VaultGateway";
+
 function DashboardPage() {
   const { user, switchActiveCircle } = useAuth();
 
@@ -82,7 +84,6 @@ function DashboardPage() {
     }
   };
 
-  // 🔥 CHECK FOR GATEWAY ON FIRST LOAD
   useEffect(() => {
     const hasSeenGateway = localStorage.getItem('vault_gateway_seen');
     if (!hasSeenGateway) {
@@ -249,28 +250,42 @@ function DashboardPage() {
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '-30px auto 40px', padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', position: 'relative', zIndex: 10 }}>
+        
+        {/* 🔥 ANIMATED CARDS */}
         <Link to="/vault-stories" style={{ textDecoration: 'none' }}>
-          <div className="dash-card" style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'transform 0.2s' }}>
+          <motion.div 
+            whileHover={{ y: -5, boxShadow: '0 15px 35px rgba(0,0,0,0.08)', borderColor: '#d1d5db' }} 
+            whileTap={{ scale: 0.98 }} 
+            style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'border-color 0.2s' }}
+          >
             <div style={{ fontSize: '36px', marginBottom: '12px' }}>📸</div>
             <h2 style={{ margin: '0 0 6px 0', color: '#111827', fontSize: '1.2rem' }}>Vault Stories</h2>
             <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Share private family photos and memories.</p>
-          </div>
+          </motion.div>
         </Link>
 
         <Link to="/vault" style={{ textDecoration: 'none' }}>
-          <div className="dash-card" style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'transform 0.2s' }}>
+          <motion.div 
+            whileHover={{ y: -5, boxShadow: '0 15px 35px rgba(0,0,0,0.08)', borderColor: '#d1d5db' }} 
+            whileTap={{ scale: 0.98 }} 
+            style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'border-color 0.2s' }}
+          >
             <div style={{ fontSize: '36px', marginBottom: '12px' }}>💬</div>
             <h2 style={{ margin: '0 0 6px 0', color: '#111827', fontSize: '1.2rem' }}>Family Chat</h2>
             <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Secure, encrypted real-time messaging room.</p>
-          </div>
+          </motion.div>
         </Link>
 
         <Link to="/radar" style={{ textDecoration: 'none' }}>
-          <div className="dash-card" style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'transform 0.2s' }}>
+          <motion.div 
+            whileHover={{ y: -5, boxShadow: '0 15px 35px rgba(0,0,0,0.08)', borderColor: '#d1d5db' }} 
+            whileTap={{ scale: 0.98 }} 
+            style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'border-color 0.2s' }}
+          >
             <div style={{ fontSize: '36px', marginBottom: '12px' }}>📡</div>
             <h2 style={{ margin: '0 0 6px 0', color: '#111827', fontSize: '1.2rem' }}>Live Radar</h2>
             <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Track family locations and activity.</p>
-          </div>
+          </motion.div>
         </Link>
       </div>
 
@@ -321,13 +336,15 @@ function DashboardPage() {
                       </div>
 
                       {isCircleAdmin && !isThisMemberAdmin && (
-                        <button 
+                        <motion.button 
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                           onClick={() => handleRemoveMember(m._id, m.name)}
                           disabled={!!activeAction} 
                           style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s', opacity: isRemovingThis ? 0.6 : 1 }}
                         >
                           {isRemovingThis ? '...' : 'Remove'}
-                        </button>
+                        </motion.button>
                       )}
                     </div>
                   );
@@ -347,21 +364,23 @@ function DashboardPage() {
                 <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#111827' }}>➕ Invite Members</h3>
                 
                 <div style={{ display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '12px', marginBottom: '20px', gap: '4px' }}>
-                  <button onClick={() => setInviteTab('magic')} style={inviteTab === 'magic' ? activeTabStyle : inactiveTabStyle}>🪄 Magic Link</button>
-                  <button onClick={() => setInviteTab('direct')} style={inviteTab === 'direct' ? activeTabStyle : inactiveTabStyle}>📨 Direct</button>
-                  <button onClick={() => setInviteTab('code')} style={inviteTab === 'code' ? activeTabStyle : inactiveTabStyle}>🔑 Code</button>
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setInviteTab('magic')} style={inviteTab === 'magic' ? activeTabStyle : inactiveTabStyle}>🪄 Magic Link</motion.button>
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setInviteTab('direct')} style={inviteTab === 'direct' ? activeTabStyle : inactiveTabStyle}>📨 Direct</motion.button>
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setInviteTab('code')} style={inviteTab === 'code' ? activeTabStyle : inactiveTabStyle}>🔑 Code</motion.button>
                 </div>
 
                 {inviteTab === 'magic' && (
                   <div style={{ animation: 'fadeIn 0.3s' }}>
                     <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Generate a secure link or QR code to let members join instantly.</p>
-                    <button 
+                    <motion.button 
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={handleGenerateInvite} 
                       disabled={!!activeAction} 
                       style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '12px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', width: '100%', fontSize: '14px', transition: 'all 0.2s', opacity: activeAction === 'generateLink' ? 0.7 : 1 }}
                     >
                       {activeAction === 'generateLink' ? 'Generating...' : 'Generate Magic Invite'}
-                    </button>
+                    </motion.button>
                   </div>
                 )}
 
@@ -375,9 +394,15 @@ function DashboardPage() {
                         required 
                         style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }} 
                       />
-                      <button type="submit" disabled={!!activeAction} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '0 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: activeAction === 'sendInvite' ? 0.7 : 1 }}>
+                      <motion.button 
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        type="submit" 
+                        disabled={!!activeAction} 
+                        style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '0 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: activeAction === 'sendInvite' ? 0.7 : 1 }}
+                      >
                         {activeAction === 'sendInvite' ? '...' : 'Send'}
-                      </button>
+                      </motion.button>
                     </form>
                   </div>
                 )}
@@ -389,12 +414,14 @@ function DashboardPage() {
                       <span style={{ fontSize: '18px', fontWeight: '900', color: '#0f172a', letterSpacing: '1px' }}>
                         {selectedCircle?.familyCode || user?.familyCode || '---'}
                       </span>
-                      <button 
+                      <motion.button 
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={handleCopyCode} 
                         style={{ background: codeCopied ? '#10b981' : '#e2e8f0', color: codeCopied ? '#fff' : '#475569', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s' }}
                       >
                         {codeCopied ? 'Copied!' : 'Copy Code'}
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
                 )}
@@ -411,49 +438,67 @@ function DashboardPage() {
               <div style={{ background: '#fef2f2', borderRadius: '20px', padding: '20px', border: '1px dashed #f87171' }}>
                 <h3 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', color: '#b91c1c' }}>🚨 Danger Zone</h3>
                 <p style={{ color: '#7f1d1d', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Permanently delete this family circle. This action cannot be undone.</p>
-                <button 
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleDeleteCircle} 
                   disabled={!!activeAction}
                   style={{ background: '#dc2626', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s', opacity: activeAction === 'deleteCircle' ? 0.7 : 1 }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#b91c1c'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#dc2626'}
                 >
                   {activeAction === 'deleteCircle' ? 'Deleting...' : 'Delete Family Vault'}
-                </button>
+                </motion.button>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* 🪄 MAGIC INVITE MODAL */}
-      {showInviteModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ background: '#fff', borderRadius: '32px', width: '100%', maxWidth: '400px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', textAlign: 'center', position: 'relative', animation: 'scaleUp 0.3s ease-out' }}>
-            <button onClick={() => setShowInviteModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', color: '#64748b', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
-            <h2 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800' }}>Scan to Join</h2>
-            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>Have them scan this QR code or share the link below. Valid for 48 hours.</p>
+      {/* 🪄 ANIMATED MAGIC INVITE MODAL */}
+      <AnimatePresence>
+        {showInviteModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", duration: 0.4, bounce: 0.4 }}
+              style={{ background: '#fff', borderRadius: '32px', width: '100%', maxWidth: '400px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', textAlign: 'center', position: 'relative' }}
+            >
+              <motion.button 
+                whileHover={{ scale: 1.1, backgroundColor: '#e2e8f0' }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowInviteModal(false)} 
+                style={{ position: 'absolute', top: '20px', right: '20px', background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', color: '#64748b', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ✕
+              </motion.button>
+              <h2 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800' }}>Scan to Join</h2>
+              <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>Have them scan this QR code or share the link below. Valid for 48 hours.</p>
 
-            <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '24px', display: 'inline-block', border: '2px dashed #cbd5e1', marginBottom: '24px' }}>
-              <QRCodeSVG value={inviteLink} size={180} fgColor="#0f172a" />
-            </div>
+              <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '24px', display: 'inline-block', border: '2px dashed #cbd5e1', marginBottom: '24px' }}>
+                <QRCodeSVG value={inviteLink} size={180} fgColor="#0f172a" />
+              </div>
 
-            <div style={{ background: '#f1f5f9', borderRadius: '12px', display: 'flex', padding: '6px', border: '1px solid #e2e8f0' }}>
-              <input type="text" value={inviteLink} readOnly style={{ flex: 1, background: 'transparent', border: 'none', padding: '10px', fontSize: '13px', color: '#475569', outline: 'none' }} />
-              <button onClick={handleCopyLink} style={{ background: linkCopied ? '#10b981' : '#0f172a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s' }}>
-                {linkCopied ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
+              <div style={{ background: '#f1f5f9', borderRadius: '12px', display: 'flex', padding: '6px', border: '1px solid #e2e8f0' }}>
+                <input type="text" value={inviteLink} readOnly style={{ flex: 1, background: 'transparent', border: 'none', padding: '10px', fontSize: '13px', color: '#475569', outline: 'none' }} />
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCopyLink} 
+                  style={{ background: linkCopied ? '#10b981' : '#0f172a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s' }}
+                >
+                  {linkCopied ? 'Copied!' : 'Copy'}
+                </motion.button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* 🎬 VAULT GATEWAY COMPONENT */}
       {showGateway && <VaultGateway onClose={handleCloseGateway} />}
 
       <style>{`
-        .dash-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08) !important; border-color: #d1d5db !important; }
-        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>

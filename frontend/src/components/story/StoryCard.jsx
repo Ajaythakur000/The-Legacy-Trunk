@@ -1,8 +1,7 @@
-import { useState, useRef } from 'react'; // 🔥 useRef add kiya yahan
+import { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import StoryCommentBox from './StoryCommentBox';
-
-import StoryExportTemplate from './StoryExportTemplate'; // 🔥 Import kiya hua hai
+import StoryExportTemplate from './StoryExportTemplate';
 
 function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) {
   const isAuthor = currentUser && story?.user?._id === currentUser._id;
@@ -16,12 +15,10 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
   const [showComments, setShowComments] = useState(false);
   const [showShieldAnim, setShowShieldAnim] = useState(false);
   
-  // Track states locally for immediate UI feedback
   const isLikedByMe = story?.likes?.includes(currentUser?._id);
   const [isShared, setIsShared] = useState(false);
   const [isDownloaded, setIsDownloaded] = useState(false);
 
-  // 🔥 Yahan Export ke liye Ref banaya
   const exportRef = useRef();
 
   const images = [];
@@ -80,7 +77,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
     } catch (err) { console.log('Share failed', err); }
   };
 
-  // 🔥 UPDATE: Purana photo download hata ke ab humara naya template trigger hoga
   const handleDownloadImage = async () => {
       if (exportRef.current) {
           exportRef.current.generateImage();
@@ -94,6 +90,12 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
     }
     setShowShieldAnim(true);
     setTimeout(() => setShowShieldAnim(false), 1000);
+  };
+
+  // 🔥 CLOUDINARY SPEED OPTIMIZER (q_auto, f_auto)
+  const getOptimizedUrl = (url) => {
+    if (!url || !url.includes('cloudinary.com')) return url;
+    return url.replace('/upload/', '/upload/q_auto,f_auto/');
   };
 
   const renderMediaGrid = () => {
@@ -110,7 +112,18 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
     }
 
     const count = images.length;
-    const imgProps = { loading: "lazy", decoding: "async" };
+    
+    // 🔥 FALLBACK LOGIC INTEGRATED HERE
+    const imgProps = { 
+      loading: "lazy", 
+      decoding: "async",
+      onError: (e) => { 
+        e.target.onerror = null; 
+        e.target.src = '/web-app-manifest-512x512.png'; 
+        e.target.style.objectFit = 'contain'; 
+        e.target.style.padding = '20px'; 
+      }
+    };
 
     if (count === 1) {
       return (
@@ -120,9 +133,8 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
         >
           <img 
             {...imgProps}
-            src={images[0]} 
+            src={getOptimizedUrl(images[0])} 
             alt={story.title} 
-            onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Available'; }}
             style={{ width: '100%', maxHeight: '600px', objectFit: 'cover', display: 'block', border: '4px solid #faf9f6', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }} 
           />
           {showShieldAnim && (
@@ -131,7 +143,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
                  animation: 'shieldPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards', pointerEvents: 'none',
                  filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.6))'
              }}>
-                {/* Large Blue Fill Shield for Animation */}
                 <svg width="120" height="120" viewBox="0 0 24 24" fill="#3b82f6" stroke="rgba(255,255,255,0.5)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
@@ -141,22 +152,21 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
       );
     }
 
-    // Grid logic 
     const gridStyles = { display: 'grid', gap: '4px', marginTop: '24px', padding: '12px', background: '#0f172a', border: '1px solid rgba(212, 175, 55, 0.4)', boxShadow: '0 8px 25px rgba(0,0,0,0.15)', height: '450px', cursor: 'pointer' };
     
     let layoutContent = null;
     if (count === 2) {
       layoutContent = (
         <div onDoubleClick={handleDoubleTap} style={{ ...gridStyles, gridTemplateColumns: '1fr 1fr', position: 'relative' }}>
-          <img {...imgProps} src={images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', border: '2px solid #faf9f6' }} />
-          <img {...imgProps} src={images[1]} style={{ width: '100%', height: '100%', objectFit: 'cover', border: '2px solid #faf9f6' }} />
+          <img {...imgProps} src={getOptimizedUrl(images[0])} style={{ width: '100%', height: '100%', objectFit: 'cover', border: '2px solid #faf9f6' }} />
+          <img {...imgProps} src={getOptimizedUrl(images[1])} style={{ width: '100%', height: '100%', objectFit: 'cover', border: '2px solid #faf9f6' }} />
           {showShieldAnim && <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', animation:'shieldPop 1s forwards', pointerEvents:'none'}}><svg width="100" height="100" viewBox="0 0 24 24" fill="#3b82f6" stroke="rgba(255,255,255,0.5)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>}
         </div>
       );
     } else {
         layoutContent = (
             <div onDoubleClick={handleDoubleTap} style={{ ...gridStyles, gridTemplateColumns: '1fr 1fr', position: 'relative' }}>
-               <img {...imgProps} src={images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: 'span 2', border: '2px solid #faf9f6' }} />
+               <img {...imgProps} src={getOptimizedUrl(images[0])} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: 'span 2', border: '2px solid #faf9f6' }} />
                {showShieldAnim && <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)', animation:'shieldPop 1s forwards', pointerEvents:'none'}}><svg width="100" height="100" viewBox="0 0 24 24" fill="#3b82f6" stroke="rgba(255,255,255,0.5)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>}
             </div>
         )
@@ -167,9 +177,9 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
 
   return (
     <div style={{ 
-        background: '#fafaf9', // Ivory/Off-white paper feel
+        background: '#fafaf9',
         border: '1px solid #e5e5e5', 
-        borderRadius: '8px', // Softer, classic corners
+        borderRadius: '8px',
         padding: '32px 40px', 
         boxShadow: '0 10px 30px -10px rgba(0,0,0,0.08)',
         position: 'relative'
@@ -247,11 +257,10 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
       {/* 🖼️ Media */}
       {!isEditing && renderMediaGrid()}
 
-      {/* 🛡️ LEGACY ACTION BAR (Premium Icons) */}
+      {/* 🛡️ LEGACY ACTION BAR */}
       {!isEditing && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid #e5e5e5' }}>
           
-          {/* Protect (Like) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button 
                   onClick={() => onLike(story._id)} 
@@ -265,7 +274,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
               <span style={{ fontWeight: '600', color: '#475569', fontSize: '14px', fontFamily: 'system-ui, sans-serif' }}>{story?.likes?.length || 0}</span>
           </div>
 
-          {/* Reflect (Comment) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button 
                   onClick={() => setShowComments(!showComments)} 
@@ -279,7 +287,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
               <span style={{ fontWeight: '600', color: '#475569', fontSize: '14px', fontFamily: 'system-ui, sans-serif' }}>{story?.comments?.length || 0}</span>
           </div>
 
-          {/* Pass On (Share) */}
           <button 
               onClick={handleShare} 
               className="action-icon-btn"
@@ -291,7 +298,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
              </svg>
           </button>
 
-          {/* Archive Image (Download) */}
           {images.length > 0 && (
               <button 
                   onClick={handleDownloadImage} 
@@ -309,7 +315,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
         </div>
       )}
 
-      {/* ☁️ Cloud Reflection Box (Inline) */}
+      {/* ☁️ Cloud Reflection Box */}
       {!isEditing && showComments && (
         <div style={{ marginTop: '24px', animation: 'fadeIn 0.3s ease', padding: '20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
           <div style={{ marginBottom: '12px', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#94a3b8', fontWeight: 'bold' }}>

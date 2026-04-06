@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { getMyCirclesApi } from '../../api/circleApi';
 import api from '../../api/axios';
 import { io } from 'socket.io-client';
-import ChampionDetailModal from '../modals/ChampionDetailModal';
+import ChampionDetailModal from '../modals/ChampionDetailModal'; // 🔥 Ye modal yahan imported hai
+import { motion } from 'framer-motion';
 
 // 🔥 Layout Wrapper
 function Navbar({ children }) {
@@ -25,7 +26,6 @@ function Navbar({ children }) {
   const [showChampionModal, setShowChampionModal] = useState(false);
   const [championUser, setChampionUser] = useState(null);
 
-  // Default true rakhte hain desktop ke liye taaki khula rahe
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -156,13 +156,11 @@ function Navbar({ children }) {
             alt="Memento Logo" 
             style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#F9F3E8', padding: '2px', objectFit: 'cover', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} 
           />
-          {/* 🔥 CLEAN FONT RESTORED HERE */}
           <div style={{ fontSize: '22px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px' }}>
             Memento
           </div>
         </div>
         
-        {/* Mobile Search inside sidebar */}
         <div className="mobile-search-container">
            <form onSubmit={handleSearchSubmit} className="mobile-search-form">
               <span style={{ color: '#94a3b8', fontSize: '14px' }}>🔍</span>
@@ -189,14 +187,12 @@ function Navbar({ children }) {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             
-            {/* 🔥 HYBRID BRAND LOGO. Hides on desktop when sidebar is open! */}
             <Link to="/home" className={`header-brand ${isSidebarOpen ? 'hide-on-desktop' : ''}`}>
                 <img src="/web-app-manifest-192x192.png" alt="Logo" style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#F9F3E8', padding: '2px', objectFit: 'cover', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
                 <span className="header-brand-text">Memento</span>
             </Link>
           </div>
 
-          {/* Center: Desktop Search Bar */}
           <form onSubmit={handleSearchSubmit} className="global-search-form desktop-only">
             <span style={{ color: '#64748b', fontSize: '16px' }}>🔍</span>
             <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search your legacy..." className="global-search-input" />
@@ -205,10 +201,16 @@ function Navbar({ children }) {
           {/* Right: Actions */}
           <div className="header-actions">
             
-            <button onClick={() => navigate('/oracle')} className="oracle-ai-btn">
+            <motion.button 
+              onClick={() => navigate('/oracle')} 
+              className="oracle-ai-btn"
+              whileHover={{ scale: 1.05 }} 
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
               <div className="oracle-icon-wrapper"><span className="oracle-sparkle">🔮</span></div>
               <span className="oracle-btn-text">Ask Oracle AI</span>
-            </button>
+            </motion.button>
 
             <div ref={hubRef} style={{ position: 'relative' }}>
               <button onClick={() => setIsHubOpen(!isHubOpen)} className="hub-button" style={hubButtonStyle(isHubOpen)}>
@@ -224,7 +226,14 @@ function Navbar({ children }) {
             </div>
 
             <div ref={notifRef} style={{ position: 'relative' }}>
-              <button onClick={() => setIsNotifOpen(!isNotifOpen)} className="icon-btn">🔔 {unreadCount > 0 && <span style={badgeStyle}>{unreadCount}</span>}</button>
+              <motion.button 
+                onClick={() => setIsNotifOpen(!isNotifOpen)} 
+                className="icon-btn"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                🔔 {unreadCount > 0 && <span style={badgeStyle}>{unreadCount}</span>}
+              </motion.button>
               
               {isNotifOpen && (
                 <div style={dropdownWrapperStyle} className="notif-dropdown-wrapper">
@@ -250,11 +259,25 @@ function Navbar({ children }) {
             </div>
 
             <div className="profile-dropdown-container" style={{ position: 'relative' }}>
-              <button onClick={() => navigate('/profile')} className="avatar-btn"><img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /></button>
+              <motion.button 
+                onClick={() => navigate('/profile')} 
+                className="avatar-btn"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              </motion.button>
+              
               <div className="profile-dropdown-menu" style={dropdownWrapperStyle}>
                  <div style={profileDropdownStyle} className="profile-dropdown-box">
                      <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc' }}><img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} /><div style={{ overflow: 'hidden' }}><div style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'User'}</div><div style={{ color: '#64748b', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div></div></div>
-                  <div style={{ padding: '8px' }}><button onClick={() => setShowChampionModal(true)} style={dropdownLinkStyle}>👑 Top Contributor</button><Link to="/profile?edit=true" style={dropdownLinkStyle}>✏️ Edit Profile</Link><div style={{ height: '1px', background: '#e2e8f0', margin: '8px 0' }}></div><button onClick={handleLogout} style={{ ...dropdownLinkStyle, color: '#ef4444' }}>🚪 Signout</button></div>
+                  <div style={{ padding: '8px' }}>
+                    {/* 🔥 THE BUTTON THAT TRIGGERS THE MODAL IS HERE */}
+                    <button onClick={() => setShowChampionModal(true)} style={dropdownLinkStyle}>👑 Top Contributor</button>
+                    <Link to="/profile?edit=true" style={dropdownLinkStyle}>✏️ Edit Profile</Link>
+                    <div style={{ height: '1px', background: '#e2e8f0', margin: '8px 0' }}></div>
+                    <button onClick={handleLogout} style={{ ...dropdownLinkStyle, color: '#ef4444' }}>🚪 Signout</button>
+                  </div>
               </div></div>
             </div>
 
@@ -262,6 +285,14 @@ function Navbar({ children }) {
         </header>
         <main className="page-wrapper">{children}</main>
       </div>
+
+      {/* 🔥 CHAMPION MODAL RESTORED HERE 🔥 */}
+      {showChampionModal && (
+        <ChampionDetailModal 
+          champion={championUser} 
+          onClose={() => setShowChampionModal(false)} 
+        />
+      )}
 
       {/* 🔥 RESPONSIVE CSS MAGIC 🔥 */}
       <style>{`
@@ -278,7 +309,7 @@ function Navbar({ children }) {
         .hamburger-btn { background: transparent; border: none; color: #334155; cursor: pointer; padding: 10px; border-radius: 12px; display: flex; align-items: center; transition: background 0.2s; z-index: 60; }
         .hamburger-btn:hover { background: #f1f5f9; color: #0f172a; }
 
-        /* 🔥 BRAND LOGO IN HEADER - CLEAN SYSTEM FONT */
+        /* 🔥 BRAND LOGO IN HEADER */
         .header-brand { display: flex; align-items: center; gap: 10px; margin-left: 8px; text-decoration: none; cursor: pointer; transition: opacity 0.3s; }
         .header-brand-text { font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; transition: color 0.2s ease; }
         .header-brand:hover .header-brand-text { color: #3b82f6; }
@@ -291,14 +322,14 @@ function Navbar({ children }) {
         .mobile-search-container { display: none; }
 
         /* Oracle Button */
-        .oracle-ai-btn { background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 99px; padding: 4px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: flex-start; gap: 0px; cursor: pointer; position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .oracle-ai-btn { background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 99px; padding: 4px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: flex-start; gap: 0px; cursor: pointer; position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .oracle-icon-wrapper { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.4s ease; background: transparent; }
         .oracle-sparkle { font-size: 32px; color: #64748b; transition: all 0.4s ease; filter: grayscale(100%) opacity(0.5); }
         .oracle-btn-text { max-width: 0; opacity: 0; font-weight: 800; font-size: 14px; white-space: nowrap; color: white; transition: all 0.4s ease; overflow: hidden; }
         
-        .oracle-ai-btn:hover { width: 175px; padding: 4px 20px 4px 6px; background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); background-size: 200% 200%; border-color: transparent; animation: gradientShift 4s ease infinite; box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 8px 15px -5px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .oracle-ai-btn:hover { width: 175px; padding: 4px 20px 4px 6px; background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899); background-size: 200% 200%; border-color: transparent; animation: gradientShift 4s ease infinite; box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 8px 15px -5px rgba(0,0,0,0.1); }
         .oracle-ai-btn:hover .oracle-icon-wrapper { background: rgba(255,255,255,0.2); }
-        .oracle-ai-btn:hover .oracle-sparkle { filter: grayscale(0%) opacity(1) drop-shadow(0 0 10px rgba(255,255,255,0.9)); color: white; transform: scale(1.3) translateY(-2px); }
+        .oracle-ai-btn:hover .oracle-sparkle { filter: grayscale(0%) opacity(1) drop-shadow(0 0 10px rgba(255,255,255,0.9)); color: white; transform: scale(1.3); }
         .oracle-ai-btn:hover .oracle-btn-text { max-width: 150px; opacity: 1; margin-left: 12px; }
         @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
@@ -308,10 +339,9 @@ function Navbar({ children }) {
         .notif-btn-decline { flex: 1; background: #fff; color: #ef4444; border: 1px solid #fecaca; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 13px; transition: all 0.2s ease; }
         .notif-btn-decline:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; transform: translateY(-2px); }
 
-        .icon-btn { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 19px; position: relative; transition: all 0.2s; color: #475569; }
-        .icon-btn:hover { background: #f1f5f9; color: #0f172a; transform: scale(1.05); }
-        .avatar-btn { background: transparent; border: 2px solid #e2e8f0; border-radius: 50%; width: 46px; height: 46px; padding: 2px; cursor: pointer; transition: all 0.2s; display: flex; }
-        .avatar-btn:hover { border-color: #3b82f6; }
+        .icon-btn { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 19px; position: relative; color: #475569; }
+        .avatar-btn { background: transparent; border: 2px solid #e2e8f0; border-radius: 50%; width: 46px; height: 46px; padding: 2px; cursor: pointer; display: flex; }
+        
         .profile-dropdown-menu { visibility: hidden; opacity: 0; transform: translateY(-10px); transition: all 0.2s ease; }
         .profile-dropdown-container:hover .profile-dropdown-menu { visibility: visible; opacity: 1; transform: translateY(0); }
 
@@ -325,7 +355,6 @@ function Navbar({ children }) {
         @media (min-width: 769px) {
           .sidebar-open { width: 260px; transform: translateX(0); }
           .sidebar-closed { width: 0px; transform: translateX(-100%); }
-          /* 🔥 HIDE TOP NAVBAR LOGO WHEN SIDEBAR IS OPEN ON DESKTOP */
           .hide-on-desktop { display: none !important; }
         }
 
@@ -335,14 +364,10 @@ function Navbar({ children }) {
           .header-actions { gap: 10px; }
           .desktop-only { display: none !important; }
 
-          /* Sidebar becomes a sliding drawer */
           .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px !important; transform: translateX(-100%); box-shadow: 10px 0 30px rgba(0,0,0,0.2); }
           .sidebar-open { transform: translateX(0); }
-          
-          /* Overlay becomes active */
           .sidebar-overlay.visible { display: block; opacity: 1; }
 
-          /* Compact Oracle Button & Icons */
           .oracle-ai-btn { width: 40px; height: 40px; padding: 2px; }
           .oracle-icon-wrapper { width: 34px; height: 34px; }
           .oracle-sparkle { font-size: 24px; }
@@ -352,7 +377,6 @@ function Navbar({ children }) {
           .notif-dropdown-box { width: 300px; }
           .profile-dropdown-box { width: 220px; }
 
-          /* Mobile Search styling */
           .mobile-search-container { display: block; padding: 0 16px; margin-top: 10px; margin-bottom: 10px; }
           .mobile-search-form { display: flex; align-items: center; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 14px; }
           .mobile-search-input { border: none; background: transparent; outline: none; padding-left: 8px; width: 100%; color: #fff; font-size: 14px; }

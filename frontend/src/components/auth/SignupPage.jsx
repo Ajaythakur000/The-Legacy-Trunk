@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { joinViaInviteApi } from '../../api/circleApi'; // 🔥 Magic Link API
+import { joinViaInviteApi } from '../../api/circleApi';
+import { motion } from 'framer-motion'; // 🔥 FRAMER MOTION IMPORTED
 
 function SignupPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signup, loading } = useAuth();
 
-  // 🔥 URL se Token nikalne ka logic
   const queryParams = new URLSearchParams(location.search);
   const inviteToken = queryParams.get('inviteToken');
 
@@ -16,7 +16,7 @@ function SignupPage() {
     name: '',
     email: '',
     password: '',
-    role: inviteToken ? 'member' : 'admin', // Token hai toh default member
+    role: inviteToken ? 'member' : 'admin',
     familyCode: '',
     relationToAdmin: '',
   });
@@ -26,7 +26,6 @@ function SignupPage() {
 
   const isAdmin = form.role === 'admin';
 
-  // Agar inviteToken hai, toh user manually role change nahi kar sakta
   useEffect(() => {
     if (inviteToken) {
       setForm((prev) => ({ ...prev, role: 'member', familyCode: '' }));
@@ -51,18 +50,15 @@ function SignupPage() {
     setActionLoading(true);
 
     try {
-      // 1. Prepare Clean Payload
       const payload = {
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
         role: form.role,
         relationToAdmin: isAdmin ? 'Admin' : form.relationToAdmin?.trim() || '',
-        // Sirf tab familyCode bhejo jab user khud form bhar raha ho (bina token ke)
         ...(!isAdmin && !inviteToken && form.familyCode ? { familyCode: form.familyCode.trim().toUpperCase() } : {}),
       };
 
-      // 2. Call Auth Signup
       const result = await signup(payload);
 
       if (!result.success) {
@@ -71,17 +67,14 @@ function SignupPage() {
         return;
       }
 
-      // 3. 🪄 MAGIC LINK: Agar token tha, toh signup ke baad turant us token ko consume kar lo
       if (inviteToken) {
         try {
           await joinViaInviteApi(inviteToken);
         } catch (inviteErr) {
           console.error("Auto-join via token failed after signup", inviteErr);
-          // Token expire/invalid ho gaya hoga, par account toh ban gaya
         }
       }
 
-      // 4. Send to Dashboard
       if (result?.data?.token) {
         navigate('/dashboard', { replace: true });
       } else {
@@ -100,10 +93,23 @@ function SignupPage() {
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
       
-      <div style={{ background: '#fff', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '480px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+      {/* 🔥 MOTION DIV FOR PREMIUM CARD */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        style={{ background: '#fff', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '480px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}
+      >
         
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <div style={{ fontSize: '40px', marginBottom: '10px' }}>🛡️</div>
+          <motion.div 
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            style={{ fontSize: '40px', marginBottom: '10px' }}
+          >
+            🛡️
+          </motion.div>
           <h2 style={{ margin: '0 0 8px 0', fontSize: '2rem', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.5px' }}>Create Account</h2>
           <p style={{ margin: 0, color: '#64748b', fontSize: '15px' }}>Start preserving your family legacy today.</p>
         </div>
@@ -116,9 +122,9 @@ function SignupPage() {
         )}
 
         {error && (
-          <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', fontWeight: '600', border: '1px solid #fecaca', textAlign: 'center' }}>
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ background: '#fef2f2', color: '#dc2626', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', fontWeight: '600', border: '1px solid #fecaca', textAlign: 'center' }}>
             {error}
-          </div>
+          </motion.div>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -127,7 +133,6 @@ function SignupPage() {
           <input type="email" name="email" placeholder="Email Address" value={form.email} onChange={handleChange} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
           <input type="password" name="password" placeholder="Create Password" value={form.password} onChange={handleChange} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
 
-          {/* Sirf tab dikhao jab koi Invite Token NAHI hai */}
           {!inviteToken && (
             <div style={{ position: 'relative' }}>
               <select name="role" value={form.role} onChange={handleChange} style={{ ...inputStyle, cursor: 'pointer', appearance: 'none' }}>
@@ -139,28 +144,33 @@ function SignupPage() {
           )}
 
           {!isAdmin && (
-            <div style={{ background: '#f1f5f9', padding: '20px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px dashed #cbd5e1' }}>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} style={{ background: '#f1f5f9', padding: '20px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px dashed #cbd5e1' }}>
               <div style={{ fontSize: '13px', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Member Details</div>
               
-              {/* Token nahi hai toh Code maango */}
               {!inviteToken && (
                 <input type="text" name="familyCode" placeholder="Family Code (e.g. TRUNK-XXXX)" value={form.familyCode} onChange={handleChange} required style={{ ...inputStyle, background: '#fff' }} onFocus={handleFocus} onBlur={handleBlur} />
               )}
               
               <input type="text" name="relationToAdmin" placeholder="Relation (e.g. Brother, Mother)" value={form.relationToAdmin} onChange={handleChange} required style={{ ...inputStyle, background: '#fff' }} onFocus={handleFocus} onBlur={handleBlur} />
-            </div>
+            </motion.div>
           )}
 
-          <button type="submit" disabled={isFormLoading} style={{ background: '#0f172a', color: '#fff', padding: '16px', borderRadius: '16px', fontSize: '16px', fontWeight: '800', cursor: 'pointer', border: 'none', transition: 'all 0.2s', opacity: isFormLoading ? 0.7 : 1, marginTop: '8px', boxShadow: '0 8px 20px rgba(15, 23, 42, 0.2)' }} onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+          {/* 🔥 MOTION BUTTON */}
+          <motion.button 
+            type="submit" 
+            disabled={isFormLoading} 
+            whileHover={{ scale: isFormLoading ? 1 : 1.02 }}
+            whileTap={{ scale: isFormLoading ? 1 : 0.96 }}
+            style={{ background: '#0f172a', color: '#fff', padding: '16px', borderRadius: '16px', fontSize: '16px', fontWeight: '800', cursor: isFormLoading ? 'not-allowed' : 'pointer', border: 'none', opacity: isFormLoading ? 0.7 : 1, marginTop: '8px', boxShadow: '0 8px 20px rgba(15, 23, 42, 0.2)' }}
+          >
             {isFormLoading ? 'Creating account...' : 'Create Account'}
-          </button>
+          </motion.button>
         </form>
 
         <p style={{ marginTop: '24px', textAlign: 'center', color: '#64748b', fontSize: '14px', fontWeight: '500' }}>
           Already have an account? <Link to="/login" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '700' }}>Login here</Link>
         </p>
-      </div>
-
+      </motion.div>
     </div>
   );
 }

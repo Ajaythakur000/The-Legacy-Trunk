@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getGlobalStoriesApi, toggleLikeStoryApi, addCommentToStoryApi } from '../api/storyApi'; 
-// 🔥 WE IMPORT OUR NEW PREMIUM CARD
 import StoryCard from '../components/story/StoryCard'; 
+import { motion } from 'framer-motion'; // 🔥 IMPORTED FRAMER MOTION
 
 function HomePage() {
   const { user } = useAuth();
@@ -12,7 +12,7 @@ function HomePage() {
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const data = await getGlobalStoriesApi(); // API call to get all public stories
+        const data = await getGlobalStoriesApi(); 
         setStories(Array.isArray(data) ? data : data?.stories || []);
       } catch (error) {
         console.error("Failed to load feed", error);
@@ -23,11 +23,9 @@ function HomePage() {
     fetchFeed();
   }, []);
 
-  // 🔥 HANDLE INLINE PROTECT (LIKE)
   const handleLike = async (storyId) => {
     try {
       const data = await toggleLikeStoryApi(storyId);
-      // Optimistic update so UI feels instant
       setStories(stories.map(s => {
         if (s._id === storyId) {
           const hasLiked = s.likes.includes(user._id);
@@ -41,11 +39,9 @@ function HomePage() {
     } catch (err) { console.error('Like failed', err); }
   };
 
-  // 🔥 HANDLE INLINE REFLECTION (COMMENT)
   const handleComment = async (storyId, text) => {
     try {
       const data = await addCommentToStoryApi(storyId, text);
-      // Update state immediately
       setStories(stories.map(s => {
         if (s._id === storyId) {
           return { ...s, comments: data.comments }; 
@@ -56,7 +52,6 @@ function HomePage() {
   };
 
   return (
-    // Background matches the Journal vibe
     <div style={{ backgroundColor: '#f1f5f9', minHeight: '100vh', paddingBottom: '40px', paddingTop: '40px' }}>
       <div style={{ maxWidth: '680px', margin: '0 auto', padding: '0 16px' }}>
         
@@ -85,17 +80,21 @@ function HomePage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            {/* 🔥 RENDER OUR PREMIUM STORY CARDS */}
-            {stories.map((story) => (
-              <StoryCard 
-                key={story._id} 
-                story={story} 
-                currentUser={user}
-                onLike={handleLike}
-                onComment={handleComment}
-                // No onDelete/onEdit here because it's the global feed. 
-                // Only allow edits on "My Stories" page.
-              />
+            {/* 🔥 PREMIUM STAGGERED FEED ANIMATION */}
+            {stories.map((story, index) => (
+              <motion.div 
+                key={story._id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+              >
+                <StoryCard 
+                  story={story} 
+                  currentUser={user}
+                  onLike={handleLike}
+                  onComment={handleComment}
+                />
+              </motion.div>
             ))}
           </div>
         )}

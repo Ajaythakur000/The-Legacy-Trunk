@@ -1,9 +1,11 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { AnimatePresence } from 'framer-motion'; // 🔥 FRAMER MOTION IMPORT
 
 // Layout & Shared
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
+import AnimatedPage from './components/shared/AnimatedPage'; // 🔥 TERA NAYA ANIMATION WRAPPER
 
 // Auth Pages
 import LoginPage from './components/auth/LoginPage';
@@ -27,54 +29,54 @@ import FamilyTimelinePage from './pages/FamilyTimelinePage';
 
 import FamilyOraclePage from './pages/FamilyOraclePage';
 import InvitePage from './pages/InvitePage';
-
-// 1. Upar import add karo
 import SearchResultsPage from './pages/SearchResultsPage';
 
 function App() {
+  const location = useLocation(); // 🔥 NAYA: Route track karne ke liye
+
   return (
     <>
       {/* Notifications setup */}
       <Toaster position="top-center" reverseOrder={false} />
       
-      {/* 🔥 NEW: Navbar is now the Grand Layout Wrapper */}
+      {/* Navbar is the Grand Layout Wrapper */}
       <Navbar>
-        <Routes>
-          {/* 1. INITIAL REDIRECT */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* 🔥 ANIMATE PRESENCE: Wait for old page to fade out before showing new page */}
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            
+            {/* 1. INITIAL REDIRECT */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* 2. PUBLIC ROUTES */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+            {/* 2. PUBLIC ROUTES */}
+            <Route path="/login" element={<AnimatedPage><LoginPage /></AnimatedPage>} />
+            <Route path="/signup" element={<AnimatedPage><SignupPage /></AnimatedPage>} />
+            <Route path="/invite/:token" element={<AnimatedPage><InvitePage /></AnimatedPage>} />
+            
+            {/* 3. PROTECTED PRIVATE ROUTES */}
+            <Route path="/home" element={<ProtectedRoute><AnimatedPage><HomePage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><AnimatedPage><DashboardPage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><AnimatedPage><ProfilePage /></AnimatedPage></ProtectedRoute>} />
+            
+            {/* Features */}
+            <Route path="/vault" element={<ProtectedRoute><AnimatedPage><VaultRoomPage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/radar" element={<ProtectedRoute><AnimatedPage><FamilyRadarPage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/leaderboard" element={<ProtectedRoute><AnimatedPage><LeaderboardPage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/memory-lane" element={<ProtectedRoute><AnimatedPage><FamilyTimelinePage /></AnimatedPage></ProtectedRoute>} />
+            
+            {/* Stories Engine */}
+            <Route path="/vault-stories" element={<ProtectedRoute><AnimatedPage><VaultStoriesPage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/vault-stories/:storyId" element={<ProtectedRoute><AnimatedPage><StoryDetailPage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/my-stories" element={<ProtectedRoute><AnimatedPage><MyStoriesPage /></AnimatedPage></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><AnimatedPage><SearchResultsPage /></AnimatedPage></ProtectedRoute>} />
+            
+            <Route path="/oracle" element={<AnimatedPage><FamilyOraclePage /></AnimatedPage>} />
 
-          <Route path="/invite/:token" element={<InvitePage />} />
-          
-          {/* 3. PROTECTED PRIVATE ROUTES */}
-          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          
-          {/* Features */}
-          <Route path="/vault" element={<ProtectedRoute><VaultRoomPage /></ProtectedRoute>} />
-          <Route path="/radar" element={<ProtectedRoute><FamilyRadarPage /></ProtectedRoute>} />
-          <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
-          <Route path="/memory-lane" element={<ProtectedRoute><FamilyTimelinePage /></ProtectedRoute>} />
-          
+            {/* 4. CATCH-ALL REDIRECT (Security) */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
 
-          
-          {/* Stories Engine */}
-          <Route path="/vault-stories" element={<ProtectedRoute><VaultStoriesPage /></ProtectedRoute>} />
-          <Route path="/vault-stories/:storyId" element={<ProtectedRoute><StoryDetailPage /></ProtectedRoute>} />
-          <Route path="/my-stories" element={<ProtectedRoute><MyStoriesPage /></ProtectedRoute>} />
-
-              <Route path="/search" element={<ProtectedRoute><SearchResultsPage /></ProtectedRoute>} />
-
-        
-          <Route path="/oracle" element={<FamilyOraclePage />} />
-
-          {/* 4. CATCH-ALL REDIRECT (Security) */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+          </Routes>
+        </AnimatePresence>
       </Navbar>
     </>
   );
