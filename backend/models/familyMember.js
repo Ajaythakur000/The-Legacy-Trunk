@@ -22,6 +22,22 @@ const familyMemberSchema = new Schema(
     },
     
     // ==============================
+    // 🛡️ OTP & SECURITY FIELDS (NEW)
+    // ==============================
+    isVerified: {
+      type: Boolean,
+      default: true, // Purane users by default verified rahenge
+    },
+    otp: {
+      type: String,
+      default: null,
+    },
+    otpExpires: {
+      type: Date,
+      default: null,
+    },
+
+    // ==============================
     // 👤 USER PROFILE FIELDS
     // ==============================
     avatar: {
@@ -86,6 +102,36 @@ const familyMemberSchema = new Schema(
       type: Boolean,
       default: false,
     },
+
+    // ==============================
+    // 🔥 GAMIFICATION & STREAKS
+    // ==============================
+    currentStreak: {
+      type: Number,
+      default: 0
+    },
+    maxStreak: {
+      type: Number,
+      default: 0
+    },
+    lastLoginDate: {
+      type: String, 
+      default: null
+    },
+    lastPostDate: {
+      type: String,
+      default: null
+    },
+    activityMap: {
+      type: Map,
+      of: Number,
+      default: {}
+    },
+    totalContributionPoints: {
+      type: Number,
+      default: 0,
+      min: 0
+    }
   },
   {
     timestamps: true,

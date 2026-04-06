@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { joinViaInviteApi } from '../../api/circleApi';
-import { motion } from 'framer-motion'; // 🔥 FRAMER MOTION IMPORTED
+import { motion } from 'framer-motion'; 
+import OTPVerificationModal from './OTPVerificationModal';
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -23,6 +24,10 @@ function SignupPage() {
 
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  
+  // 🔥 OTP MODAL STATES
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   const isAdmin = form.role === 'admin';
 
@@ -75,10 +80,13 @@ function SignupPage() {
         }
       }
 
-      if (result?.data?.token) {
+      // 🔥 OTP LOGIC
+      if (result.requireOtp || result?.data?.requireOtp) {
+        setRegisteredEmail(form.email);
+        setShowOtpModal(true);
+      } 
+      else if (result?.data?.token) {
         navigate('/dashboard', { replace: true });
-      } else {
-        navigate('/login', { replace: true });
       }
 
     } catch (err) {
@@ -88,12 +96,24 @@ function SignupPage() {
     }
   };
 
+  const handleOtpSuccess = () => {
+    setShowOtpModal(false);
+    window.location.href = '/dashboard'; 
+  };
+
   const isFormLoading = loading || actionLoading;
 
   return (
     <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
       
-      {/* 🔥 MOTION DIV FOR PREMIUM CARD */}
+      {showOtpModal && (
+        <OTPVerificationModal 
+          email={registeredEmail} 
+          onSuccess={handleOtpSuccess}
+          onClose={() => setShowOtpModal(false)}
+        />
+      )}
+
       <motion.div 
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -101,20 +121,45 @@ function SignupPage() {
         style={{ background: '#fff', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '480px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}
       >
         
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <motion.div 
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            style={{ fontSize: '40px', marginBottom: '10px' }}
+        <div style={{ textAlign: 'center', marginBottom: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          
+          {/* 🔥 LOGO FIX: Edges merged perfectly (no white gap) */}
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
+            style={{
+              width: '120px', 
+              height: '120px',
+              borderRadius: '50%',
+              marginBottom: '20px',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+              overflow: 'hidden', 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'transparent', // No white background
+              border: 'none', // No white border
+              padding: 0 // Absolute zero padding
+            }}
           >
-            🛡️
+             <img 
+              src="/finall_logo.png" 
+              alt="The Legacy Trunk Emblem"
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover', 
+                display: 'block', 
+                transform: 'scale(1.25)', // 🔥 Scaled to blow past the borders
+              }} 
+            />
           </motion.div>
-          <h2 style={{ margin: '0 0 8px 0', fontSize: '2rem', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.5px' }}>Create Account</h2>
+
+          <h2 style={{ margin: '0 0 8px 0', fontSize: '2.2rem', fontWeight: '900', color: '#0f172a', letterSpacing: '-0.5px' }}>Create Account</h2>
           <p style={{ margin: 0, color: '#64748b', fontSize: '15px' }}>Start preserving your family legacy today.</p>
         </div>
 
-        {/* 🪄 Smart Invite Banner */}
         {inviteToken && (
           <div style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#fff', padding: '12px', borderRadius: '12px', marginBottom: '24px', textAlign: 'center', fontWeight: '700', fontSize: '14px', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)' }}>
             ✨ You've been invited to join a Family Vault!
@@ -128,7 +173,6 @@ function SignupPage() {
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          
           <input type="text" name="name" placeholder="Full Name" value={form.name} onChange={handleChange} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
           <input type="email" name="email" placeholder="Email Address" value={form.email} onChange={handleChange} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
           <input type="password" name="password" placeholder="Create Password" value={form.password} onChange={handleChange} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
@@ -155,7 +199,6 @@ function SignupPage() {
             </motion.div>
           )}
 
-          {/* 🔥 MOTION BUTTON */}
           <motion.button 
             type="submit" 
             disabled={isFormLoading} 

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { updateUserProfileApi } from '../../api/authApi';
 import FamilyLegacyCard from './FamilyLegacyCard';
+import ActivityHeatmap from './ActivityHeatmap';
 
 function ProfilePage() {
   const { user } = useAuth(); 
@@ -20,11 +21,11 @@ function ProfilePage() {
     bio: user?.bio || '',
     avatarFile: null, 
     dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
+    familyRole: 'Family Member', // Added Family Role (UI Only for now)
   });
 
   const familyPoints = user?.bondPoints || 0;
 
-  // Auto-open Edit Modal
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     if (queryParams.get('edit') === 'true') {
@@ -74,132 +75,172 @@ function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div style={{ backgroundColor: '#f3f4f6', minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+    <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', padding: '60px 32px', position: 'relative', overflowX: 'hidden' }}>
+      
+      {/* 🗑️ REMOVED WATERMARK TO KEEP IT CLEAN */}
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         
-        {/* 🏆 PREMIUM PROFILE CARD */}
-        <div style={{ background: '#fff', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', marginBottom: '30px' }}>
-          <div style={{ height: '160px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}></div>
+        {/* 👑 THE SINGLE ROYAL VAULT PASSPORT CARD */}
+        <div style={{ 
+          background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', 
+          borderRadius: '32px', 
+          border: '1px solid rgba(234, 221, 205, 0.1)', 
+          boxShadow: '0 30px 60px rgba(0,0,0,0.4)', 
+          display: 'flex', 
+          flexDirection: 'row', 
+          flexWrap: 'wrap',
+          overflow: 'hidden',
+          marginBottom: '40px',
+          position: 'relative'
+        }}>
           
-          <div style={{ padding: '0 40px 40px', marginTop: '-80px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ width: '160px', height: '160px', borderRadius: '50%', border: '8px solid #fff', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden', background: '#f3f4f6' }}>
-              <img src={user?.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-
-            <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#111827', margin: '20px 0 5px' }}>{user?.name}</h1>
-            <p style={{ color: '#6b7280', fontWeight: '600', fontSize: '1.1rem' }}>{user?.email}</p>
+          {/* LEFT: IDENTITY SECTION */}
+          <div style={{ flex: '1 1 400px', padding: '50px 40px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
             
-            <p style={{ marginTop: '20px', textAlign: 'center', color: '#4b5563', maxWidth: '600px', fontSize: '1.1rem', fontStyle: 'italic', lineHeight: '1.6' }}>
-              "{user?.bio || 'Preserving our family legacy, one story at a time.'}"
-            </p>
-
+            {/* ✏️ MOVED EDIT BUTTON TO LEFT SIDE TO PREVENT OVERLAP */}
             <button 
               onClick={() => setIsEditing(true)}
-              style={{ marginTop: '30px', padding: '12px 30px', background: '#111827', color: '#fff', borderRadius: '16px', border: 'none', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
+              title="Edit Profile Settings"
+              style={{ position: 'absolute', top: '24px', left: '24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.3s ease', zIndex: 20 }}
+              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
             >
-              ✏️ Edit Profile
+              ✏️
             </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px', marginTop: '20px' }}>
+              <div style={{ width: '130px', height: '130px', borderRadius: '50%', border: '4px solid #EADDCD', padding: '4px', background: 'transparent' }}>
+                <img src={user?.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              </div>
+              <div>
+                <h1 style={{ fontSize: '2.5rem', fontWeight: '900', color: '#fff', margin: '0 0 8px 0', fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>{user?.name}</h1>
+                <p style={{ color: '#94a3b8', fontWeight: '600', fontSize: '1.1rem', margin: 0, letterSpacing: '0.5px' }}>{user?.email}</p>
+                <div style={{ display: 'inline-block', marginTop: '12px', padding: '6px 14px', background: 'rgba(234, 221, 205, 0.1)', color: '#EADDCD', borderRadius: '99px', fontSize: '0.85rem', fontWeight: '700', letterSpacing: '1px', border: '1px solid rgba(234, 221, 205, 0.2)' }}>
+                  {formData.familyRole.toUpperCase()}
+                </div>
+              </div>
+            </div>
+            <p style={{ color: '#cbd5e1', fontSize: '1.15rem', fontStyle: 'italic', lineHeight: '1.7', margin: 0, borderLeft: '3px solid #EADDCD', paddingLeft: '20px' }}>
+              "{user?.bio || 'Preserving our family legacy, one story at a time.'}"
+            </p>
           </div>
+
+          {/* RIGHT: STATUS SECTION */}
+          <div style={{ flex: '1 1 450px', padding: '50px 40px', display: 'flex', alignItems: 'center' }}>
+            <FamilyLegacyCard familyPoints={familyPoints} />
+          </div>
+
         </div>
 
-        {/* 💎 THE IMPORTED FAMILY LEGACY CARD */}
-        <FamilyLegacyCard familyPoints={familyPoints} />
-
+        {/* 🔥 THE ACTIVITY HEATMAP */}
+        <ActivityHeatmap 
+          activityMap={user?.activityMap || {}} 
+          currentStreak={user?.currentStreak || 0}
+          maxStreak={user?.maxStreak || 0}
+        />
       </div>
 
-      {/* 🛠️ EDIT PROFILE MODAL (FIXED SCROLL & UI) */}
+      {/* 🛠️ THE NEW PREMIUM CENTER MODAL POP-UP */}
       {isEditing && (
         <div style={{ 
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, 
-          padding: '20px', 
-          overflowY: 'auto' // 🔥 THIS FIXES THE SCROLL ISSUE
+          position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px', overflowY: 'auto' 
         }}>
           
           <div style={{ 
-            background: '#fff', borderRadius: '24px', width: '100%', maxWidth: '450px', 
-            padding: '32px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', 
-            animation: 'fadeIn 0.2s ease-out', position: 'relative',
-            marginTop: 'auto', marginBottom: 'auto' // Helps center vertically if taller than screen
+            background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', 
+            borderRadius: '24px', width: '100%', maxWidth: '480px', padding: '40px 32px', 
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', position: 'relative', border: '1px solid rgba(255,255,255,0.1)',
+            animation: 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
             
-            {/* ✕ CLOSE BUTTON */}
+            {/* Modal Header */}
             <button 
               onClick={() => setIsEditing(false)} 
-              style={{ position: 'absolute', top: '24px', right: '24px', background: '#f1f5f9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', color: '#64748b', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-              onMouseOver={(e) => e.currentTarget.style.background = '#e2e8f0'}
-              onMouseOut={(e) => e.currentTarget.style.background = '#f1f5f9'}
+              style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: '36px', height: '36px', borderRadius: '50%', color: '#94a3b8', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+              onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}
             >
               ✕
             </button>
+            <h2 style={{ margin: '0 0 32px 0', color: '#fff', fontSize: '1.8rem', fontWeight: '900', fontFamily: 'Georgia, serif', textAlign: 'center' }}>Profile Settings</h2>
 
-            <h2 style={{ margin: '0 0 24px 0', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800' }}>Edit Profile</h2>
-            
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Modal Body */}
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
-              {/* 🔥 IMAGE UPLOAD SECTION */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
+              {/* IMAGE UPLOAD SECTION */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
                 <div 
                   onClick={() => fileInputRef.current.click()}
                   style={{ 
-                    width: '100px', height: '100px', borderRadius: '50%', border: '2px solid #e2e8f0', 
+                    width: '120px', height: '120px', borderRadius: '50%', border: '3px solid #EADDCD', 
                     overflow: 'hidden', cursor: 'pointer', position: 'relative', background: '#f8fafc',
-                    display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'border 0.2s'
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'border 0.2s',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.borderColor = '#94a3b8'}
-                  onMouseOut={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
                 >
                   {imagePreview ? (
                     <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <span style={{ fontSize: '24px', color: '#94a3b8' }}>📸</span>
+                    <span style={{ fontSize: '32px', color: '#94a3b8' }}>📸</span>
                   )}
-                  <div style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(15, 23, 42, 0.6)', color: '#fff', textAlign: 'center', padding: '4px 0', fontSize: '11px', fontWeight: '600' }}>
+                  <div style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(15, 23, 42, 0.8)', color: '#fff', textAlign: 'center', padding: '6px 0', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
                     Change
                   </div>
                 </div>
-                <input 
-                  type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }}
-                />
+                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
+                <span style={{ marginTop: '12px', fontSize: '12px', color: '#94a3b8' }}>Joined Vault: April 2026</span>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Full Name</label>
-                <input type="text" name="name" value={formData.name} onChange={handleInputChange} required style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '15px', outline: 'none', transition: 'border-color 0.2s', background: '#fff', color: '#0f172a', boxSizing: 'border-box' }} onFocus={(e) => e.target.style.borderColor = '#3b82f6'} onBlur={(e) => e.target.style.borderColor = '#cbd5e1'} />
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '800', color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Full Name</label>
+                <input type="text" name="name" value={formData.name} onChange={handleInputChange} required style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Bio</label>
-                <textarea name="bio" value={formData.bio} onChange={handleInputChange} rows="3" maxLength="150" style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '15px', resize: 'none', outline: 'none', background: '#fff', color: '#0f172a', boxSizing: 'border-box' }} onFocus={(e) => e.target.style.borderColor = '#3b82f6'} onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}></textarea>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '800', color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Family Role</label>
+                <select name="familyRole" value={formData.familyRole} onChange={handleInputChange} style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }} onFocus={handleFocus} onBlur={handleBlur}>
+                  <option value="Family Member">Family Member</option>
+                  <option value="The Patriarch">The Patriarch</option>
+                  <option value="The Matriarch">The Matriarch</option>
+                  <option value="The Guardian">The Guardian</option>
+                  <option value="The Explorer">The Explorer</option>
+                </select>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date of Birth</label>
-                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '15px', outline: 'none', background: '#fff', color: '#0f172a', boxSizing: 'border-box' }} onFocus={(e) => e.target.style.borderColor = '#3b82f6'} onBlur={(e) => e.target.style.borderColor = '#cbd5e1'} />
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '800', color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Personal Motto / Bio</label>
+                <textarea name="bio" value={formData.bio} onChange={handleInputChange} rows="3" maxLength="150" style={{ ...inputStyle, resize: 'none' }} onFocus={handleFocus} onBlur={handleBlur} placeholder="Write a short quote or intro..."></textarea>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '12px', background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = '#e2e8f0'} onMouseOut={(e) => e.currentTarget.style.background = '#f1f5f9'}>
+              <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '14px', background: 'transparent', color: '#cbd5e1', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; }} onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#cbd5e1'; }}>
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} style={{ flex: 1, padding: '12px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', opacity: loading ? 0.7 : 1, fontSize: '14px', transition: 'background 0.2s' }} onMouseOver={(e) => !loading && (e.currentTarget.style.background = '#1e293b')} onMouseOut={(e) => !loading && (e.currentTarget.style.background = '#0f172a')}>
-                  {loading ? 'Saving...' : 'Save Changes'}
+                <button type="submit" disabled={loading} style={{ flex: 1, padding: '14px', background: '#EADDCD', color: '#0f172a', border: 'none', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', opacity: loading ? 0.7 : 1, transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(234, 221, 205, 0.3)' }} onMouseOver={(e) => !loading && (e.currentTarget.style.background = '#fff')} onMouseOut={(e) => !loading && (e.currentTarget.style.background = '#EADDCD')}>
+                  {loading ? 'Saving...' : 'Save Vault Profile'}
                 </button>
               </div>
+
             </form>
           </div>
         </div>
       )}
 
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes popIn {
+          0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
         }
       `}</style>
     </div>
   );
 }
+
+// PREMIUM STYLES FOR INPUTS (DARK THEME ADAPTED)
+const inputStyle = { width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '15px', outline: 'none', transition: 'all 0.2s', background: 'rgba(0,0,0,0.2)', color: '#fff', boxSizing: 'border-box' };
+const handleFocus = (e) => { e.target.style.borderColor = '#EADDCD'; e.target.style.background = 'rgba(0,0,0,0.4)'; e.target.style.boxShadow = '0 0 0 2px rgba(234, 221, 205, 0.2)'; };
+const handleBlur = (e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.background = 'rgba(0,0,0,0.2)'; e.target.style.boxShadow = 'none'; };
 
 export default ProfilePage;

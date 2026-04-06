@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config(); // .env file ki variables ko load karne ke liye
@@ -10,6 +11,13 @@ import dotenv from 'dotenv';
 <<<<<<< HEAD
 >>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
 =======
+=======
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+
+>>>>>>> 27b06e2 (feat: enhance profile UI & integrate secure OTP email system)
 import http from 'http';
 import { Server } from 'socket.io';
 >>>>>>> 55125cf (8: add Socket.io live nostalgia rooms with room isolation, realtime chat, and live location broadcasting)
@@ -28,7 +36,7 @@ import aiRoutes from './routes/aiRoutes.js';
 
 import notificationRoutes from './routes/notificationRoutes.js';
 
-dotenv.config();
+//dotenv.config();
 
 const app = express();
 <<<<<<< HEAD

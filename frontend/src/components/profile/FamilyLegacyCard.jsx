@@ -11,37 +11,38 @@ function FamilyLegacyCard({ familyPoints }) {
   const badge = getFamilyBadge(familyPoints);
   const progressPercent = badge.next === 'MAX' ? 100 : Math.min((familyPoints / badge.next) * 100, 100);
 
+  // 🔥 Notice: Background and heavy shadow removed to blend into the main VIP card
   return (
-    <div style={{ background: '#0f172a', borderRadius: '32px', padding: '40px', color: '#fff', position: 'relative', overflow: 'hidden', boxShadow: `0 20px 50px ${badge.shadow || 'rgba(0,0,0,0.3)'}` }}>
-      <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: badge.color, opacity: 0.1, borderRadius: '50%', filter: 'blur(60px)' }}></div>
+    <div style={{ position: 'relative', width: '100%' }}>
+      <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '150px', height: '150px', background: badge.color, opacity: 0.15, borderRadius: '50%', filter: 'blur(50px)', pointerEvents: 'none' }}></div>
       
       <div style={{ position: 'relative', zIndex: 2 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px' }}>
           <div>
-            <h2 style={{ textTransform: 'uppercase', letterSpacing: '3px', fontSize: '0.9rem', color: '#94a3b8', marginBottom: '10px' }}>Family Collective Status</h2>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '15px' }}>
-              <span style={{ fontSize: '5rem', fontWeight: '900', color: '#fff', textShadow: `0 0 20px ${badge.glow}` }}>{familyPoints}</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: '700', color: '#94a3b8' }}>BOND POINTS</span>
+            <h2 style={{ textTransform: 'uppercase', letterSpacing: '3px', fontSize: '0.85rem', color: '#94a3b8', marginBottom: '8px', fontWeight: '800' }}>Family Collective Status</h2>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+              <span style={{ fontSize: '4.5rem', fontWeight: '900', color: '#fff', textShadow: `0 0 25px ${badge.glow}` }}>{familyPoints}</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#94a3b8', letterSpacing: '1px' }}>BOND POINTS</span>
             </div>
           </div>
           
-          <div style={{ background: badge.bg, color: badge.color, padding: '15px 25px', borderRadius: '20px', border: `2px solid ${badge.color}`, fontWeight: '900', fontSize: '1.4rem' }}>
+          <div style={{ background: badge.bg, color: badge.color, padding: '12px 24px', borderRadius: '99px', border: `1px solid ${badge.color}`, fontWeight: '800', fontSize: '1.1rem', letterSpacing: '0.5px' }}>
             {badge.title}
           </div>
         </div>
 
-        <p style={{ fontSize: '1.2rem', color: '#cbd5e1', margin: '20px 0 40px', fontStyle: 'italic', maxWidth: '80%' }}>"{badge.msg}"</p>
+        <p style={{ fontSize: '1.1rem', color: '#cbd5e1', margin: '20px 0 35px', fontStyle: 'italic', maxWidth: '90%', lineHeight: '1.6' }}>"{badge.msg}"</p>
 
         {badge.next !== 'MAX' ? (
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontWeight: 'bold', color: '#f8fafc' }}>
-              <span>Next Rank Progress</span>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '24px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontWeight: '700', color: '#f8fafc', fontSize: '0.95rem' }}>
+              <span style={{ textTransform: 'uppercase', letterSpacing: '1px', color: '#94a3b8' }}>Next Rank Progress</span>
               <span>{familyPoints} / {badge.next}</span>
             </div>
-            <div style={{ height: '16px', background: 'rgba(0,0,0,0.4)', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ width: `${progressPercent}%`, height: '100%', background: `linear-gradient(90deg, ${badge.color} 0%, #fff 100%)`, boxShadow: `0 0 15px ${badge.color}`, transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+            <div style={{ height: '12px', background: 'rgba(0,0,0,0.5)', borderRadius: '99px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ width: `${progressPercent}%`, height: '100%', background: `linear-gradient(90deg, ${badge.color} 0%, #fff 100%)`, boxShadow: `0 0 20px ${badge.color}`, transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
             </div>
-            <div style={{ textAlign: 'right', marginTop: '15px', color: '#64748b', fontSize: '0.9rem', fontWeight: 'bold' }}>
+            <div style={{ textAlign: 'right', marginTop: '12px', color: '#64748b', fontSize: '0.85rem', fontWeight: '700' }}>
               🔒 {badge.next - familyPoints} points to elevate your family name
             </div>
           </div>

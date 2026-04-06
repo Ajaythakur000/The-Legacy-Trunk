@@ -18,12 +18,35 @@ const messageSchema = new Schema(
       required: true,
       trim: true,
     },
+    senderAvatar: {
+      type: String,
+      default: '', // 🔥 Ab refresh karne pe photo gayab nahi hogi
+    },
     text: {
       type: String,
-      required: true,
       trim: true,
       maxlength: 1000,
+      default: '', 
     },
+    imageUrl: {
+      type: String,
+      default: '',
+    },
+    audioUrl: {
+      type: String,
+      default: '',
+    },
+    // 🔥 NEW: REACTIONS & VIEWS SYSTEM
+    reactions: [
+      {
+        emoji: { type: String, required: true },
+        userId: { type: Schema.Types.ObjectId, ref: 'FamilyMember' },
+        userName: { type: String }
+      }
+    ],
+    seenBy: [
+      { type: Schema.Types.ObjectId, ref: 'FamilyMember' }
+    ]
   },
   { timestamps: true }
 );

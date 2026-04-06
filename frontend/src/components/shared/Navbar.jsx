@@ -4,10 +4,9 @@ import { useEffect, useState, useRef } from 'react';
 import { getMyCirclesApi } from '../../api/circleApi';
 import api from '../../api/axios';
 import { io } from 'socket.io-client';
-import ChampionDetailModal from '../modals/ChampionDetailModal'; // 🔥 Ye modal yahan imported hai
+import ChampionDetailModal from '../modals/ChampionDetailModal'; 
 import { motion } from 'framer-motion';
 
-// 🔥 Layout Wrapper
 function Navbar({ children }) {
   const { isAuthenticated, user, logout, switchActiveCircle } = useAuth();
   const navigate = useNavigate();
@@ -28,6 +27,9 @@ function Navbar({ children }) {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // 🔥 NEW STREAK LOGIC
+  const currentStreak = user?.currentStreak || 0;
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -151,11 +153,20 @@ function Navbar({ children }) {
       {/* 🌑 DARK SIDEBAR */}
       <aside className={`sidebar ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img 
-            src="/web-app-manifest-192x192.png" 
-            alt="Memento Logo" 
-            style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#F9F3E8', padding: '2px', objectFit: 'cover', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} 
-          />
+          
+          {/* 🔥 SIDEBAR LOGO UPDATE */}
+          <div style={{ 
+            width: '42px', height: '42px', borderRadius: '50%', overflow: 'hidden', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)', flexShrink: 0 
+          }}>
+            <img 
+              src="/finall_logo.png" 
+              alt="Memento Logo" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.25)', display: 'block' }} 
+            />
+          </div>
+
           <div style={{ fontSize: '22px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px' }}>
             Memento
           </div>
@@ -188,7 +199,18 @@ function Navbar({ children }) {
             </button>
             
             <Link to="/home" className={`header-brand ${isSidebarOpen ? 'hide-on-desktop' : ''}`}>
-                <img src="/web-app-manifest-192x192.png" alt="Logo" style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#F9F3E8', padding: '2px', objectFit: 'cover', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
+                {/* 🔥 HEADER LOGO UPDATE */}
+                <div style={{ 
+                  width: '34px', height: '34px', borderRadius: '50%', overflow: 'hidden', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)', flexShrink: 0 
+                }}>
+                  <img 
+                    src="/finall_logo.png" 
+                    alt="Logo" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.25)', display: 'block' }} 
+                  />
+                </div>
                 <span className="header-brand-text">Memento</span>
             </Link>
           </div>
@@ -225,6 +247,7 @@ function Navbar({ children }) {
               )}
             </div>
 
+            {/* NOTIFICATION BELL */}
             <div ref={notifRef} style={{ position: 'relative' }}>
               <motion.button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)} 
@@ -258,6 +281,37 @@ function Navbar({ children }) {
               )}
             </div>
 
+            {/* ⚛️ ATOMIC STREAK INDICATOR ⚛️ */}
+            <div
+              title={currentStreak > 0 ? `Atomic Streak: ${currentStreak} Days!` : "Post a story today to ignite your streak!"}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: currentStreak > 0 ? '6px 14px' : '6px 10px',
+                borderRadius: '12px',
+                background: currentStreak > 0 ? '#fff' : '#f8fafc',
+                border: `2px solid ${currentStreak > 0 ? '#06b6d4' : '#e2e8f0'}`,
+                boxShadow: currentStreak > 0 ? '0 0 15px rgba(6, 182, 212, 0.3)' : 'none',
+                color: '#0f172a',
+                fontWeight: '900', fontSize: '16px',
+                cursor: 'default', transition: 'all 0.3s ease'
+              }}
+            >
+              <div 
+                className={currentStreak > 0 ? "atomic-glow" : ""} 
+                style={{ 
+                  fontSize: '18px', 
+                  color: currentStreak > 0 ? '#06b6d4' : '#94a3b8',
+                  filter: currentStreak === 0 ? 'grayscale(100%) opacity(0.6)' : 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1'
+                }}
+              >
+                ⚛
+              </div>
+              {/* Show number ONLY when streak is 1 or more */}
+              {currentStreak > 0 && <span style={{ paddingTop: '1px' }}>{currentStreak}</span>}
+            </div>
+
+            {/* PROFILE DROPDOWN */}
             <div className="profile-dropdown-container" style={{ position: 'relative' }}>
               <motion.button 
                 onClick={() => navigate('/profile')} 
@@ -272,7 +326,6 @@ function Navbar({ children }) {
                  <div style={profileDropdownStyle} className="profile-dropdown-box">
                      <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px', background: '#f8fafc' }}><img src={user?.avatar || "https://via.placeholder.com/40"} alt="DP" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} /><div style={{ overflow: 'hidden' }}><div style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || 'User'}</div><div style={{ color: '#64748b', fontSize: '12px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div></div></div>
                   <div style={{ padding: '8px' }}>
-                    {/* 🔥 THE BUTTON THAT TRIGGERS THE MODAL IS HERE */}
                     <button onClick={() => setShowChampionModal(true)} style={dropdownLinkStyle}>👑 Top Contributor</button>
                     <Link to="/profile?edit=true" style={dropdownLinkStyle}>✏️ Edit Profile</Link>
                     <div style={{ height: '1px', background: '#e2e8f0', margin: '8px 0' }}></div>
@@ -286,7 +339,6 @@ function Navbar({ children }) {
         <main className="page-wrapper">{children}</main>
       </div>
 
-      {/* 🔥 CHAMPION MODAL RESTORED HERE 🔥 */}
       {showChampionModal && (
         <ChampionDetailModal 
           champion={championUser} 
@@ -309,7 +361,7 @@ function Navbar({ children }) {
         .hamburger-btn { background: transparent; border: none; color: #334155; cursor: pointer; padding: 10px; border-radius: 12px; display: flex; align-items: center; transition: background 0.2s; z-index: 60; }
         .hamburger-btn:hover { background: #f1f5f9; color: #0f172a; }
 
-        /* 🔥 BRAND LOGO IN HEADER */
+        /* BRAND LOGO IN HEADER */
         .header-brand { display: flex; align-items: center; gap: 10px; margin-left: 8px; text-decoration: none; cursor: pointer; transition: opacity 0.3s; }
         .header-brand-text { font-size: 22px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; transition: color 0.2s ease; }
         .header-brand:hover .header-brand-text { color: #3b82f6; }
@@ -344,6 +396,16 @@ function Navbar({ children }) {
         
         .profile-dropdown-menu { visibility: hidden; opacity: 0; transform: translateY(-10px); transition: all 0.2s ease; }
         .profile-dropdown-container:hover .profile-dropdown-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+
+        /* ⚛️ ATOMIC PREMIUM GLOW ANIMATION */
+        @keyframes atomPulse {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #06b6d4); }
+          50% { transform: scale(1.15); filter: drop-shadow(0 0 12px #22d3ee) brightness(1.2); }
+        }
+        .atomic-glow {
+          animation: atomPulse 2.5s ease-in-out infinite;
+          display: inline-block;
+        }
 
         /* ==========================================
            📱 MOBILE RESPONSIVENESS (PWA MAGIC)
