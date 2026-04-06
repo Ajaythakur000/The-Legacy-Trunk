@@ -26,10 +26,10 @@ export const getCircleByIdApi = async (circleId) => {
 };
 
 /**
- * Add member by email
+ * 🔥 UPDATED: Send Direct Email Invite (Creates Notification)
  * body: { email }
  */
-export const addMemberToCircleApi = async (circleId, { email }) => {
+export const sendFamilyInviteApi = async (circleId, { email }) => {
   const response = await api.post(`/circles/${circleId}/members`, { email });
   return response.data;
 };
@@ -39,6 +39,14 @@ export const addMemberToCircleApi = async (circleId, { email }) => {
  */
 export const removeMemberFromCircleApi = async (circleId, memberId) => {
   const response = await api.delete(`/circles/${circleId}/members/${memberId}`);
+  return response.data;
+};
+
+/**
+ * 🔥 NEW: Delete an entire Family Circle (Admin Only)
+ */
+export const deleteCircleApi = async (circleId) => {
+  const response = await api.delete(`/circles/${circleId}`);
   return response.data;
 };
 

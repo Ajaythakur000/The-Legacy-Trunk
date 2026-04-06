@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import Confetti from 'react-confetti'; // 🔥 IMPORTED CONFETTI
 import {
   addCommentToStoryApi,
   createStoryApi,
@@ -22,6 +23,9 @@ function VaultStoriesPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // 🔥 CONFETTI STATE
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const loadFeed = async () => {
     if (!activeCircleId) return;
@@ -77,6 +81,11 @@ function VaultStoriesPage() {
     try {
       await createStoryApi(formData);
       setSuccess('Memory securely locked in the vault! 🔐');
+      
+      // 🎉 FIRE THE CONFETTI ON SUCCESS!
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 6000); // Stop after 6 seconds
+
       await loadFeed();
     } catch (e) {
       console.error('createStory failed:', e?.response?.data || e);
@@ -140,6 +149,13 @@ function VaultStoriesPage() {
   return (
     <div style={{ maxWidth: '850px', margin: '0 auto', padding: '60px 20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
       
+      {/* 🎉 THE CONFETTI LAYER (Appears on top of everything) */}
+      {showConfetti && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 99999, pointerEvents: 'none' }}>
+          <Confetti width={window.innerWidth} height={window.innerHeight} gravity={0.3} numberOfPieces={400} />
+        </div>
+      )}
+
       {/* ✨ WOW HEADER SECTION */}
       <div style={{ textAlign: 'center', marginBottom: '50px', animation: 'fadeInDown 0.8s ease' }}>
         <h1 style={{ 
@@ -172,7 +188,7 @@ function VaultStoriesPage() {
           {error && <div style={{ color: '#b91c1c', background: '#fef2f2', padding: '16px', borderRadius: '16px', borderLeft: '4px solid #ef4444', marginBottom: '24px', fontWeight: '600' }}>{error}</div>}
           {success && <div style={{ color: '#15803d', background: '#f0fdf4', padding: '16px', borderRadius: '16px', borderLeft: '4px solid #22c55e', marginBottom: '24px', fontWeight: '600' }}>{success}</div>}
 
-          {/* ✍️ STORY COMPOSER (With AI Magic Inside) */}
+          {/* ✍️ STORY COMPOSER */}
           <div style={{ animation: 'fadeInUp 0.8s ease 0.1s both' }}>
             <StoryComposer 
               activeCircleId={activeCircleId} 
