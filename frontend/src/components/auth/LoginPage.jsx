@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { motion } from 'framer-motion'; // 🔥 FRAMER MOTION IMPORT
+import { motion } from 'framer-motion';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -29,6 +29,11 @@ function LoginPage() {
     const result = await login(form.email, form.password);
 
     if (!result.success) {
+      if (result.requireOtp || result?.data?.requireOtp) {
+          setError("Your account is not verified yet. Please sign up again to trigger the OTP email.");
+          return;
+      }
+      
       setError(result.message);
       return;
     }
@@ -61,24 +66,39 @@ function LoginPage() {
           textAlign: 'center'
         }}
       >
-        {/* 🔥 BRAND LOGO */}
-       {/* 🔥 BRAND LOGO (CSS ZOOM HACK) */}
-        <motion.div 
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-          style={{ 
-            width: '90px', height: '90px', borderRadius: '50%', margin: '0 auto 24px', 
-            border: '4px solid #f8fafc', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', 
-            overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F9F3E8' 
-          }} 
-        >
-          <img 
-            src="/web-app-manifest-192x192.png" 
-            alt="Memento Logo" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.8)' }} 
-          />
-        </motion.div>
+        
+        {/* 🔥 BRAND LOGO: Scale increased to 1.25 to completely obliterate the white edge */}
+        <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
+            style={{
+              width: '120px', 
+              height: '120px',
+              borderRadius: '50%',
+              margin: '0 auto 24px',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+              overflow: 'hidden', 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'transparent',
+              border: 'none', 
+              padding: 0 
+            }}
+          >
+             <img 
+              src="/finall_logo.png" 
+              alt="The Legacy Trunk Emblem"
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover', 
+                display: 'block', // Ensures no random inline-block spacing
+                transform: 'scale(1.25)', // 🔥 Ab ye pakka border ke bahar tak nikal jayega
+              }} 
+            />
+          </motion.div>
 
         <h2 style={{ margin: '0 0 8px 0', fontSize: '2rem', color: '#0f172a', fontWeight: '900', fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>
           Welcome Back

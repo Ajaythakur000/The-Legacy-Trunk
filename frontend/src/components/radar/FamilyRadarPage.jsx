@@ -1,7 +1,9 @@
+
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet'; 
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../context/AuthContext';
 import {
   getFamilyRadarApi,
@@ -10,60 +12,40 @@ import {
 } from '../../api/locationApi';
 import { getCircleFeedApi } from '../../api/storyApi'; 
 import { getSocket } from '../../services/socket';
-import 'leaflet/dist/leaflet.css';
 
 // -----------------------------------------------------------
-// 🔥 NEW CUSTOM MARKER ICONS
+// 🔥 PREMIUM DARK MARKERS
 // -----------------------------------------------------------
 const myIcon = L.divIcon({
   className: 'user-marker', 
-  iconSize: [20, 20],
-  iconAnchor: [10, 10], 
-  popupAnchor: [0, -10] 
+  iconSize: [24, 24],
+  iconAnchor: [12, 12], 
+  popupAnchor: [0, -12] 
 });
 
 const otherMemberIcon = L.divIcon({
   className: 'other-marker', 
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-  popupAnchor: [0, -8]
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+  popupAnchor: [0, -9]
 });
 
 // -----------------------------------------------------------
-// 🚀 THE FIX: SMART TOUCHPAD HANDLER
-// -----------------------------------------------------------
-// -----------------------------------------------------------
-// 🚀 THE FIX: SMART TOUCHPAD HANDLER (STRICT VERTICAL/HORIZONTAL PAN)
+// 🚀 TOUCHPAD HANDLER (Smooth Scrolling)
 // -----------------------------------------------------------
 function TouchpadPanHandler() {
   const map = useMap();
-
   useEffect(() => {
     const handleWheel = (e) => {
-      // 1. Agar user Pinch (Zoom) kar raha hai (Touchpad pinch par ctrlKey true hoti hai)
-      if (e.ctrlKey) {
-        return; // Leaflet ko apna Zoom ka kaam karne do
-      }
-
-      // 2. Agar user sirf Slide (Pan) kar raha hai kisi bhi direction mein
+      if (e.ctrlKey) return; 
       e.preventDefault();
-      
-      // 🔥 YEH HAI MAGIC WORD: Leaflet ko vertical scroll padhne se roko!
       e.stopImmediatePropagation(); 
-      
-      // Map ko exact us direction mein slide karo
       map.panBy([e.deltaX, e.deltaY], { animate: false }); 
     };
-
     const container = map.getContainer();
-    // 'capture: true' se humara code Leaflet se pehle event pakad lega
     container.addEventListener('wheel', handleWheel, { capture: true, passive: false });
-
-    return () => {
-      container.removeEventListener('wheel', handleWheel, { capture: true });
-    };
+    return () => container.removeEventListener('wheel', handleWheel, { capture: true });
   }, [map]);
-
   return null;
 }
 
@@ -71,8 +53,7 @@ function FamilyRadarPage() {
   const { user } = useAuth();
 
   const myUserId = String(user?._id || '');
-  const familyCircleId =
-    user?.familyCircleId || user?.activeCircleId || user?.familyCircle?._id || null;
+  const familyCircleId = user?.familyCircleId || user?.activeCircleId || user?.familyCircle?._id || null;
 
   const [myLocation, setMyLocation] = useState(null);
   const [locError, setLocError] = useState('');
@@ -91,7 +72,7 @@ function FamilyRadarPage() {
       (m) => !m.isGhostModeOn && Number.isFinite(m.latitude) && Number.isFinite(m.longitude)
     );
     if (firstVisible) return [firstVisible.latitude, firstVisible.longitude];
-    return [28.6139, 77.209];
+    return [28.6139, 77.209]; // Default India
   }, [myLocation, members]);
 
   const formatTime = (iso) => {
@@ -190,26 +171,30 @@ function FamilyRadarPage() {
     loadFamilyRadar();
     const id = setInterval(() => loadFamilyRadar(), 20000);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 🔥 GHOST MODE FIXED
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocError('Geolocation is not supported in this browser.');
       return;
     }
     setLoadingLoc(true);
-    navigator.geolocation.getCurrentPosition(
+
+    const watchId = navigator.geolocation.watchPosition(
       async (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         setMyLocation({ lat, lng });
         setLocError('');
         setLoadingLoc(false);
-        try {
-          await updateMyLocationApi({ latitude: lat, longitude: lng });
-          await loadFamilyRadar();
-        } catch { /* silent */ }
+
+        // 🔥 Backend update only if Ghost Mode is OFF
+        if (!isGhostModeOn) {
+          try {
+            await updateMyLocationApi({ latitude: lat, longitude: lng });
+          } catch { /* silent */ }
+        }
       },
       (err) => {
         setLocError(err?.message || 'Location access denied. Radar will not work.');
@@ -217,8 +202,9 @@ function FamilyRadarPage() {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [isGhostModeOn]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -288,7 +274,8 @@ function FamilyRadarPage() {
               padding: '10px 18px',
               cursor: 'pointer',
               fontWeight: 600,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+              transition: 'all 0.3s ease'
             }}
           >
             Ghost Mode: {isGhostModeOn ? 'ON 👻' : 'OFF'}
@@ -300,42 +287,42 @@ function FamilyRadarPage() {
         {radarLoading && members.length === 0 && <p style={{ color: '#6b7280' }}>Loading family radar...</p>}
         {radarError && <p style={{ color: 'crimson' }}>{radarError}</p>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(320px, 0.8fr)', gap: 20, marginBottom: 30, '@media (max-width: 768px)': { gridTemplateColumns: '1fr' } }}>
+        {/* 🔥 CSS Grid Bug Fix without @media inline */}
+        <div className="radar-grid-container" style={{ marginBottom: 30 }}>
           
-          <div style={{ height: 470, border: '1px solid #e5e7eb', borderRadius: 16, overflow: 'hidden', background: '#111827', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+          <div style={{ height: 470, border: '1px solid #e5e7eb', borderRadius: 16, overflow: 'hidden', background: '#111827', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', zIndex: 0 }}>
             <MapContainer 
               center={center} 
               zoom={13} 
-              style={{ height: '100%', width: '100%' }}
-              // 🔥 scrollWheelZoom ko TRUE kar diya taaki Pinch (Zoom) kaam kare
+              style={{ height: '100%', width: '100%', zIndex: 0 }}
               scrollWheelZoom={true} 
               dragging={true}
               touchZoom={true}
             >
-              {/* THE SMART TOUCHPAD HANDLER */}
               <TouchpadPanHandler />
 
+              {/* 🔥 PREMIUM DARK MAP TILES (NO API KEY REQUIRED) */}
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               />
 
               {myLocation && !isGhostModeOn && (
                 <>
                   <Marker icon={myIcon} position={[myLocation.lat, myLocation.lng]}>
-                    <Popup>{user?.name || 'You'} (You) 📍</Popup>
+                    <Popup className="premium-popup"><b>{user?.name || 'You'}</b> (You) 📍</Popup>
                   </Marker>
-                  <Circle center={[myLocation.lat, myLocation.lng]} radius={120} pathOptions={{ color: '#3b82f6', fillOpacity: 0.2 }} />
+                  <Circle center={[myLocation.lat, myLocation.lng]} radius={150} pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.15, weight: 1 }} />
                 </>
               )}
 
               {visibleMembers.map((m) => (
                 <Marker key={m._id} icon={otherMemberIcon} position={[m.latitude, m.longitude]}>
-                  <Popup>
-                    <div>
-                      <b style={{ color: '#111827' }}>{m.name}</b>
-                      <div style={{ color: m.isOnline ? '#10b981' : '#6b7280' }}>{m.isOnline ? 'Active now 🟢' : `Last seen ${timeAgo(m.updatedAt)}`}</div>
-                      <div style={{ fontWeight: 'bold' }}>{getDistanceLabel(m)}</div>
+                  <Popup className="premium-popup">
+                    <div style={{ textAlign: 'center' }}>
+                      <b style={{ color: '#111827', fontSize: '14px' }}>{m.name}</b>
+                      <div style={{ color: m.isOnline ? '#10b981' : '#6b7280', fontSize: '12px', marginTop: '2px' }}>{m.isOnline ? 'Active now 🟢' : `Last seen ${timeAgo(m.updatedAt)}`}</div>
+                      <div style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '12px', marginTop: '2px' }}>{getDistanceLabel(m)}</div>
                     </div>
                   </Popup>
                 </Marker>
@@ -348,7 +335,7 @@ function FamilyRadarPage() {
             
             <div style={{ padding: 12, borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', marginBottom: 12 }}>
               <div style={{ fontWeight: 700 }}>{user?.name || 'You'} (You)</div>
-              <div style={{ fontSize: 13, color: '#555', marginTop: 4 }}>{isGhostModeOn ? 'Hidden (Ghost Mode ON)' : 'Visible to family'}</div>
+              <div style={{ fontSize: 13, color: '#555', marginTop: 4 }}>{isGhostModeOn ? 'Hidden (Ghost Mode ON) 👻' : 'Visible to family 📡'}</div>
             </div>
 
             {members.length === 0 ? (
@@ -407,31 +394,60 @@ function FamilyRadarPage() {
 
       </div>
 
-      {/* 💅 CSS MAGIC */}
       <style>{`
+        /* 🔥 FIXED GRID LAYOUT */
+        .radar-grid-container {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .radar-grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 🌑 THE CSS FILTER HACK FOR FREE PREMIUM DARK THEME */
+        .leaflet-container {
+           background-color: #020617 !important;
+           filter: brightness(0.9) contrast(1.1) saturate(1.2);
+        }
+
+        /* Premium Leaflet Markers */
         .user-marker {
-          width: 20px;
-          height: 20px;
+          width: 24px !important;
+          height: 24px !important;
           background-color: #3b82f6; 
           border: 3px solid #fff;
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
-          animation: pulse 1.5s infinite;
+          box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+          animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-          0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-          70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-          100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+          70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
 
         .other-marker {
-          width: 16px;
-          height: 16px;
+          width: 18px !important;
+          height: 18px !important;
           background-color: #8b5cf6; 
           border: 3px solid #fff;
           border-radius: 50%;
-          box-shadow: 0 0 6px rgba(139, 92, 246, 0.6);
+          box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+        }
+
+        /* Custom Popup styling to match dark theme vibes */
+        .leaflet-popup-content-wrapper {
+          border-radius: 12px;
+          padding: 4px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .leaflet-popup-content {
+          margin: 10px 14px;
+          font-family: inherit;
         }
       `}</style>
     </div>

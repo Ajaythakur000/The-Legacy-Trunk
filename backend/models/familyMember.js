@@ -22,6 +22,22 @@ const familyMemberSchema = new Schema(
     },
     
     // ==============================
+    // 🛡️ OTP & SECURITY FIELDS (NEW)
+    // ==============================
+    isVerified: {
+      type: Boolean,
+      default: true, // Purane users by default verified rahenge
+    },
+    otp: {
+      type: String,
+      default: null,
+    },
+    otpExpires: {
+      type: Date,
+      default: null,
+    },
+
+    // ==============================
     // 👤 USER PROFILE FIELDS
     // ==============================
     avatar: {
@@ -88,10 +104,8 @@ const familyMemberSchema = new Schema(
     },
 
     // ==============================
-    // 🔥 GAMIFICATION & STREAKS (NEW)
+    // 🔥 GAMIFICATION & STREAKS
     // ==============================
-    
-    // 1. Daily Login Streak System
     currentStreak: {
       type: Number,
       default: 0
@@ -101,20 +115,18 @@ const familyMemberSchema = new Schema(
       default: 0
     },
     lastLoginDate: {
-      type: String, // Store as "YYYY-MM-DD" for easy comparison
+      type: String, 
       default: null
     },
-
-    // 2. Activity Heatmap Graph Data (The Yellow GitHub Graph)
-    // Keys will be dates "2026-04-07", values will be the point score for that day.
+    lastPostDate: {
+      type: String,
+      default: null
+    },
     activityMap: {
       type: Map,
       of: Number,
       default: {}
     },
-
-    // 3. User's Personal Contribution to the Family Bond
-    // To track who is the "Top Contributor"
     totalContributionPoints: {
       type: Number,
       default: 0,

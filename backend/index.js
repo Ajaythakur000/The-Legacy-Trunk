@@ -1,7 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -19,7 +20,7 @@ import aiRoutes from './routes/aiRoutes.js';
 
 import notificationRoutes from './routes/notificationRoutes.js';
 
-dotenv.config();
+//dotenv.config();
 
 const app = express();
 app.use(cors());

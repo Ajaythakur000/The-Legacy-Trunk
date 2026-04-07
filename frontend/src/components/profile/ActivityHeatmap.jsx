@@ -75,51 +75,58 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
     return { monthsData: data, totalPoints: total, activeDays: activeCount, currentYear: cYear };
   }, [activityMap]);
 
+  // 🔥 THE NEW DARK/GOLDEN COLOR PALETTE
   const getColor = (level, isFuture) => {
     if (isFuture) return 'transparent'; 
     switch (level) {
-      case 0: return '#e2e8f0'; 
-      case 1: return '#fef08a'; 
-      case 2: return '#facc15'; 
-      case 3: return '#eab308'; 
-      case 4: return '#ca8a04'; 
-      default: return '#e2e8f0';
+      case 0: return 'rgba(255, 255, 255, 0.05)'; // Empty days (Dark Slate with subtle white)
+      case 1: return '#d4af37'; // Light Bronze/Gold
+      case 2: return '#eab308'; // Bright Gold
+      case 3: return '#fbbf24'; // Brighter Gold
+      case 4: return '#fef08a'; // Glowing White-Gold
+      default: return 'rgba(255, 255, 255, 0.05)';
     }
   };
 
   return (
     <div style={{
-      background: '#fff', borderRadius: '24px', padding: '32px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginTop: '24px',
-      overflowX: 'auto', border: '1px solid #e2e8f0'
+      // 🔥 DARK BACKGROUND TO MATCH VAULT
+      background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', 
+      borderRadius: '24px', padding: '32px',
+      boxShadow: '0 20px 40px rgba(0,0,0,0.3)', marginTop: '24px',
+      overflowX: 'auto', border: '1px solid rgba(234, 221, 205, 0.1)'
     }}>
       
       <style>{`
         .heatmap-cell {
           box-sizing: border-box;
-          border: 1px solid rgba(27, 31, 35, 0.04);
-          transition: all 0.1s ease;
+          border: 1px solid rgba(255, 255, 255, 0.02);
+          transition: all 0.2s ease;
         }
         .heatmap-cell:hover {
-          border: 2.5px solid #0f172a !important;
+          border: 1px solid #EADDCD !important;
+          transform: scale(1.2);
+          box-shadow: 0 0 10px rgba(234, 221, 205, 0.4);
           z-index: 10;
         }
       `}</style>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        <div style={{ fontSize: '15px', color: '#64748b' }}>
-          <span style={{ color: '#0f172a', fontSize: '20px', fontWeight: '800', marginRight: '6px' }}>{totalPoints}</span> 
+        {/* 🔥 UPDATED TEXT COLORS FOR DARK THEME */}
+        <div style={{ fontSize: '15px', color: '#94a3b8' }}>
+          <span style={{ color: '#EADDCD', fontSize: '20px', fontWeight: '800', marginRight: '6px' }}>{totalPoints}</span> 
           legacy points in the past one year
         </div>
         
-        <div style={{ display: 'flex', gap: '20px', fontSize: '13px', color: '#64748b', alignItems: 'center', fontWeight: '500' }}>
-          <span>Total active days: <strong style={{ color: '#0f172a' }}>{activeDays}</strong></span>
-          <span>Max streak: <strong style={{ color: '#0f172a' }}>{maxStreak}</strong></span>
+        <div style={{ display: 'flex', gap: '20px', fontSize: '13px', color: '#94a3b8', alignItems: 'center', fontWeight: '500' }}>
+          <span>Total active days: <strong style={{ color: '#EADDCD' }}>{activeDays}</strong></span>
+          <span>Max streak: <strong style={{ color: '#EADDCD' }}>{maxStreak}</strong></span>
           
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <div 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: '#334155' }}
+              // 🔥 UPDATED BUTTON FOR DARK THEME
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: '#cbd5e1' }}
             >
               Current
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -128,17 +135,15 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
             </div>
             
             {isDropdownOpen && (
-              <div style={{ position: 'absolute', top: '110%', right: '0', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', boxShadow: '0 10px 20px rgba(0,0,0,0.1)', zIndex: 100, minWidth: '120px' }}>
-                <div style={{ padding: '10px 14px', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#0f172a' }}>
-                  Current <span style={{ color: '#3b82f6' }}>✓</span>
+              <div style={{ position: 'absolute', top: '110%', right: '0', background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: '0 10px 20px rgba(0,0,0,0.5)', zIndex: 100, minWidth: '120px' }}>
+                <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#EADDCD' }}>
+                  Current <span style={{ color: '#EADDCD' }}>✓</span>
                 </div>
-                {/* Agar 2026 se aage nikal gaye toh purane saal dikhayega */}
                 {currentYear > 2026 && (
-                  <div style={{ padding: '10px 14px', color: '#64748b', cursor: 'pointer' }}>2026</div>
+                  <div style={{ padding: '10px 14px', color: '#94a3b8', cursor: 'pointer' }}>2026</div>
                 )}
-                {/* Fallback for now */}
                 {currentYear === 2026 && (
-                   <div style={{ padding: '10px 14px', color: '#cbd5e1', cursor: 'not-allowed', fontSize: '11px' }}>No past years</div>
+                   <div style={{ padding: '10px 14px', color: '#475569', cursor: 'not-allowed', fontSize: '11px' }}>No past years</div>
                 )}
               </div>
             )}
@@ -173,7 +178,7 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
                   </div>
                 ))}
               </div>
-              <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', textAlign: 'center' }}>{month.name}</span>
+              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textAlign: 'center' }}>{month.name}</span>
             </div>
           ))}
         </div>

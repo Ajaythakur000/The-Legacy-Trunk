@@ -7,7 +7,6 @@ import { io } from 'socket.io-client';
 import ChampionDetailModal from '../modals/ChampionDetailModal'; 
 import { motion } from 'framer-motion';
 
-// 🔥 Layout Wrapper
 function Navbar({ children }) {
   const { isAuthenticated, user, logout, switchActiveCircle } = useAuth();
   const navigate = useNavigate();
@@ -29,8 +28,7 @@ function Navbar({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 🔥 STREAK LOGIC
-  // Current streak backend se aayegi. Jab user login hai, hum assume kar rahe hain aaj visit ho gaya (always filled).
+  // 🔥 NEW STREAK LOGIC
   const currentStreak = user?.currentStreak || 0;
 
   useEffect(() => {
@@ -155,11 +153,20 @@ function Navbar({ children }) {
       {/* 🌑 DARK SIDEBAR */}
       <aside className={`sidebar ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img 
-            src="/web-app-manifest-192x192.png" 
-            alt="Memento Logo" 
-            style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#F9F3E8', padding: '2px', objectFit: 'cover', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} 
-          />
+          
+          {/* 🔥 SIDEBAR LOGO UPDATE */}
+          <div style={{ 
+            width: '42px', height: '42px', borderRadius: '50%', overflow: 'hidden', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)', flexShrink: 0 
+          }}>
+            <img 
+              src="/finall_logo.png" 
+              alt="Memento Logo" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.25)', display: 'block' }} 
+            />
+          </div>
+
           <div style={{ fontSize: '22px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px' }}>
             Memento
           </div>
@@ -192,7 +199,18 @@ function Navbar({ children }) {
             </button>
             
             <Link to="/home" className={`header-brand ${isSidebarOpen ? 'hide-on-desktop' : ''}`}>
-                <img src="/web-app-manifest-192x192.png" alt="Logo" style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#F9F3E8', padding: '2px', objectFit: 'cover', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
+                {/* 🔥 HEADER LOGO UPDATE */}
+                <div style={{ 
+                  width: '34px', height: '34px', borderRadius: '50%', overflow: 'hidden', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)', flexShrink: 0 
+                }}>
+                  <img 
+                    src="/finall_logo.png" 
+                    alt="Logo" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.25)', display: 'block' }} 
+                  />
+                </div>
                 <span className="header-brand-text">Memento</span>
             </Link>
           </div>
@@ -229,7 +247,7 @@ function Navbar({ children }) {
               )}
             </div>
 
-            {/* 🔔 Notifications */}
+            {/* NOTIFICATION BELL */}
             <div ref={notifRef} style={{ position: 'relative' }}>
               <motion.button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)} 
@@ -263,32 +281,37 @@ function Navbar({ children }) {
               )}
             </div>
 
-            {/* 🔥 THE LEGACY FLAME (STREAK INDICATOR) - Placed correctly! */}
-            <div 
-              title="Your active legacy streak!"
+            {/* ⚛️ ATOMIC STREAK INDICATOR ⚛️ */}
+            <div
+              title={currentStreak > 0 ? `Atomic Streak: ${currentStreak} Days!` : "Post a story today to ignite your streak!"}
               style={{
                 display: 'flex', alignItems: 'center', gap: '6px',
-                padding: '6px 12px', borderRadius: '99px',
-                background: 'linear-gradient(135deg, #fef08a 0%, #fde047 100%)', // Always filled gold
-                border: '1px solid #facc15',
-                boxShadow: '0 0 10px rgba(234, 179, 8, 0.4)', // Glowing effect
-                color: '#a16207',
-                fontWeight: '800', fontSize: '14px',
-                transition: 'all 0.3s ease', cursor: 'default'
+                padding: currentStreak > 0 ? '6px 14px' : '6px 10px',
+                borderRadius: '12px',
+                background: currentStreak > 0 ? '#fff' : '#f8fafc',
+                border: `2px solid ${currentStreak > 0 ? '#06b6d4' : '#e2e8f0'}`,
+                boxShadow: currentStreak > 0 ? '0 0 15px rgba(6, 182, 212, 0.3)' : 'none',
+                color: '#0f172a',
+                fontWeight: '900', fontSize: '16px',
+                cursor: 'default', transition: 'all 0.3s ease'
               }}
             >
-              <svg 
-                width="18" height="18" viewBox="0 0 24 24" 
-                fill="#eab308" // Solid fill
-                stroke="#ca8a04" 
-                strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"
+              <div 
+                className={currentStreak > 0 ? "atomic-glow" : ""} 
+                style={{ 
+                  fontSize: '18px', 
+                  color: currentStreak > 0 ? '#06b6d4' : '#94a3b8',
+                  filter: currentStreak === 0 ? 'grayscale(100%) opacity(0.6)' : 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1'
+                }}
               >
-                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-              </svg>
-              <span>{currentStreak}</span>
+                ⚛
+              </div>
+              {/* Show number ONLY when streak is 1 or more */}
+              {currentStreak > 0 && <span style={{ paddingTop: '1px' }}>{currentStreak}</span>}
             </div>
 
-            {/* 👤 Profile */}
+            {/* PROFILE DROPDOWN */}
             <div className="profile-dropdown-container" style={{ position: 'relative' }}>
               <motion.button 
                 onClick={() => navigate('/profile')} 
@@ -373,6 +396,16 @@ function Navbar({ children }) {
         
         .profile-dropdown-menu { visibility: hidden; opacity: 0; transform: translateY(-10px); transition: all 0.2s ease; }
         .profile-dropdown-container:hover .profile-dropdown-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+
+        /* ⚛️ ATOMIC PREMIUM GLOW ANIMATION */
+        @keyframes atomPulse {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #06b6d4); }
+          50% { transform: scale(1.15); filter: drop-shadow(0 0 12px #22d3ee) brightness(1.2); }
+        }
+        .atomic-glow {
+          animation: atomPulse 2.5s ease-in-out infinite;
+          display: inline-block;
+        }
 
         /* ==========================================
            📱 MOBILE RESPONSIVENESS (PWA MAGIC)

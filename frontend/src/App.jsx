@@ -5,14 +5,14 @@ import { AnimatePresence } from 'framer-motion'; // 🔥 FRAMER MOTION IMPORT
 // Layout & Shared
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
-import AnimatedPage from './components/shared/AnimatedPage'; // 🔥 TERA NAYA ANIMATION WRAPPER
+import AnimatedPage from './components/shared/AnimatedPage'; 
 
 // Auth Pages
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 
 // Core Pages
-import HomePage from './pages/HomePage';
+import HomePage from './components/Feed/HomePage';
 import DashboardPage from './components/dashboard/DashboardPage';
 import ProfilePage from './components/profile/ProfilePage';
 
@@ -24,7 +24,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 // Stories Pages
 import VaultStoriesPage from './pages/VaultStoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
-import MyStoriesPage from './pages/MyStoriesPage';
+import MyStoriesPage from './components/story/MyStoriesPage';
 import FamilyTimelinePage from './pages/FamilyTimelinePage';
 
 import FamilyOraclePage from './pages/FamilyOraclePage';
@@ -32,7 +32,7 @@ import InvitePage from './pages/InvitePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 
 function App() {
-  const location = useLocation(); // 🔥 NAYA: Route track karne ke liye
+  const location = useLocation(); //  Route track karne ke liye
 
   return (
     <>

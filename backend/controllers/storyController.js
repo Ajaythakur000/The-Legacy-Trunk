@@ -227,7 +227,8 @@ const getCircleFeed = async (req, res) => {
       .populate('user', 'name email relationToAdmin')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(15); // 🔥 ADDED LIMIT 15 HERE
 
     return res.status(200).json(stories);
   } catch (error) {
@@ -248,7 +249,8 @@ const getMyFamilyStories = async (req, res) => {
       ]
     })
       .populate('user', 'name relationToAdmin')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(15); // 🔥 ADDED LIMIT 15 HERE
 
     return res.status(200).json(stories);
   } catch (error) {
@@ -261,7 +263,8 @@ const getGlobalStories = async (req, res) => {
     const stories = await Story.find({ isGlobalPublic: true })
       .populate('user', 'name')
       .populate('originCircleId', 'circleName')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(50); // Optional: limited global feed so it doesn't crash the browser later
 
     return res.status(200).json(stories);
   } catch (error) {
