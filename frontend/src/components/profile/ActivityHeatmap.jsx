@@ -4,19 +4,19 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const { monthsData, totalPoints, activeDays, currentYear } = useMemo(() => {
     const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const currentMonth = today.getMonth();
     const cYear = today.getFullYear();
 
@@ -27,26 +27,33 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
     for (let i = 11; i >= 0; i--) {
       let targetMonth = currentMonth - i;
       let targetYear = cYear;
-      
+
       if (targetMonth < 0) {
         targetMonth += 12;
         targetYear -= 1;
       }
 
       const d = new Date(targetYear, targetMonth, 1);
-      const monthName = d.toLocaleString('default', { month: 'short' }); 
+      const monthName = d.toLocaleString('default', { month: 'short' });
       const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
-      const firstDayOfWeek = new Date(targetYear, targetMonth, 1).getDay(); 
+      const firstDayOfWeek = new Date(targetYear, targetMonth, 1).getDay();
 
       const weeks = [];
-      let currentWeek = new Array(7).fill(null); 
+      let currentWeek = new Array(7).fill(null);
       let currentDayOfWeek = firstDayOfWeek;
 
       for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const isFuture = new Date(targetYear, targetMonth, day, 23, 59, 59) > today;
-        const count = (!isFuture && activityMap && activityMap[dateStr]) ? activityMap[dateStr] : 0;
-        
+        const dateObj = new Date(targetYear, targetMonth, day);
+
+        // ✅ Stable local key (matches backend "YYYY-MM-DD")
+        const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+
+        // ✅ Future-date check without time glitch
+        const isFuture = dateObj > startOfToday;
+
+        const raw = activityMap?.[dateStr];
+        const count = !isFuture ? Number(raw || 0) : 0;
+
         if (!isFuture) {
           total += count;
           if (count > 0) activeCount++;
@@ -58,7 +65,12 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
         else if (count >= 6 && count <= 9) level = 3;
         else if (count >= 10) level = 4;
 
-        const tooltipDate = new Date(targetYear, targetMonth, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const tooltipDate = dateObj.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+
         currentWeek[currentDayOfWeek] = { date: dateStr, tooltipDate, count, level, isFuture };
 
         currentDayOfWeek++;
@@ -68,35 +80,38 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
           currentDayOfWeek = 0;
         }
       }
+
       if (currentDayOfWeek > 0) weeks.push(currentWeek);
-      data.push({ name: monthName, weeks: weeks });
+      data.push({ name: monthName, weeks });
     }
 
     return { monthsData: data, totalPoints: total, activeDays: activeCount, currentYear: cYear };
   }, [activityMap]);
 
-  // 🔥 THE NEW DARK/GOLDEN COLOR PALETTE
   const getColor = (level, isFuture) => {
-    if (isFuture) return 'transparent'; 
+    if (isFuture) return 'transparent';
     switch (level) {
-      case 0: return 'rgba(255, 255, 255, 0.05)'; // Empty days (Dark Slate with subtle white)
-      case 1: return '#d4af37'; // Light Bronze/Gold
-      case 2: return '#eab308'; // Bright Gold
-      case 3: return '#fbbf24'; // Brighter Gold
-      case 4: return '#fef08a'; // Glowing White-Gold
+      case 0: return 'rgba(255, 255, 255, 0.05)';
+      case 1: return '#d4af37';
+      case 2: return '#eab308';
+      case 3: return '#fbbf24';
+      case 4: return '#fef08a';
       default: return 'rgba(255, 255, 255, 0.05)';
     }
   };
 
   return (
-    <div style={{
-      // 🔥 DARK BACKGROUND TO MATCH VAULT
-      background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', 
-      borderRadius: '24px', padding: '32px',
-      boxShadow: '0 20px 40px rgba(0,0,0,0.3)', marginTop: '24px',
-      overflowX: 'auto', border: '1px solid rgba(234, 221, 205, 0.1)'
-    }}>
-      
+    <div
+      style={{
+        background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+        borderRadius: '24px',
+        padding: '32px',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+        marginTop: '24px',
+        overflowX: 'auto',
+        border: '1px solid rgba(234, 221, 205, 0.1)',
+      }}
+    >
       <style>{`
         .heatmap-cell {
           box-sizing: border-box;
@@ -112,20 +127,18 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
       `}</style>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-        {/* 🔥 UPDATED TEXT COLORS FOR DARK THEME */}
         <div style={{ fontSize: '15px', color: '#94a3b8' }}>
-          <span style={{ color: '#EADDCD', fontSize: '20px', fontWeight: '800', marginRight: '6px' }}>{totalPoints}</span> 
+          <span style={{ color: '#EADDCD', fontSize: '20px', fontWeight: '800', marginRight: '6px' }}>{totalPoints}</span>
           legacy points in the past one year
         </div>
-        
+
         <div style={{ display: 'flex', gap: '20px', fontSize: '13px', color: '#94a3b8', alignItems: 'center', fontWeight: '500' }}>
           <span>Total active days: <strong style={{ color: '#EADDCD' }}>{activeDays}</strong></span>
           <span>Max streak: <strong style={{ color: '#EADDCD' }}>{maxStreak}</strong></span>
-          
+
           <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <div 
+            <div
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              // 🔥 UPDATED BUTTON FOR DARK THEME
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: '#cbd5e1' }}
             >
               Current
@@ -133,18 +146,14 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </div>
-            
+
             {isDropdownOpen && (
               <div style={{ position: 'absolute', top: '110%', right: '0', background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: '0 10px 20px rgba(0,0,0,0.5)', zIndex: 100, minWidth: '120px' }}>
                 <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#EADDCD' }}>
                   Current <span style={{ color: '#EADDCD' }}>✓</span>
                 </div>
-                {currentYear > 2026 && (
-                  <div style={{ padding: '10px 14px', color: '#94a3b8', cursor: 'pointer' }}>2026</div>
-                )}
-                {currentYear === 2026 && (
-                   <div style={{ padding: '10px 14px', color: '#475569', cursor: 'not-allowed', fontSize: '11px' }}>No past years</div>
-                )}
+                {currentYear > 2026 && <div style={{ padding: '10px 14px', color: '#94a3b8', cursor: 'pointer' }}>2026</div>}
+                {currentYear === 2026 && <div style={{ padding: '10px 14px', color: '#475569', cursor: 'not-allowed', fontSize: '11px' }}>No past years</div>}
               </div>
             )}
           </div>
@@ -158,24 +167,24 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
               <div style={{ display: 'flex', gap: '4px' }}>
                 {month.weeks.map((week, wIndex) => (
                   <div key={wIndex} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {week.map((day, dIndex) => (
+                    {week.map((day, dIndex) =>
                       day ? (
-                        <div 
+                        <div
                           key={day.date}
                           className="heatmap-cell"
                           title={`${day.count} points on ${day.tooltipDate}`}
                           style={{
-                            width: '13px', height: '13px',
+                            width: '13px',
+                            height: '13px',
                             backgroundColor: getColor(day.level, day.isFuture),
                             borderRadius: '3px',
                             cursor: day.isFuture ? 'default' : 'pointer',
                           }}
                         ></div>
                       ) : (
-                        // 🔥 SECURITY/REACT FIX: Unique key guaranteed (No React Warning Spam)
                         <div key={`empty-${mIndex}-${wIndex}-${dIndex}`} style={{ width: '13px', height: '13px', backgroundColor: 'transparent' }}></div>
                       )
-                    ))}
+                    )}
                   </div>
                 ))}
               </div>

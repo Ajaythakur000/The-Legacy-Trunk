@@ -147,9 +147,9 @@ function ProfilePage() {
         </div>
 
         <ActivityHeatmap
-          activityMap={user?.activityMap || {}}
-          maxStreak={user?.maxStreak || 0}
-        />
+  activityMap={user?.activityMap || user?.activityMapData || {}}
+  maxStreak={user?.maxStreak || 0}
+/>
       </div>
 
       {isEditing && (
