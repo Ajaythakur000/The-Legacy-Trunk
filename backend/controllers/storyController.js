@@ -3,7 +3,8 @@ import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 import Notification from '../models/notificationModel.js';
 // 🔥 IMPORT GAMIFICATION SERVICE (Adjust path if needed)
-import { awardPoints } from './gamificationService.js'; 
+// 🔥 IMPORT GAMIFICATION SERVICE (Adjust path if needed)
+import { awardPoints, handleStoryPostStreak } from './gamificationService.js';
 
 const createStory = async (req, res) => {
   try {
@@ -51,10 +52,15 @@ const createStory = async (req, res) => {
 
     const createdStory = await story.save();
 
-    // 🔥 NEW: Award 10 points for posting a story (to both User Heatmap & Family)
+    // 🔥 Award 10 points for posting a story (to both User Heatmap & Family)
     if (targetCircleId) {
       await awardPoints(req.user._id, targetCircleId, 10);
     }
+
+    // ==========================================
+    // 🔥 CRITICAL FIX: UPDATE STREAK HERE!
+    // ==========================================
+    await handleStoryPostStreak(req.user._id);
 
     const populated = await Story.findById(createdStory._id)
       .populate('user', 'name email relationToAdmin avatar')
@@ -68,8 +74,8 @@ const createStory = async (req, res) => {
     return res.status(201).json(populated);
     
   } catch (error) {
-    console.error("Story Creation Error:", error);
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Story Creation Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -78,11 +84,11 @@ const deleteStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    const isAuthor = story.user.toString() === req.user._id.toString();
+    const isAuthor = String(story.user) === String(req.user._id);
     const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
-      return res.status(401).json({ message: 'Not authorized to delete this story' });
+      return res.status(403).json({ message: 'Not authorized to delete this story' });
     }
 
     // 🔥 NEW: Deduct 10 points when story is deleted
@@ -93,16 +99,19 @@ const deleteStory = async (req, res) => {
     await Story.deleteOne({ _id: req.params.id });
     return res.status(200).json({ message: 'Story removed successfully' });
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Delete Story Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 const toggleLikeStory = async (req, res) => {
   try {
-    const story = await Story.findById(req.params.id);
+    const storyId = req.params.id;
+    const userId = req.user._id.toString();
+
+    const story = await Story.findById(storyId);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    const userId = req.user._id.toString();
     const storyOwnerId = story.user.toString();
     const alreadyLiked = story.likes.some((id) => id.toString() === userId);
 
@@ -112,16 +121,36 @@ const toggleLikeStory = async (req, res) => {
       story.originCircleId.toString() !== req.user.activeCircleId.toString();
 
     const isGlobalLike = story.isGlobalPublic && isDifferentFamily;
-    
-    // 🔥 UPDATED LOGIC: Global Like = 4 points, Family Like = 2 points
     const pointsToAward = isGlobalLike ? 4 : 2;
 
+    let updatedStory;
+
     if (alreadyLiked) {
-      story.likes = story.likes.filter((id) => id.toString() !== userId);
-    } else {
-      story.likes.push(req.user._id);
+      // 🔥 FIX: Use $pull to guarantee removal (Bug C)
+      updatedStory = await Story.findByIdAndUpdate(
+        storyId,
+        { $pull: { likes: req.user._id } },
+        { new: true }
+      );
       
-      // Send Notification
+      // Deduct points only if it's someone else's post
+      if (userId !== storyOwnerId && story.originCircleId) {
+        await awardPoints(req.user._id, story.originCircleId, -pointsToAward);
+      }
+    } else {
+      // 🔥 FIX: Use $addToSet to guarantee uniqueness (no double count!) (Bug C)
+      updatedStory = await Story.findByIdAndUpdate(
+        storyId,
+        { $addToSet: { likes: req.user._id } },
+        { new: true }
+      );
+
+      // Award points only if it's someone else's post
+      if (userId !== storyOwnerId && story.originCircleId) {
+        await awardPoints(req.user._id, story.originCircleId, pointsToAward);
+      }
+
+      // Send Notification (Only if liking someone else's post)
       if (userId !== storyOwnerId) {
         const io = req.app.get('io');
         const newNotif = await Notification.create({
@@ -131,27 +160,18 @@ const toggleLikeStory = async (req, res) => {
           storyId: story._id,
           message: `${req.user.name} liked your memory: "${story.title}"`
         });
-        if (io) {
-          io.to(storyOwnerId).emit('new_notification', newNotif);
-        }
+        if (io) io.to(storyOwnerId).emit('new_notification', newNotif);
       }
-    }
-
-    await story.save();
-
-    // 🔥 NEW: Award points to the USER WHO LIKED IT (for their heatmap)
-    if (userId !== storyOwnerId && story.originCircleId) {
-      const pointModifier = alreadyLiked ? -pointsToAward : pointsToAward;
-      await awardPoints(req.user._id, story.originCircleId, pointModifier);
     }
 
     return res.status(200).json({
       message: alreadyLiked ? 'Story unliked' : 'Story liked',
-      likesCount: story.likes.length,
-      likes: story.likes,
+      likesCount: updatedStory.likes.length,
+      likes: updatedStory.likes,
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Toggle Like Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -186,18 +206,14 @@ const addCommentToStory = async (req, res) => {
         storyId: story._id,
         message: `${req.user.name} commented: "${text.substring(0, 30)}..."`
       });
-      if (io) {
-        io.to(storyOwnerId).emit('new_notification', newNotif);
-      }
+      if (io) io.to(storyOwnerId).emit('new_notification', newNotif);
     }
 
-    // 🔥 NEW LOGIC: Family Comment = 4 points, Global Comment = 8 points
     const isDifferentFamily = story.originCircleId && req.user.activeCircleId && story.originCircleId.toString() !== req.user.activeCircleId.toString();
     const isGlobalComment = story.isGlobalPublic && isDifferentFamily;
     const pointsToAward = isGlobalComment ? 8 : 4;
 
     if (userId !== storyOwnerId && story.originCircleId) {
-      // Award points to the USER WHO COMMENTED
       await awardPoints(req.user._id, story.originCircleId, pointsToAward);
     }
 
@@ -211,7 +227,8 @@ const addCommentToStory = async (req, res) => {
       comments: populatedStory.comments,
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Add Comment Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -228,11 +245,12 @@ const getCircleFeed = async (req, res) => {
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name')
       .sort({ createdAt: -1 })
-      .limit(15); // 🔥 ADDED LIMIT 15 HERE
+      .limit(15); 
 
     return res.status(200).json(stories);
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Get Circle Feed Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -250,11 +268,12 @@ const getMyFamilyStories = async (req, res) => {
     })
       .populate('user', 'name relationToAdmin')
       .sort({ createdAt: -1 })
-      .limit(15); // 🔥 ADDED LIMIT 15 HERE
+      .limit(15); 
 
     return res.status(200).json(stories);
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Get My Family Stories Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -264,11 +283,12 @@ const getGlobalStories = async (req, res) => {
       .populate('user', 'name')
       .populate('originCircleId', 'circleName')
       .sort({ createdAt: -1 })
-      .limit(50); // Optional: limited global feed so it doesn't crash the browser later
+      .limit(50); 
 
     return res.status(200).json(stories);
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Get Global Stories Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -283,7 +303,8 @@ const getStoryById = async (req, res) => {
 
     return res.status(200).json(story);
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Get Story By Id Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -292,11 +313,11 @@ const updateStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
-    const isAuthor = story.user.toString() === req.user._id.toString();
+    const isAuthor = String(story.user) === String(req.user._id);
     const isAdmin = req.user.role === 'admin';
 
     if (!isAuthor && !isAdmin) {
-      return res.status(401).json({ message: 'Not authorized to edit this story' });
+      return res.status(403).json({ message: 'Not authorized to edit this story' });
     }
 
     story.title = req.body.title ?? story.title;
@@ -313,7 +334,8 @@ const updateStory = async (req, res) => {
     const updatedStory = await story.save();
     return res.status(200).json(updatedStory);
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Update Story Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -327,7 +349,8 @@ const getMyStories = async (req, res) => {
 
     return res.status(200).json(stories);
   } catch (error) {
-    return res.status(500).json({ message: 'Server Error: ' + error.message });
+    console.error("Get My Stories Error:", error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 

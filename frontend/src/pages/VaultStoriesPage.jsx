@@ -1,4 +1,3 @@
-// File Path: src/pages/VaultStoriesPage.jsx
 import { useState } from 'react';
 import Confetti from 'react-confetti'; 
 import { createStoryApi } from '../api/storyApi';
@@ -7,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import StoryComposer from '../components/story/StoryComposer';
 
 function VaultStoriesPage() {
-  const { user } = useAuth();
+  const { user, fetchFreshProfile } = useAuth(); // 🔴 IMPORTANT FIX
   const activeCircleId = user?.activeCircleId || null;
 
   const [uploading, setUploading] = useState(false);
@@ -21,14 +20,14 @@ function VaultStoriesPage() {
     setUploading(true);
     try {
       await createStoryApi(formData);
+
+      // 🔴 IMPORTANT FIX: points/streak/navbar instant sync after post
+      await fetchFreshProfile();
       
-      // Update success message to guide user to the new Home Feed
       setSuccess('Memory securely locked! 🔐 Check the Home page to view it.');
       
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 6000); 
-
-      // Pura loadFeed() yahan se hata diya kyunki feed ab Home pe hai
     } catch (e) {
       console.error('createStory failed:', e?.response?.data || e);
       setError(e?.response?.data?.message || e?.message || 'Failed to save memory');
@@ -40,15 +39,12 @@ function VaultStoriesPage() {
 
   return (
     <div style={{ maxWidth: '850px', margin: '0 auto', padding: '60px 20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      
-      {/* 🎉 THE CONFETTI LAYER */}
       {showConfetti && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 99999, pointerEvents: 'none' }}>
           <Confetti width={window.innerWidth} height={window.innerHeight} gravity={0.3} numberOfPieces={400} />
         </div>
       )}
 
-      {/* ✨ UPDATED HEADER SECTION */}
       <div style={{ textAlign: 'center', marginBottom: '50px', animation: 'fadeInDown 0.8s ease' }}>
         <h1 style={{ 
           fontSize: '3.5rem', fontWeight: '900', margin: '0 0 12px 0', 
@@ -80,7 +76,6 @@ function VaultStoriesPage() {
           {error && <div style={{ color: '#b91c1c', background: '#fef2f2', padding: '16px', borderRadius: '16px', borderLeft: '4px solid #ef4444', marginBottom: '24px', fontWeight: '600' }}>{error}</div>}
           {success && <div style={{ color: '#15803d', background: '#f0fdf4', padding: '16px', borderRadius: '16px', borderLeft: '4px solid #22c55e', marginBottom: '24px', fontWeight: '600' }}>{success}</div>}
 
-          {/* ✍️ STORY COMPOSER (Form yahan render hoga) */}
           <div style={{ animation: 'fadeInUp 0.8s ease 0.1s both' }}>
             <StoryComposer 
               activeCircleId={activeCircleId} 

@@ -1,21 +1,27 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import StoryCommentBox from './StoryCommentBox';
 import StoryExportTemplate from './StoryExportTemplate';
 
 function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) {
-  const isAuthor = currentUser && story?.user?._id === currentUser._id;
-  const isAdmin = currentUser && currentUser?.role === 'admin';
+  // 🔥 BUG FIX: Stronger null checks to prevent "Cannot read properties" crashes
+  const isAuthor = Boolean(currentUser && story?.user?._id && String(story.user._id) === String(currentUser._id));
+  const isAdmin = Boolean(currentUser && currentUser?.role === 'admin');
   const canDelete = isAuthor || isAdmin;
   
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(story.title);
-  const [editContent, setEditContent] = useState(story.content);
+  const [editTitle, setEditTitle] = useState(story?.title || '');
+  const [editContent, setEditContent] = useState(story?.content || '');
   
   const [showComments, setShowComments] = useState(false);
   const [showShieldAnim, setShowShieldAnim] = useState(false);
   
-  const isLikedByMe = story?.likes?.includes(currentUser?._id);
+  // 🔥 FIX 1: Secure String vs ObjectId Match with null protection
+  const isLikedByMe = Boolean(
+    currentUser?._id && 
+    story?.likes?.some(id => String(id) === String(currentUser._id))
+  );
+  
   const [isShared, setIsShared] = useState(false);
   const [isDownloaded, setIsDownloaded] = useState(false);
 
@@ -28,14 +34,33 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
     images.push(story.mediaUrl);
   }
 
+  // 🔥 UX FIX: Better timer handling for overlapping animations
+  useEffect(() => {
+    let shieldTimer;
+    if (showShieldAnim) {
+      shieldTimer = setTimeout(() => setShowShieldAnim(false), 1000);
+    }
+    return () => clearTimeout(shieldTimer);
+  }, [showShieldAnim]);
+
+  useEffect(() => {
+    let shareTimer;
+    if (isShared) {
+      shareTimer = setTimeout(() => setIsShared(false), 2000);
+    }
+    return () => clearTimeout(shareTimer);
+  }, [isShared]);
+
   const handleSaveEdit = () => {
-    if (onEdit) {
+    if (onEdit && story?._id) {
       onEdit(story._id, { title: editTitle, content: editContent });
       setIsEditing(false);
     }
   };
 
   const getFormattedDates = () => {
+    if (!story?.createdAt) return { displayDate: '', eventBadge: null, timeTravelBadge: null };
+
     const postDateObj = new Date(story.createdAt);
     const postDateStr = postDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     let eventDateStr = null;
@@ -59,9 +84,10 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
   const { displayDate, eventBadge, timeTravelBadge } = getFormattedDates();
 
   const handleShare = async () => {
+    if (!story?._id) return;
     const shareData = {
-      title: story.title,
-      text: `Check out this memory: "${story.title}"`,
+      title: story.title || 'Family Memory',
+      text: `Check out this memory: "${story.title || 'A special moment'}"`,
       url: `${window.location.origin}/vault-stories/${story._id}`
     };
 
@@ -72,7 +98,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
         await navigator.clipboard.writeText(shareData.url);
         toast.success("Link copied! 📋", { style: { borderRadius: '12px', background: '#1e293b', color: '#fff' }});
         setIsShared(true);
-        setTimeout(() => setIsShared(false), 2000);
       }
     } catch (err) { console.log('Share failed', err); }
   };
@@ -85,14 +110,14 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
 
   const handleDoubleTap = (e) => {
     e.preventDefault();
-    if (!isLikedByMe) {
+    if (!isLikedByMe && story?._id) {
       onLike(story._id);
     }
-    setShowShieldAnim(true);
-    setTimeout(() => setShowShieldAnim(false), 1000);
+    // Force a re-trigger of the animation even if already showing
+    setShowShieldAnim(false);
+    setTimeout(() => setShowShieldAnim(true), 10);
   };
 
-  // 🔥 CLOUDINARY SPEED OPTIMIZER (q_auto, f_auto)
   const getOptimizedUrl = (url) => {
     if (!url || !url.includes('cloudinary.com')) return url;
     return url.replace('/upload/', '/upload/q_auto,f_auto/');
@@ -113,7 +138,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
 
     const count = images.length;
     
-    // 🔥 FALLBACK LOGIC INTEGRATED HERE
     const imgProps = { 
       loading: "lazy", 
       decoding: "async",
@@ -134,7 +158,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
           <img 
             {...imgProps}
             src={getOptimizedUrl(images[0])} 
-            alt={story.title} 
+            alt={story?.title || 'Story Media'} 
             style={{ width: '100%', maxHeight: '600px', objectFit: 'cover', display: 'block', border: '4px solid #faf9f6', boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)' }} 
           />
           {showShieldAnim && (
@@ -174,6 +198,8 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
 
     return layoutContent;
   };
+
+  if (!story) return null; // Ultimate safety check
 
   return (
     <div style={{ 
@@ -220,7 +246,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
           </div>
         </div>
         
-        {!isEditing && (isAuthor || isAdmin) && (
+        {!isEditing && canDelete && (
           <div style={{ display: 'flex', gap: '12px' }}>
              <button onClick={() => setIsEditing(true)} style={{ background: 'transparent', color: '#94a3b8', border: 'none', cursor: 'pointer', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Edit</button>
              <button onClick={() => { if(window.confirm('Erase this memory?')) onDelete(story._id); }} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Delete</button>

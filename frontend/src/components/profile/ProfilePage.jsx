@@ -4,12 +4,19 @@ import { useAuth } from '../../context/AuthContext';
 import { updateUserProfileApi } from '../../api/authApi';
 import FamilyLegacyCard from './FamilyLegacyCard';
 import ActivityHeatmap from './ActivityHeatmap';
+import toast from 'react-hot-toast';
+
+const getSafeDateString = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
+};
 
 function ProfilePage() {
-  const { user } = useAuth(); 
-  const location = useLocation(); 
-  const navigate = useNavigate(); 
-  
+  const { user, fetchFreshProfile } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(user?.avatar || '');
@@ -19,9 +26,9 @@ function ProfilePage() {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     bio: user?.bio || '',
-    avatarFile: null, 
-    dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
-    familyRole: 'Family Member', // Added Family Role (UI Only for now)
+    avatarFile: null,
+    dateOfBirth: getSafeDateString(user?.dateOfBirth),
+    familyRole: 'Family Member',
   });
 
   const familyPoints = user?.bondPoints || 0;
@@ -30,9 +37,20 @@ function ProfilePage() {
     const queryParams = new URLSearchParams(location.search);
     if (queryParams.get('edit') === 'true') {
       setIsEditing(true);
-      navigate('/profile', { replace: true }); 
+      navigate('/profile', { replace: true });
     }
   }, [location, navigate]);
+
+  // 🔴 IMPORTANT: keep local form in sync when user updates after fetchFreshProfile
+  useEffect(() => {
+    setImagePreview(user?.avatar || '');
+    setFormData((prev) => ({
+      ...prev,
+      name: user?.name || '',
+      bio: user?.bio || '',
+      dateOfBirth: getSafeDateString(user?.dateOfBirth),
+    }));
+  }, [user]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,9 +61,7 @@ function ProfilePage() {
     if (file) {
       setFormData({ ...formData, avatarFile: file });
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
+      reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -53,21 +69,28 @@ function ProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const submitData = new FormData();
       submitData.append('name', formData.name);
       submitData.append('bio', formData.bio);
       submitData.append('dateOfBirth', formData.dateOfBirth);
-      
+
       if (formData.avatarFile) {
         submitData.append('avatar', formData.avatarFile);
       }
 
-      await updateUserProfileApi(submitData); 
-      window.location.reload(); 
+      await updateUserProfileApi(submitData);
+      await fetchFreshProfile();
+
+      toast.success('Profile Updated Successfully! ✨', {
+        style: { borderRadius: '12px', background: '#1e293b', color: '#fff' },
+      });
+
+      setIsEditing(false);
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to update profile');
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
       setLoading(false);
     }
   };
@@ -76,35 +99,26 @@ function ProfilePage() {
 
   return (
     <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', padding: '60px 32px', position: 'relative', overflowX: 'hidden' }}>
-      
-      {/* 🗑️ REMOVED WATERMARK TO KEEP IT CLEAN */}
-
       <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
-        
-        {/* 👑 THE SINGLE ROYAL VAULT PASSPORT CARD */}
-        <div style={{ 
-          background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', 
-          borderRadius: '32px', 
-          border: '1px solid rgba(234, 221, 205, 0.1)', 
-          boxShadow: '0 30px 60px rgba(0,0,0,0.4)', 
-          display: 'flex', 
-          flexDirection: 'row', 
+        <div style={{
+          background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+          borderRadius: '32px',
+          border: '1px solid rgba(234, 221, 205, 0.1)',
+          boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+          display: 'flex',
+          flexDirection: 'row',
           flexWrap: 'wrap',
           overflow: 'hidden',
           marginBottom: '40px',
           position: 'relative'
         }}>
-          
-          {/* LEFT: IDENTITY SECTION */}
           <div style={{ flex: '1 1 400px', padding: '50px 40px', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
-            
-            {/* ✏️ MOVED EDIT BUTTON TO LEFT SIDE TO PREVENT OVERLAP */}
-            <button 
+            <button
               onClick={() => setIsEditing(true)}
               title="Edit Profile Settings"
               style={{ position: 'absolute', top: '24px', left: '24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', transition: 'all 0.3s ease', zIndex: 20 }}
-              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+              onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
             >
               ✏️
             </button>
@@ -121,64 +135,42 @@ function ProfilePage() {
                 </div>
               </div>
             </div>
+
             <p style={{ color: '#cbd5e1', fontSize: '1.15rem', fontStyle: 'italic', lineHeight: '1.7', margin: 0, borderLeft: '3px solid #EADDCD', paddingLeft: '20px' }}>
               "{user?.bio || 'Preserving our family legacy, one story at a time.'}"
             </p>
           </div>
 
-          {/* RIGHT: STATUS SECTION */}
           <div style={{ flex: '1 1 450px', padding: '50px 40px', display: 'flex', alignItems: 'center' }}>
             <FamilyLegacyCard familyPoints={familyPoints} />
           </div>
-
         </div>
 
-        {/* 🔥 THE ACTIVITY HEATMAP */}
-        <ActivityHeatmap 
-          activityMap={user?.activityMap || {}} 
-          currentStreak={user?.currentStreak || 0}
+        <ActivityHeatmap
+          activityMap={user?.activityMap || {}}
           maxStreak={user?.maxStreak || 0}
         />
       </div>
 
-      {/* 🛠️ THE NEW PREMIUM CENTER MODAL POP-UP */}
       {isEditing && (
-        <div style={{ 
-          position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px', overflowY: 'auto' 
-        }}>
-          
-          <div style={{ 
-            background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', 
-            borderRadius: '24px', width: '100%', maxWidth: '480px', padding: '40px 32px', 
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', position: 'relative', border: '1px solid rgba(255,255,255,0.1)',
-            animation: 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}>
-            
-            {/* Modal Header */}
-            <button 
-              onClick={() => setIsEditing(false)} 
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px', overflowY: 'auto' }}>
+          <div style={{ background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)', borderRadius: '24px', width: '100%', maxWidth: '480px', padding: '40px 32px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', position: 'relative', border: '1px solid rgba(255,255,255,0.1)', animation: 'popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+            <button
+              onClick={() => setIsEditing(false)}
               style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', width: '36px', height: '36px', borderRadius: '50%', color: '#94a3b8', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
               onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
               onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}
             >
               ✕
             </button>
+
             <h2 style={{ margin: '0 0 32px 0', color: '#fff', fontSize: '1.8rem', fontWeight: '900', fontFamily: 'Georgia, serif', textAlign: 'center' }}>Profile Settings</h2>
 
-            {/* Modal Body */}
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* IMAGE UPLOAD SECTION */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '12px' }}>
-                <div 
+                <div
                   onClick={() => fileInputRef.current.click()}
-                  style={{ 
-                    width: '120px', height: '120px', borderRadius: '50%', border: '3px solid #EADDCD', 
-                    overflow: 'hidden', cursor: 'pointer', position: 'relative', background: '#f8fafc',
-                    display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'border 0.2s',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
-                  }}
+                  style={{ width: '120px', height: '120px', borderRadius: '50%', border: '3px solid #EADDCD', overflow: 'hidden', cursor: 'pointer', position: 'relative', background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: 'border 0.2s', boxShadow: '0 8px 20px rgba(0,0,0,0.3)' }}
                 >
                   {imagePreview ? (
                     <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -189,6 +181,7 @@ function ProfilePage() {
                     Change
                   </div>
                 </div>
+
                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
                 <span style={{ marginTop: '12px', fontSize: '12px', color: '#94a3b8' }}>Joined Vault: April 2026</span>
               </div>
@@ -215,14 +208,13 @@ function ProfilePage() {
               </div>
 
               <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-                <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '14px', background: 'transparent', color: '#cbd5e1', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; }} onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#cbd5e1'; }}>
+                <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '14px', background: 'transparent', color: '#cbd5e1', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }}>
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} style={{ flex: 1, padding: '14px', background: '#EADDCD', color: '#0f172a', border: 'none', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', opacity: loading ? 0.7 : 1, transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(234, 221, 205, 0.3)' }} onMouseOver={(e) => !loading && (e.currentTarget.style.background = '#fff')} onMouseOut={(e) => !loading && (e.currentTarget.style.background = '#EADDCD')}>
+                <button type="submit" disabled={loading} style={{ flex: 1, padding: '14px', background: '#EADDCD', color: '#0f172a', border: 'none', borderRadius: '12px', fontWeight: '800', cursor: 'pointer', opacity: loading ? 0.7 : 1, transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(234, 221, 205, 0.3)' }}>
                   {loading ? 'Saving...' : 'Save Vault Profile'}
                 </button>
               </div>
-
             </form>
           </div>
         </div>
@@ -238,7 +230,6 @@ function ProfilePage() {
   );
 }
 
-// PREMIUM STYLES FOR INPUTS (DARK THEME ADAPTED)
 const inputStyle = { width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '15px', outline: 'none', transition: 'all 0.2s', background: 'rgba(0,0,0,0.2)', color: '#fff', boxSizing: 'border-box' };
 const handleFocus = (e) => { e.target.style.borderColor = '#EADDCD'; e.target.style.background = 'rgba(0,0,0,0.4)'; e.target.style.boxShadow = '0 0 0 2px rgba(234, 221, 205, 0.2)'; };
 const handleBlur = (e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.background = 'rgba(0,0,0,0.2)'; e.target.style.boxShadow = 'none'; };

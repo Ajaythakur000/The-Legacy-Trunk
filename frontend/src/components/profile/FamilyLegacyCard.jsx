@@ -9,9 +9,10 @@ function FamilyLegacyCard({ familyPoints }) {
   };
 
   const badge = getFamilyBadge(familyPoints);
-  const progressPercent = badge.next === 'MAX' ? 100 : Math.min((familyPoints / badge.next) * 100, 100);
+  
+  // 🔥 SECURITY/UI FIX: Math.max(0) ensures width never goes negative if points are negative
+  const progressPercent = badge.next === 'MAX' ? 100 : Math.max(0, Math.min((familyPoints / badge.next) * 100, 100));
 
-  // 🔥 Notice: Background and heavy shadow removed to blend into the main VIP card
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '150px', height: '150px', background: badge.color, opacity: 0.15, borderRadius: '50%', filter: 'blur(50px)', pointerEvents: 'none' }}></div>
@@ -43,7 +44,7 @@ function FamilyLegacyCard({ familyPoints }) {
               <div style={{ width: `${progressPercent}%`, height: '100%', background: `linear-gradient(90deg, ${badge.color} 0%, #fff 100%)`, boxShadow: `0 0 20px ${badge.color}`, transition: 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
             </div>
             <div style={{ textAlign: 'right', marginTop: '12px', color: '#64748b', fontSize: '0.85rem', fontWeight: '700' }}>
-              🔒 {badge.next - familyPoints} points to elevate your family name
+              🔒 {Math.max(0, badge.next - familyPoints)} points to elevate your family name
             </div>
           </div>
         ) : (
