@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../api/axios'; 
 import CollageMaker from '../../pages/CollageMaker';
-import { motion } from 'framer-motion'; // 🔥 FRAMER MOTION IMPORTED
+import { motion } from 'framer-motion';
 
 function StoryComposer({ activeCircleId, onPostStory, uploading }) {
   const [title, setTitle] = useState('');
@@ -130,12 +130,19 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
     const toastId = toast.loading('Securing in Vault... 🚀');
 
     try {
+      // parent component should handle any profile/dashboard refresh logic
       await onPostStory(formData);
+
       toast.success('Memory saved successfully! 🎉', { id: toastId });
 
-      setTitle(''); setContent(''); setTags(''); setIsGlobalPublic(false);
-      setMediaFiles([]); setMediaPreviewUrls([]);
-      setIsMilestone(false); setMilestoneDate('');
+      setTitle('');
+      setContent('');
+      setTags('');
+      setIsGlobalPublic(false);
+      setMediaFiles([]);
+      setMediaPreviewUrls([]);
+      setIsMilestone(false);
+      setMilestoneDate('');
     } catch (err) {
       toast.error(err?.message || 'Failed to save memory ❌', { id: toastId });
     }
@@ -160,7 +167,6 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
             onFocus={(e) => e.target.style.borderBottomColor = '#3b82f6'}
             onBlur={(e) => e.target.style.borderBottomColor = '#f1f5f9'}
           />
-          {/* 🔥 MOTION BUTTON */}
           <motion.button 
             type="button" 
             onClick={handleAutoTitle}
@@ -208,7 +214,6 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                 <option value="🦸‍♂️ Action Movie Style">🦸‍♂️ Action Movie Style</option>
               </select>
               
-              {/* 🔥 MOTION BUTTON */}
               <motion.button 
                 type="button" 
                 onClick={handleEnhanceStory}
@@ -250,7 +255,6 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
             </div>
             
             <div style={{ display: 'flex', gap: '10px' }}>
-              {/* 🔥 MOTION BUTTON */}
               <motion.button 
                 type="button" 
                 onClick={() => setShowCollageMaker(true)}
@@ -308,7 +312,6 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
           </div>
         </div>
 
-        {/* 🔥 MOTION BUTTON (THE BIG ONE) */}
         <motion.button 
           type="submit" 
           disabled={uploading || aiLoading || !activeCircleId} 

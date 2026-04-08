@@ -3,16 +3,24 @@ import { io } from 'socket.io-client';
 let socket = null;
 let connecting = false;
 
-const SOCKET_URL = 'http://localhost:8000';
+// 🔴 IMPORTANT: normalize URL to avoid trailing slash mismatch
+const normalizeUrl = (url) => (url || '').trim().replace(/\/+$/, '');
+
+const getSocketUrl = () => {
+  if (import.meta.env.VITE_SOCKET_URL) return normalizeUrl(import.meta.env.VITE_SOCKET_URL);
+  if (import.meta.env.VITE_API_URL) {
+    // remove trailing /api if present
+    return normalizeUrl(import.meta.env.VITE_API_URL).replace(/\/api$/, '');
+  }
+  return 'http://localhost:8000';
+};
+
+const SOCKET_URL = getSocketUrl();
 
 export const connectSocket = (token) => {
-  // already connected
   if (socket?.connected) return socket;
-
-  // if existing socket is trying to connect, reuse it
   if (socket && connecting) return socket;
 
-  // cleanup stale instance
   if (socket) {
     socket.removeAllListeners();
     socket.disconnect();
@@ -22,6 +30,7 @@ export const connectSocket = (token) => {
   connecting = true;
 
   socket = io(SOCKET_URL, {
+    path: '/socket.io', // 🔴 IMPORTANT FIX: backend socket path sync
     transports: ['websocket', 'polling'],
     withCredentials: true,
     autoConnect: true,

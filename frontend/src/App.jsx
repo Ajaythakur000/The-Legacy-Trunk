@@ -70,7 +70,7 @@ function App() {
             <Route path="/my-stories" element={<ProtectedRoute><AnimatedPage><MyStoriesPage /></AnimatedPage></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><AnimatedPage><SearchResultsPage /></AnimatedPage></ProtectedRoute>} />
             
-            <Route path="/oracle" element={<AnimatedPage><FamilyOraclePage /></AnimatedPage>} />
+           <Route path="/oracle" element={<ProtectedRoute><AnimatedPage><FamilyOraclePage /></AnimatedPage></ProtectedRoute>} />
 
             {/* 4. CATCH-ALL REDIRECT (Security) */}
             <Route path="*" element={<Navigate to="/login" replace />} />

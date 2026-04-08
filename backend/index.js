@@ -16,12 +16,16 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+<<<<<<< HEAD
 
 >>>>>>> 27b06e2 (feat: enhance profile UI & integrate secure OTP email system)
+=======
+>>>>>>> a8ac503 (fix: resolve config issues and update system settings)
 import http from 'http';
 import { Server } from 'socket.io';
 >>>>>>> 55125cf (8: add Socket.io live nostalgia rooms with room isolation, realtime chat, and live location broadcasting)
 
+// Routes Imports
 import userRoutes from './routes/userRoutes.js';
 import storyRoutes from './routes/storyRoutes.js';
 import timelineRoutes from './routes/timelineRoutes.js';
@@ -29,22 +33,53 @@ import circleRoutes from './routes/circleRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import exportRoutes from './routes/exportRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
-import { initializeSocket } from './socket/socketHandler.js';
 import messageRoutes from './routes/messageRoutes.js';
-
 import aiRoutes from './routes/aiRoutes.js';
-
 import notificationRoutes from './routes/notificationRoutes.js';
 
-//dotenv.config();
+import { initializeSocket } from './socket/socketHandler.js';
 
 const app = express();
+<<<<<<< HEAD
 <<<<<<< HEAD
 app.use(express.json()); // JSON body parsing ke liye middleware
 =======
 app.use(cors());
 app.use(express.json());
 >>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
+=======
+
+// 🔴 IMPORTANT: trim spaces in FRONTEND_URL CSV to avoid false CORS mismatch
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
+  : [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://localhost:5174',
+      'http://127.0.0.1:5174',
+      'http://localhost:3000'
+    ];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`Blocked CORS request from: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+>>>>>>> a8ac503 (fix: resolve config issues and update system settings)
 
 const PORT = process.env.PORT || 8000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -59,12 +94,19 @@ app.use('/api/export', exportRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/ai', aiRoutes);
-
 app.use('/api/notifications', notificationRoutes);
 
-
 app.get('/', (req, res) => {
-  res.send('Welcome to The Legacy Trunk API!');
+  res.send('Welcome to The Legacy Trunk API! Vault is Secured. 🔒');
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('🔥 Global Server Error Caught:', err.message);
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ message: 'CORS Policy Violation' });
+  }
+  res.status(500).json({ message: 'Internal Server Error' });
 });
 
 const connectDB = async () => {
@@ -77,17 +119,20 @@ const connectDB = async () => {
   }
 };
 
-// HTTP server + Socket.io setup
 const server = http.createServer(app);
 
-
+// 🔴 IMPORTANT: set path explicitly to match frontend socketService path
 export const io = new Server(server, {
+  path: '/socket.io',
   cors: {
-    origin: '*', // production me frontend domain specify karna
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true
   },
 });
+
 app.set('io', io);
+
 // initialize all socket events
 initializeSocket(io);
 

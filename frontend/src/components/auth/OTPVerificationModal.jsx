@@ -1,30 +1,32 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import api from '../../api/axios'; // Adjust path if needed
+import api from '../../api/axios'; 
+import { useAuth } from '../../context/AuthContext'; // 🔥 SECURITY FIX: Context imported
 
 function OTPVerificationModal({ email, onSuccess, onClose }) {
+  const { setUser } = useAuth(); // 🔥 To fix Race Condition
+  
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLocked, setIsLocked] = useState(false); // 🔥 LOGIC FIX: UI Lockout State
   
-  // Refs for 6 input boxes
   const inputRefs = useRef([]);
 
   const handleChange = (element, index) => {
-    if (isNaN(element.value)) return;
+    if (isNaN(element.value) || isLocked) return;
 
     const newOtp = [...otp];
     newOtp[index] = element.value;
     setOtp(newOtp);
 
-    // Focus next input
     if (element.value !== "" && index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };
 
   const handleKeyDown = (e, index) => {
-    // Focus previous input on backspace
+    if (isLocked) return;
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
@@ -32,6 +34,8 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
 
   const handlePaste = (e) => {
     e.preventDefault();
+    if (isLocked) return;
+    
     const pastedData = e.clipboardData.getData("text/plain").slice(0, 6).split("");
     if (pastedData.some(char => isNaN(char))) return;
     
@@ -41,13 +45,14 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
       if (inputRefs.current[i]) inputRefs.current[i].value = char;
     });
     setOtp(newOtp);
-    // Focus last filled input
     const focusIndex = pastedData.length < 6 ? pastedData.length : 5;
     inputRefs.current[focusIndex].focus();
   };
 
   const handleVerify = async (e) => {
     e.preventDefault();
+    if (isLocked) return;
+
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
       setError("Please enter all 6 digits of the royal seal.");
@@ -58,16 +63,26 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
     setError("");
 
     try {
-      // Send OTP to backend
       const res = await api.post('/users/verify-otp', { email, otp: otpCode });
       
       if (res.data.token) {
-        // Verification successful! Save token and redirect
+        // 🔥 SECURITY FIX: Race Condition Resolved!
+        // Immediately save token AND user data to LocalStorage
         localStorage.setItem('token', res.data.token);
-        onSuccess(); 
+        localStorage.setItem('user', JSON.stringify(res.data));
+        
+        // Immediately update React Context so app knows user is logged in
+        if (setUser) setUser(res.data);
+        
+        onSuccess(res.data); 
       }
     } catch (err) {
       setError(err.response?.data?.message || "Invalid Key. Please try again.");
+      
+      // 🔥 LOGIC FIX: If Backend sends 429 Lockout, Disable UI
+      if (err.response?.status === 429) {
+        setIsLocked(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -84,37 +99,21 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
         <button onClick={onClose} style={closeButtonStyle}>✕</button>
         
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          
-          {/* 🔥 PREMIUM MEMENTO LOGO (Edge-to-Edge) */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 150 }}
             style={{
-              width: '80px', 
-              height: '80px',
-              borderRadius: '50%',
-              margin: '0 auto 20px',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
-              overflow: 'hidden', 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'transparent',
-              border: 'none',
-              padding: 0
+              width: '80px', height: '80px', borderRadius: '50%', margin: '0 auto 20px',
+              boxShadow: '0 8px 20px rgba(0,0,0,0.12)', overflow: 'hidden', display: 'flex',
+              alignItems: 'center', justifyContent: 'center', background: 'transparent',
+              border: 'none', padding: 0
             }}
           >
              <img 
               src="/finall_logo.png" 
               alt="Memento Emblem"
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'cover', 
-                display: 'block',
-                transform: 'scale(1.25)', // Same zoom magic as other pages
-              }} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.25)' }} 
             />
           </motion.div>
 
@@ -142,32 +141,43 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
                 maxLength="1"
                 ref={el => inputRefs.current[index] = el}
                 value={data}
+                disabled={isLocked} // 🔥 Disable if locked out
                 onChange={e => handleChange(e.target, index)}
                 onKeyDown={e => handleKeyDown(e, index)}
                 onPaste={handlePaste}
                 onFocus={(e) => { 
+                  if(isLocked) return;
                   e.target.style.borderColor = '#8C6D46'; 
                   e.target.style.background = '#fff'; 
                   e.target.style.boxShadow = '0 4px 15px rgba(140, 109, 70, 0.15)'; 
                 }}
                 onBlur={(e) => { 
+                  if(isLocked) return;
                   e.target.style.borderColor = '#EADDCD'; 
                   e.target.style.background = '#F9F3E8'; 
                   e.target.style.boxShadow = 'none'; 
                 }}
-                style={otpBoxStyle}
+                style={{
+                  ...otpBoxStyle,
+                  opacity: isLocked ? 0.6 : 1,
+                  cursor: isLocked ? 'not-allowed' : 'text'
+                }}
               />
             ))}
           </div>
 
           <motion.button 
             type="submit" 
-            disabled={loading}
-            whileHover={{ scale: loading ? 1 : 1.02 }}
-            whileTap={{ scale: loading ? 1 : 0.96 }}
-            style={{ ...verifyBtnStyle, opacity: loading ? 0.7 : 1 }}
+            disabled={loading || isLocked} // 🔥 Disable button if locked out
+            whileHover={{ scale: (loading || isLocked) ? 1 : 1.02 }}
+            whileTap={{ scale: (loading || isLocked) ? 1 : 0.96 }}
+            style={{ 
+              ...verifyBtnStyle, 
+              opacity: (loading || isLocked) ? 0.7 : 1,
+              cursor: (loading || isLocked) ? 'not-allowed' : 'pointer'
+            }}
           >
-            {loading ? 'Unlocking...' : 'Verify & Enter'}
+            {loading ? 'Unlocking...' : isLocked ? 'Vault Locked 🔒' : 'Verify & Enter'}
           </motion.button>
         </form>
       </motion.div>

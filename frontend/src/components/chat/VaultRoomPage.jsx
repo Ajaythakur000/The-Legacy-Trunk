@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getMessagesApi } from '../../api/messageApi';
-import { getSocket } from '../../services/socket';
+// 🔥 FIX: Import connectSocket as well to handle the race condition
+import { getSocket, connectSocket } from '../../services/socket';
 
 import ChatWindow from './ChatWindow';
 import MessageInput from './MessageInput';
@@ -15,7 +16,6 @@ function VaultRoomPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // 🔥 NEW: Online Users State
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [onlineCount, setOnlineCount] = useState(0);
 
@@ -23,7 +23,7 @@ function VaultRoomPage() {
   const isTypingRef = useRef(false);
   const typingTimeoutRef = useRef(null);
 
-  // 1. Fetch History
+  // FETCH CHAT HISTORY
   useEffect(() => {
     if (!familyCircleId) {
       setMessages([]);
@@ -49,12 +49,20 @@ function VaultRoomPage() {
     fetchHistory();
   }, [familyCircleId]);
 
-  // 2. Realtime Socket System
+  // 🔥 THE BULLETPROOF SOCKET CONNECTION MANAGER
   useEffect(() => {
-    const socket = getSocket();
-    if (!socket || !familyCircleId) {
-      setIsConnected(false);
-      return;
+    if (!familyCircleId) return;
+
+    // 🔥 FIX 1: Race Condition Resolver
+    let socket = getSocket();
+    if (!socket) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        socket = connectSocket(token);
+      } else {
+        setIsConnected(false);
+        return;
+      }
     }
 
     const onReceiveMessage = (msg) => {
@@ -68,24 +76,18 @@ function VaultRoomPage() {
       });
     };
 
-    // 🔥 LIVE REACTION UPDATER
     const onReactionUpdated = ({ messageId, reactions }) => {
       setMessages((prev) => prev.map(msg => 
         msg._id === messageId ? { ...msg, reactions } : msg
       ));
     };
 
-    // 🔥 LIVE DELETE SINGLE MESSAGE
     const onMessageDeleted = ({ messageId }) => {
       setMessages((prev) => prev.filter(msg => msg._id !== messageId));
     };
 
-    // 🔥 LIVE CLEAR ALL VAULT CHAT
-    const onVaultChatCleared = () => {
-      setMessages([]);
-    };
+    const onVaultChatCleared = () => setMessages([]);
 
-    // 🔥 LIVE ONLINE USERS UPDATER
     const onOnlineUsersUpdate = (data) => {
       if (data && data.users) {
         setOnlineCount(data.count);
@@ -105,35 +107,48 @@ function VaultRoomPage() {
       setTypingUsers((prev) => prev.filter((n) => n !== uname));
     };
 
-    setIsConnected(socket.connected);
-    // Send avatar so backend knows who is joining
-    socket.emit('join_vault', { familyCircleId, userId: user?._id, name: user?.name, avatar: user?.avatar });
+    // 🔥 FIX 2: Dynamic Reconnect & Room Restorer
+    const handleConnect = () => {
+      setIsConnected(true);
+      socket.emit('join_vault', { familyCircleId }); // Force Re-join!
+    };
 
-    socket.on('connect', () => setIsConnected(true));
-    socket.on('disconnect', () => setIsConnected(false));
-    
-    // Bind Listeners
+    const handleDisconnect = () => setIsConnected(false);
+
+    // Initial state check
+    setIsConnected(socket.connected);
+    if (socket.connected) {
+      socket.emit('join_vault', { familyCircleId });
+    }
+
+    // Attach listeners safely
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
     socket.on('receive_message', onReceiveMessage);
     socket.on('message_reaction_updated', onReactionUpdated); 
-    socket.on('message_deleted', onMessageDeleted); // Listen for delete
-    socket.on('vault_chat_cleared', onVaultChatCleared); // Listen for clear all
+    socket.on('message_deleted', onMessageDeleted); 
+    socket.on('vault_chat_cleared', onVaultChatCleared); 
     socket.on('vault_online_users', onOnlineUsersUpdate); 
     socket.on('member_typing', onMemberTyping);
     socket.on('member_stop_typing', onMemberStopTyping);
 
     return () => {
-      socket.off('receive_message');
-      socket.off('message_reaction_updated');
-      socket.off('message_deleted');
-      socket.off('vault_chat_cleared');
-      socket.off('vault_online_users');
-      socket.off('member_typing');
-      socket.off('member_stop_typing');
-      socket.emit('leave_vault', { familyCircleId });
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('receive_message', onReceiveMessage);
+      socket.off('message_reaction_updated', onReactionUpdated);
+      socket.off('message_deleted', onMessageDeleted);
+      socket.off('vault_chat_cleared', onVaultChatCleared);
+      socket.off('vault_online_users', onOnlineUsersUpdate);
+      socket.off('member_typing', onMemberTyping);
+      socket.off('member_stop_typing', onMemberStopTyping);
+      
+      if (socket.connected) {
+        socket.emit('leave_vault', { familyCircleId });
+      }
     };
-  }, [familyCircleId, user?._id, user?.name, user?.avatar]);
+  }, [familyCircleId, user?._id]);
 
-  // 3. Send Message Action
   const handleSendMessage = (mediaObject) => {
     const socket = getSocket();
     if (!socket || !socket.connected || !familyCircleId) return;
@@ -142,43 +157,28 @@ function VaultRoomPage() {
 
     const payload = {
       familyCircleId,
-      senderId: String(user?._id),
-      senderName: user?.name || 'User',
-      avatar: user?.avatar || '', 
       text,
       imageUrl,
       audioUrl,
       clientMsgId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      createdAt: new Date().toISOString(),
     };
 
     socket.emit('send_message', payload);
 
     if (isTypingRef.current) {
-      socket.emit('typing_stop', {
-        familyCircleId,
-        senderId: String(user?._id),
-        senderName: user?.name || 'User',
-      });
+      socket.emit('typing_stop', { familyCircleId });
       isTypingRef.current = false;
     }
     
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
   };
 
-  // 4. Typing Control Logic
   const handleTyping = (val) => {
     const socket = getSocket();
     if (!socket || !socket.connected || !familyCircleId) return;
 
     const hasText = val.trim().length > 0;
-    const payload = {
-      familyCircleId,
-      senderId: String(user?._id),
-      userId: String(user?._id),
-      senderName: user?.name || 'User',
-      name: user?.name || 'User'
-    };
+    const payload = { familyCircleId };
 
     if (hasText) {
       if (!isTypingRef.current) {
@@ -200,7 +200,6 @@ function VaultRoomPage() {
     }, 1000); 
   };
 
-  // 🔥 Admin Action: Clear Entire Chat
   const handleClearChat = () => {
     const confirmDelete = window.confirm("🚨 DANGER: This will permanently delete ALL messages for EVERYONE in the family. Are you absolutely sure?");
     if (confirmDelete) {
@@ -210,10 +209,7 @@ function VaultRoomPage() {
   };
 
   return (
-    // 🔥 Making it full screen height (calc 100vh - header height)
     <div style={{ height: 'calc(100vh - 76px)', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
-      
-      {/* 🌟 Premium Slack/Discord Style Header */}
       <header style={{ 
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
         padding: '16px 32px', borderBottom: '1px solid #e2e8f0', background: '#ffffff',
@@ -236,10 +232,7 @@ function VaultRoomPage() {
           </div>
         </div>
 
-        {/* 🔥 DYNAMIC Online Avatars & Admin Tools */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-           
-           {/* Admin Clear Chat Button */}
            {user?.role === 'admin' && (
              <button 
                onClick={handleClearChat}
@@ -289,7 +282,6 @@ function VaultRoomPage() {
         </div>
       )}
 
-      {/* 💬 Chat Box taking remaining space */}
       <ChatWindow 
         messages={messages} 
         currentUserId={String(user?._id)} 
@@ -297,14 +289,12 @@ function VaultRoomPage() {
         familyCircleId={familyCircleId} 
       />
       
-      {/* ⌨️ Typing indicator */}
       <div style={{ background: '#f8fafc', padding: '0 32px', display: 'flex', justifyContent: 'center' }}>
          <div style={{ width: '100%', maxWidth: '800px', padding: '0 24px' }}>
            <TypingIndicator typingUsers={typingUsers} />
          </div>
       </div>
 
-      {/* 🚀 Input Box fixed at bottom */}
       <MessageInput
         onSend={handleSendMessage}
         onTyping={handleTyping}

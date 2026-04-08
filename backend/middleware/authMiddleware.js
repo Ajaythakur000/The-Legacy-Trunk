@@ -12,6 +12,12 @@ const protect = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // 🔥 SECURITY FIX: Token Type Validation (Bug 9)
+    // Ab koi 'Invite Token' chura kar API access nahi kar payega!
+    if (decoded.type !== 'auth') {
+      return res.status(401).json({ message: 'Not authorized, invalid token type' });
+    }
+
     const user = await FamilyMember.findById(decoded.id).select('-password');
     if (!user) {
       return res.status(401).json({ message: 'Not authorized, user not found' });
@@ -20,7 +26,9 @@ const protect = async (req, res, next) => {
     req.user = user;
     return next();
   } catch (error) {
-    return res.status(401).json({ message: 'Not authorized, token failed' });
+    // Hidden Bug Fix: Keep internal errors out of the response
+    console.error("Auth Middleware Error:", error.message);
+    return res.status(401).json({ message: 'Not authorized, token failed or expired' });
   }
 };
 

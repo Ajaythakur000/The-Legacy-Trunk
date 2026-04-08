@@ -66,28 +66,26 @@ function SignupPage() {
 
       const result = await signup(payload);
 
-      if (!result.success) {
-        setError(result.message);
-        setActionLoading(false);
-        return;
-      }
-
-      if (inviteToken) {
-        try {
-          await joinViaInviteApi(inviteToken);
-        } catch (inviteErr) {
-          console.error("Auto-join via token failed after signup", inviteErr);
+      // 🔥 FIX: Correctly handling the requireOtp signal from successful registration
+      if (result.success || (result.data && result.data.requireOtp)) {
+        
+        if (inviteToken) {
+          try {
+            await joinViaInviteApi(inviteToken);
+          } catch (inviteErr) {
+            console.error("Auto-join via token failed after signup", inviteErr);
+          }
         }
-      }
 
-      // 🔥 OTP LOGIC
-      if (result.requireOtp || result?.data?.requireOtp) {
+        // 🔥 Trigger OTP Modal
         setRegisteredEmail(form.email);
         setShowOtpModal(true);
-      } 
-      else if (result?.data?.token) {
-        navigate('/dashboard', { replace: true });
+        setActionLoading(false);
+        return; 
       }
+
+      // If we reach here and it's not a success and no OTP is required
+      setError(result.message || "Registration failed.");
 
     } catch (err) {
       setError("Something went wrong during signup.");
@@ -98,6 +96,7 @@ function SignupPage() {
 
   const handleOtpSuccess = () => {
     setShowOtpModal(false);
+    // Hard redirect to force a fresh context load
     window.location.href = '/dashboard'; 
   };
 
@@ -123,7 +122,6 @@ function SignupPage() {
         
         <div style={{ textAlign: 'center', marginBottom: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           
-          {/* 🔥 LOGO FIX: Edges merged perfectly (no white gap) */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -138,9 +136,9 @@ function SignupPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'transparent', // No white background
-              border: 'none', // No white border
-              padding: 0 // Absolute zero padding
+              background: 'transparent',
+              border: 'none', 
+              padding: 0 
             }}
           >
              <img 
@@ -151,7 +149,7 @@ function SignupPage() {
                 height: '100%', 
                 objectFit: 'cover', 
                 display: 'block', 
-                transform: 'scale(1.25)', // 🔥 Scaled to blow past the borders
+                transform: 'scale(1.25)', 
               }} 
             />
           </motion.div>

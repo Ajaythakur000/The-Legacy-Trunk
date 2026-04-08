@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { loginApi, signupApi } from '../api/authApi';
-import api from '../api/axios'; // 🔥 Ye import chahiye taaki hum directly profile fetch kar sakein
+import api from '../api/axios'; 
 import { connectSocket, disconnectSocket } from '../services/socket';
+import toast from 'react-hot-toast'; 
 
 const AuthContext = createContext(null);
 
@@ -15,17 +16,13 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(false);
 
-  // token exists => auto socket connect & Fetch Fresh Profile Data!
   useEffect(() => {
     if (token) {
       connectSocket(token);
-      fetchFreshProfile(); // 🔥 Jaise hi token mile, fresh data manga lo (Points sync karne ke liye)
+      fetchFreshProfile(); 
     }
   }, [token]);
 
-  // ==========================================
-  // 🔥 FETCH FRESH PROFILE DATA (SYNC FUNCTION)
-  // ==========================================
   const fetchFreshProfile = async () => {
     try {
       const response = await api.get('/users/profile');
@@ -35,6 +32,10 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Failed to fetch fresh profile data:", error);
+      if (error.response && error.response.status === 401) {
+        logout();
+        toast.error("Session expired. Please log in again. 🔒");
+      }
     }
   };
 
@@ -54,12 +55,15 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('user', JSON.stringify(receivedUser));
 
-      connectSocket(receivedToken);
+      // 🔴 IMPORTANT LOGIC FIX:
+      // yahan connectSocket dobara mat call karo, kyunki token state set hone ke baad
+      // useEffect([token]) already connectSocket(token) chala deta hai.
+      // connectSocket(receivedToken);
 
       return { success: true, data };
     } catch (error) {
       const message = error?.response?.data?.message || error.message || 'Login failed';
-      return { success: false, message };
+      return { success: false, message, errorData: error?.response?.data }; 
     } finally {
       setLoading(false);
     }
@@ -76,7 +80,10 @@ export const AuthProvider = ({ children }) => {
       if (receivedToken) {
         setToken(receivedToken);
         localStorage.setItem('token', receivedToken);
-        connectSocket(receivedToken);
+
+        // 🔴 IMPORTANT LOGIC FIX:
+        // same reason as login - duplicate connect avoid
+        // connectSocket(receivedToken);
       }
 
       if (receivedUser) {
@@ -101,26 +108,24 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  // Switch Active Circle
-  // ==========================================
-  // 🔥 Switch Active Circle (FIXED)
-  // ==========================================
   const switchActiveCircle = async (circleId) => {
     if (!user) return;
     
-    // 1. Turant UI update kar (Optimistic update taaki fast lage)
+    const previousUser = { ...user };
+    
     const updatedUser = { ...user, activeCircleId: circleId };
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
     
     try {
-      // 2. Backend ko batao ki naya circle save kar le
       await api.put('/users/profile', { activeCircleId: circleId });
-      
-      // 3. Ab fresh points aur data mangwa lo
       fetchFreshProfile(); 
     } catch (error) {
       console.error("Failed to save switched circle to backend:", error);
+      
+      setUser(previousUser);
+      localStorage.setItem('user', JSON.stringify(previousUser));
+      toast.error("Failed to switch vault. Access Denied.");
     }
   };
 
@@ -136,7 +141,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     setUser,
     switchActiveCircle,
-    fetchFreshProfile, // 🔥 Is function ko baahar export kar diya taaki doosre components bhi ise bula sakein
+    fetchFreshProfile, 
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

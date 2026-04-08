@@ -2,26 +2,29 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
+// 🔥 IMPORT OTP MODAL
+import OTPVerificationModal from './OTPVerificationModal'; 
 
 function LoginPage() {
   const navigate = useNavigate();
   const { login, loading } = useAuth();
 
-  // form state
   const [form, setForm] = useState({
     email: '',
     password: '',
   });
 
   const [error, setError] = useState('');
+  
+  // 🔥 OTP MODAL STATES
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
 
-  // input change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -29,17 +32,26 @@ function LoginPage() {
     const result = await login(form.email, form.password);
 
     if (!result.success) {
-      if (result.requireOtp || result?.data?.requireOtp) {
-          setError("Your account is not verified yet. Please sign up again to trigger the OTP email.");
+      // 🔥 LOGIC FIX: Handle Backend 403 Forbidden with OTP Request
+      // Ab error dikhane ki bajaye, directly OTP modal khulega naye OTP ke sath!
+      if (result.errorData && result.errorData.requireOtp) {
+          setUnverifiedEmail(result.errorData.email || form.email);
+          setShowOtpModal(true);
           return;
       }
       
-      setError(result.message);
+      setError(result.message || "Login failed");
       return;
     }
 
     // login success -> dashboard
     navigate('/dashboard', { replace: true });
+  };
+
+  // 🔥 SUCCESS HANDLER FOR MODAL
+  const handleOtpSuccess = () => {
+    setShowOtpModal(false);
+    window.location.href = '/dashboard'; 
   };
 
   return (
@@ -52,6 +64,16 @@ function LoginPage() {
       padding: '20px',
       fontFamily: 'system-ui, sans-serif'
     }}>
+      
+      {/* 🔥 RENDER OTP MODAL HERE */}
+      {showOtpModal && (
+        <OTPVerificationModal 
+          email={unverifiedEmail} 
+          onSuccess={handleOtpSuccess}
+          onClose={() => setShowOtpModal(false)}
+        />
+      )}
+
       <motion.div 
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -67,7 +89,6 @@ function LoginPage() {
         }}
       >
         
-        {/* 🔥 BRAND LOGO: Scale increased to 1.25 to completely obliterate the white edge */}
         <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -94,8 +115,8 @@ function LoginPage() {
                 width: '100%', 
                 height: '100%', 
                 objectFit: 'cover', 
-                display: 'block', // Ensures no random inline-block spacing
-                transform: 'scale(1.25)', // 🔥 Ab ye pakka border ke bahar tak nikal jayega
+                display: 'block', 
+                transform: 'scale(1.25)', 
               }} 
             />
           </motion.div>
@@ -103,8 +124,9 @@ function LoginPage() {
         <h2 style={{ margin: '0 0 8px 0', fontSize: '2rem', color: '#0f172a', fontWeight: '900', fontFamily: 'Georgia, serif', letterSpacing: '-0.5px' }}>
           Welcome Back
         </h2>
-        <p style={{ margin: '0 0 32px 0', color: '#64748b', fontSize: '1rem' }}>
-          Access your family's private vault.
+        <p style={{ margin: '0 0 32px 0', color: '#64748b', fontSize: '1rem', lineHeight: '1.4' }}>
+          <span style={{display: 'block', marginBottom: '8px'}}>Access your family's private vault.</span>
+          <span style={{ fontSize: '0.85rem' }}>The Oracle awaits your questions. ✨</span>
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -144,7 +166,6 @@ function LoginPage() {
             </motion.div>
           )}
 
-          {/* 🔥 MOTION BUTTON */}
           <motion.button 
             type="submit" 
             disabled={loading}

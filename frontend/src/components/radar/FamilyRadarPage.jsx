@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet'; 
@@ -13,9 +12,6 @@ import {
 import { getCircleFeedApi } from '../../api/storyApi'; 
 import { getSocket } from '../../services/socket';
 
-// -----------------------------------------------------------
-// 🔥 PREMIUM DARK MARKERS
-// -----------------------------------------------------------
 const myIcon = L.divIcon({
   className: 'user-marker', 
   iconSize: [24, 24],
@@ -30,9 +26,6 @@ const otherMemberIcon = L.divIcon({
   popupAnchor: [0, -9]
 });
 
-// -----------------------------------------------------------
-// 🚀 TOUCHPAD HANDLER (Smooth Scrolling)
-// -----------------------------------------------------------
 function TouchpadPanHandler() {
   const map = useMap();
   useEffect(() => {
@@ -173,7 +166,6 @@ function FamilyRadarPage() {
     return () => clearInterval(id);
   }, []);
 
-  // 🔥 GHOST MODE FIXED
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocError('Geolocation is not supported in this browser.');
@@ -189,7 +181,6 @@ function FamilyRadarPage() {
         setLocError('');
         setLoadingLoc(false);
 
-        // 🔥 Backend update only if Ghost Mode is OFF
         if (!isGhostModeOn) {
           try {
             await updateMyLocationApi({ latitude: lat, longitude: lng });
@@ -210,7 +201,8 @@ function FamilyRadarPage() {
     const socket = getSocket();
     if (!socket || !familyCircleId) return;
 
-    socket.emit('join_vault', { familyCircleId: familyCircleId, userId: myUserId, name: user?.name });
+    // 🔥 FIX: Removed fakeable user data. Backend uses JWT now.
+    socket.emit('join_vault', { familyCircleId });
 
     const onMemberLocationChanged = (payload) => {
       const changedUserId = String(payload?.userId || payload?.memberId || '');
@@ -231,7 +223,7 @@ function FamilyRadarPage() {
 
     socket.on('member_location_changed', onMemberLocationChanged);
     return () => socket.off('member_location_changed', onMemberLocationChanged);
-  }, [familyCircleId, myUserId, user?.name]);
+  }, [familyCircleId, myUserId]);
 
   const handleToggleGhostMode = async () => {
     const next = !isGhostModeOn;
@@ -257,7 +249,6 @@ function FamilyRadarPage() {
 
   return (
     <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '40px' }}>
-      
       <div style={{ maxWidth: 1200, margin: '24px auto', padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
           <div>
@@ -287,25 +278,11 @@ function FamilyRadarPage() {
         {radarLoading && members.length === 0 && <p style={{ color: '#6b7280' }}>Loading family radar...</p>}
         {radarError && <p style={{ color: 'crimson' }}>{radarError}</p>}
 
-        {/* 🔥 CSS Grid Bug Fix without @media inline */}
         <div className="radar-grid-container" style={{ marginBottom: 30 }}>
-          
           <div style={{ height: 470, border: '1px solid #e5e7eb', borderRadius: 16, overflow: 'hidden', background: '#111827', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', zIndex: 0 }}>
-            <MapContainer 
-              center={center} 
-              zoom={13} 
-              style={{ height: '100%', width: '100%', zIndex: 0 }}
-              scrollWheelZoom={true} 
-              dragging={true}
-              touchZoom={true}
-            >
+            <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%', zIndex: 0 }} scrollWheelZoom={true} dragging={true} touchZoom={true}>
               <TouchpadPanHandler />
-
-              {/* 🔥 PREMIUM DARK MAP TILES (NO API KEY REQUIRED) */}
-              <TileLayer
-                attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              />
+              <TileLayer attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
 
               {myLocation && !isGhostModeOn && (
                 <>
@@ -332,7 +309,6 @@ function FamilyRadarPage() {
 
           <div style={{ border: '1px solid #e5e7eb', borderRadius: 16, padding: 16, background: '#fff', maxHeight: 470, overflowY: 'auto', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
             <h3 style={{ marginTop: 0, marginBottom: 16, borderBottom: '2px solid #f3f4f6', paddingBottom: '10px' }}>Family Members</h3>
-            
             <div style={{ padding: 12, borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', marginBottom: 12 }}>
               <div style={{ fontWeight: 700 }}>{user?.name || 'You'} (You)</div>
               <div style={{ fontSize: 13, color: '#555', marginTop: 4 }}>{isGhostModeOn ? 'Hidden (Ghost Mode ON) 👻' : 'Visible to family 📡'}</div>
@@ -391,11 +367,8 @@ function FamilyRadarPage() {
             </div>
           )}
         </div>
-
       </div>
-
       <style>{`
-        /* 🔥 FIXED GRID LAYOUT */
         .radar-grid-container {
             display: grid;
             grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
@@ -406,14 +379,10 @@ function FamilyRadarPage() {
                 grid-template-columns: 1fr;
             }
         }
-
-        /* 🌑 THE CSS FILTER HACK FOR FREE PREMIUM DARK THEME */
         .leaflet-container {
            background-color: #020617 !important;
            filter: brightness(0.9) contrast(1.1) saturate(1.2);
         }
-
-        /* Premium Leaflet Markers */
         .user-marker {
           width: 24px !important;
           height: 24px !important;
@@ -423,13 +392,11 @@ function FamilyRadarPage() {
           box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
           animation: pulse 2s infinite;
         }
-
         @keyframes pulse {
           0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
           70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
           100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
-
         .other-marker {
           width: 18px !important;
           height: 18px !important;
@@ -438,8 +405,6 @@ function FamilyRadarPage() {
           border-radius: 50%;
           box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
         }
-
-        /* Custom Popup styling to match dark theme vibes */
         .leaflet-popup-content-wrapper {
           border-radius: 12px;
           padding: 4px;

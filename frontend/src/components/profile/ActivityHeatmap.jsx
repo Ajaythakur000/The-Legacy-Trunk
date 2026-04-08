@@ -172,7 +172,8 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
                           }}
                         ></div>
                       ) : (
-                        <div key={`empty-${dIndex}`} style={{ width: '13px', height: '13px', backgroundColor: 'transparent' }}></div>
+                        // 🔥 SECURITY/REACT FIX: Unique key guaranteed (No React Warning Spam)
+                        <div key={`empty-${mIndex}-${wIndex}-${dIndex}`} style={{ width: '13px', height: '13px', backgroundColor: 'transparent' }}></div>
                       )
                     ))}
                   </div>

@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useEffect, useState, useRef } from 'react';
 import { getMyCirclesApi } from '../../api/circleApi';
 import api from '../../api/axios';
-import { io } from 'socket.io-client';
+import { connectSocket, getSocket } from '../../services/socket'; // 🔴 IMPORTANT SOCKET FIX: use centralized socket service (no direct io here)
 import ChampionDetailModal from '../modals/ChampionDetailModal'; 
 import { motion } from 'framer-motion';
 
@@ -20,7 +20,6 @@ function Navbar({ children }) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
-  const [socket, setSocket] = useState(null);
 
   const [showChampionModal, setShowChampionModal] = useState(false);
   const [championUser, setChampionUser] = useState(null);
@@ -32,42 +31,60 @@ function Navbar({ children }) {
   const currentStreak = user?.currentStreak || 0;
 
   useEffect(() => {
-    if (isAuthenticated) {
-      const fetchCircles = async () => {
-        try {
-          const res = await getMyCirclesApi(); 
-          const circleList = Array.isArray(res) ? res : (res?.data || res?.circles || []);
-          setMyCircles(circleList);
-          if (circleList.length > 0 && !user?.activeCircleId) {
-            switchActiveCircle(circleList[0]._id);
-          }
-        } catch (error) { console.error("Navbar circles error", error); }
-      };
+    if (!isAuthenticated || !user?._id) return;
 
-      const fetchNotifications = async () => {
-        try {
-          const res = await api.get('/notifications');
-          setNotifications(res.data);
-        } catch (err) { console.error("Failed to load notifications", err); }
-      };
+    const fetchCircles = async () => {
+      try {
+        const res = await getMyCirclesApi(); 
+        const circleList = Array.isArray(res) ? res : (res?.data || res?.circles || []);
+        setMyCircles(circleList);
+        if (circleList.length > 0 && !user?.activeCircleId) {
+          switchActiveCircle(circleList[0]._id);
+        }
+      } catch (error) { console.error("Navbar circles error", error); }
+    };
 
-      fetchCircles();
-      fetchNotifications();
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get('/notifications');
+        setNotifications(res.data);
+      } catch (err) { console.error("Failed to load notifications", err); }
+    };
 
-      const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:8000');
-      setSocket(newSocket);
-      
-      newSocket.on('connect', () => {
-        newSocket.emit('setup_user', user._id);
-      });
+    fetchCircles();
+    fetchNotifications();
 
-      newSocket.on('new_notification', (newNotif) => {
-        setNotifications(prev => [newNotif, ...prev]);
-      });
+    // 🔴 IMPORTANT SOCKET FIX: do NOT create socket with io() here
+    // Use same global service everywhere to avoid 400 handshake mismatch / duplicate sockets
+    const newSocket = connectSocket();
 
-      return () => newSocket.disconnect();
+    if (!newSocket) return;
+
+    const handleConnect = () => {
+      // 🔴 IMPORTANT: emit only after connection + valid user id
+      newSocket.emit('setup_user', user._id);
+    };
+
+    const handleNewNotification = (newNotif) => {
+      setNotifications(prev => [newNotif, ...prev]);
+    };
+
+    // If already connected, setup immediately
+    if (newSocket.connected) {
+      handleConnect();
     }
-  }, [isAuthenticated, user]);
+
+    newSocket.on('connect', handleConnect);
+    newSocket.on('new_notification', handleNewNotification);
+
+    return () => {
+      // 🔴 IMPORTANT CLEANUP: remove only component listeners (don’t break global socket usage)
+      const s = getSocket();
+      if (!s) return;
+      s.off('connect', handleConnect);
+      s.off('new_notification', handleNewNotification);
+    };
+  }, [isAuthenticated, user?._id, user?.activeCircleId, switchActiveCircle]);
 
   useEffect(() => {
     if (user?.activeCircleId) {

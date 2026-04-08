@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import Navbar from '../components/shared/Navbar';
+import DOMPurify from 'dompurify'; 
 
 function FamilyOraclePage() {
   const { user } = useAuth();
@@ -10,7 +10,6 @@ function FamilyOraclePage() {
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef(null);
 
-  // Auto-resize textarea magic
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -19,7 +18,16 @@ function FamilyOraclePage() {
   }, [question]);
 
   const askTheOracle = async () => {
+    // 🔥 SECURITY FIX: Basic frontend trim check
     if (!question.trim()) return;
+    
+    // 🔥 SECURITY FIX: Token Limit Protection (Frontend Side)
+    // Extra safety, agar html bypass karke aaye toh javascript rok legi
+    if (question.trim().length > 300) {
+      alert("The Oracle prefers short, concise whispers. Keep it under 300 characters! 📜");
+      return;
+    }
+
     if (!user?.activeCircleId) {
       alert("Please select a family circle first!");
       return;
@@ -31,7 +39,7 @@ function FamilyOraclePage() {
     try {
       const res = await api.post('/ai/ask-oracle', {
         circleId: user.activeCircleId,
-        question: question
+        question: question.substring(0, 300) // Explicitly trim payload
       });
       
       setAnswer(res.data.answer);
@@ -43,7 +51,6 @@ function FamilyOraclePage() {
     }
   };
 
-  // Handle Enter key for quick sending
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -51,14 +58,17 @@ function FamilyOraclePage() {
     }
   };
 
-  // Helper to render basic markdown (bold text) sent by Gemini
   const renderFormattedText = (text) => {
-    // Replace **text** with <strong>text</strong> and \n with <br/>
     const formatted = text
       .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #fef08a;">$1</strong>')
       .replace(/\n/g, '<br />');
     
-    return <span dangerouslySetInnerHTML={{ __html: formatted }} />;
+    const cleanHTML = DOMPurify.sanitize(formatted, {
+      ALLOWED_TAGS: ['strong', 'br', 'span'],
+      ALLOWED_ATTR: ['style']
+    });
+    
+    return <span dangerouslySetInnerHTML={{ __html: cleanHTML }} />;
   };
 
   return (
@@ -66,7 +76,6 @@ function FamilyOraclePage() {
       
       <div style={{ maxWidth: '850px', margin: '0 auto', padding: '60px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         
-        {/* 🔮 THE HEADER */}
         <div style={{ textAlign: 'center', marginBottom: '50px', animation: 'fadeInDown 1s ease' }}>
           <div style={{ fontSize: '70px', marginBottom: '20px', animation: 'float 3s ease-in-out infinite', textShadow: '0 0 30px rgba(212, 175, 55, 0.5)' }}>🔮</div>
           <h1 style={{ fontSize: '4rem', fontWeight: '900', margin: '0 0 10px 0', background: 'linear-gradient(135deg, #d4af37, #fefce8, #d4af37)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 25px rgba(212, 175, 55, 0.3))', fontFamily: 'Georgia, serif', letterSpacing: '1px' }}>
@@ -77,7 +86,6 @@ function FamilyOraclePage() {
           </p>
         </div>
 
-        {/* ✨ THE GLASSMORPHISM INPUT BOX */}
         <div style={{ 
           width: '100%', background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(25px)',
           borderRadius: '24px', padding: '15px', border: '1px solid rgba(212, 175, 55, 0.2)',
@@ -91,6 +99,7 @@ function FamilyOraclePage() {
             onKeyDown={handleKeyDown}
             placeholder="e.g., When did Dadaji buy his first car? (Press Enter to ask)"
             disabled={loading}
+            maxLength={300} // 🔥 SECURITY FIX: UI restriction
             style={{
               width: '100%', minHeight: '80px', background: 'transparent', border: 'none',
               color: '#f8fafc', fontSize: '1.25rem', padding: '20px', resize: 'none', outline: 'none',
@@ -98,7 +107,12 @@ function FamilyOraclePage() {
             }}
           />
           
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 20px 10px 10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px 10px 10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            {/* 🔥 Added a char counter for better UX */}
+            <span style={{ color: question.length >= 300 ? '#ef4444' : '#64748b', fontSize: '0.85rem' }}>
+              {question.length} / 300
+            </span>
+            
             <button 
               onClick={askTheOracle}
               disabled={loading || !question.trim()}
@@ -116,7 +130,6 @@ function FamilyOraclePage() {
           </div>
         </div>
 
-        {/* 🌀 THE MAGICAL LOADING ORB */}
         {loading && (
           <div style={{ marginTop: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'fadeIn 0.5s ease' }}>
             <div className="magical-orb"></div>
@@ -126,7 +139,6 @@ function FamilyOraclePage() {
           </div>
         )}
 
-        {/* 📜 THE CINEMATIC REVEAL (ANSWER) */}
         {!loading && answer && (
           <div style={{ 
             marginTop: '60px', width: '100%', background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95))',
@@ -134,23 +146,20 @@ function FamilyOraclePage() {
             boxShadow: '0 40px 80px rgba(0,0,0,0.8), 0 0 60px rgba(212, 175, 55, 0.05)',
             animation: 'revealScroll 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards', position: 'relative', overflow: 'hidden'
           }}>
-            {/* Top Border Deco */}
             <div style={{ width: '80px', height: '3px', background: 'linear-gradient(90deg, transparent, #d4af37, transparent)', margin: '0 auto 40px auto' }}></div>
             
             <p style={{ 
               fontSize: '1.35rem', lineHeight: '2.1', color: '#f1f5f9', 
               fontFamily: 'Georgia, serif', margin: 0,
-              textAlign: 'center', // 🔥 Centered for a more "Oracle reading a scroll" feel
+              textAlign: 'center',
               fontWeight: '400',
               textShadow: '0 2px 4px rgba(0,0,0,0.5)'
             }}>
               {renderFormattedText(answer)}
             </p>
             
-            {/* Bottom Border Deco */}
             <div style={{ width: '80px', height: '3px', background: 'linear-gradient(90deg, transparent, #d4af37, transparent)', margin: '40px auto 0 auto' }}></div>
             
-            {/* Floating particles effect inside card */}
             <div className="card-particle p1"></div>
             <div className="card-particle p2"></div>
             <div className="card-particle p3"></div>
@@ -160,7 +169,6 @@ function FamilyOraclePage() {
       </div>
 
       <style>{`
-        /* 🌌 Starry Background */
         .starry-bg {
           background-image: 
             radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
@@ -171,27 +179,23 @@ function FamilyOraclePage() {
           animation: starDrift 150s linear infinite;
         }
 
-        /* 🪄 Animations */
         @keyframes starDrift { to { background-position: -550px -550px, -310px -290px, -120px -280px; } }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
         @keyframes pulseText { 0% { opacity: 0.4; } 50% { opacity: 1; text-shadow: 0 0 10px #d4af37; } 100% { opacity: 0.4; } }
         
-        /* The Magical Reveal of the Answer */
         @keyframes revealScroll {
           0% { opacity: 0; transform: translateY(60px) scale(0.95); filter: blur(15px); }
           100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
 
-        /* The Glowing Button */
         .glow-btn:hover:not(:disabled) {
           box-shadow: 0 15px 35px -5px rgba(212, 175, 55, 0.6) !important;
           transform: translateY(-3px) scale(1.02);
         }
         .glow-btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
 
-        /* 🌀 The Magical Orb Animation */
         .magical-orb {
           width: 90px; height: 90px; border-radius: 50%;
           background: radial-gradient(circle at 30% 30%, #fefce8, #d4af37, #020617);
@@ -201,13 +205,11 @@ function FamilyOraclePage() {
         @keyframes orbSpin { 100% { transform: rotate(360deg); } }
         @keyframes orbPulse { 0% { box-shadow: 0 0 20px #d4af37, inset 0 0 10px #fef08a; transform: scale(0.95); } 100% { box-shadow: 0 0 60px #d4af37, 0 0 30px #fefce8, inset 0 0 40px #fef08a; transform: scale(1.05); } }
 
-        /* ✨ Subtle particles inside the answer card */
         .card-particle { position: absolute; width: 4px; height: 4px; background: #fef08a; border-radius: 50%; opacity: 0.6; box-shadow: 0 0 10px #fef08a; }
         .p1 { top: 30px; left: 30px; animation: float 4s infinite; }
         .p2 { bottom: 30px; right: 30px; animation: float 3s infinite reverse; }
         .p3 { top: 50%; left: 10px; animation: float 5s infinite 1s; }
 
-        /* Custom Scrollbar for Textarea */
         textarea::-webkit-scrollbar { width: 6px; }
         textarea::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.4); border-radius: 10px; }
       `}</style>

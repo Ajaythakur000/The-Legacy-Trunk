@@ -36,25 +36,28 @@ export default function FamilyLedgerFeed() {
     if (activeCircleId) { loadFeed(); } else { setStories([]); }
   }, [activeCircleId]);
     
-  useEffect(() => {
-    const socket = getSocket();
-    if (!activeCircleId || !socket) return;
-    socket.emit('join_story_feed', { circleId: activeCircleId });
-    socket.off('new_story_added'); 
+ useEffect(() => {
+  const socket = getSocket();
+  if (!activeCircleId || !socket) return;
 
-    const onNewStory = (incoming) => {
-      setStories((prev) => {
-        if (prev.some((x) => x._id === incoming._id)) return prev;
-        return [incoming, ...prev];
-      });
-    };
-    socket.on('new_story_added', onNewStory);
+  socket.emit('join_story_feed', { circleId: activeCircleId });
 
-    return () => {
-      socket.emit('leave_story_feed', { circleId: activeCircleId });
-      socket.off('new_story_added', onNewStory);
-    };
-  }, [activeCircleId]);
+  const onNewStory = (incoming) => {
+    setStories((prev) => {
+      if (prev.some((x) => x._id === incoming._id)) return prev;
+      return [incoming, ...prev];
+    });
+  };
+
+  
+  socket.off('new_story_added', onNewStory);
+  socket.on('new_story_added', onNewStory);
+
+  return () => {
+    socket.emit('leave_story_feed', { circleId: activeCircleId });
+    socket.off('new_story_added', onNewStory);
+  };
+}, [activeCircleId]);
 
   const handleLike = async (storyId) => {
     setStories((prev) => prev.map((s) => {
