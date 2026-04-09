@@ -290,18 +290,19 @@ const generateInviteLink = async (req, res) => {
       return res.status(403).json({ message: 'Only Admin can generate invite links' });
     }
 
+    // ✅ add explicit token type
     const inviteToken = jwt.sign(
-      { circleId: circle._id, inviterId: req.user._id },
+      { circleId: circle._id, inviterId: req.user._id, type: 'invite' },
       process.env.JWT_SECRET,
       { expiresIn: '48h' }
     );
 
     return res.status(200).json({
       token: inviteToken,
-      message: 'Invite token generated successfully'
+      message: 'Invite token generated successfully',
     });
   } catch (error) {
-    console.error("Generate Invite Error:", error);
+    console.error('Generate Invite Error:', error);
     return res.status(500).json({ message: 'Failed to generate invite link' });
   }
 };
@@ -318,12 +319,17 @@ const joinViaInvite = async (req, res) => {
       return res.status(401).json({ message: 'Invite link is invalid or has expired.' });
     }
 
+    // ✅ strict invite token validation
+    if (decoded?.type !== 'invite' || !decoded?.circleId) {
+      return res.status(401).json({ message: 'Invalid invite token.' });
+    }
+
     const { circleId } = decoded;
     const circle = await FamilyCircle.findById(circleId);
 
     if (!circle) return res.status(404).json({ message: 'This Family Vault no longer exists.' });
 
-    if (circle.members.some(m => String(m) === String(req.user._id))) {
+    if (circle.members.some((m) => String(m) === String(req.user._id))) {
       return res.status(400).json({ message: 'You are already a member of this family.' });
     }
 
@@ -337,11 +343,10 @@ const joinViaInvite = async (req, res) => {
 
     return res.status(200).json({
       message: `Welcome to ${circle.circleName}!`,
-      circleId: circle._id
+      circleId: circle._id,
     });
-
   } catch (error) {
-    console.error("Join Invite Error:", error);
+    console.error('Join Invite Error:', error);
     return res.status(500).json({ message: 'Failed to join via invite link' });
   }
 };

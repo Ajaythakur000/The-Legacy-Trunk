@@ -6,7 +6,7 @@ const router = Router();
 
 const {
   createCircle,
-  sendFamilyInvite, // 🔥 Yahan theek kar diya (Pehle addMemberToCircle tha)
+  sendFamilyInvite,
   getMyCircles,
   getCircleById,
   removeMemberFromCircle,
@@ -15,36 +15,26 @@ const {
   getUpcomingEvents,
   generateInviteLink,
   joinViaInvite,
-  deleteCircle
+  deleteCircle,
 } = circleController;
 
 // GET /api/circles
 // POST /api/circles
 router.route('/').post(protect, createCircle).get(protect, getMyCircles);
 
-// 🔥 IMPORTANT: specific text routes MUST be ABOVE /:id routes!
-// GET /api/circles/leaderboard
+// specific routes must be above /:id
 router.route('/leaderboard').get(protect, getLeaderboard);
-
-// POST /api/circles/join-invite
 router.route('/join-invite').post(protect, joinViaInvite);
-
-// GET /api/circles/:id/top-contributor
 router.route('/:id/top-contributor').get(protect, getTopContributor);
-
-// GET /api/circles/:id/upcoming-events
 router.route('/:id/upcoming-events').get(protect, getUpcomingEvents);
-
-// POST /api/circles/:id/invite-link
 router.route('/:id/invite-link').post(protect, generateInviteLink);
 
 // GET /api/circles/:id
-router.route('/:id').get(protect, getCircleById);
-
+// DELETE /api/circles/:id
 router.route('/:id').get(protect, getCircleById).delete(protect, deleteCircle);
 
-// POST /api/circles/:id/members (Ab ye direct add nahi, invite bhejega)
-router.route('/:id/members').post(protect, sendFamilyInvite); // 🔥 Yahan handler update kar diya
+// POST /api/circles/:id/members
+router.route('/:id/members').post(protect, sendFamilyInvite);
 
 // DELETE /api/circles/:circleId/members/:memberId
 router.route('/:circleId/members/:memberId').delete(protect, removeMemberFromCircle);

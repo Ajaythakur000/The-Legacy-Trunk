@@ -140,6 +140,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     setUser,
+    setToken,
     switchActiveCircle,
     fetchFreshProfile, 
   };

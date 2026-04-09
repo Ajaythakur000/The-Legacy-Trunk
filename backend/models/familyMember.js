@@ -8,6 +8,7 @@ const familyMemberSchema = new Schema(
       required: true,
       trim: true,
     },
+
     email: {
       type: String,
       required: true,
@@ -15,26 +16,43 @@ const familyMemberSchema = new Schema(
       trim: true,
       lowercase: true,
     },
+
     password: {
       type: String,
       required: true,
-      select: false, 
+      select: false,
     },
-    
+
     // ==============================
-    // 🛡️ OTP & SECURITY FIELDS (NEW)
+    // 🛡️ OTP & SECURITY FIELDS
     // ==============================
     isVerified: {
       type: Boolean,
       default: true, // Purane users by default verified rahenge
     },
+
     otp: {
       type: String,
       default: null,
+      select: false,
     },
+
     otpExpires: {
       type: Date,
       default: null,
+      select: false,
+    },
+
+    otpAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+
+    otpBlockedUntil: {
+      type: Date,
+      default: null,
+      select: false,
     },
 
     // ==============================
@@ -42,13 +60,15 @@ const familyMemberSchema = new Schema(
     // ==============================
     avatar: {
       type: String,
-      default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+      default: 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg',
     },
+
     bio: {
       type: String,
       maxLength: 150,
-      default: "Hey there! I am using FamilyVault.",
+      default: 'Hey there! I am using FamilyVault.',
     },
+
     dateOfBirth: {
       type: Date,
       default: null,
@@ -62,19 +82,23 @@ const familyMemberSchema = new Schema(
       enum: ['admin', 'member', 'restricted'],
       default: 'member',
     },
+
     relationToAdmin: {
       type: String,
       trim: true,
     },
+
     children: [
       {
         type: Schema.Types.ObjectId,
         ref: 'FamilyMember',
       },
     ],
+
     familyCode: {
       type: String,
     },
+
     activeCircleId: {
       type: Schema.Types.ObjectId,
       ref: 'FamilyCircle',
@@ -94,10 +118,12 @@ const familyMemberSchema = new Schema(
         default: [0, 0],
       },
     },
+
     lastLocationUpdatedAt: {
       type: Date,
       default: null,
     },
+
     isGhostModeOn: {
       type: Boolean,
       default: false,
@@ -108,30 +134,35 @@ const familyMemberSchema = new Schema(
     // ==============================
     currentStreak: {
       type: Number,
-      default: 0
+      default: 0,
     },
+
     maxStreak: {
       type: Number,
-      default: 0
+      default: 0,
     },
+
     lastLoginDate: {
-      type: String, 
-      default: null
+      type: String,
+      default: null,
     },
+
     lastPostDate: {
       type: String,
-      default: null
+      default: null,
     },
+
     activityMap: {
       type: Map,
       of: Number,
-      default: {}
+      default: {},
     },
+
     totalContributionPoints: {
       type: Number,
       default: 0,
-      min: 0
-    }
+      min: 0,
+    },
   },
   {
     timestamps: true,
@@ -144,6 +175,7 @@ familyMemberSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
+
   const salt = await genSalt(10);
   this.password = await hash(this.password, salt);
   return next();

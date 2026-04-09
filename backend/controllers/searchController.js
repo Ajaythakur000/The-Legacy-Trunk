@@ -16,8 +16,20 @@ const searchContent = async (req, res) => {
     }
 
     const keyword = String(q).trim();
-    const regex = new RegExp(keyword, 'i');
+
+    // ✅ Minimal perf/safety guard
+    if (keyword.length > 80) {
+      return res.status(400).json({ message: 'Search query too long (max 80 chars)' });
+    }
+
     const activeCircleId = req.user.activeCircleId;
+    if (!activeCircleId) {
+      return res.status(400).json({ message: 'No active circle selected' });
+    }
+
+    // ✅ Escape regex special chars (keeps behavior, avoids unsafe regex patterns)
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'i');
 
     // 1) Stories: private family + global searchable
     const storiesQuery = Story.find({
@@ -53,12 +65,12 @@ const searchContent = async (req, res) => {
     const membersQuery = FamilyMember.find({
       $and: [
         {
-          $or: [{ name: regex }, { email: regex }, { relationToAdmin: regex }],
+          $or: [{ name: regex }, { relationToAdmin: regex }],
         },
         { activeCircleId: activeCircleId },
       ],
     })
-      .select('name email relationToAdmin role')
+      .select('name relationToAdmin role')
       .limit(25);
 
     const [stories, timelines, members] = await Promise.all([

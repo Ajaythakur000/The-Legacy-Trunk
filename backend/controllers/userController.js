@@ -1,22 +1,40 @@
 import FamilyMember from '../models/familyMember.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer'; 
+import nodemailer from 'nodemailer';
 import { handleDailyLogin } from './gamificationService.js';
-import bcrypt from 'bcryptjs'; 
+import bcrypt from 'bcryptjs';
 import path from 'path';
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail', 
+  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, 
-    pass: process.env.EMAIL_PASS, 
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
+const sendOtpEmail = async ({ to, subject, otpHtml, otpPlain }) => {
+  try {
+    await transporter.sendMail({
+      from: `"The Memento" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html: otpHtml,
+    });
+    return { ok: true };
+  } catch (err) {
+    console.error('OTP Mail Error:', err?.message || err);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`🔐 DEV OTP for ${to}: ${otpPlain}`);
+    }
+    return { ok: false, error: err };
+  }
+};
+
 const generateToken = (id) => {
-  return jwt.sign({ id, type: 'auth' }, process.env.JWT_SECRET, { 
-    expiresIn: process.env.JWT_ACCESS_EXPIRES || '30d' 
+  return jwt.sign({ id, type: 'auth' }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_ACCESS_EXPIRES || '30d',
   });
 };
 
@@ -31,7 +49,6 @@ const generateFamilyCode = async () => {
   return code;
 };
 
-
 const buildUserResponse = (user, bondPoints = 0) => ({
   _id: user._id,
   name: user.name,
@@ -42,13 +59,11 @@ const buildUserResponse = (user, bondPoints = 0) => ({
   avatar: user.avatar,
   bio: user.bio,
   dateOfBirth: user.dateOfBirth,
-  bondPoints: Number(bondPoints) || 0, // ✅ FIX: no hardcoded 0
+  bondPoints: Number(bondPoints) || 0,
   currentStreak: user.currentStreak || 0,
   maxStreak: user.maxStreak || 0,
   totalContributionPoints: user.totalContributionPoints || 0,
-  activityMap: user.activityMap
-    ? Object.fromEntries(user.activityMap.entries())
-    : {},
+  activityMap: user.activityMap ? Object.fromEntries(user.activityMap.entries()) : {},
   activeCircleId:
     typeof user.activeCircleId === 'object' && user.activeCircleId?._id
       ? user.activeCircleId._id
@@ -59,6 +74,7 @@ const buildUserResponse = (user, bondPoints = 0) => ({
       : user.activeCircleId || null,
   token: generateToken(user._id),
 });
+
 const registerUser = async (req, res) => {
   try {
     let { name, email, password, role, familyCode, relationToAdmin } = req.body;
@@ -69,24 +85,23 @@ const registerUser = async (req, res) => {
 
     name = name.trim();
     email = email.trim().toLowerCase();
-    
-    // Bug 7 & 12 Fix: Force Roles
+
     role = role ? role.trim().toLowerCase() : 'member';
-    if (role !== 'admin' && role !== 'member') role = 'member'; 
-    
+    if (role !== 'admin' && role !== 'member') role = 'member';
+
     relationToAdmin = relationToAdmin ? relationToAdmin.trim() : '';
 
     let userExists = await FamilyMember.findOne({ email });
-    
+
     if (userExists && userExists.isVerified) {
       return res.status(400).json({ message: 'User already exists' });
     } else if (userExists && !userExists.isVerified) {
       if (userExists.activeCircleId) {
         await FamilyCircle.findByIdAndUpdate(userExists.activeCircleId, {
-          $pull: { members: userExists._id }
+          $pull: { members: userExists._id },
         });
       }
-      await FamilyMember.deleteOne({ email }); 
+      await FamilyMember.deleteOne({ email });
     }
 
     let circleId;
@@ -110,27 +125,30 @@ const registerUser = async (req, res) => {
     const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const salt = await bcrypt.genSalt(10);
     const hashedOtp = await bcrypt.hash(plainOtp, salt);
-    
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
+
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     const user = await FamilyMember.create({
-      name, email, password, role,
+      name,
+      email,
+      password,
+      role,
       relationToAdmin: relationToAdmin || (role === 'admin' ? 'Admin' : ''),
       familyCode: finalFamilyCode,
-      activeCircleId: circleId || null, 
+      activeCircleId: circleId || null,
       isVerified: false,
       otp: hashedOtp,
       otpExpires,
-      otpAttempts: 0, 
-      otpBlockedUntil: null
+      otpAttempts: 0,
+      otpBlockedUntil: null,
     });
 
     if (role === 'admin') {
       const newCircle = await FamilyCircle.create({
         circleName: `${name}'s Family Vault`,
         familyCode: finalFamilyCode,
-        admin: user._id,          
-        members: [user._id],        
+        admin: user._id,
+        members: [user._id],
       });
       user.activeCircleId = newCircle._id;
       await user.save();
@@ -140,13 +158,13 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const logoPath = path.join(process.cwd(), '../frontend/public/finall_logo.png');
+    path.join(process.cwd(), '../frontend/public/finall_logo.png');
 
-    const mailOptions = {
-      from: `"The Memento" <${process.env.EMAIL_USER}>`,
+    const mailResult = await sendOtpEmail({
       to: user.email,
       subject: '🗝️ Your Key to The Memento',
-      html: `
+      otpPlain: plainOtp,
+      otpHtml: `
         <div style="font-family: 'Georgia', serif; background-color: #f8fafc; padding: 40px 20px; text-align: center;">
           <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0;">
             <h1 style="color: #0f172a; font-size: 26px;">The Memento</h1>
@@ -157,24 +175,23 @@ const registerUser = async (req, res) => {
             <p>This key is valid for 10 minutes.</p>
           </div>
         </div>
-      `
-    };
-    
-    await transporter.sendMail(mailOptions);
-    
-    return res.status(201).json({ 
-      message: 'OTP sent to email. Please verify.', 
-      email: user.email,
-      requireOtp: true 
+      `,
     });
 
+    return res.status(201).json({
+      message: mailResult.ok
+        ? 'OTP sent to email. Please verify.'
+        : 'OTP generated but email delivery failed. Please retry.',
+      email: user.email,
+      requireOtp: true,
+      mailSent: mailResult.ok,
+    });
   } catch (error) {
-    console.error("Register Error:", error.message);
+    console.error('Register Error:', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-// 🔴 REPLACE verifyOTP FUNCTION
 const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -227,7 +244,7 @@ const verifyOTP = async (req, res) => {
 
     return res.status(200).json(buildUserResponse(freshUser, bondPoints));
   } catch (error) {
-    console.error("VerifyOTP Error:", error.message);
+    console.error('VerifyOTP Error:', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -244,44 +261,49 @@ const loginUser = async (req, res) => {
 
     if (user && (await user.matchPassword(password))) {
       if (!user.isVerified) {
-        
         const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
         const salt = await bcrypt.genSalt(10);
-        
+
         user.otp = await bcrypt.hash(plainOtp, salt);
         user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
         user.otpAttempts = 0;
         user.otpBlockedUntil = null;
         await user.save();
 
-        const mailOptions = {
-          from: `"The Memento" <${process.env.EMAIL_USER}>`,
+        const mailResult = await sendOtpEmail({
           to: user.email,
           subject: '🗝️ Your NEW Key to The Memento',
-          html: `
+          otpPlain: plainOtp,
+          otpHtml: `
             <div style="font-family: 'Georgia', serif; text-align: center; padding: 40px;">
               <h2>Welcome back, <strong>${user.name}</strong></h2>
               <p>You haven't verified your vault yet. Here is your new access key:</p>
               <h1 style="letter-spacing: 10px;">${plainOtp}</h1>
             </div>
-          `
-        };
-        await transporter.sendMail(mailOptions);
+          `,
+        });
 
-        return res.status(403).json({ 
-          message: 'Account not verified. A new OTP has been sent to your email.',
+        return res.status(403).json({
+          message: mailResult.ok
+            ? 'Account not verified. A new OTP has been sent to your email.'
+            : 'Account not verified. OTP mail failed, please retry in a moment.',
           requireOtp: true,
-          email: user.email
+          email: user.email,
+          mailSent: mailResult.ok,
         });
       }
 
       await handleDailyLogin(user._id, user.activeCircleId);
-      const freshUser = await FamilyMember.findById(user._id);
-      return res.json(buildUserResponse(freshUser));
+
+      const freshUser = await FamilyMember.findById(user._id).populate('activeCircleId', 'familyBondPoints');
+      const bondPoints = freshUser?.activeCircleId?.familyBondPoints || 0;
+
+      return res.json(buildUserResponse(freshUser, bondPoints));
     }
+
     return res.status(401).json({ message: 'Invalid email or password' });
   } catch (error) {
-    console.error("Login Error:", error.message);
+    console.error('Login Error:', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -291,7 +313,6 @@ const getUserProfile = async (req, res) => {
     const userWithCircle = await FamilyMember.findById(req.user._id).populate('activeCircleId', 'familyBondPoints');
     if (!userWithCircle) return res.status(404).json({ message: 'User not found' });
 
-    // 🔴 FIX: robust map conversion (works for Map + plain object + null)
     let activityMapPlain = {};
     if (userWithCircle.activityMap instanceof Map) {
       activityMapPlain = Object.fromEntries(userWithCircle.activityMap);
@@ -322,7 +343,7 @@ const getUserProfile = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
-// 🔴 REPLACE updateUserProfile FUNCTION
+
 const updateUserProfile = async (req, res) => {
   try {
     const user = await FamilyMember.findById(req.user._id);
@@ -341,7 +362,7 @@ const updateUserProfile = async (req, res) => {
       const targetCircle = await FamilyCircle.findById(req.body.activeCircleId);
       if (!targetCircle) return res.status(404).json({ message: 'Target circle not found' });
 
-      const isMember = targetCircle.members.some(memberId => String(memberId) === String(user._id));
+      const isMember = targetCircle.members.some((memberId) => String(memberId) === String(user._id));
       if (!isMember) {
         return res.status(403).json({ message: 'You are not a member of this circle.' });
       }
@@ -361,7 +382,7 @@ const updateUserProfile = async (req, res) => {
 
     return res.json(buildUserResponse(freshUser, bondPoints));
   } catch (error) {
-    console.error("Profile Update Error:", error.message);
+    console.error('Profile Update Error:', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

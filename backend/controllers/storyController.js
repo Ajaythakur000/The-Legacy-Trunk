@@ -6,6 +6,18 @@ import Notification from '../models/notificationModel.js';
 // 🔥 IMPORT GAMIFICATION SERVICE (Adjust path if needed)
 import { awardPoints, handleStoryPostStreak } from './gamificationService.js';
 
+const hasStoryAccess = (story, user) => {
+  if (!story || !user) return false;
+
+  // Public story -> all authenticated users can access
+  if (story.isGlobalPublic) return true;
+
+  // Private story -> only same active circle
+  if (!story.originCircleId || !user.activeCircleId) return false;
+
+  return String(story.originCircleId) === String(user.activeCircleId);
+};
+
 const createStory = async (req, res) => {
   try {
     const { title, content, tags, isGlobalPublic, circleId, isMilestone, milestoneDate, tone } = req.body;
@@ -85,9 +97,12 @@ const deleteStory = async (req, res) => {
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
     const isAuthor = String(story.user) === String(req.user._id);
-    const isAdmin = req.user.role === 'admin';
+    const isCircleAdmin =
+      req.user.role === 'admin' &&
+      req.user.activeCircleId &&
+      String(story.originCircleId) === String(req.user.activeCircleId);
 
-    if (!isAuthor && !isAdmin) {
+    if (!isAuthor && !isCircleAdmin) {
       return res.status(403).json({ message: 'Not authorized to delete this story' });
     }
 
@@ -111,6 +126,10 @@ const toggleLikeStory = async (req, res) => {
 
     const story = await Story.findById(storyId);
     if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    if (!hasStoryAccess(story, req.user)) {
+      return res.status(403).json({ message: 'Access denied to this story' });
+    }
 
     const storyOwnerId = story.user.toString();
     const alreadyLiked = story.likes.some((id) => id.toString() === userId);
@@ -185,6 +204,10 @@ const addCommentToStory = async (req, res) => {
 
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
+
+    if (!hasStoryAccess(story, req.user)) {
+      return res.status(403).json({ message: 'Access denied to this story' });
+    }
 
     story.comments.push({
       user: req.user._id,
@@ -301,6 +324,10 @@ const getStoryById = async (req, res) => {
 
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
+    if (!hasStoryAccess(story, req.user)) {
+      return res.status(403).json({ message: 'Access denied to this story' });
+    }
+
     return res.status(200).json(story);
   } catch (error) {
     console.error("Get Story By Id Error:", error.message);
@@ -314,9 +341,12 @@ const updateStory = async (req, res) => {
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
     const isAuthor = String(story.user) === String(req.user._id);
-    const isAdmin = req.user.role === 'admin';
+    const isCircleAdmin =
+      req.user.role === 'admin' &&
+      req.user.activeCircleId &&
+      String(story.originCircleId) === String(req.user.activeCircleId);
 
-    if (!isAuthor && !isAdmin) {
+    if (!isAuthor && !isCircleAdmin) {
       return res.status(403).json({ message: 'Not authorized to edit this story' });
     }
 

@@ -128,11 +128,20 @@ export const awardPoints = async (userId, familyCircleId, points) => {
       await user.save();
     }
 
-    await FamilyCircle.findByIdAndUpdate(familyCircleId, {
-      $inc: { familyBondPoints: points }
-    });
-
+    // ✅ floor familyBondPoints at 0 (prevents negative values)
+    await FamilyCircle.findByIdAndUpdate(
+      familyCircleId,
+      [
+        {
+          $set: {
+            familyBondPoints: {
+              $max: [0, { $add: ['$familyBondPoints', points] }],
+            },
+          },
+        },
+      ]
+    );
   } catch (error) {
-    console.error("Gamification Award Error:", error);
+    console.error('Gamification Award Error:', error);
   }
 };

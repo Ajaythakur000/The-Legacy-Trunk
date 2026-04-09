@@ -8,20 +8,26 @@ const emitSocketError = (socket, code, message) => {
 };
 
 // GLOBAL TRACKER FOR ONLINE USERS IN VAULTS
-const activeVaultUsers = new Map(); 
+// circleId -> Map<userId, { userId, name, avatar, socketIds:Set<string> }>
+const activeVaultUsers = new Map();
 
 const broadcastOnlineUsers = (io, circleId) => {
   if (!circleId || !activeVaultUsers.has(circleId)) return;
+
   const usersMap = activeVaultUsers.get(circleId);
-  const onlineList = Array.from(usersMap.values());
+  const onlineList = Array.from(usersMap.values()).map((u) => ({
+    userId: u.userId,
+    name: u.name,
+    avatar: u.avatar,
+  }));
+
   io.to(circleId).emit('vault_online_users', {
     count: onlineList.length,
-    users: onlineList
+    users: onlineList,
   });
 };
 
 export const initializeSocket = (io) => {
-  
   // 🔥 JWT AUTHENTICATION MIDDLEWARE
   io.use(async (socket, next) => {
     try {
@@ -30,7 +36,16 @@ export const initializeSocket = (io) => {
 
       const token = tokenStr.startsWith('Bearer ') ? tokenStr.split(' ')[1] : tokenStr;
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
+
+      // ✅ CRITICAL: token type validation
+      if (decoded?.type !== 'auth') {
+        return next(new Error('Authentication error: Invalid token type'));
+      }
+
+      if (!decoded?.id) {
+        return next(new Error('Authentication error: Invalid token payload'));
+      }
+
       const user = await FamilyMember.findById(decoded.id).select('_id name avatar activeCircleId role');
       if (!user) return next(new Error('Authentication error: User not found'));
 
@@ -49,7 +64,7 @@ export const initializeSocket = (io) => {
     socket.on('setup_user', () => {
       const roomName = String(socket.user._id);
       if (!socket.rooms.has(roomName)) {
-        socket.join(roomName); 
+        socket.join(roomName);
       }
     });
 
@@ -58,13 +73,15 @@ export const initializeSocket = (io) => {
       if (!circleId) return;
       try {
         const circle = await FamilyCircle.findOne({ _id: circleId, members: socket.user._id });
-        if (circle) socket.join(String(circleId)); 
-      } catch (err) { console.error(err); }
+        if (circle) socket.join(String(circleId));
+      } catch (err) {
+        console.error(err);
+      }
     });
 
     socket.on('leave_story_feed', ({ circleId }) => {
       if (!circleId) return;
-      socket.leave(String(circleId)); 
+      socket.leave(String(circleId));
     });
 
     /**
@@ -86,20 +103,32 @@ export const initializeSocket = (io) => {
 
         socket.join(String(familyCircleId));
 
-        // 🔥 FIX 3: Safe Initialization (Don't overwrite existing users)
+        // ✅ multi-tab safe online presence tracking
         if (!activeVaultUsers.has(String(familyCircleId))) {
           activeVaultUsers.set(String(familyCircleId), new Map());
         }
-        
-        activeVaultUsers.get(String(familyCircleId)).set(uIdStr, {
-          userId: uIdStr,
-          name: socket.data.name,
-          avatar: socket.data.avatar
-        });
+
+        const circleUsersMap = activeVaultUsers.get(String(familyCircleId));
+        const existing = circleUsersMap.get(uIdStr);
+
+        if (existing) {
+          existing.socketIds.add(socket.id);
+          circleUsersMap.set(uIdStr, existing);
+        } else {
+          circleUsersMap.set(uIdStr, {
+            userId: uIdStr,
+            name: socket.data.name,
+            avatar: socket.data.avatar,
+            socketIds: new Set([socket.id]),
+          });
+        }
 
         broadcastOnlineUsers(io, String(familyCircleId));
 
-        socket.emit('joined_vault', { message: 'Joined vault successfully', familyCircleId: String(familyCircleId) });
+        socket.emit('joined_vault', {
+          message: 'Joined vault successfully',
+          familyCircleId: String(familyCircleId),
+        });
       } catch (error) {
         return emitSocketError(socket, 'SERVER_ERROR', error.message);
       }
@@ -117,7 +146,9 @@ export const initializeSocket = (io) => {
         if (!circle) return emitSocketError(socket, 'UNAUTHORIZED', 'Not authorized to send messages here');
 
         const cleanText = text ? String(text).trim() : '';
-        if (!cleanText && !imageUrl && !audioUrl) return emitSocketError(socket, 'EMPTY_MESSAGE', 'Message cannot be empty');
+        if (!cleanText && !imageUrl && !audioUrl) {
+          return emitSocketError(socket, 'EMPTY_MESSAGE', 'Message cannot be empty');
+        }
 
         const now = Date.now();
         const diff = now - (socket.data.lastMessageAt || 0);
@@ -129,17 +160,17 @@ export const initializeSocket = (io) => {
           familyCircleId,
           sender: socket.user._id,
           senderName: socket.user.name || 'Unknown',
-          senderAvatar: socket.user.avatar || '', 
+          senderAvatar: socket.user.avatar || '',
           text: cleanText,
           imageUrl: imageUrl || '',
           audioUrl: audioUrl || '',
-          seenBy: [socket.user._id] 
+          seenBy: [socket.user._id],
         });
 
         io.to(String(familyCircleId)).emit('receive_message', {
           _id: newMessage._id,
           familyCircleId: String(newMessage.familyCircleId),
-          senderId: newMessage.sender, 
+          senderId: newMessage.sender,
           senderName: newMessage.senderName,
           senderAvatar: newMessage.senderAvatar,
           text: newMessage.text,
@@ -148,7 +179,7 @@ export const initializeSocket = (io) => {
           reactions: [],
           seenBy: newMessage.seenBy,
           createdAt: newMessage.createdAt,
-          clientMsgId: clientMsgId || null 
+          clientMsgId: clientMsgId || null,
         });
       } catch (error) {
         return emitSocketError(socket, 'SERVER_ERROR', error.message);
@@ -169,26 +200,30 @@ export const initializeSocket = (io) => {
           if (!circle) return;
 
           const uIdStr = String(socket.user._id);
-          const existingReactionIndex = msg.reactions.findIndex(r => String(r.userId) === uIdStr);
+          const existingReactionIndex = msg.reactions.findIndex((r) => String(r.userId) === uIdStr);
 
           if (existingReactionIndex > -1) {
             if (msg.reactions[existingReactionIndex].emoji === emoji) {
-               // 🔥 FIX 1: Proper safe array filtering for mongoose
-               msg.reactions = msg.reactions.filter(r => String(r.userId) !== uIdStr);
+              // 🔥 FIX 1: Proper safe array filtering for mongoose
+              msg.reactions = msg.reactions.filter((r) => String(r.userId) !== uIdStr);
             } else {
-               msg.reactions[existingReactionIndex].emoji = emoji;
+              msg.reactions[existingReactionIndex].emoji = emoji;
             }
           } else {
             msg.reactions.push({ emoji, userId: uIdStr, userName: socket.user.name });
           }
 
-          // Important: Explicitly tell mongoose we changed an array element
-          msg.markModified('reactions'); 
+          msg.markModified('reactions');
           await msg.save();
-          
-          io.to(String(msg.familyCircleId)).emit('message_reaction_updated', { messageId, reactions: msg.reactions });
+
+          io.to(String(msg.familyCircleId)).emit('message_reaction_updated', {
+            messageId,
+            reactions: msg.reactions,
+          });
         }
-      } catch (error) { console.error(error); }
+      } catch (error) {
+        console.error(error);
+      }
     });
 
     /**
@@ -203,7 +238,7 @@ export const initializeSocket = (io) => {
         if (!msg) return;
 
         const circle = await FamilyCircle.findById(msg.familyCircleId);
-        
+
         // 🔥 FIX 2: Secure matching
         const isAuthor = String(msg.sender) === String(socket.user._id);
         const isAdmin = circle && circle.admin && String(circle.admin) === String(socket.user._id);
@@ -214,7 +249,9 @@ export const initializeSocket = (io) => {
 
         await Message.findByIdAndDelete(messageId);
         io.to(String(msg.familyCircleId)).emit('message_deleted', { messageId });
-      } catch (error) { console.error(error); }
+      } catch (error) {
+        console.error(error);
+      }
     });
 
     /**
@@ -232,7 +269,9 @@ export const initializeSocket = (io) => {
 
         await Message.deleteMany({ familyCircleId });
         io.to(String(familyCircleId)).emit('vault_chat_cleared');
-      } catch (error) { console.error(error); }
+      } catch (error) {
+        console.error(error);
+      }
     });
 
     // 🔥 SECURITY FIX: Typing Spam Blocked
@@ -240,10 +279,10 @@ export const initializeSocket = (io) => {
       try {
         const { familyCircleId } = payload || {};
         if (!familyCircleId || String(familyCircleId) !== socket.data.familyCircleId) return;
-        
+
         socket.to(String(familyCircleId)).emit('member_typing', {
           senderId: String(socket.user._id),
-          senderName: socket.user.name || 'Unknown User'
+          senderName: socket.user.name || 'Unknown User',
         });
       } catch (error) {}
     });
@@ -255,7 +294,7 @@ export const initializeSocket = (io) => {
 
         socket.to(String(familyCircleId)).emit('member_stop_typing', {
           senderId: String(socket.user._id),
-          senderName: socket.user.name || 'Unknown User'
+          senderName: socket.user.name || 'Unknown User',
         });
       } catch (error) {}
     });
@@ -264,25 +303,46 @@ export const initializeSocket = (io) => {
       try {
         const { familyCircleId } = payload || {};
         if (!familyCircleId) return;
-        
+
         socket.leave(String(familyCircleId));
-        
-        if (socket.data.userId && activeVaultUsers.has(String(familyCircleId))) {
-          activeVaultUsers.get(String(familyCircleId)).delete(socket.data.userId);
-          broadcastOnlineUsers(io, String(familyCircleId));
+
+        const circleId = String(familyCircleId);
+        const userId = socket.data.userId;
+
+        if (userId && activeVaultUsers.has(circleId)) {
+          const usersMap = activeVaultUsers.get(circleId);
+          const entry = usersMap.get(userId);
+
+          if (entry) {
+            entry.socketIds.delete(socket.id);
+            if (entry.socketIds.size === 0) usersMap.delete(userId);
+            else usersMap.set(userId, entry);
+          }
+
+          if (usersMap.size === 0) activeVaultUsers.delete(circleId);
+          broadcastOnlineUsers(io, circleId);
         }
       } catch (error) {}
     });
 
     socket.on('disconnect', () => {
       console.log('❌ Socket disconnected:', socket.id);
-      if (socket.data.familyCircleId && socket.data.userId) {
-        const circleId = socket.data.familyCircleId;
-        if (activeVaultUsers.has(circleId)) {
-          activeVaultUsers.get(circleId).delete(socket.data.userId);
-          broadcastOnlineUsers(io, circleId);
-        }
+
+      const circleId = socket.data.familyCircleId;
+      const userId = socket.data.userId;
+      if (!circleId || !userId || !activeVaultUsers.has(circleId)) return;
+
+      const usersMap = activeVaultUsers.get(circleId);
+      const entry = usersMap.get(userId);
+
+      if (entry) {
+        entry.socketIds.delete(socket.id);
+        if (entry.socketIds.size === 0) usersMap.delete(userId);
+        else usersMap.set(userId, entry);
       }
+
+      if (usersMap.size === 0) activeVaultUsers.delete(circleId);
+      broadcastOnlineUsers(io, circleId);
     });
   });
 };
