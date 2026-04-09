@@ -104,8 +104,6 @@ const sendFamilyInvite = async (req, res) => {
       return res.status(400).json({ message: 'User is already in this family' });
     }
 
-    // 🔥 SPAM PROTECTION: Check if an invite is already pending
-    // 'invite' type means it hasn't been accepted or rejected yet
     const pendingInvite = await Notification.findOne({
       recipient: targetUser._id,
       circleId: circle._id,
@@ -116,16 +114,14 @@ const sendFamilyInvite = async (req, res) => {
       return res.status(400).json({ message: 'An invite is already pending for this user!' });
     }
 
-    // CREATE NOTIFICATION INSTEAD OF DIRECTLY ADDING
     const newNotif = await Notification.create({
       recipient: targetUser._id,
       sender: req.user._id,
-      type: 'invite', // Important type flag
+      type: 'invite', 
       circleId: circle._id, 
       message: `${req.user.name} invited you to join ${circle.circleName}`
     });
 
-    // Fire real-time socket event if they are online
     const io = req.app.get('io');
     if (io) {
       io.to(String(targetUser._id)).emit('new_notification', newNotif);
@@ -172,15 +168,48 @@ const removeMemberFromCircle = async (req, res) => {
   }
 };
 
+// 🔥 FIX: Calculate and attach the top contributor (champion) avatar for each family
 const getLeaderboard = async (req, res) => {
   try {
     const topFamilies = await FamilyCircle.find({})
       .sort({ familyBondPoints: -1 }) 
       .limit(10)
       .populate('admin', 'name avatar') 
-      .select('circleName familyCode familyBondPoints admin members');
+      .select('circleName familyCode familyBondPoints admin members')
+      .lean(); // Lean to manipulate the object freely
 
-    return res.status(200).json(topFamilies);
+    // Array to hold promises for finding the champion of each family
+    const familiesWithChampions = await Promise.all(
+      topFamilies.map(async (family) => {
+        const topContributorData = await Story.aggregate([
+          { $match: { originCircleId: new mongoose.Types.ObjectId(family._id) } },
+          { $group: { _id: '$user', storyCount: { $sum: 1 } } },
+          { $sort: { storyCount: -1 } },
+          { $limit: 1 }
+        ]);
+
+        let championAvatar = null;
+        let championName = '';
+
+        if (topContributorData.length > 0) {
+          const championUser = await FamilyMember.findById(topContributorData[0]._id).select('name avatar');
+          championAvatar = championUser?.avatar || null;
+          championName = championUser?.name || '';
+        } else {
+          // Fallback to admin if no stories exist
+          championAvatar = family.admin?.avatar || null;
+          championName = family.admin?.name || '';
+        }
+
+        return {
+          ...family,
+          championAvatar,
+          championName
+        };
+      })
+    );
+
+    return res.status(200).json(familiesWithChampions);
   } catch (error) {
     return res.status(500).json({ message: error.message || 'Failed to fetch leaderboard' });
   }
@@ -290,7 +319,6 @@ const generateInviteLink = async (req, res) => {
       return res.status(403).json({ message: 'Only Admin can generate invite links' });
     }
 
-    // ✅ add explicit token type
     const inviteToken = jwt.sign(
       { circleId: circle._id, inviterId: req.user._id, type: 'invite' },
       process.env.JWT_SECRET,
@@ -319,7 +347,6 @@ const joinViaInvite = async (req, res) => {
       return res.status(401).json({ message: 'Invite link is invalid or has expired.' });
     }
 
-    // ✅ strict invite token validation
     if (decoded?.type !== 'invite' || !decoded?.circleId) {
       return res.status(401).json({ message: 'Invalid invite token.' });
     }
@@ -351,9 +378,6 @@ const joinViaInvite = async (req, res) => {
   }
 };
 
-// ==========================================
-// 🗑️ NEW: DELETE CIRCLE LOGIC (Admin Only)
-// ==========================================
 const deleteCircle = async (req, res) => {
   try {
     const circleId = req.params.id;

@@ -387,4 +387,114 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-export { registerUser, verifyOTP, loginUser, getUserProfile, updateUserProfile };
+// 🔥 NEW: Forgot Password Controller
+const forgotPassword = async (req, res) => {
+  try {
+    let { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    email = email.trim().toLowerCase();
+    const user = await FamilyMember.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'No account found with this email' });
+    }
+
+    const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const salt = await bcrypt.genSalt(10);
+
+    user.otp = await bcrypt.hash(plainOtp, salt);
+    user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    user.otpAttempts = 0;
+    user.otpBlockedUntil = null;
+    await user.save();
+
+    const mailResult = await sendOtpEmail({
+      to: user.email,
+      subject: '🗝️ Password Reset Key for The Memento',
+      otpPlain: plainOtp,
+      otpHtml: `
+        <div style="font-family: 'Georgia', serif; text-align: center; padding: 40px;">
+          <h2>Hello, <strong>${user.name}</strong></h2>
+          <p>It seems you lost your key. Use this code to forge a new one:</p>
+          <h1 style="letter-spacing: 10px;">${plainOtp}</h1>
+          <p>Valid for 10 minutes. Do not share this key.</p>
+        </div>
+      `,
+    });
+
+    if (!mailResult.ok) {
+      return res.status(500).json({ message: 'Failed to send recovery email. Try again later.' });
+    }
+
+    return res.status(200).json({ message: 'Recovery key sent to your email.' });
+  } catch (error) {
+    console.error('Forgot Password Error:', error.message);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// 🔥 NEW: Reset Password Controller
+const resetPassword = async (req, res) => {
+  try {
+    let { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+    }
+
+    email = email.trim().toLowerCase();
+    const user = await FamilyMember.findOne({ email }).select('+otp +otpAttempts +otpBlockedUntil +otpExpires');
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const now = Date.now();
+
+    if (user.otpBlockedUntil && user.otpBlockedUntil.getTime() > now) {
+      const minutesLeft = Math.ceil((user.otpBlockedUntil.getTime() - now) / 60000);
+      return res.status(429).json({ message: `Too many failed attempts. Try again in ${minutesLeft} minutes.` });
+    }
+
+    if (!user.otp || !user.otpExpires || user.otpExpires.getTime() < now) {
+      return res.status(400).json({ message: 'OTP has expired or does not exist. Please request a new one.' });
+    }
+
+    const isMatch = await bcrypt.compare(String(otp), user.otp);
+
+    if (!isMatch) {
+      user.otpAttempts = (user.otpAttempts || 0) + 1;
+
+      if (user.otpAttempts >= 5) {
+        user.otpBlockedUntil = new Date(now + 10 * 60 * 1000);
+        user.otp = null;
+        user.otpExpires = null;
+        await user.save();
+        return res.status(429).json({ message: 'Verification locked for 10 minutes.' });
+      }
+
+      await user.save();
+      const attemptsLeft = 5 - user.otpAttempts;
+      return res.status(400).json({ message: `Invalid OTP. ${attemptsLeft} attempts remaining.` });
+    }
+
+    // OTP verified successfully. Update password.
+    // The pre-save hook in familyMember schema will handle hashing the new password.
+    user.password = newPassword;
+    user.otp = null;
+    user.otpExpires = null;
+    user.otpAttempts = 0;
+    user.otpBlockedUntil = null;
+    
+    // If the user wasn't verified before, verifying their identity for a password reset counts as verification.
+    user.isVerified = true; 
+
+    await user.save();
+
+    return res.status(200).json({ message: 'Password has been successfully forged anew. You may now unlock the vault.' });
+  } catch (error) {
+    console.error('Reset Password Error:', error.message);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export { registerUser, verifyOTP, loginUser, getUserProfile, updateUserProfile, forgotPassword, resetPassword };

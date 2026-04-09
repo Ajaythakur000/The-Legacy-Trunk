@@ -42,3 +42,15 @@ export const updateUserProfileApi = async (profileData) => {
   const response = await api.put('/users/profile', profileData);
   return response.data;
 };
+
+// 🔥 NEW: Forgot Password Request API
+export const forgotPasswordApi = async (email) => {
+  const response = await api.post('/users/forgot-password', { email });
+  return response.data;
+};
+
+// 🔥 NEW: Reset Password Verify API
+export const resetPasswordApi = async (payload) => {
+  const response = await api.post('/users/reset-password', payload);
+  return response.data;
+};

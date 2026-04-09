@@ -1,219 +1,526 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import DOMPurify from 'dompurify'; 
+import DOMPurify from 'dompurify';
 
-function FamilyOraclePage() {
-  const { user } = useAuth();
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [loading, setLoading] = useState(false);
+// ── Animated Star Canvas ──────────────────────────────────────────────────────
+function StarCanvas() {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animId, frame = 0;
+    const stars = [];
+
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < 140; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.3,
+        phase: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.02 + 0.005,
+      });
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame++;
+      stars.forEach(s => {
+        const alpha = 0.3 + 0.5 * Math.sin(frame * s.speed + s.phase);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(212,180,80,${alpha})`;
+        ctx.fill();
+      });
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas ref={canvasRef} style={{
+      position: 'absolute', inset: 0,
+      width: '100%', height: '100%',
+      pointerEvents: 'none', zIndex: 0,
+    }} />
+  );
+}
+
+// ── Dust Motes ────────────────────────────────────────────────────────────────
+function DustMotes({ count = 18 }) {
+  const motes = useRef(
+    Array.from({ length: count }, (_, i) => ({
+      id: i,
+      lx:    `${Math.random() * 100}%`,
+      ty:    `${Math.random() * 100}%`,
+      tx:    `${Math.random() * 60 - 30}px`,
+      ty2:   `${-30 - Math.random() * 50}px`,
+      sz:    `${4 + Math.random() * 8}px`,
+      dur:   `${6 + Math.random() * 8}s`,
+      delay: `${Math.random() * 10}s`,
+      color: ['rgba(212,168,80,0.7)', 'rgba(100,140,220,0.5)', 'rgba(180,140,80,0.6)'][
+        Math.floor(Math.random() * 3)
+      ],
+    }))
+  ).current;
+
+  return (
+    <>
+      {motes.map(m => (
+        <div key={m.id} style={{
+          position: 'absolute',
+          left: m.lx, top: m.ty,
+          width: m.sz, height: m.sz,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${m.color}, transparent 70%)`,
+          animation: `ltFloat ${m.dur} ${m.delay} ease-in-out infinite`,
+          opacity: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          '--tx': m.tx,
+          '--ty2': m.ty2,
+        }} />
+      ))}
+    </>
+  );
+}
+
+// ── Card Shell (Glassmorphism) ─────────────────────────────────────────────────
+function OracleCard({ children }) {
+  const cardRef = useRef(null);
+  const spotRef = useRef(null);
+
+  const onMouseMove = useCallback(e => {
+    if (!cardRef.current || !spotRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    spotRef.current.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    spotRef.current.style.setProperty('--my', `${e.clientY - rect.top}px`);
+    spotRef.current.style.opacity = '1';
+  }, []);
+
+  const onMouseLeave = useCallback(() => {
+    if (spotRef.current) spotRef.current.style.opacity = '0';
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      style={{
+        width: '100%',
+        background: 'rgba(12,16,32,0.85)',
+        border: '1px solid rgba(212,168,80,0.22)',
+        borderRadius: 20,
+        padding: 6,
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+      }}
+    >
+      {/* Shimmer lines */}
+      <div style={{ position:'absolute', top:0, left:'15%', right:'15%', height:1,
+        background:'linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent)', pointerEvents:'none' }}/>
+      <div style={{ position:'absolute', bottom:0, left:'15%', right:'15%', height:1,
+        background:'linear-gradient(90deg,transparent,rgba(212,168,80,0.25),transparent)', pointerEvents:'none' }}/>
+      {/* Corner accents */}
+      {[['top:12px','left:12px','borderTop','borderLeft'],
+        ['top:12px','right:12px','borderTop','borderRight'],
+        ['bottom:12px','left:12px','borderBottom','borderLeft'],
+        ['bottom:12px','right:12px','borderBottom','borderRight']].map(([a,b,c,d],i)=>(
+        <div key={i} style={{
+          position:'absolute', width:18, height:18,
+          ...Object.fromEntries([[a.split(':')[0], a.split(':')[1]],[b.split(':')[0], b.split(':')[1]]]),
+          [c]: '1px solid rgba(212,168,80,0.6)',
+          [d]: '1px solid rgba(212,168,80,0.6)',
+          pointerEvents:'none',
+        }}/>
+      ))}
+      {/* Mouse spotlight */}
+      <div ref={spotRef} style={{
+        position:'absolute', inset:0, borderRadius:20, opacity:0,
+        background:'radial-gradient(circle 180px at var(--mx,50%) var(--my,50%), rgba(212,168,80,0.07), transparent)',
+        transition:'opacity 0.3s', pointerEvents:'none',
+      }}/>
+      {children}
+    </div>
+  );
+}
+
+// ── Dark Input ────────────────────────────────────────────────────────────────
+function DarkTextarea({ value, onChange, onKeyDown, disabled, maxLength }) {
+  const [focused, setFocused] = useState(false);
   const textareaRef = useRef(null);
 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 250)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
     }
-  }, [question]);
+  }, [value]);
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'flex-start', gap: 12,
+      background: focused ? 'rgba(212,168,80,0.05)' : 'rgba(255,255,255,0.04)',
+      border: `1px solid ${focused ? 'rgba(212,168,80,0.6)' : 'rgba(212,168,80,0.35)'}`,
+      borderRadius: 12, padding: '14px 16px',
+      marginBottom: 12, position: 'relative',
+      transition: 'all 0.3s',
+      boxShadow: focused ? '0 0 0 3px rgba(212,168,80,0.08)' : 'none',
+    }}>
+      {/* Gold icon */}
+      <svg style={{ marginTop:2, flexShrink:0 }} width="14" height="14" viewBox="0 0 14 14"
+        fill="none" stroke="rgba(212,168,80,0.9)" strokeWidth="1.5" strokeLinecap="round">
+        <circle cx="5" cy="5" r="4"/><path d="M10 10 L13 13"/>
+      </svg>
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        disabled={disabled}
+        maxLength={maxLength}
+        placeholder="e.g., When did Dadaji buy his first car? (Press Enter to ask)"
+        style={{
+          flex: 1, background: 'transparent', border: 'none', outline: 'none',
+          color: 'rgba(255,255,255,0.88)',
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 16, lineHeight: 1.6, resize: 'none',
+          minHeight: 60, maxHeight: 200,
+        }}
+      />
+      {/* Sweep line */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: '10%', right: '10%', height: 1,
+        background: 'linear-gradient(90deg, transparent, rgba(212,168,80,0.8), transparent)',
+        transform: focused ? 'scaleX(1)' : 'scaleX(0)',
+        transition: 'transform 0.4s ease',
+        pointerEvents: 'none',
+      }}/>
+    </div>
+  );
+}
+
+// ── Gold Button ───────────────────────────────────────────────────────────────
+function GoldButton({ onClick, disabled, loading, children }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      disabled={disabled}
+      whileHover={!disabled ? { scale: 1.02, y: -1 } : {}}
+      whileTap={!disabled ? { scale: 0.97 } : {}}
+      style={{
+        position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(135deg, #c9933a 0%, #e8a820 50%, #c9933a 100%)',
+        backgroundSize: '200%',
+        color: '#1a0f00',
+        border: 'none', borderRadius: 10,
+        padding: '12px 24px',
+        fontFamily: "'Cinzel', serif",
+        fontSize: 12, fontWeight: 700,
+        letterSpacing: 2, textTransform: 'uppercase',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        animation: disabled ? 'none' : 'ltPulseGlow 3s ease-in-out infinite',
+      }}
+    >
+      <div style={{
+        position:'absolute', top:'-50%', left:'-100%',
+        width:'50%', height:'200%',
+        background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)',
+        transform:'skewX(-20deg)',
+        animation: 'ltShine 3s ease-in-out infinite',
+        pointerEvents:'none',
+      }}/>
+      {loading ? (
+        <span style={{ display:'inline-flex', gap:4, alignItems:'center' }}>
+          {[0,1,2].map(i=>(
+            <span key={i} style={{
+              width:5,height:5,borderRadius:'50%',background:'#1a0f00',
+              animation:`ltDot 0.8s ease-in-out ${i*0.15}s infinite`,
+              display:'inline-block',
+            }}/>
+          ))}
+        </span>
+      ) : children}
+    </motion.button>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+function FamilyOraclePage() {
+  const { user } = useAuth();
+  const [question, setQuestion]   = useState('');
+  const [answer, setAnswer]       = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
 
   const askTheOracle = async () => {
-    // 🔥 SECURITY FIX: Basic frontend trim check
     if (!question.trim()) return;
-    
-    // 🔥 SECURITY FIX: Token Limit Protection (Frontend Side)
-    // Extra safety, agar html bypass karke aaye toh javascript rok legi
     if (question.trim().length > 300) {
-      alert("The Oracle prefers short, concise whispers. Keep it under 300 characters! 📜");
+      setError("The Oracle prefers short, concise whispers. Keep it under 300 characters.");
       return;
     }
-
     if (!user?.activeCircleId) {
-      alert("Please select a family circle first!");
+      setError("Please select a family circle first!");
       return;
     }
-
+    setError('');
     setLoading(true);
-    setAnswer(''); 
-    
+    setAnswer('');
     try {
       const res = await api.post('/ai/ask-oracle', {
         circleId: user.activeCircleId,
-        question: question.substring(0, 300) // Explicitly trim payload
+        question: question.substring(0, 300),
       });
-      
       setAnswer(res.data.answer);
-    } catch (error) {
-      console.error("Oracle Error:", error);
+    } catch (err) {
+      console.error('Oracle Error:', err);
       setAnswer("The Oracle is currently resting. The cosmic energies are weak right now. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      askTheOracle();
-    }
+  const handleKeyDown = e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askTheOracle(); }
   };
 
-  const renderFormattedText = (text) => {
+  const renderFormattedText = text => {
     const formatted = text
-      .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #fef08a;">$1</strong>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fef08a;">$1</strong>')
       .replace(/\n/g, '<br />');
-    
-    const cleanHTML = DOMPurify.sanitize(formatted, {
-      ALLOWED_TAGS: ['strong', 'br', 'span'],
-      ALLOWED_ATTR: ['style']
+    const clean = DOMPurify.sanitize(formatted, {
+      ALLOWED_TAGS: ['strong', 'br', 'span'], ALLOWED_ATTR: ['style'],
     });
-    
-    return <span dangerouslySetInnerHTML={{ __html: cleanHTML }} />;
+    return <span dangerouslySetInnerHTML={{ __html: clean }} />;
   };
 
   return (
-    <div className="starry-bg" style={{ backgroundColor: '#020617', minHeight: '100vh', fontFamily: 'system-ui, sans-serif', color: '#f8fafc', paddingBottom: '100px' }}>
-      
-      <div style={{ maxWidth: '850px', margin: '0 auto', padding: '60px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        
-        <div style={{ textAlign: 'center', marginBottom: '50px', animation: 'fadeInDown 1s ease' }}>
-          <div style={{ fontSize: '70px', marginBottom: '20px', animation: 'float 3s ease-in-out infinite', textShadow: '0 0 30px rgba(212, 175, 55, 0.5)' }}>🔮</div>
-          <h1 style={{ fontSize: '4rem', fontWeight: '900', margin: '0 0 10px 0', background: 'linear-gradient(135deg, #d4af37, #fefce8, #d4af37)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 25px rgba(212, 175, 55, 0.3))', fontFamily: 'Georgia, serif', letterSpacing: '1px' }}>
-            The Family Oracle
-          </h1>
-          <p style={{ fontSize: '1.2rem', color: '#94a3b8', fontStyle: 'italic', letterSpacing: '1px' }}>
-            Whisper your question. The Oracle reads the legacy trunk.
-          </p>
-        </div>
-
-        <div style={{ 
-          width: '100%', background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(25px)',
-          borderRadius: '24px', padding: '15px', border: '1px solid rgba(212, 175, 55, 0.2)',
-          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8), inset 0 0 20px rgba(212, 175, 55, 0.03)',
-          display: 'flex', flexDirection: 'column', animation: 'fadeInUp 1s ease 0.2s backwards'
-        }}>
-          <textarea 
-            ref={textareaRef}
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="e.g., When did Dadaji buy his first car? (Press Enter to ask)"
-            disabled={loading}
-            maxLength={300} // 🔥 SECURITY FIX: UI restriction
-            style={{
-              width: '100%', minHeight: '80px', background: 'transparent', border: 'none',
-              color: '#f8fafc', fontSize: '1.25rem', padding: '20px', resize: 'none', outline: 'none',
-              fontFamily: 'system-ui, sans-serif', lineHeight: '1.6'
-            }}
-          />
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px 10px 10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            {/* 🔥 Added a char counter for better UX */}
-            <span style={{ color: question.length >= 300 ? '#ef4444' : '#64748b', fontSize: '0.85rem' }}>
-              {question.length} / 300
-            </span>
-            
-            <button 
-              onClick={askTheOracle}
-              disabled={loading || !question.trim()}
-              className="glow-btn"
-              style={{
-                background: loading ? '#334155' : 'linear-gradient(135deg, #d4af37, #b48608)',
-                color: loading ? '#94a3b8' : '#020617', border: 'none', borderRadius: '16px',
-                padding: '12px 32px', fontSize: '1.1rem', fontWeight: '800', cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', display: 'flex', alignItems: 'center', gap: '10px',
-                boxShadow: loading ? 'none' : '0 10px 25px -5px rgba(212, 175, 55, 0.4)'
-              }}
-            >
-              {loading ? 'Consulting Ancestors...' : 'Ask the Oracle ✨'}
-            </button>
-          </div>
-        </div>
-
-        {loading && (
-          <div style={{ marginTop: '80px', display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'fadeIn 0.5s ease' }}>
-            <div className="magical-orb"></div>
-            <p style={{ color: '#d4af37', fontStyle: 'italic', marginTop: '30px', letterSpacing: '3px', fontSize: '1.1rem', animation: 'pulseText 2s infinite' }}>
-              Weaving memories from the trunk...
-            </p>
-          </div>
-        )}
-
-        {!loading && answer && (
-          <div style={{ 
-            marginTop: '60px', width: '100%', background: 'linear-gradient(180deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95))',
-            backdropFilter: 'blur(30px)', borderRadius: '32px', padding: '50px', border: '1px solid rgba(212, 175, 55, 0.3)',
-            boxShadow: '0 40px 80px rgba(0,0,0,0.8), 0 0 60px rgba(212, 175, 55, 0.05)',
-            animation: 'revealScroll 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards', position: 'relative', overflow: 'hidden'
-          }}>
-            <div style={{ width: '80px', height: '3px', background: 'linear-gradient(90deg, transparent, #d4af37, transparent)', margin: '0 auto 40px auto' }}></div>
-            
-            <p style={{ 
-              fontSize: '1.35rem', lineHeight: '2.1', color: '#f1f5f9', 
-              fontFamily: 'Georgia, serif', margin: 0,
-              textAlign: 'center',
-              fontWeight: '400',
-              textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-            }}>
-              {renderFormattedText(answer)}
-            </p>
-            
-            <div style={{ width: '80px', height: '3px', background: 'linear-gradient(90deg, transparent, #d4af37, transparent)', margin: '40px auto 0 auto' }}></div>
-            
-            <div className="card-particle p1"></div>
-            <div className="card-particle p2"></div>
-            <div className="card-particle p3"></div>
-          </div>
-        )}
-
-      </div>
-
+    <>
+      {/* ── Google Fonts ── */}
       <style>{`
-        .starry-bg {
-          background-image: 
-            radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
-            radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
-            radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
-          background-size: 550px 550px, 350px 350px, 250px 250px;
-          background-position: 0 0, 40px 60px, 130px 270px;
-          animation: starDrift 150s linear infinite;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Space+Mono:wght@400;700&display=swap');
 
-        @keyframes starDrift { to { background-position: -550px -550px, -310px -290px, -120px -280px; } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
-        @keyframes pulseText { 0% { opacity: 0.4; } 50% { opacity: 1; text-shadow: 0 0 10px #d4af37; } 100% { opacity: 0.4; } }
-        
+        @keyframes ltRingSpin  { to { transform: rotate(360deg); } }
+        @keyframes ltShine     { 0% { left:-100%; } 40%,100% { left:150%; } }
+        @keyframes ltPulseGlow { 0%,100% { box-shadow:0 8px 24px rgba(212,168,80,0.25); } 50% { box-shadow:0 8px 32px rgba(212,168,80,0.5); } }
+        @keyframes ltDot       { 0%,80%,100% { transform:translateY(0); } 40% { transform:translateY(-5px); } }
+        @keyframes ltFloat     {
+          0%   { opacity:0; transform:translate(0,0) scale(1); }
+          20%  { opacity:0.8; }
+          80%  { opacity:0.4; }
+          100% { opacity:0; transform:translate(var(--tx,20px),var(--ty2,-40px)) scale(0.2); }
+        }
+        @keyframes crystalFloat {
+          0%,100% { transform:translateY(0); filter:drop-shadow(0 0 24px rgba(212,168,80,0.5)); }
+          50%     { transform:translateY(-14px); filter:drop-shadow(0 0 44px rgba(212,168,80,1)); }
+        }
+        @keyframes orbSpin  { to { transform:rotate(360deg); } }
+        @keyframes orbPulse {
+          from { box-shadow:0 0 20px #d4af37, inset 0 0 10px #fef08a; transform:scale(0.95); }
+          to   { box-shadow:0 0 60px #d4af37, 0 0 30px #fefce8, inset 0 0 40px #fef08a; transform:scale(1.05); }
+        }
+        @keyframes ltPulseText { 0%,100%{opacity:0.4;} 50%{opacity:1; text-shadow:0 0 10px #d4af37;} }
         @keyframes revealScroll {
-          0% { opacity: 0; transform: translateY(60px) scale(0.95); filter: blur(15px); }
-          100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+          from { opacity:0; transform:translateY(50px) scale(0.96); filter:blur(8px); }
+          to   { opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
         }
-
-        .glow-btn:hover:not(:disabled) {
-          box-shadow: 0 15px 35px -5px rgba(212, 175, 55, 0.6) !important;
-          transform: translateY(-3px) scale(1.02);
-        }
-        .glow-btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
-
-        .magical-orb {
-          width: 90px; height: 90px; border-radius: 50%;
-          background: radial-gradient(circle at 30% 30%, #fefce8, #d4af37, #020617);
-          box-shadow: 0 0 40px #d4af37, inset 0 0 25px #fef08a;
-          animation: orbSpin 2.5s linear infinite, orbPulse 1.5s ease-in-out infinite alternate;
-        }
-        @keyframes orbSpin { 100% { transform: rotate(360deg); } }
-        @keyframes orbPulse { 0% { box-shadow: 0 0 20px #d4af37, inset 0 0 10px #fef08a; transform: scale(0.95); } 100% { box-shadow: 0 0 60px #d4af37, 0 0 30px #fefce8, inset 0 0 40px #fef08a; transform: scale(1.05); } }
-
-        .card-particle { position: absolute; width: 4px; height: 4px; background: #fef08a; border-radius: 50%; opacity: 0.6; box-shadow: 0 0 10px #fef08a; }
-        .p1 { top: 30px; left: 30px; animation: float 4s infinite; }
-        .p2 { bottom: 30px; right: 30px; animation: float 3s infinite reverse; }
-        .p3 { top: 50%; left: 10px; animation: float 5s infinite 1s; }
-
-        textarea::-webkit-scrollbar { width: 6px; }
-        textarea::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.4); border-radius: 10px; }
+        .oracle-crystal { animation: crystalFloat 4s ease-in-out infinite; display:block; }
+        .oracle-orb     { animation: orbSpin 2.5s linear infinite, orbPulse 1.5s ease-in-out infinite alternate; }
+        .oracle-orb-txt { animation: ltPulseText 2s ease-in-out infinite; }
+        .answer-reveal  { animation: revealScroll 1.2s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .ap1 { animation: crystalFloat 4s ease-in-out infinite; }
+        .ap2 { animation: crystalFloat 3s ease-in-out infinite reverse; }
+        .ap3 { animation: crystalFloat 5s ease-in-out 1s infinite; }
       `}</style>
-    </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          backgroundColor: '#06080f',
+          minHeight: '100vh',
+          paddingBottom: 100,
+          position: 'relative',
+          overflow: 'hidden',
+          fontFamily: "'Cormorant Garamond', serif",
+        }}
+      >
+        <StarCanvas />
+        <DustMotes count={18} />
+
+        <div style={{ maxWidth: 750, margin: '0 auto', padding: '60px 20px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          position: 'relative', zIndex: 2 }}>
+
+          {/* Title section */}
+          <div style={{ textAlign:'center', marginBottom:44 }}>
+            <span className="oracle-crystal" style={{ fontSize:68, marginBottom:16,
+              textShadow:'0 0 30px rgba(212,168,80,0.5)' }}>🔮</span>
+            <h1 style={{ fontFamily:"'Cinzel',serif", fontSize:'clamp(1.8rem,5vw,3rem)',
+              fontWeight:700, color:'#e8c87a', margin:'0 0 12px',
+              textShadow:'0 0 40px rgba(212,168,80,0.4)', letterSpacing:2 }}>
+              The Family Oracle
+            </h1>
+            <p style={{ fontStyle:'italic', fontSize:'1.1rem',
+              color:'rgba(255,255,255,0.38)', letterSpacing:1, margin:0 }}>
+              Whisper your question. The Oracle reads your memories.
+            </p>
+          </div>
+
+          {/* Input card */}
+          <OracleCard>
+            <div style={{ padding:'16px 16px 10px' }}>
+              <DarkTextarea
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={loading}
+                maxLength={300}
+              />
+
+              {/* Error */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }}
+                    exit={{ opacity:0, y:-8 }}
+                    style={{ display:'flex', alignItems:'center', gap:8,
+                      background:'rgba(220,60,60,0.12)', border:'1px solid rgba(240,128,128,0.3)',
+                      borderRadius:8, padding:'10px 14px', marginBottom:10 }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                      stroke="#f08080" strokeWidth="1.5" strokeLinecap="round">
+                      <circle cx="7" cy="7" r="6"/><path d="M7 4v3M7 10h.01"/>
+                    </svg>
+                    <span style={{ fontFamily:"'Space Mono',monospace", fontSize:11,
+                      color:'#f08080', letterSpacing:0.5 }}>{error}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div style={{ display:'flex', justifyContent:'space-between',
+                alignItems:'center', padding:'8px 4px 6px',
+                borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ fontFamily:"'Space Mono',monospace", fontSize:10,
+                  letterSpacing:1,
+                  color: question.length >= 300 ? '#f08080' : 'rgba(212,168,80,0.4)' }}>
+                  {question.length} / 300
+                </span>
+                <GoldButton
+                  onClick={askTheOracle}
+                  disabled={loading || !question.trim()}
+                  loading={loading}
+                >
+                  Ask the Oracle ✦
+                </GoldButton>
+              </div>
+            </div>
+          </OracleCard>
+
+          {/* Loading orb */}
+          <AnimatePresence>
+            {loading && (
+              <motion.div
+                initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                style={{ marginTop:60, display:'flex', flexDirection:'column',
+                  alignItems:'center', gap:24 }}>
+                <div className="oracle-orb" style={{
+                  width:80, height:80, borderRadius:'50%',
+                  background:'radial-gradient(circle at 30% 30%, #fefce8, #d4af37, #06080f)',
+                  boxShadow:'0 0 40px #d4af37, inset 0 0 25px rgba(254,240,138,0.5)',
+                }}/>
+                <div className="oracle-orb-txt" style={{ fontFamily:"'Space Mono',monospace",
+                  fontSize:10, letterSpacing:'3px', textTransform:'uppercase', color:'#d4af37' }}>
+                  Weaving memories...
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Answer scroll */}
+          <AnimatePresence>
+            {!loading && answer && (
+              <motion.div
+                className="answer-reveal"
+                initial={{ opacity:0, y:50, scale:0.96 }}
+                animate={{ opacity:1, y:0, scale:1 }}
+                transition={{ duration:1.2, ease:[0.16,1,0.3,1] }}
+                style={{
+                  marginTop:50, width:'100%',
+                  background:'rgba(12,16,32,0.85)',
+                  border:'1px solid rgba(212,168,80,0.22)',
+                  borderRadius:20, padding:'40px 36px',
+                  position:'relative', overflow:'hidden',
+                  boxShadow:'0 20px 60px rgba(0,0,0,0.6), 0 0 60px rgba(212,168,80,0.04)',
+                }}
+              >
+                {/* shimmer lines */}
+                <div style={{ position:'absolute',top:0,left:'15%',right:'15%',height:1,
+                  background:'linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent)',pointerEvents:'none' }}/>
+                <div style={{ position:'absolute',bottom:0,left:'15%',right:'15%',height:1,
+                  background:'linear-gradient(90deg,transparent,rgba(212,168,80,0.25),transparent)',pointerEvents:'none' }}/>
+                {/* corners */}
+                {[['top:12px','left:12px','borderTop','borderLeft'],
+                  ['top:12px','right:12px','borderTop','borderRight'],
+                  ['bottom:12px','left:12px','borderBottom','borderLeft'],
+                  ['bottom:12px','right:12px','borderBottom','borderRight']].map(([a,b,c,d],i)=>(
+                  <div key={i} style={{
+                    position:'absolute', width:18, height:18, pointerEvents:'none',
+                    ...Object.fromEntries([[a.split(':')[0],a.split(':')[1]],[b.split(':')[0],b.split(':')[1]]]),
+                    [c]:'1px solid rgba(212,168,80,0.6)', [d]:'1px solid rgba(212,168,80,0.6)',
+                  }}/>
+                ))}
+
+                <div style={{ width:80,height:2,
+                  background:'linear-gradient(90deg,transparent,#d4af37,transparent)',
+                  margin:'0 auto 28px' }}/>
+
+                <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:'1.25rem',
+                  lineHeight:2, color:'rgba(255,255,255,0.88)', textAlign:'center', margin:0 }}>
+                  {renderFormattedText(answer)}
+                </p>
+
+                <div style={{ width:80,height:2,
+                  background:'linear-gradient(90deg,transparent,#d4af37,transparent)',
+                  margin:'28px auto 0' }}/>
+
+                {/* Particles */}
+                {[{cls:'ap1',top:28,left:28},{cls:'ap2',bottom:28,right:28},{cls:'ap3',top:'50%',left:20}]
+                  .map(({cls,...pos},i)=>(
+                  <div key={i} className={cls} style={{ position:'absolute',width:4,height:4,
+                    background:'#fef08a',borderRadius:'50%',boxShadow:'0 0 10px #fef08a',
+                    opacity:0.6,...pos }} />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Rune footer */}
+          <div style={{ fontFamily:"'Cinzel',serif", fontSize:10, letterSpacing:'4px',
+            color:'rgba(212,168,80,0.18)', userSelect:'none', textAlign:'center', marginTop:36 }}>
+            ✦   ᚦ ᛖ   ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ   ᛏ ᚱ ᚢ ᚾ ᚲ   ✦
+          </div>
+        </div>
+      </motion.div>
+    </>
   );
 }
 
