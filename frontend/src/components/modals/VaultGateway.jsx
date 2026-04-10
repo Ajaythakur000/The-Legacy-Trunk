@@ -129,17 +129,22 @@ function VaultGateway({ onClose }) {
 
   const handleFinish = useCallback(() => {
     setDone(true);
-    setIsVisible(false);
+    setIsVisible(false); // Ye sirf opacity 0 karega (animation fade out)
     
     // Save state in session storage so it doesn't pop up again while browsing the app
     sessionStorage.setItem('vault_gateway_seen_session', 'true');
     
-    setTimeout(onClose, 500);
+    // 🔥 THE FIX: Animation fade out (450ms) hone ke baad DOM se completely hatao
+    setTimeout(() => {
+      setShouldRender(false); // Kill the component
+      onClose();
+    }, 500); 
   }, [onClose]);
 
   const handleNext = () => { if (step < SLIDES.length - 1) setStep(s => s + 1); };
   const isLast = step === SLIDES.length - 1;
 
+  // 🔥 THE FIX: Agar shouldRender false hai, toh DOM me render hi mat ho
   if (!shouldRender) return null;
 
   return createPortal(
@@ -163,6 +168,8 @@ function VaultGateway({ onClose }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         zIndex: 99999, padding: 20,
         opacity: isVisible ? 1 : 0,
+        // 🔥 THE FIX: Safety pointer-events logic. Jab invisible ho toh clicks pass through ho jayein
+        pointerEvents: isVisible ? 'auto' : 'none',
         transition: 'opacity 0.45s ease',
         fontFamily: "'Cormorant Garamond',serif",
         overflow: 'hidden',

@@ -10,13 +10,14 @@ const NAV_LINKS = [
 ];
 
 const TOOL_LINKS = [
-  { to:'/vault',       icon:'💬', label:'Family Chat',  sub:null,              hot:true  },
-  { to:'/memory-lane', icon:'🛤️', label:'Memory Lane',  sub:'Timeline of souls', hot:false },
-  { to:'/radar',       icon:'📡', label:'Family Radar', sub:'Live locations',    hot:false },
+  { to:'/vault',       icon:'💬', label:'Family Chat',  sub:null },
+  { to:'/memory-lane', icon:'🛤️', label:'Memory Lane',  sub:'Timeline of souls' },
+  { to:'/radar',       icon:'📡', label:'Family Radar', sub:'Live locations' },
 ];
 
 // ─── SIDEBAR LINK ─────────────────────────────────────────────────────────────
-function SbLink({ to, icon, label, sub, badge, hot, active, onClick }) {
+// BUG 1 FIX: badge aur hot props ko yahan se poori tarah hata diya
+function SbLink({ to, icon, label, sub, active, onClick }) {
   return (
     <Link to={to} onClick={onClick} className={`lt-sb-link${active?' lt-active':''}`}>
       <div className="lt-sb-icon">{icon}</div>
@@ -24,7 +25,6 @@ function SbLink({ to, icon, label, sub, badge, hot, active, onClick }) {
         <div className="lt-sb-lbl">{label}</div>
         {sub && <div className="lt-sb-sublbl">{sub}</div>}
       </div>
-      {badge > 0 && <span className={`lt-sb-badge${hot?' lt-hot':''}`}>{badge}</span>}
     </Link>
   );
 }
@@ -71,8 +71,8 @@ export default function Sidebar({
   searchQuery,
   setSearchQuery,
   handleSearch,
-  unreadCount,
   handleLogout
+  // BUG 1 FIX: unreadCount prop yahan se bhi hata diya
 }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -87,7 +87,7 @@ export default function Sidebar({
         <div className="lt-sb-head">
           <div className="lt-sb-user" onClick={() => {
             navigate('/profile');
-            if(window.innerWidth <= 768) setIsSidebarOpen(false);
+            // BUG 2 FIX: Profile click par bhi zabardasti close nahi hoga ab
           }}>
             <div className="lt-sb-avatar">
               {user?.avatar
@@ -115,17 +115,18 @@ export default function Sidebar({
             {NAV_LINKS.map(({to,icon,label,sub}) => (
               <SbLink key={to} to={to} icon={icon} label={label} sub={sub}
                 active={location.pathname===to}
-                onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}/>
+                // BUG 2 FIX: onClick htaya taaki sidebar screen se na hate
+              />
             ))}
           </div>
 
           <div className="lt-sb-section" style={{marginTop:12, paddingBottom:20}}>
             <div className="lt-sec-label">Family Tools</div>
-            {TOOL_LINKS.map(({to,icon,label,sub,hot}) => (
-              <SbLink key={to} to={to} icon={icon} label={label} sub={sub} hot={hot}
-                badge={hot?unreadCount:0}
+            {TOOL_LINKS.map(({to,icon,label,sub}) => (
+              <SbLink key={to} to={to} icon={icon} label={label} sub={sub}
                 active={location.pathname===to}
-                onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}/>
+                // BUG 2 FIX: onClick htaya taaki sidebar screen se na hate
+              />
             ))}
           </div>
         </div>

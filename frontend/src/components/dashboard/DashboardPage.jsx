@@ -1,496 +1,782 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { QRCodeSVG } from 'qrcode.react'; 
-import { motion, AnimatePresence } from 'framer-motion'; 
+import { QRCodeSVG } from 'qrcode.react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  createCircleApi,
-  getCircleByIdApi,
-  getMyCirclesApi,
-  removeMemberFromCircleApi,
-  generateInviteLinkApi,
-  sendFamilyInviteApi,     
-  deleteCircleApi      
+  createCircleApi, getCircleByIdApi, getMyCirclesApi,
+  removeMemberFromCircleApi, generateInviteLinkApi,
+  sendFamilyInviteApi, deleteCircleApi
 } from '../../api/circleApi';
-
 import UpcomingEventsWidget from '../../components/dashboard/UpcomingEventsWidget';
 import VaultGateway from "../modals/VaultGateway";
 
+// ─── Star Canvas ─────────────────────────────────────────────────────────────
+function StarCanvas() {
+  const canvasRef = useRef(null);
+  const rafRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const stars = Array.from({ length: 180 }, () => ({
+      x: Math.random(), y: Math.random(),
+      r: Math.random() * 1.5 + 0.2,
+      sp: Math.random() * 0.007 + 0.002,
+      ph: Math.random() * Math.PI * 2,
+    }));
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    resize();
+    window.addEventListener('resize', resize);
+    const draw = (t) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        const alpha = 0.15 + 0.45 * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph));
+        ctx.beginPath();
+        ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(212,180,80,${alpha})`;
+        ctx.fill();
+      });
+      const grd = ctx.createRadialGradient(canvas.width / 2, 0, 0, canvas.width / 2, 0, canvas.height * 0.8);
+      grd.addColorStop(0, 'rgba(212,130,40,0.06)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+    const animate = (ts) => { draw(ts * 0.001); rafRef.current = requestAnimationFrame(animate); };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener('resize', resize); };
+  }, []);
+  return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }} />;
+}
+
+// ─── Dust Layer ───────────────────────────────────────────────────────────────
+function DustLayer() {
+  const motes = Array.from({ length: 24 }, (_, i) => ({
+    id: i, sz: Math.random() * 4 + 1.5,
+    gold: Math.random() > 0.3,
+    dur: Math.random() * 10 + 6,
+    delay: Math.random() * 14,
+    tx: (Math.random() - 0.5) * 160,
+    ty: -(Math.random() * 120 + 40),
+    x: Math.random() * 100, y: Math.random() * 100,
+  }));
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden' }}>
+      {motes.map(m => (
+        <div key={m.id} style={{
+          position: 'absolute', width: m.sz, height: m.sz,
+          left: `${m.x}%`, top: `${m.y}%`, borderRadius: '50%',
+          background: `radial-gradient(circle,${m.gold ? 'rgba(255,200,80,0.8)' : 'rgba(180,200,255,0.5)'} 0%,transparent 70%)`,
+          animation: `ltFloat ${m.dur}s ${m.delay}s linear infinite`,
+          '--tx': `${m.tx}px`, '--ty': `${m.ty}px`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Corner Accents ───────────────────────────────────────────────────────────
+function CornerAccents({ size = 18, inset = 12, opacity = 0.5 }) {
+  const base = { position: 'absolute', width: size, height: size, borderColor: `rgba(212,168,80,${opacity})`, borderStyle: 'solid' };
+  return (
+    <>
+      <div style={{ ...base, top: inset, left: inset, borderWidth: '1px 0 0 1px', borderRadius: '4px 0 0 0' }} />
+      <div style={{ ...base, top: inset, right: inset, borderWidth: '1px 1px 0 0', borderRadius: '0 4px 0 0' }} />
+      <div style={{ ...base, bottom: inset, left: inset, borderWidth: '0 0 1px 1px', borderRadius: '0 0 0 4px' }} />
+      <div style={{ ...base, bottom: inset, right: inset, borderWidth: '0 1px 1px 0', borderRadius: '0 0 4px 0' }} />
+    </>
+  );
+}
+
+// ─── Logo Ring ────────────────────────────────────────────────────────────────
+function LogoRing({ size = 90 }) {
+  return (
+    <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
+      <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', animation: 'ltRingSpin 18s linear infinite' }} viewBox="0 0 90 90" fill="none">
+        <circle cx="45" cy="45" r="42" stroke="rgba(212,168,80,0.2)" strokeWidth="0.5" />
+        <circle cx="45" cy="45" r="40" stroke="rgba(212,168,80,0.1)" strokeWidth="0.5" strokeDasharray="3 8" />
+        <circle cx="45" cy="5" r="2.5" fill="rgba(212,168,80,0.9)" />
+        <circle cx="83" cy="27" r="2" fill="rgba(212,168,80,0.6)" />
+        <circle cx="83" cy="63" r="2" fill="rgba(212,168,80,0.6)" />
+        <circle cx="45" cy="85" r="2.5" fill="rgba(212,168,80,0.9)" />
+        <circle cx="7" cy="63" r="2" fill="rgba(212,168,80,0.6)" />
+        <circle cx="7" cy="27" r="2" fill="rgba(212,168,80,0.6)" />
+      </svg>
+      <div style={{ position: 'absolute', top: 8, left: 8, right: 8, bottom: 8, borderRadius: '50%', background: 'linear-gradient(135deg,#1a1410,#0f0c08)', border: '1px solid rgba(212,168,80,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <img src="/finall_logo.png" alt="LT" style={{ width: '110%', height: '110%', objectFit: 'cover', borderRadius: '50%' }}
+          onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+        <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#e8c87a', fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700 }}>LT</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── DarkInput ────────────────────────────────────────────────────────────────
+function DarkInput({ type = 'text', placeholder, value, onChange, icon, disabled, name }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{ border: `1px solid ${focused ? 'rgba(212,168,80,0.6)' : 'rgba(212,168,80,0.22)'}`, background: focused ? 'rgba(212,168,80,0.05)' : 'rgba(255,255,255,0.03)', borderRadius: 10, position: 'relative', overflow: 'hidden', boxShadow: focused ? '0 0 0 3px rgba(212,168,80,0.08)' : 'none', transition: 'all 0.3s' }}>
+      {icon && <div style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', opacity: focused ? 0.8 : 0.35, transition: 'opacity 0.3s', pointerEvents: 'none' }}>{icon}</div>}
+      <input type={type} placeholder={placeholder} value={value} onChange={onChange} name={name} disabled={disabled}
+        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        style={{ width: '100%', padding: icon ? '12px 16px 12px 40px' : '12px 16px', background: 'transparent', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontFamily: "'Cormorant Garamond',serif", fontSize: 16, boxSizing: 'border-box' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.6),transparent)', transform: focused ? 'scaleX(1)' : 'scaleX(0)', transition: 'transform 0.4s ease' }} />
+    </div>
+  );
+}
+
+// ─── Nav Room Card ────────────────────────────────────────────────────────────
+function RoomCard({ to, icon, title, desc, glowColor = 'rgba(212,168,80,0.3)', delay = 0 }) {
+  const cardRef = useRef(null);
+  const [spotPos, setSpotPos] = useState({ x: 50, y: 50 });
+  const [hovering, setHovering] = useState(false);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setSpotPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }, []);
+
+  return (
+    <Link to={to} style={{ textDecoration: 'none' }}>
+      <motion.div
+        ref={cardRef}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        whileHover={{ y: -6, scale: 1.02 }}
+        whileTap={{ scale: 0.97 }}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        style={{
+          background: 'rgba(12,16,32,0.88)',
+          border: '1px solid rgba(212,168,80,0.22)',
+          borderRadius: 20, padding: '32px 28px',
+          position: 'relative', overflow: 'hidden',
+          boxShadow: hovering
+            ? `0 20px 60px rgba(0,0,0,0.7), 0 0 40px ${glowColor}`
+            : '0 10px 40px rgba(0,0,0,0.5)',
+          transition: 'box-shadow 0.4s',
+          height: '100%', cursor: 'pointer',
+        }}
+      >
+        {/* Spotlight */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 20, background: hovering ? `radial-gradient(200px at ${spotPos.x}px ${spotPos.y}px, rgba(212,168,80,0.09) 0%, transparent 70%)` : 'none' }} />
+
+        {/* Gold lines */}
+        <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent)' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.2),transparent)' }} />
+        <CornerAccents size={14} inset={10} opacity={0.4} />
+
+        {/* Icon */}
+        <motion.div
+          animate={hovering ? { scale: 1.15, rotate: [0, -5, 5, 0] } : { scale: 1, rotate: 0 }}
+          transition={{ duration: 0.4 }}
+          style={{ fontSize: 40, marginBottom: 16, filter: hovering ? `drop-shadow(0 0 12px ${glowColor})` : 'none', display: 'inline-block' }}
+        >
+          {icon}
+        </motion.div>
+
+        <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, color: '#e8c87a', margin: '0 0 8px', letterSpacing: 1, textShadow: hovering ? '0 0 20px rgba(212,168,80,0.5)' : 'none', transition: 'text-shadow 0.3s' }}>
+          {title}
+        </h2>
+        <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>
+          {desc}
+        </p>
+
+        {/* Arrow */}
+        <motion.div
+          animate={hovering ? { x: 4, opacity: 1 } : { x: 0, opacity: 0 }}
+          style={{ position: 'absolute', bottom: 20, right: 20, color: 'rgba(212,168,80,0.7)', fontSize: 18 }}
+        >
+          →
+        </motion.div>
+
+        {/* Rune watermark */}
+        <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: 3, color: 'rgba(212,168,80,0.08)', whiteSpace: 'nowrap', userSelect: 'none' }}>
+          ✦ ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ ✦
+        </div>
+      </motion.div>
+    </Link>
+  );
+}
+
+// ─── Member Row ───────────────────────────────────────────────────────────────
+function MemberRow({ m, isSelf, isAdmin, isRemoving, canRemove, onRemove, activeAction }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '14px 16px',
+        background: isSelf ? 'rgba(212,168,80,0.08)' : 'rgba(255,255,255,0.02)',
+        borderRadius: 14,
+        border: `1px solid ${isSelf ? 'rgba(212,168,80,0.3)' : 'rgba(212,168,80,0.1)'}`,
+        transition: 'all 0.2s',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: 42, height: 42, borderRadius: '50%', border: `1.5px solid ${isSelf ? 'rgba(212,168,80,0.6)' : 'rgba(212,168,80,0.25)'}`, overflow: 'hidden', background: '#1a1410' }}>
+            <img src={m.avatar || 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg'} alt="dp" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          {isSelf && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: '#4ade80', border: '2px solid #06080f', boxShadow: '0 0 6px #4ade80' }} />}
+        </div>
+        <div>
+          <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            {m.name}
+            {isSelf && <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(212,168,80,0.7)', letterSpacing: '1px' }}>(You)</span>}
+            {isAdmin && (
+              <span style={{ background: 'rgba(212,168,80,0.15)', border: '1px solid rgba(212,168,80,0.35)', color: 'rgba(212,168,80,0.85)', padding: '1px 7px', borderRadius: 4, fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '1px' }}>
+                👑 Admin
+              </span>
+            )}
+          </div>
+          <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(212,168,80,0.35)', letterSpacing: '0.5px', marginTop: 2 }}>{m.email}</div>
+        </div>
+      </div>
+
+      {canRemove && (
+        <motion.button
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          onClick={() => onRemove(m._id, m.name)}
+          disabled={!!activeAction}
+          style={{ background: 'rgba(220,60,60,0.1)', border: '1px solid rgba(220,60,60,0.25)', color: '#f08080', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1px', textTransform: 'uppercase', transition: 'all 0.2s', opacity: isRemoving ? 0.5 : 1 }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,60,60,0.2)'; e.currentTarget.style.color = '#ff6b6b'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,60,60,0.1)'; e.currentTarget.style.color = '#f08080'; }}
+        >
+          {isRemoving ? '...' : 'Remove'}
+        </motion.button>
+      )}
+    </motion.div>
+  );
+}
+
+// ─── Section Card ─────────────────────────────────────────────────────────────
+function SectionCard({ children, style: extraStyle }) {
+  return (
+    <div style={{
+      background: 'rgba(12,16,32,0.88)',
+      border: '1px solid rgba(212,168,80,0.18)',
+      borderRadius: 20, padding: '28px 32px',
+      position: 'relative', overflow: 'hidden',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+      ...extraStyle,
+    }}>
+      <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.6),transparent)' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.2),transparent)' }} />
+      <CornerAccents />
+      {children}
+    </div>
+  );
+}
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
 function DashboardPage() {
   const { user, switchActiveCircle } = useAuth();
 
   const [circles, setCircles] = useState([]);
   const [selectedCircleId, setSelectedCircleId] = useState(user?.activeCircleId || '');
   const [selectedCircle, setSelectedCircle] = useState(null);
-
   const [newCircleName, setNewCircleName] = useState('');
-  const [inviteEmail, setInviteEmail] = useState(''); 
-
+  const [inviteEmail, setInviteEmail] = useState('');
   const [loadingCircles, setLoadingCircles] = useState(false);
   const [loadingCircleDetails, setLoadingCircleDetails] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
-
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
   const [linkCopied, setLinkCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
-
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
+  const [inviteTab, setInviteTab] = useState('magic');
 
-  const [inviteTab, setInviteTab] = useState('magic'); 
-
-  // Gateway related states removed, Gateway handles its own visibility now!
-
-  const isGlobalAdmin = user?.role === 'admin';
   const isCircleAdmin = useMemo(() => {
     if (!selectedCircle || !user?._id) return false;
     return String(selectedCircle?.admin?._id || selectedCircle?.admin) === String(user._id);
   }, [selectedCircle, user]);
 
-  const clearFlash = () => {
-    setError('');
-    setSuccess('');
-  };
+  const clearFlash = () => { setError(''); setSuccess(''); };
 
   const loadMyCircles = async () => {
     setLoadingCircles(true);
-    try {
-      const data = await getMyCirclesApi();
-      const list = Array.isArray(data) ? data : [];
-      setCircles(list);
-    } catch (e) {
-      console.error('Failed to load circles', e);
-    } finally {
-      setLoadingCircles(false);
-    }
+    try { const data = await getMyCirclesApi(); setCircles(Array.isArray(data) ? data : []); }
+    catch (e) { console.error(e); }
+    finally { setLoadingCircles(false); }
   };
 
   const loadCircleDetails = async (circleId) => {
-    if (!circleId) {
-      setSelectedCircle(null);
-      return;
-    }
+    if (!circleId) { setSelectedCircle(null); return; }
     setLoadingCircleDetails(true);
-    try {
-      const data = await getCircleByIdApi(circleId);
-      setSelectedCircle(data);
-    } catch (e) {
-      console.error('Failed to load circle details', e);
-    } finally {
-      setLoadingCircleDetails(false);
-    }
+    try { const data = await getCircleByIdApi(circleId); setSelectedCircle(data); }
+    catch (e) { console.error(e); }
+    finally { setLoadingCircleDetails(false); }
   };
 
+  useEffect(() => { loadMyCircles(); }, []);
+  useEffect(() => { if (user?.activeCircleId && user.activeCircleId !== selectedCircleId) setSelectedCircleId(user.activeCircleId); }, [user?.activeCircleId]);
   useEffect(() => {
-    loadMyCircles();
-  }, []);
-
-  useEffect(() => {
-    if (user?.activeCircleId && user.activeCircleId !== selectedCircleId) {
-      setSelectedCircleId(user.activeCircleId);
-    }
-  }, [user?.activeCircleId]);
-
-  useEffect(() => {
-    if (selectedCircleId) {
-      loadCircleDetails(selectedCircleId);
-      if (selectedCircleId !== user?.activeCircleId) {
-        switchActiveCircle(selectedCircleId);
-      }
-    } else {
-      setSelectedCircle(null);
-    }
+    if (selectedCircleId) { loadCircleDetails(selectedCircleId); if (selectedCircleId !== user?.activeCircleId) switchActiveCircle(selectedCircleId); }
+    else setSelectedCircle(null);
   }, [selectedCircleId]);
 
   const handleCreateCircle = async (e) => {
-    e.preventDefault();
-    clearFlash();
+    e.preventDefault(); clearFlash();
     if (!newCircleName.trim()) return setError('Circle name is required');
-
-    setActiveAction('createCircle'); 
+    setActiveAction('createCircle');
     try {
       const created = await createCircleApi({ circleName: newCircleName.trim() });
-      setSuccess(`🎉 Family "${created.circleName}" created successfully!`);
-      setNewCircleName('');
-      await loadMyCircles();
+      setSuccess(`Family "${created.circleName}" created!`);
+      setNewCircleName(''); await loadMyCircles();
       if (created?._id) setSelectedCircleId(created._id);
-    } catch (e2) {
-      setError(e2?.response?.data?.message || 'Failed to create circle');
-    } finally {
-      setActiveAction(null);
-    }
+    } catch (e2) { setError(e2?.response?.data?.message || 'Failed to create circle'); }
+    finally { setActiveAction(null); }
   };
 
   const handleRemoveMember = async (memberId, memberName) => {
     clearFlash();
-    if (!selectedCircleId) return setError('Please select a circle first');
-
-    const ok = window.confirm(`Are you sure you want to remove ${memberName} from this family?`);
-    if (!ok) return;
-
-    setActiveAction(`remove_${memberId}`); 
-    try {
-      await removeMemberFromCircleApi(selectedCircleId, memberId);
-      setSuccess(`🗑️ ${memberName} removed successfully.`);
-      await loadCircleDetails(selectedCircleId);
-    } catch (e2) {
-      setError(e2?.response?.data?.message || 'Failed to remove member');
-    } finally {
-      setActiveAction(null);
-    }
+    if (!selectedCircleId) return setError('Select a circle first');
+    if (!window.confirm(`Remove ${memberName} from this family?`)) return;
+    setActiveAction(`remove_${memberId}`);
+    try { await removeMemberFromCircleApi(selectedCircleId, memberId); setSuccess(`${memberName} removed.`); await loadCircleDetails(selectedCircleId); }
+    catch (e2) { setError(e2?.response?.data?.message || 'Failed to remove'); }
+    finally { setActiveAction(null); }
   };
 
   const handleSendDirectInvite = async (e) => {
-    e.preventDefault();
-    clearFlash();
-    if (!inviteEmail.trim()) return setError('Please enter an email address.');
-
-    setActiveAction('sendInvite'); 
-    try {
-      const res = await sendFamilyInviteApi(selectedCircleId, { email: inviteEmail.trim() });
-      setSuccess(`📨 ${res.message}`);
-      setInviteEmail('');
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to send invite. Ensure the user is registered.');
-    } finally {
-      setActiveAction(null);
-    }
+    e.preventDefault(); clearFlash();
+    if (!inviteEmail.trim()) return setError('Enter an email address');
+    setActiveAction('sendInvite');
+    try { const res = await sendFamilyInviteApi(selectedCircleId, { email: inviteEmail.trim() }); setSuccess(res.message); setInviteEmail(''); }
+    catch (err) { setError(err?.response?.data?.message || 'Failed to send invite'); }
+    finally { setActiveAction(null); }
   };
 
   const handleDeleteCircle = async () => {
     clearFlash();
-    const confirmName = window.prompt(`DANGER ZONE: Are you sure you want to delete "${selectedCircle?.circleName}" permanently?\n\nType the family name to confirm:`);
-    
-    if (confirmName !== selectedCircle?.circleName) {
-      if (confirmName !== null) setError('Family name did not match. Deletion cancelled.');
-      return;
-    }
-
-    setActiveAction('deleteCircle'); 
+    const confirmName = window.prompt(`DANGER: Type "${selectedCircle?.circleName}" to permanently delete:`);
+    if (confirmName !== selectedCircle?.circleName) { if (confirmName !== null) setError('Name mismatch. Cancelled.'); return; }
+    setActiveAction('deleteCircle');
     try {
       await deleteCircleApi(selectedCircleId);
-      setSuccess(`🗑️ Family "${selectedCircle?.circleName}" has been deleted.`);
-      
-      const data = await getMyCirclesApi();
-      const list = Array.isArray(data) ? data : [];
-      setCircles(list);
-      
-      if (list.length > 0) {
-        setSelectedCircleId(list[0]._id);
-      } else {
-        setSelectedCircleId('');
-        setSelectedCircle(null);
-      }
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to delete family circle.');
-    } finally {
-      setActiveAction(null);
-    }
+      setSuccess(`Family "${selectedCircle?.circleName}" deleted.`);
+      const data = await getMyCirclesApi(); const list = Array.isArray(data) ? data : []; setCircles(list);
+      if (list.length > 0) setSelectedCircleId(list[0]._id); else { setSelectedCircleId(''); setSelectedCircle(null); }
+    } catch (err) { setError(err?.response?.data?.message || 'Failed to delete'); }
+    finally { setActiveAction(null); }
   };
 
   const handleGenerateInvite = async () => {
-    clearFlash();
-    setActiveAction('generateLink'); 
-    try {
-      const data = await generateInviteLinkApi(selectedCircleId);
-      const fullUrl = `${window.location.origin}/invite/${data.token}`;
-      setInviteLink(fullUrl);
-      setShowInviteModal(true);
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to generate invite link');
-    } finally {
-      setActiveAction(null);
-    }
+    clearFlash(); setActiveAction('generateLink');
+    try { const data = await generateInviteLinkApi(selectedCircleId); const fullUrl = `${window.location.origin}/invite/${data.token}`; setInviteLink(fullUrl); setShowInviteModal(true); }
+    catch (err) { setError(err?.response?.data?.message || 'Failed to generate link'); }
+    finally { setActiveAction(null); }
   };
 
-  const handleCopyLink = () => {
-    if (inviteLink) {
-      navigator.clipboard.writeText(inviteLink);
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
-    }
-  };
-
+  const handleCopyLink = () => { if (inviteLink) { navigator.clipboard.writeText(inviteLink); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); } };
   const handleCopyCode = () => {
     const code = selectedCircle?.familyCode || user?.familyCode;
-    if (code) {
-      navigator.clipboard.writeText(code);
-      setCodeCopied(true);
-      setTimeout(() => setCodeCopied(false), 2000);
-    }
+    if (code) { navigator.clipboard.writeText(code); setCodeCopied(true); setTimeout(() => setCodeCopied(false), 2000); }
   };
 
   const familyName = selectedCircle?.circleName || selectedCircle?.name || 'Your Family';
 
-  const activeTabStyle = { background: '#fff', color: '#0f172a', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', fontWeight: '700', borderRadius: '8px', padding: '8px 12px', flex: 1, border: 'none', cursor: 'pointer', transition: 'all 0.2s', fontSize: '13px' };
-  const inactiveTabStyle = { background: 'transparent', color: '#64748b', fontWeight: '600', borderRadius: '8px', padding: '8px 12px', flex: 1, border: 'none', cursor: 'pointer', transition: 'all 0.2s', fontSize: '13px' };
+  const roomCards = [
+    { to: '/vault-stories', icon: '📸', title: 'Vault Stories', desc: 'Share private family photos and memories sealed forever.', glowColor: 'rgba(212,168,80,0.3)', delay: 0.1 },
+    { to: '/vault', icon: '💬', title: 'Family Chat', desc: 'Secure encrypted real-time messaging between family.', glowColor: 'rgba(100,180,255,0.25)', delay: 0.2 },
+    { to: '/radar', icon: '📡', title: 'Live Radar', desc: 'Track family locations and live activity in real time.', glowColor: 'rgba(100,255,150,0.2)', delay: 0.3 },
+  ];
 
   return (
-    <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '60px', fontFamily: 'system-ui, sans-serif' }}>
-      
-      {/* 🎬 VAULT GATEWAY COMPONENT - It will automatically manage its own visibility now */}
+    <div style={{ background: '#06080f', minHeight: '100vh', paddingBottom: 80, fontFamily: "'Cormorant Garamond',serif", position: 'relative', overflowX: 'hidden' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap');
+        @keyframes ltFloat{0%{opacity:0;transform:translate(0,0) scale(1)}15%{opacity:1}85%{opacity:0.7}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0.2)}}
+        @keyframes ltRingSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes ltShine{0%,70%{left:-100%}100%{left:150%}}
+        @keyframes ltDot{0%,80%,100%{transform:scale(0.6);opacity:0.5}40%{transform:scale(1);opacity:1}}
+        @keyframes ltPulseGlow{0%,100%{box-shadow:0 4px 20px rgba(212,168,80,0.25)}50%{box-shadow:0 6px 40px rgba(212,168,80,0.55)}}
+        @keyframes ltScrollRune{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        @keyframes ltBeam{0%,100%{opacity:0;transform:scaleX(0)}50%{opacity:1;transform:scaleX(1)}}
+        input::placeholder{color:rgba(255,255,255,0.2);font-style:italic;}
+        input:-webkit-autofill,select:-webkit-autofill{-webkit-box-shadow:0 0 0 30px #0c1020 inset!important;-webkit-text-fill-color:rgba(255,255,255,0.88)!important;}
+        select option{background:#0c1020;color:rgba(255,255,255,0.88);}
+        ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:rgba(212,168,80,0.05);} ::-webkit-scrollbar-thumb{background:rgba(212,168,80,0.25);border-radius:2px;}
+      `}</style>
+
       <VaultGateway onClose={() => {}} />
+      <StarCanvas />
+      <DustLayer />
 
-      <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', padding: '50px 20px', textAlign: 'center', color: '#fff', boxShadow: '0 4px 20px rgba(59, 130, 246, 0.2)' }}>
-        <h1 style={{ margin: 0, fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-0.5px' }}>
-          {loadingCircleDetails ? 'Loading...' : `${familyName} Vault`}
-        </h1>
-        <p style={{ margin: '12px auto 0', fontSize: '1.1rem', color: '#bfdbfe', maxWidth: '600px' }}>
-          Welcome, {user?.name?.split(' ')[0] || 'User'}. Choose a room to enter your family's private space.
-        </p>
+      {/* Rune ticker */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 26, zIndex: 50, overflow: 'hidden', borderBottom: '1px solid rgba(212,168,80,0.1)', background: 'rgba(6,8,15,0.92)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', animation: 'ltScrollRune 35s linear infinite', whiteSpace: 'nowrap' }}>
+          {Array(4).fill('✦ ᚦ ᛖ ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ ᛏ ᚱ ᚢ ᚾ ᚲ · The Legacy Trunk · Family Vault · Sealed for Eternity · Bond Points · ').map((t, i) => (
+            <span key={i} style={{ fontFamily: "'Cinzel',serif", fontSize: 8, letterSpacing: '3px', color: 'rgba(212,168,80,0.22)', padding: '0 24px' }}>{t}</span>
+          ))}
+        </div>
       </div>
 
-      <div style={{ maxWidth: '1100px', margin: '-30px auto 40px', padding: '0 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', position: 'relative', zIndex: 10 }}>
-        
-        {/* 🔥 ANIMATED CARDS */}
-        <Link to="/vault-stories" style={{ textDecoration: 'none' }}>
-          <motion.div 
-            whileHover={{ y: -5, boxShadow: '0 15px 35px rgba(0,0,0,0.08)', borderColor: '#d1d5db' }} 
-            whileTap={{ scale: 0.98 }} 
-            style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'border-color 0.2s' }}
-          >
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>📸</div>
-            <h2 style={{ margin: '0 0 6px 0', color: '#111827', fontSize: '1.2rem' }}>Vault Stories</h2>
-            <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Share private family photos and memories.</p>
-          </motion.div>
-        </Link>
+      {/* ── HERO HEADER ── */}
+      <div style={{ position: 'relative', paddingTop: 26, overflow: 'hidden' }}>
+        {/* Atmospheric gradient behind hero */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,130,40,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-        <Link to="/vault" style={{ textDecoration: 'none' }}>
-          <motion.div 
-            whileHover={{ y: -5, boxShadow: '0 15px 35px rgba(0,0,0,0.08)', borderColor: '#d1d5db' }} 
-            whileTap={{ scale: 0.98 }} 
-            style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'border-color 0.2s' }}
-          >
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>💬</div>
-            <h2 style={{ margin: '0 0 6px 0', color: '#111827', fontSize: '1.2rem' }}>Family Chat</h2>
-            <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Secure, encrypted real-time messaging room.</p>
-          </motion.div>
-        </Link>
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          style={{ textAlign: 'center', padding: '52px 20px 60px', position: 'relative', zIndex: 10 }}
+        >
+          <LogoRing size={96} />
 
-        <Link to="/radar" style={{ textDecoration: 'none' }}>
-          <motion.div 
-            whileHover={{ y: -5, boxShadow: '0 15px 35px rgba(0,0,0,0.08)', borderColor: '#d1d5db' }} 
-            whileTap={{ scale: 0.98 }} 
-            style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.06)', border: '1px solid #e5e7eb', height: '100%', transition: 'border-color 0.2s' }}
-          >
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>📡</div>
-            <h2 style={{ margin: '0 0 6px 0', color: '#111827', fontSize: '1.2rem' }}>Live Radar</h2>
-            <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Track family locations and activity.</p>
-          </motion.div>
-        </Link>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, margin: '18px 0 10px' }}>
+            <div style={{ flex: 1, maxWidth: 70, height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.5))' }} />
+            <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(212,168,80,0.55)' }}>The Legacy Trunk</span>
+            <div style={{ flex: 1, maxWidth: 70, height: 1, background: 'linear-gradient(270deg,transparent,rgba(212,168,80,0.5))' }} />
+          </div>
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 20px' }}>
-        
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid #e5e7eb', paddingBottom: '12px', marginBottom: '24px' }}>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#111827' }}>⚙️ Family Management</h2>
-          
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            style={{ fontFamily: "'Cinzel',serif", fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 700, color: '#e8c87a', textShadow: '0 0 80px rgba(212,168,80,0.5), 0 0 30px rgba(212,168,80,0.25)', letterSpacing: 3, margin: '0 0 12px' }}
+          >
+            {loadingCircleDetails ? 'The Vault Awakens…' : `${familyName} Vault`}
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            style={{ fontStyle: 'italic', fontSize: 18, color: 'rgba(255,255,255,0.38)', margin: '0 auto 24px', maxWidth: 500 }}
+          >
+            Welcome back, <span style={{ color: 'rgba(212,168,80,0.75)', fontStyle: 'normal', fontFamily: "'Cinzel',serif" }}>{user?.name?.split(' ')[0] || 'Guardian'}</span>. Your legacy awaits.
+          </motion.p>
+
+          {/* Circle selector */}
           {circles.length > 0 && (
-            <select 
-              value={selectedCircleId} 
-              onChange={(e) => setSelectedCircleId(e.target.value)}
-              style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontWeight: '600', color: '#374151', cursor: 'pointer', outline: 'none' }}
-            >
-              {circles.map(c => <option key={c._id} value={c._id}>{c.circleName || c.name}</option>)}
-            </select>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 16px 8px 14px', background: 'rgba(212,168,80,0.08)', border: '1px solid rgba(212,168,80,0.28)', borderRadius: 40 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80', flexShrink: 0, display: 'inline-block' }} />
+              <select value={selectedCircleId} onChange={e => setSelectedCircleId(e.target.value)}
+                style={{ background: 'transparent', border: 'none', outline: 'none', fontFamily: "'Cinzel',serif", fontSize: 13, color: 'rgba(212,168,80,0.85)', cursor: 'pointer', letterSpacing: '1px' }}>
+                {circles.map(c => <option key={c._id} value={c._id}>{c.circleName || c.name}</option>)}
+              </select>
+            </motion.div>
           )}
+
+          {/* Decorative rune divider */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, marginTop: 28 }}>
+            <div style={{ flex: 1, maxWidth: 150, height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.25))' }} />
+            <span style={{ fontFamily: "'Cinzel',serif", fontSize: 12, letterSpacing: 7, color: 'rgba(212,168,80,0.2)' }}>✦ ᚦ ᛖ ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ ✦</span>
+            <div style={{ flex: 1, maxWidth: 150, height: 1, background: 'linear-gradient(270deg,transparent,rgba(212,168,80,0.25))' }} />
+          </div>
+        </motion.div>
+
+        {/* Bottom gold beam */}
+        <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.4),rgba(212,168,80,0.4),transparent)', animation: 'ltBeam 4s ease-in-out infinite' }} />
+      </div>
+
+      <div style={{ maxWidth: 1140, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 10 }}>
+
+        {/* ── ROOM CARDS ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, margin: '48px 0' }}>
+          {roomCards.map((card, i) => <RoomCard key={i} {...card} />)}
         </div>
 
-        {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #fca5a5', fontWeight: '500' }}>{error}</div>}
-        {success && <div style={{ background: '#ecfdf5', color: '#059669', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #6ee7b7', fontWeight: '500' }}>{success}</div>}
+        {/* ── SECTION HEADER ── */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32 }}>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg,rgba(212,168,80,0.3),transparent)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.6)" strokeWidth="1.5" style={{ width: 16, height: 16 }}><circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" /></svg>
+            <span style={{ fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 700, color: '#e8c87a', letterSpacing: 2, textShadow: '0 0 20px rgba(212,168,80,0.3)' }}>Family Management</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.6)" strokeWidth="1.5" style={{ width: 16, height: 16 }}><circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" /></svg>
+          </div>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(270deg,rgba(212,168,80,0.3),transparent)' }} />
+        </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-          
-          <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', border: '1px solid #e5e7eb' }}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '1.2rem', color: '#111827' }}>👥 Members in {familyName}</h3>
-            
-            {loadingCircleDetails ? <p style={{ color: '#6b7280' }}>Loading members...</p> : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* ── ALERTS ── */}
+        <AnimatePresence>
+          {error && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              style={{ background: 'rgba(220,60,60,0.12)', border: '1px solid rgba(220,60,60,0.3)', borderRadius: 14, padding: '13px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Space Mono',monospace", fontSize: 11, color: '#f08080' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f08080" strokeWidth="2" style={{ width: 14, height: 14, flexShrink: 0 }}><circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" /></svg>
+              {error}
+            </motion.div>
+          )}
+          {success && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              style={{ background: 'rgba(60,168,80,0.10)', border: '1px solid rgba(60,168,80,0.3)', borderRadius: 14, padding: '13px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Space Mono',monospace", fontSize: 11, color: '#6ee87a' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#6ee87a" strokeWidth="2" style={{ width: 14, height: 14, flexShrink: 0 }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+              {success}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── MAIN GRID ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
+
+          {/* Members Panel */}
+          <SectionCard>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 20px rgba(212,168,80,0.3)', marginBottom: 4 }}>
+                Family Members
+              </div>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2px', color: 'rgba(212,168,80,0.4)' }}>
+                {familyName} · {selectedCircle?.members?.length || 0} members
+              </div>
+            </div>
+
+            {loadingCircleDetails ? (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 5, padding: '20px 0' }}>
+                {[0, 1, 2].map(i => <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: '#e8c87a', display: 'inline-block', animation: `ltDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />)}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {selectedCircle?.members?.map(m => {
                   const isSelf = String(m._id) === String(user?._id);
-                  const isThisMemberAdmin = String(selectedCircle?.admin?._id || selectedCircle?.admin) === String(m._id);
-                  const isRemovingThis = activeAction === `remove_${m._id}`;
-
+                  const isAdm = String(selectedCircle?.admin?._id || selectedCircle?.admin) === String(m._id);
                   return (
-                    <div key={m._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: isSelf ? '#eff6ff' : '#f8fafc', borderRadius: '12px', border: `1px solid ${isSelf ? '#bfdbfe' : '#f1f5f9'}` }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <img src={m.avatar || "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"} alt="DP" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                        <div>
-                          <div style={{ fontWeight: '700', color: '#111827', fontSize: '15px' }}>
-                            {m.name} {isSelf && <span style={{ color: '#2563eb' }}>(You)</span>}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {m.email} 
-                            {isThisMemberAdmin && <span style={{ background: '#fef3c7', color: '#d97706', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', fontSize: '10px' }}>👑 Admin</span>}
-                          </div>
-                        </div>
-                      </div>
-
-                      {isCircleAdmin && !isThisMemberAdmin && (
-                        <motion.button 
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleRemoveMember(m._id, m.name)}
-                          disabled={!!activeAction} 
-                          style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s', opacity: isRemovingThis ? 0.6 : 1 }}
-                        >
-                          {isRemovingThis ? '...' : 'Remove'}
-                        </motion.button>
-                      )}
-                    </div>
+                    <MemberRow key={m._id} m={m} isSelf={isSelf} isAdmin={isAdm}
+                      isRemoving={activeAction === `remove_${m._id}`}
+                      canRemove={isCircleAdmin && !isAdm}
+                      onRemove={handleRemoveMember} activeAction={activeAction} />
                   );
                 })}
               </div>
             )}
-          </div>
+          </SectionCard>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            
-            {selectedCircleId && (
-              <UpcomingEventsWidget circleId={selectedCircleId} />
-            )}
-            
+          {/* Right Column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+            {/* Upcoming Events */}
+            {selectedCircleId && <UpcomingEventsWidget circleId={selectedCircleId} />}
+
+            {/* Found a New Family (MOVED HERE) */}
+            <SectionCard>
+              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 20px rgba(212,168,80,0.3)', marginBottom: 4 }}>
+                Create a New Vault
+              </div>
+              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2px', color: 'rgba(212,168,80,0.4)', marginBottom: 20 }}>
+                Found a new family circle
+              </div>
+              <form onSubmit={handleCreateCircle} style={{ display: 'flex', gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <DarkInput
+                    placeholder="Family name…"
+                    value={newCircleName}
+                    onChange={e => setNewCircleName(e.target.value)}
+                    disabled={!!activeAction}
+                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.8)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>}
+                  />
+                </div>
+                <motion.button type="submit" disabled={!!activeAction}
+                  whileHover={!activeAction ? { scale: 1.03, y: -1 } : {}}
+                  whileTap={!activeAction ? { scale: 0.97 } : {}}
+                  style={{ padding: '0 18px', position: 'relative', overflow: 'hidden', background: activeAction ? 'rgba(212,168,80,0.3)' : 'linear-gradient(135deg,#c9933a,#e8a820)', border: 'none', borderRadius: 10, color: '#1a0f00', fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', cursor: activeAction ? 'not-allowed' : 'pointer', animation: !activeAction ? 'ltPulseGlow 3s ease-in-out infinite' : 'none', whiteSpace: 'nowrap' }}>
+                  {activeAction === 'createCircle' ? '...' : '+ Found'}
+                </motion.button>
+              </form>
+            </SectionCard>
+
+            {/* Invite Panel */}
             {isCircleAdmin ? (
-              <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', border: '1px solid #e5e7eb', boxShadow: '0 4px 10px rgba(0,0,0,0.03)' }}>
-                <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', color: '#111827' }}>➕ Invite Members</h3>
-                
-                <div style={{ display: 'flex', background: '#f1f5f9', padding: '6px', borderRadius: '12px', marginBottom: '20px', gap: '4px' }}>
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setInviteTab('magic')} style={inviteTab === 'magic' ? activeTabStyle : inactiveTabStyle}>🪄 Magic Link</motion.button>
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setInviteTab('direct')} style={inviteTab === 'direct' ? activeTabStyle : inactiveTabStyle}>📨 Direct</motion.button>
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setInviteTab('code')} style={inviteTab === 'code' ? activeTabStyle : inactiveTabStyle}>🔑 Code</motion.button>
+              <SectionCard>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 20px rgba(212,168,80,0.3)', marginBottom: 4 }}>
+                    Summon Members
+                  </div>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2px', color: 'rgba(212,168,80,0.4)' }}>
+                    Invite family to join the vault
+                  </div>
                 </div>
 
-                {inviteTab === 'magic' && (
-                  <div style={{ animation: 'fadeIn 0.3s' }}>
-                    <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Generate a secure link or QR code to let members join instantly.</p>
-                    <motion.button 
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleGenerateInvite} 
-                      disabled={!!activeAction} 
-                      style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '12px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', width: '100%', fontSize: '14px', transition: 'all 0.2s', opacity: activeAction === 'generateLink' ? 0.7 : 1 }}
-                    >
-                      {activeAction === 'generateLink' ? 'Generating...' : 'Generate Magic Invite'}
-                    </motion.button>
-                  </div>
-                )}
+                {/* Invite tabs */}
+                <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(212,168,80,0.15)', padding: 4, borderRadius: 12, marginBottom: 20, gap: 3 }}>
+                  {[
+                    { key: 'magic', label: '🪄 Magic Link' },
+                    { key: 'direct', label: '📨 Direct' },
+                    { key: 'code', label: '🔑 Code' },
+                  ].map(tab => (
+                    <button key={tab.key} onClick={() => setInviteTab(tab.key)}
+                      style={{
+                        flex: 1, padding: '8px 10px', border: 'none', borderRadius: 9, cursor: 'pointer', transition: 'all 0.25s',
+                        background: inviteTab === tab.key ? 'rgba(212,168,80,0.15)' : 'transparent',
+                        borderColor: inviteTab === tab.key ? 'rgba(212,168,80,0.35)' : 'transparent',
+                        borderWidth: 1, borderStyle: 'solid',
+                        fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1px',
+                        color: inviteTab === tab.key ? 'rgba(212,168,80,0.9)' : 'rgba(212,168,80,0.38)',
+                        boxShadow: inviteTab === tab.key ? '0 0 12px rgba(212,168,80,0.1)' : 'none',
+                      }}>
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
 
-                {inviteTab === 'direct' && (
-                  <div style={{ animation: 'fadeIn 0.3s' }}>
-                    <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Send a join request directly to a registered user's notification bell.</p>
-                    <form onSubmit={handleSendDirectInvite} style={{ display: 'flex', gap: '8px' }}>
-                      <input 
-                        type="email" placeholder="User's email..." 
-                        value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} 
-                        required 
-                        style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '14px' }} 
-                      />
-                      <motion.button 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        type="submit" 
-                        disabled={!!activeAction} 
-                        style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '0 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: activeAction === 'sendInvite' ? 0.7 : 1 }}
-                      >
-                        {activeAction === 'sendInvite' ? '...' : 'Send'}
+                <AnimatePresence mode="wait">
+                  {inviteTab === 'magic' && (
+                    <motion.div key="magic" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+                      <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.38)', marginBottom: 16, marginTop: 0 }}>
+                        Generate a secure link or QR code for instant entry.
+                      </p>
+                      <motion.button onClick={handleGenerateInvite} disabled={!!activeAction}
+                        whileHover={!activeAction ? { scale: 1.02, y: -1 } : {}}
+                        whileTap={!activeAction ? { scale: 0.97 } : {}}
+                        style={{ width: '100%', padding: '14px', position: 'relative', overflow: 'hidden', background: activeAction === 'generateLink' ? 'rgba(212,168,80,0.4)' : 'linear-gradient(135deg,#c9933a,#e8a820)', border: 'none', borderRadius: 12, color: '#1a0f00', fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', cursor: activeAction ? 'not-allowed' : 'pointer', animation: !activeAction ? 'ltPulseGlow 3s ease-in-out infinite' : 'none' }}>
+                        <div style={{ position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)', transform: 'skewX(-20deg)', animation: !activeAction ? 'ltShine 3s ease-in-out infinite' : 'none' }} />
+                        {activeAction === 'generateLink' ? (
+                          <span style={{ display: 'flex', justifyContent: 'center', gap: 5 }}>
+                            {[0, 1, 2].map(i => <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: '#1a0f00', display: 'inline-block', animation: `ltDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />)}
+                          </span>
+                        ) : '✦ Generate Magic Invite'}
                       </motion.button>
-                    </form>
-                  </div>
-                )}
+                    </motion.div>
+                  )}
 
-                {inviteTab === 'code' && (
-                  <div style={{ animation: 'fadeIn 0.3s' }}>
-                    <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Share this short code for manual signups on the registration page.</p>
-                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '12px', border: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '18px', fontWeight: '900', color: '#0f172a', letterSpacing: '1px' }}>
-                        {selectedCircle?.familyCode || user?.familyCode || '---'}
-                      </span>
-                      <motion.button 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleCopyCode} 
-                        style={{ background: codeCopied ? '#10b981' : '#e2e8f0', color: codeCopied ? '#fff' : '#475569', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px', transition: 'background 0.2s' }}
-                      >
-                        {codeCopied ? 'Copied!' : 'Copy Code'}
-                      </motion.button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  {inviteTab === 'direct' && (
+                    <motion.div key="direct" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+                      <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.38)', marginBottom: 16, marginTop: 0 }}>
+                        Send a direct summons to any registered member.
+                      </p>
+                      <form onSubmit={handleSendDirectInvite} style={{ display: 'flex', gap: 10 }}>
+                        <div style={{ flex: 1 }}>
+                          <DarkInput type="email" placeholder="their@email.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} disabled={!!activeAction}
+                            icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.8)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><rect x="2" y="4" width="20" height="16" rx="3" /><path d="M2 7l10 7 10-7" /></svg>} />
+                        </div>
+                        <motion.button type="submit" disabled={!!activeAction}
+                          whileHover={!activeAction ? { scale: 1.03 } : {}} whileTap={!activeAction ? { scale: 0.97 } : {}}
+                          style={{ padding: '0 18px', background: 'rgba(212,168,80,0.15)', border: '1px solid rgba(212,168,80,0.35)', borderRadius: 10, color: 'rgba(212,168,80,0.85)', fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, cursor: activeAction ? 'not-allowed' : 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
+                          {activeAction === 'sendInvite' ? '...' : 'Send ✦'}
+                        </motion.button>
+                      </form>
+                    </motion.div>
+                  )}
+
+                  {inviteTab === 'code' && (
+                    <motion.div key="code" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+                      <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.38)', marginBottom: 16, marginTop: 0 }}>
+                        Share this ancient code for manual vault entry.
+                      </p>
+                      <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px dashed rgba(212,168,80,0.35)', borderRadius: 12, padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#e8c87a', letterSpacing: 4, textShadow: '0 0 20px rgba(212,168,80,0.4)' }}>
+                          {selectedCircle?.familyCode || user?.familyCode || '———'}
+                        </span>
+                        <motion.button onClick={handleCopyCode}
+                          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                          style={{ background: codeCopied ? 'rgba(74,222,128,0.15)' : 'rgba(212,168,80,0.1)', border: `1px solid ${codeCopied ? 'rgba(74,222,128,0.4)' : 'rgba(212,168,80,0.3)'}`, borderRadius: 8, padding: '6px 14px', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1.5px', color: codeCopied ? '#4ade80' : 'rgba(212,168,80,0.75)', cursor: 'pointer', transition: 'all 0.3s', textTransform: 'uppercase' }}>
+                          {codeCopied ? '✓ Copied' : 'Copy'}
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </SectionCard>
             ) : (
-              <div style={{ background: '#f8fafc', borderRadius: '20px', padding: '24px', border: '1px solid #e5e7eb', textAlign: 'center' }}>
-                <div style={{ fontSize: '30px', marginBottom: '8px' }}>🔒</div>
-                <h3 style={{ margin: '0 0 8px 0', color: '#374151', fontSize: '1.1rem' }}>Admin Access Required</h3>
-                <p style={{ margin: 0, color: '#6b7280', fontSize: '14px', lineHeight: '1.5' }}>Only the family admin can invite members or manage settings.</p>
-              </div>
+              <SectionCard>
+                <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                  <div style={{ fontSize: 36, marginBottom: 14, filter: 'drop-shadow(0 0 12px rgba(212,168,80,0.3))' }}>🔒</div>
+                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 700, color: '#e8c87a', marginBottom: 8 }}>Admin Access Required</div>
+                  <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.6 }}>Only the vault master can summon new members or manage settings.</p>
+                </div>
+              </SectionCard>
             )}
 
+            {/* Danger Zone */}
             {isCircleAdmin && selectedCircleId && (
-              <div style={{ background: '#fef2f2', borderRadius: '20px', padding: '20px', border: '1px dashed #f87171' }}>
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', color: '#b91c1c' }}>🚨 Danger Zone</h3>
-                <p style={{ color: '#7f1d1d', fontSize: '13px', marginBottom: '16px', marginTop: 0 }}>Permanently delete this family circle. This action cannot be undone.</p>
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleDeleteCircle} 
-                  disabled={!!activeAction}
-                  style={{ background: '#dc2626', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s', opacity: activeAction === 'deleteCircle' ? 0.7 : 1 }}
-                >
-                  {activeAction === 'deleteCircle' ? 'Deleting...' : 'Delete Family Vault'}
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+                style={{ background: 'rgba(220,38,38,0.06)', border: '1px dashed rgba(220,38,38,0.3)', borderRadius: 20, padding: '24px 28px', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(220,38,38,0.4),transparent)' }} />
+                <CornerAccents size={14} inset={10} opacity={0.3} />
+                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 14, fontWeight: 700, color: '#f08080', marginBottom: 6, letterSpacing: 1 }}>⚠ Danger Zone</div>
+                <p style={{ fontStyle: 'italic', fontSize: 14, color: 'rgba(240,128,128,0.55)', marginBottom: 18, marginTop: 0, lineHeight: 1.6 }}>
+                  Permanently erase this family vault. This cannot be undone.
+                </p>
+                <motion.button onClick={handleDeleteCircle} disabled={!!activeAction}
+                  whileHover={!activeAction ? { scale: 1.02 } : {}} whileTap={!activeAction ? { scale: 0.97 } : {}}
+                  style={{ width: '100%', padding: '12px', background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 10, color: '#f08080', fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', cursor: activeAction ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: activeAction === 'deleteCircle' ? 0.6 : 1 }}
+                  onMouseEnter={e => { if (!activeAction) { e.currentTarget.style.background = 'rgba(220,38,38,0.25)'; e.currentTarget.style.color = '#ff6b6b'; } }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.15)'; e.currentTarget.style.color = '#f08080'; }}>
+                  {activeAction === 'deleteCircle' ? (
+                    <span style={{ display: 'flex', justifyContent: 'center', gap: 5 }}>
+                      {[0, 1, 2].map(i => <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: '#f08080', display: 'inline-block', animation: `ltDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />)}
+                    </span>
+                  ) : '⚔ Destroy This Vault'}
                 </motion.button>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
+
+        {/* Rune footer */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+          style={{ textAlign: 'center', marginTop: 60, fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: 6, color: 'rgba(212,168,80,0.12)', userSelect: 'none' }}>
+          ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
+        </motion.div>
       </div>
 
-      {/* 🪄 ANIMATED MAGIC INVITE MODAL */}
+      {/* ── INVITE MODAL ── */}
       <AnimatePresence>
         {showInviteModal && (
-          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: "spring", duration: 0.4, bounce: 0.4 }}
-              style={{ background: '#fff', borderRadius: '32px', width: '100%', maxWidth: '400px', padding: '40px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', textAlign: 'center', position: 'relative' }}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 }}
+            onClick={e => { if (e.target === e.currentTarget) setShowInviteModal(false); }}
+          >
+            <motion.div
+              initial={{ scale: 0.88, y: 28, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.88, y: 28, opacity: 0 }}
+              transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+              style={{ background: 'rgba(12,16,32,0.98)', border: '1px solid rgba(212,168,80,0.28)', borderRadius: 24, width: '100%', maxWidth: 420, padding: '44px 36px', position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.9), inset 0 1px 0 rgba(212,168,80,0.15)', textAlign: 'center' }}
             >
-              <motion.button 
-                whileHover={{ scale: 1.1, backgroundColor: '#e2e8f0' }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowInviteModal(false)} 
-                style={{ position: 'absolute', top: '20px', right: '20px', background: '#f1f5f9', border: 'none', width: '36px', height: '36px', borderRadius: '50%', color: '#64748b', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                ✕
-              </motion.button>
-              <h2 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800' }}>Scan to Join</h2>
-              <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px' }}>Have them scan this QR code or share the link below. Valid for 48 hours.</p>
+              <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.8),transparent)' }} />
+              <CornerAccents />
 
-              <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '24px', display: 'inline-block', border: '2px dashed #cbd5e1', marginBottom: '24px' }}>
-                <QRCodeSVG value={inviteLink} size={180} fgColor="#0f172a" />
+              <button onClick={() => setShowInviteModal(false)}
+                style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(212,168,80,0.22)', background: 'rgba(255,255,255,0.04)', color: 'rgba(212,168,80,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.7)'; e.currentTarget.style.color = '#e8c87a'; e.currentTarget.style.background = 'rgba(212,168,80,0.1)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(212,168,80,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}>
+                ✕
+              </button>
+
+              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 30px rgba(212,168,80,0.3)', marginBottom: 6 }}>
+                Vault Entry Portal
+              </div>
+              <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.35)', marginBottom: 24, marginTop: 0 }}>
+                Scan to enter the family vault. Valid for 48 hours.
+              </p>
+
+              {/* QR Code */}
+              <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(212,168,80,0.25)', borderRadius: 18, padding: 20, display: 'inline-block', marginBottom: 24, position: 'relative' }}>
+                <CornerAccents size={12} inset={8} opacity={0.5} />
+                <div style={{ background: '#fff', padding: 12, borderRadius: 8, display: 'inline-block' }}>
+                  <QRCodeSVG value={inviteLink} size={170} fgColor="#06080f" />
+                </div>
               </div>
 
-              <div style={{ background: '#f1f5f9', borderRadius: '12px', display: 'flex', padding: '6px', border: '1px solid #e2e8f0' }}>
-                <input type="text" value={inviteLink} readOnly style={{ flex: 1, background: 'transparent', border: 'none', padding: '10px', fontSize: '13px', color: '#475569', outline: 'none' }} />
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleCopyLink} 
-                  style={{ background: linkCopied ? '#10b981' : '#0f172a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'background 0.2s' }}
-                >
-                  {linkCopied ? 'Copied!' : 'Copy'}
+              {/* Link copy */}
+              <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(212,168,80,0.2)', borderRadius: 12, display: 'flex', overflow: 'hidden' }}>
+                <input type="text" value={inviteLink} readOnly
+                  style={{ flex: 1, background: 'transparent', border: 'none', padding: '11px 14px', fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(212,168,80,0.5)', outline: 'none', letterSpacing: '0.5px' }} />
+                <motion.button onClick={handleCopyLink}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                  style={{ background: linkCopied ? 'rgba(74,222,128,0.2)' : 'linear-gradient(135deg,#c9933a,#e8a820)', border: 'none', padding: '0 20px', color: linkCopied ? '#4ade80' : '#1a0f00', fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s', position: 'relative', overflow: 'hidden' }}>
+                  {!linkCopied && <div style={{ position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)', transform: 'skewX(-20deg)', animation: 'ltShine 3s ease-in-out infinite' }} />}
+                  {linkCopied ? '✓ Copied!' : 'Copy ✦'}
                 </motion.button>
               </div>
+
+              <div style={{ marginTop: 18, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: 4, color: 'rgba(212,168,80,0.15)', userSelect: 'none' }}>
+                ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
+              </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
-
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
     </div>
   );
 }

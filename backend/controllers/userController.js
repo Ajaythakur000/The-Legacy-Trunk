@@ -6,6 +6,13 @@ import { handleDailyLogin } from './gamificationService.js';
 import bcrypt from 'bcryptjs';
 import path from 'path';
 
+// 🔥 Import templates from your new file
+import { 
+  getWelcomeOtpTemplate, 
+  getLoginOtpTemplate, 
+  getResetPasswordTemplate 
+} from './otpmsg.js';
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -17,7 +24,7 @@ const transporter = nodemailer.createTransport({
 const sendOtpEmail = async ({ to, subject, otpHtml, otpPlain }) => {
   try {
     await transporter.sendMail({
-      from: `"The Memento" <${process.env.EMAIL_USER}>`,
+      from: `"The Legacy Trunk" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html: otpHtml,
@@ -158,24 +165,12 @@ const registerUser = async (req, res) => {
       });
     }
 
-    path.join(process.cwd(), '../frontend/public/finall_logo.png');
-
+    // 🔥 Using Premium Welcome Template
     const mailResult = await sendOtpEmail({
       to: user.email,
-      subject: '🗝️ Your Key to The Memento',
+      subject: '🗝️ Your Key to The Legacy Trunk',
       otpPlain: plainOtp,
-      otpHtml: `
-        <div style="font-family: 'Georgia', serif; background-color: #f8fafc; padding: 40px 20px; text-align: center;">
-          <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0;">
-            <h1 style="color: #0f172a; font-size: 26px;">The Memento</h1>
-            <h2>Welcome to the family, <strong>${user.name}</strong></h2>
-            <div style="background: #F9F3E8; padding: 24px; border-radius: 16px;">
-              <span style="font-size: 42px; font-weight: 900; letter-spacing: 10px;">${plainOtp}</span>
-            </div>
-            <p>This key is valid for 10 minutes.</p>
-          </div>
-        </div>
-      `,
+      otpHtml: getWelcomeOtpTemplate(user.name, plainOtp),
     });
 
     return res.status(201).json({
@@ -270,17 +265,12 @@ const loginUser = async (req, res) => {
         user.otpBlockedUntil = null;
         await user.save();
 
+        // 🔥 Using Premium Login Template
         const mailResult = await sendOtpEmail({
           to: user.email,
-          subject: '🗝️ Your NEW Key to The Memento',
+          subject: '🗝️ Your NEW Key to The Legacy Trunk',
           otpPlain: plainOtp,
-          otpHtml: `
-            <div style="font-family: 'Georgia', serif; text-align: center; padding: 40px;">
-              <h2>Welcome back, <strong>${user.name}</strong></h2>
-              <p>You haven't verified your vault yet. Here is your new access key:</p>
-              <h1 style="letter-spacing: 10px;">${plainOtp}</h1>
-            </div>
-          `,
+          otpHtml: getLoginOtpTemplate(user.name, plainOtp),
         });
 
         return res.status(403).json({
@@ -387,7 +377,6 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-// 🔥 NEW: Forgot Password Controller
 const forgotPassword = async (req, res) => {
   try {
     let { email } = req.body;
@@ -409,18 +398,12 @@ const forgotPassword = async (req, res) => {
     user.otpBlockedUntil = null;
     await user.save();
 
+    // 🔥 Using Premium Recovery Template
     const mailResult = await sendOtpEmail({
       to: user.email,
-      subject: '🗝️ Password Reset Key for The Memento',
+      subject: '🗝️ Password Reset Key for The Legacy Trunk',
       otpPlain: plainOtp,
-      otpHtml: `
-        <div style="font-family: 'Georgia', serif; text-align: center; padding: 40px;">
-          <h2>Hello, <strong>${user.name}</strong></h2>
-          <p>It seems you lost your key. Use this code to forge a new one:</p>
-          <h1 style="letter-spacing: 10px;">${plainOtp}</h1>
-          <p>Valid for 10 minutes. Do not share this key.</p>
-        </div>
-      `,
+      otpHtml: getResetPasswordTemplate(user.name, plainOtp),
     });
 
     if (!mailResult.ok) {
@@ -434,7 +417,6 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// 🔥 NEW: Reset Password Controller
 const resetPassword = async (req, res) => {
   try {
     let { email, otp, newPassword } = req.body;
@@ -477,15 +459,11 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: `Invalid OTP. ${attemptsLeft} attempts remaining.` });
     }
 
-    // OTP verified successfully. Update password.
-    // The pre-save hook in familyMember schema will handle hashing the new password.
     user.password = newPassword;
     user.otp = null;
     user.otpExpires = null;
     user.otpAttempts = 0;
     user.otpBlockedUntil = null;
-    
-    // If the user wasn't verified before, verifying their identity for a password reset counts as verification.
     user.isVerified = true; 
 
     await user.save();

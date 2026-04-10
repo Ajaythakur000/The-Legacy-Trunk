@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './context/AuthContext';
@@ -12,6 +12,7 @@ import ErrorBoundary from './components/shared/ErrorBoundary';
 // Auth Pages
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
+import InvitePage from './pages/InvitePage';
 
 // Core Pages
 import HomePage from './components/Feed/HomePage';
@@ -28,15 +29,16 @@ import VaultStoriesPage from './pages/VaultStoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './components/story/MyStoriesPage';
 import FamilyTimelinePage from './pages/FamilyTimelinePage';
-
 import FamilyOraclePage from './pages/FamilyOraclePage';
-import InvitePage from './pages/InvitePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 
-function PrivateLayout({ children }) {
+// 🔥 THE FIX: Sidebar ab kabhi nahi hatega, sirf Outlet ke andar ka content badlega
+function ProtectedLayout() {
   return (
     <ProtectedRoute>
-      <Navbar>{children}</Navbar>
+      <Navbar>
+        <Outlet /> 
+      </Navbar>
     </ProtectedRoute>
   );
 }
@@ -46,7 +48,7 @@ function App() {
   const { isInitializing } = useAuth();
 
   if (isInitializing) {
-    return <div style={{ background: '#06080f', minHeight: '100vh', width: '100vw' }} />;
+    return <div style={{ background: '#06080f', minHeight: '100vh' }} />;
   }
 
   return (
@@ -92,30 +94,31 @@ function App() {
       />
 
       <ErrorBoundary>
-        <AnimatePresence mode="wait" initial={false}>
-          <Routes location={location} key={location.pathname}>
+        <AnimatePresence mode="wait">
+          {/* 🔥 THE FIX: key=location.pathname hata diya taaki layout destroy na ho */}
+          <Routes location={location}>
             <Route path="/" element={<Navigate to="/login" replace />} />
 
-            {/* Public routes (NO Navbar wrapper) */}
+            {/* Public Routes */}
             <Route path="/login" element={<AnimatedPage showRuneFlash={false} showBurst={false}><LoginPage /></AnimatedPage>} />
             <Route path="/signup" element={<AnimatedPage showRuneFlash={false} showBurst={false}><SignupPage /></AnimatedPage>} />
             <Route path="/invite/:token" element={<AnimatedPage showRuneFlash={false} showBurst={false}><InvitePage /></AnimatedPage>} />
 
-            {/* Private routes (Navbar only here) */}
-            <Route path="/home" element={<PrivateLayout><AnimatedPage><HomePage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/dashboard" element={<PrivateLayout><AnimatedPage><DashboardPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/profile" element={<PrivateLayout><AnimatedPage><ProfilePage /></AnimatedPage></PrivateLayout>} />
-
-            <Route path="/vault" element={<PrivateLayout><AnimatedPage><VaultRoomPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/radar" element={<PrivateLayout><AnimatedPage><FamilyRadarPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/leaderboard" element={<PrivateLayout><AnimatedPage><LeaderboardPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/memory-lane" element={<PrivateLayout><AnimatedPage><FamilyTimelinePage /></AnimatedPage></PrivateLayout>} />
-
-            <Route path="/vault-stories" element={<PrivateLayout><AnimatedPage><VaultStoriesPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/vault-stories/:storyId" element={<PrivateLayout><AnimatedPage><StoryDetailPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/my-stories" element={<PrivateLayout><AnimatedPage><MyStoriesPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/search" element={<PrivateLayout><AnimatedPage><SearchResultsPage /></AnimatedPage></PrivateLayout>} />
-            <Route path="/oracle" element={<PrivateLayout><AnimatedPage><FamilyOraclePage /></AnimatedPage></PrivateLayout>} />
+            {/* 🔥 Protected Routes Wrapper (Sidebar stays mounted) */}
+            <Route element={<ProtectedLayout />}>
+              <Route path="/home" element={<AnimatedPage><HomePage /></AnimatedPage>} />
+              <Route path="/dashboard" element={<AnimatedPage><DashboardPage /></AnimatedPage>} />
+              <Route path="/profile" element={<AnimatedPage><ProfilePage /></AnimatedPage>} />
+              <Route path="/vault" element={<AnimatedPage><VaultRoomPage /></AnimatedPage>} />
+              <Route path="/radar" element={<AnimatedPage><FamilyRadarPage /></AnimatedPage>} />
+              <Route path="/leaderboard" element={<AnimatedPage><LeaderboardPage /></AnimatedPage>} />
+              <Route path="/memory-lane" element={<AnimatedPage><FamilyTimelinePage /></AnimatedPage>} />
+              <Route path="/vault-stories" element={<AnimatedPage><VaultStoriesPage /></AnimatedPage>} />
+              <Route path="/vault-stories/:storyId" element={<AnimatedPage><StoryDetailPage /></AnimatedPage>} />
+              <Route path="/my-stories" element={<AnimatedPage><MyStoriesPage /></AnimatedPage>} />
+              <Route path="/search" element={<AnimatedPage><SearchResultsPage /></AnimatedPage>} />
+              <Route path="/oracle" element={<AnimatedPage><FamilyOraclePage /></AnimatedPage>} />
+            </Route>
 
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
