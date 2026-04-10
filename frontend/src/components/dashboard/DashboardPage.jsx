@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react'; 
-import { motion, AnimatePresence } from 'framer-motion'; // 🔥 IMPORTED FRAMER MOTION
+import { motion, AnimatePresence } from 'framer-motion'; 
 import {
   createCircleApi,
   getCircleByIdApi,
   getMyCirclesApi,
   removeMemberFromCircleApi,
   generateInviteLinkApi,
-  sendFamilyInviteApi, 
+  sendFamilyInviteApi,     
   deleteCircleApi      
 } from '../../api/circleApi';
 
@@ -41,8 +41,7 @@ function DashboardPage() {
 
   const [inviteTab, setInviteTab] = useState('magic'); 
 
-  // 🔥 VAULT GATEWAY STATE
-  const [showGateway, setShowGateway] = useState(false);
+  // Gateway related states removed, Gateway handles its own visibility now!
 
   const isGlobalAdmin = user?.role === 'admin';
   const isCircleAdmin = useMemo(() => {
@@ -85,17 +84,8 @@ function DashboardPage() {
   };
 
   useEffect(() => {
-    const hasSeenGateway = localStorage.getItem('vault_gateway_seen');
-    if (!hasSeenGateway) {
-      setShowGateway(true);
-    }
     loadMyCircles();
   }, []);
-
-  const handleCloseGateway = () => {
-    localStorage.setItem('vault_gateway_seen', 'true');
-    setShowGateway(false);
-  };
 
   useEffect(() => {
     if (user?.activeCircleId && user.activeCircleId !== selectedCircleId) {
@@ -240,6 +230,9 @@ function DashboardPage() {
   return (
     <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh', paddingBottom: '60px', fontFamily: 'system-ui, sans-serif' }}>
       
+      {/* 🎬 VAULT GATEWAY COMPONENT - It will automatically manage its own visibility now */}
+      <VaultGateway onClose={() => {}} />
+
       <div style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', padding: '50px 20px', textAlign: 'center', color: '#fff', boxShadow: '0 4px 20px rgba(59, 130, 246, 0.2)' }}>
         <h1 style={{ margin: 0, fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-0.5px' }}>
           {loadingCircleDetails ? 'Loading...' : `${familyName} Vault`}
@@ -494,9 +487,6 @@ function DashboardPage() {
           </div>
         )}
       </AnimatePresence>
-
-      {/* 🎬 VAULT GATEWAY COMPONENT */}
-      {showGateway && <VaultGateway onClose={handleCloseGateway} />}
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }

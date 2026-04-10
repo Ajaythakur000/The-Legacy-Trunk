@@ -1,46 +1,103 @@
-import React from 'react';
-
 function StorySkeleton() {
   return (
-    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.03)', marginBottom: '32px' }}>
-      
-      {/* 👤 Header Skeleton */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-        <div className="skeleton-pulse" style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#e2e8f0' }}></div>
-        <div style={{ flex: 1 }}>
-          <div className="skeleton-pulse" style={{ width: '40%', height: '16px', background: '#e2e8f0', borderRadius: '8px', marginBottom: '8px' }}></div>
-          <div className="skeleton-pulse" style={{ width: '20%', height: '12px', background: '#e2e8f0', borderRadius: '6px' }}></div>
-        </div>
-      </div>
-
-      {/* 📝 Text Content Skeleton */}
-      <div style={{ marginBottom: '24px' }}>
-        <div className="skeleton-pulse" style={{ width: '100%', height: '14px', background: '#e2e8f0', borderRadius: '6px', marginBottom: '10px' }}></div>
-        <div className="skeleton-pulse" style={{ width: '90%', height: '14px', background: '#e2e8f0', borderRadius: '6px', marginBottom: '10px' }}></div>
-        <div className="skeleton-pulse" style={{ width: '70%', height: '14px', background: '#e2e8f0', borderRadius: '6px' }}></div>
-      </div>
-
-      {/* 🖼️ Media Box Skeleton */}
-      <div className="skeleton-pulse" style={{ width: '100%', height: '300px', background: '#f1f5f9', borderRadius: '16px', marginBottom: '24px' }}></div>
-
-      {/* 🔘 Action Buttons Skeleton */}
-      <div style={{ display: 'flex', gap: '12px' }}>
-        <div className="skeleton-pulse" style={{ width: '70px', height: '36px', background: '#e2e8f0', borderRadius: '99px' }}></div>
-        <div className="skeleton-pulse" style={{ width: '70px', height: '36px', background: '#e2e8f0', borderRadius: '99px' }}></div>
-        <div className="skeleton-pulse" style={{ width: '90px', height: '36px', background: '#e2e8f0', borderRadius: '99px' }}></div>
-      </div>
-
-      {/* CSS Animation */}
+    <>
       <style>{`
-        @keyframes pulse-anim {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
+        @keyframes skShimmer {
+          0%   { background-position:  200% center; }
+          100% { background-position: -200% center; }
         }
-        .skeleton-pulse {
-          animation: pulse-anim 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .sk-bone {
+          position: relative;
+          overflow: hidden;
+          background: rgba(212,168,80,0.07);
+        }
+        .sk-bone::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(212,168,80,0.13) 50%,
+            transparent 100%
+          );
+          background-size: 200% 100%;
+          animation: skShimmer 2s ease-in-out infinite;
         }
       `}</style>
-    </div>
+
+      {/* ── Card shell ── */}
+      <div style={{
+        position: 'relative',
+        background: 'rgba(12,16,32,0.85)',
+        border: '1px solid rgba(212,168,80,0.14)',
+        borderRadius: 20,
+        padding: 28,
+        overflow: 'hidden',
+        boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
+        marginBottom: 20,
+      }}>
+        {/* Top shimmer line */}
+        <div style={{ position:'absolute', top:0, left:'15%', right:'15%', height:1,
+          background:'linear-gradient(90deg,transparent,rgba(212,168,80,0.35),transparent)',
+          pointerEvents:'none' }}/>
+        {/* Bottom shimmer line */}
+        <div style={{ position:'absolute', bottom:0, left:'15%', right:'15%', height:1,
+          background:'linear-gradient(90deg,transparent,rgba(212,168,80,0.12),transparent)',
+          pointerEvents:'none' }}/>
+
+        {/* Corner accents */}
+        {[
+          { top:10,    left:10,  borderTop:    '1px solid rgba(212,168,80,0.3)', borderLeft:   '1px solid rgba(212,168,80,0.3)' },
+          { top:10,    right:10, borderTop:    '1px solid rgba(212,168,80,0.3)', borderRight:  '1px solid rgba(212,168,80,0.3)' },
+          { bottom:10, left:10,  borderBottom: '1px solid rgba(212,168,80,0.3)', borderLeft:   '1px solid rgba(212,168,80,0.3)' },
+          { bottom:10, right:10, borderBottom: '1px solid rgba(212,168,80,0.3)', borderRight:  '1px solid rgba(212,168,80,0.3)' },
+        ].map((s, i) => (
+          <div key={i} style={{ position:'absolute', width:14, height:14, ...s, pointerEvents:'none' }}/>
+        ))}
+
+        {/* ── Header row: avatar + name lines + optional badge ── */}
+        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:20 }}>
+          {/* Avatar circle */}
+          <div className="sk-bone" style={{
+            width:44, height:44, borderRadius:'50%', flexShrink:0,
+          }}/>
+          {/* Name + date */}
+          <div style={{ flex:1, display:'flex', flexDirection:'column', gap:8 }}>
+            <div className="sk-bone" style={{ width:'38%', height:13, borderRadius:6 }}/>
+            <div className="sk-bone" style={{ width:'20%', height:10, borderRadius:5 }}/>
+          </div>
+          {/* Badge pill */}
+          <div className="sk-bone" style={{ width:64, height:20, borderRadius:99 }}/>
+        </div>
+
+        {/* ── Text lines ── */}
+        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:22 }}>
+          {[['100%', 0], ['88%', '0.15s'], ['65%', '0.3s']].map(([w, delay], i) => (
+            <div key={i} className="sk-bone" style={{
+              width:w, height:13, borderRadius:6,
+              animationDelay: delay,
+            }}/>
+          ))}
+        </div>
+
+        {/* ── Media box ── */}
+        <div className="sk-bone" style={{
+          width:'100%', height:220, borderRadius:14,
+          marginBottom:22,
+        }}/>
+
+        {/* ── Action pill buttons ── */}
+        <div style={{ display:'flex', gap:10 }}>
+          {[[66, 0], [66, '0.1s'], [84, '0.2s']].map(([w, delay], i) => (
+            <div key={i} className="sk-bone" style={{
+              width:w, height:32, borderRadius:99,
+              animationDelay: delay,
+            }}/>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 

@@ -1,19 +1,206 @@
+/* ==========================================================================
+   THE LEGACY TRUNK - PREMIUM GLOBAL STYLES
+   ========================================================================== */
+
+/* 1. IMPORT PREMIUM FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* 2. BASE RESET */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* 3. PREMIUM DARK THEME BODY */
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #fff;
-  color: #111827;
+  font-family: 'Cormorant Garamond', serif; /* Default elegant text */
+  background-color: #04060e; /* Deep cosmic dark base */
+  background-image: radial-gradient(circle at 50% 0%, #0c1020 0%, #04060e 80%);
+  background-attachment: fixed;
+  color: rgba(255, 255, 255, 0.85); /* Soft white text */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
+
+/* Typography Defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+  margin-bottom: 0.5rem;
+}
+
 a {
   color: inherit;
+  text-decoration: none;
 }
+
+button, input, select, textarea {
+  font: inherit;
+  outline: none;
+}
+
 button {
   cursor: pointer;
 }
-input,
-button {
-  font: inherit;
+
+/* ==========================================================================
+   4. CUSTOM GOLD SCROLLBAR (For entire app and internal divs)
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(4, 6, 14, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 168, 80, 0.3); /* Dim gold */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 168, 80, 0.6); /* Bright gold on hover */
+}
+
+/* Specific class for internal scrollable areas (like CollageMaker tabs) */
+.vr-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* ==========================================================================
+   5. COMPONENT ANIMATIONS (Used in Buttons & Loaders)
+   ========================================================================== */
+
+/* Button Pulse Glow */
+@keyframes ltPulseGlow {
+  0% { box-shadow: 0 4px 20px rgba(212, 168, 80, 0.25); }
+  50% { box-shadow: 0 4px 35px rgba(212, 168, 80, 0.5); }
+  100% { box-shadow: 0 4px 20px rgba(212, 168, 80, 0.25); }
+}
+
+/* Button Shine Effect */
+@keyframes ltShine {
+  0% { left: -100%; opacity: 0; }
+  20% { left: 100%; opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* Loading Dots Bounce */
+@keyframes ltDot {
+  0%, 20%, 80%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; background: #e8c87a; }
+}
+
+
+/* ==========================================================================
+   6. PREMIUM VAULT DATEPICKER THEME (React-Datepicker Overrides)
+   ========================================================================== */
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+/* Input Box Styling */
+.vault-datepicker-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 168, 80, 0.3) !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  color: rgba(212, 168, 80, 0.8) !important;
+  outline: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.vault-datepicker-input:focus {
+  border-color: #e8c87a !important;
+  box-shadow: 0 0 10px rgba(212, 168, 80, 0.2);
+}
+
+/* Main Calendar Popup Box */
+.vault-datepicker-calendar {
+  background-color: #0c1020 !important; /* Dark Vault background */
+  border: 1px solid rgba(212, 168, 80, 0.4) !important;
+  font-family: 'Space Mono', monospace !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 168, 80, 0.1) !important;
+}
+
+/* Header (Month/Year) */
+.react-datepicker__header {
+  background-color: rgba(212, 168, 80, 0.05) !important;
+  border-bottom: 1px solid rgba(212, 168, 80, 0.2) !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+}
+
+.react-datepicker__current-month, 
+.react-datepicker-time__header, 
+.react-datepicker__day-name {
+  color: #e8c87a !important; /* Gold text */
+}
+
+/* Calendar Days */
+.react-datepicker__day, 
+.react-datepicker__time-name {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: rgba(212, 168, 80, 0.2) !important;
+  color: #e8c87a !important;
+  border-radius: 6px !important;
+}
+
+/* Selected Day & Time */
+.react-datepicker__day--selected, 
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__time-list-item--selected {
+  background-color: #e8c87a !important;
+  color: #0c1020 !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+}
+
+/* Time Selection Sidebar */
+
+/* Poore time section aur uske andar ke sabhi dabbiyon ka background dark karna */
+.react-datepicker__time-container,
+.react-datepicker__time-container .react-datepicker__time,
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list {
+  background-color: #0c1020 !important;
+  border-left: 1px solid rgba(212, 168, 80, 0.2) !important;
+}
+
+/* Time list items (numbers) ka color aur spacing */
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
+  color: rgba(255, 255, 255, 0.7) !important;
+  padding: 10px 5px !important;
+  transition: all 0.2s ease;
+}
+
+/* Hover karne par time kaisa dikhega */
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
+  background-color: rgba(212, 168, 80, 0.2) !important;
+  color: #e8c87a !important;
+}
+
+/* Jab time select ho jaye tab kaisa dikhega */
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
+  background-color: #e8c87a !important;
+  color: #0c1020 !important;
+  font-weight: 800 !important;
 }

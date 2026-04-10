@@ -1,29 +1,9 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-const express = require('express');
-const mongoose = require('mongoose');
-require('dotenv').config(); // .env file ki variables ko load karne ke liye
-=======
-import express from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-<<<<<<< HEAD
->>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
-=======
-=======
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-<<<<<<< HEAD
-
->>>>>>> 27b06e2 (feat: enhance profile UI & integrate secure OTP email system)
-=======
->>>>>>> a8ac503 (fix: resolve config issues and update system settings)
 import http from 'http';
 import { Server } from 'socket.io';
->>>>>>> 55125cf (8: add Socket.io live nostalgia rooms with room isolation, realtime chat, and live location broadcasting)
 
 // Routes Imports
 import userRoutes from './routes/userRoutes.js';
@@ -40,14 +20,6 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import { initializeSocket } from './socket/socketHandler.js';
 
 const app = express();
-<<<<<<< HEAD
-<<<<<<< HEAD
-app.use(express.json()); // JSON body parsing ke liye middleware
-=======
-app.use(cors());
-app.use(express.json());
->>>>>>> 30177b5 (5.feat: integrate global search API, timeline chronology, and social engagement logic)
-=======
 
 // 🔴 IMPORTANT: trim spaces in FRONTEND_URL CSV to avoid false CORS mismatch
 const allowedOrigins = process.env.FRONTEND_URL
@@ -86,7 +58,6 @@ app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
->>>>>>> a8ac503 (fix: resolve config issues and update system settings)
 
 const PORT = process.env.PORT || 8000;
 const MONGO_URI = process.env.MONGO_URI;

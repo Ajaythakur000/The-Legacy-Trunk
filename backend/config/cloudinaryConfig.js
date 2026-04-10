@@ -1,5 +1,5 @@
-const cloudinary = require('cloudinary').v2;
-require('dotenv').config();
+import { v2 as cloudinary } from 'cloudinary';
+import 'dotenv/config';
 
 // Cloudinary ko humare .env file waale credentials ke saath configure karna
 cloudinary.config({
@@ -8,4 +8,4 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-module.exports = cloudinary;
+export default cloudinary;

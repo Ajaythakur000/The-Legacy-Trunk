@@ -15,12 +15,30 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true); 
 
+  // 🔥 NEW IMPROVED EFFECT: handles unmounts and ensures completion state
   useEffect(() => {
-    if (token) {
-      connectSocket(token);
-      fetchFreshProfile(); 
-    }
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      setIsInitializing(true);
+
+      try {
+        if (token) {
+          connectSocket(token);
+          await fetchFreshProfile(); // wait for real verification
+        }
+      } finally {
+        if (mounted) setIsInitializing(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+    };
   }, [token]);
 
   const fetchFreshProfile = async () => {
@@ -55,11 +73,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('user', JSON.stringify(receivedUser));
 
-      // 🔴 IMPORTANT LOGIC FIX:
-      // yahan connectSocket dobara mat call karo, kyunki token state set hone ke baad
-      // useEffect([token]) already connectSocket(token) chala deta hai.
-      // connectSocket(receivedToken);
-
       return { success: true, data };
     } catch (error) {
       const message = error?.response?.data?.message || error.message || 'Login failed';
@@ -80,10 +93,6 @@ export const AuthProvider = ({ children }) => {
       if (receivedToken) {
         setToken(receivedToken);
         localStorage.setItem('token', receivedToken);
-
-        // 🔴 IMPORTANT LOGIC FIX:
-        // same reason as login - duplicate connect avoid
-        // connectSocket(receivedToken);
       }
 
       if (receivedUser) {
@@ -135,6 +144,7 @@ export const AuthProvider = ({ children }) => {
     token,
     user,
     loading,
+    isInitializing,
     isAuthenticated,
     login,
     signup,

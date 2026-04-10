@@ -32,7 +32,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (!error.response && error.code !== 'ECONNABORTED') {
+    // 🔥 THE FIX: Global 401 handler
+    if (error.response?.status === 401) {
+      // Local storage clear karo
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // Optionally, ek error message dikha sakte ho (AuthContext bhi dikhayega)
+      // toast.error("Session expired. The vault is locked. 🔒", { id: 'auth-err' });
+
+      // Agar user login ya signup page par nahi hai, toh usko login par bhejo
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
+        window.location.href = '/login'; 
+      }
+    } 
+    // Baaki ke existing error handlers
+    else if (!error.response && error.code !== 'ECONNABORTED') {
       toast.error('Network Error: The vault is currently unreachable. Check your internet! 🌐', { id: 'net-err' });
     } else if (error.code === 'ECONNABORTED') {
       toast.error('Timeout: The magic is taking too long. Please try again! ⏳', { id: 'time-err' });

@@ -518,7 +518,8 @@ function RuneCrystal({ lit }) {
 // MAIN COMPONENT
 // ═════════════════════════════════════════════════════════════════════════════
 function Navbar({ children }) {
-  const { isAuthenticated, user, logout, switchActiveCircle } = useAuth();
+  // 🔥 FIX ADDED: Destructured isInitializing from useAuth
+  const { isAuthenticated, user, logout, switchActiveCircle, isInitializing } = useAuth();
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -598,6 +599,11 @@ function Navbar({ children }) {
     e.preventDefault();
     if (searchQuery.trim()) { navigate(`/search?q=${encodeURIComponent(searchQuery)}`); if(window.innerWidth<=768) setIsSidebarOpen(false); }
   };
+
+  // 🔥 FIX ADDED: Return a dark screen while verifying the session to prevent sidebar flash
+  if (isInitializing) {
+    return <div style={{ background: '#06080f', height: '100vh', width: '100vw' }} />;
+  }
 
   if (isPublicRoute || !isAuthenticated || !user?._id) return <>{children}</>;
 
