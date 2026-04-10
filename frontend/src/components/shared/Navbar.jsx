@@ -28,9 +28,20 @@ const GLOBAL_CSS = `
 
   /* ── Sidebar overlay ── */
   .lt-sb-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(4,6,14,0.85); backdrop-filter: blur(8px);
-    z-index: 45; opacity: 0; transition: opacity 0.3s;
+    position: fixed;
+    inset: 0;
+    background: rgba(4,6,14,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 45;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  .lt-sb-overlay.lt-sb-vis {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   /* ═══════════════ SIDEBAR ═══════════════ */
@@ -449,7 +460,7 @@ const GLOBAL_CSS = `
   .lt-profile-email { font-family:'Space Mono',monospace; font-size:8.5px; color:rgba(212,168,80,0.38); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .lt-profile-links { padding:8px; }
   .lt-profile-link { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:9px 13px; background:transparent; border:1px solid transparent; font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.5px; color:rgba(212,168,80,0.52); border-radius:9px; cursor:pointer; text-decoration:none; transition:all 0.22s; }
-  .lt-profile-link:hover { background:rgba(212,168,80,0.07); border-color:rgba(212,168,80,0.12); color:rgba(212,168,80,0.9); }
+  .lt-profile-link:hover { background:rgba(212,168,80,0.07); border-color:rgba(212,168,80,0.14); color:rgba(212,168,80,0.9); }
   .lt-profile-link.lt-danger { color:rgba(239,68,68,0.55); }
   .lt-profile-link.lt-danger:hover { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.16); color:rgba(239,68,68,0.82); }
   .lt-profile-divider { height:1px; background:rgba(212,168,80,0.07); margin:4px 0; }
@@ -482,6 +493,7 @@ const GLOBAL_CSS = `
     .lt-sidebar.lt-sb-open   { width:255px; }
     .lt-sidebar.lt-sb-closed { width:0; transform:translateX(-100%); }
     .lt-hide-desktop { display:none !important; }
+    .lt-sb-overlay { display:none !important; }
   }
   @media (max-width:768px) {
     .lt-top-header { padding:0 14px; height:60px; }
@@ -489,8 +501,8 @@ const GLOBAL_CSS = `
     .lt-desktop-only { display:none !important; }
     .lt-sidebar { position:fixed; top:0; left:0; bottom:0; width:255px !important; transform:translateX(-100%); box-shadow:16px 0 60px rgba(0,0,0,0.6); }
     .lt-sidebar.lt-sb-open { transform:translateX(0); }
-    .lt-sb-overlay { display:block; }
-    .lt-sb-overlay.lt-sb-vis { opacity:1; }
+    .lt-sb-overlay { display:block; } /* keep render, but non-clickable unless .lt-sb-vis */
+    .lt-sb-overlay.lt-sb-vis { opacity:1; visibility:visible; pointer-events:auto; }
     .lt-mobile-search { display:block; }
     .lt-notif-dropdown { width:290px; }
     .lt-oracle-btn, .lt-icon-btn, .lt-avatar-btn { width:34px; height:34px; }
@@ -528,7 +540,7 @@ function Navbar({ children }) {
   const [notifications,     setNotifications]     = useState([]);
   const [showChampionModal, setShowChampionModal] = useState(false);
   const [championUser,      setChampionUser]      = useState(null);
-  const [isSidebarOpen,     setIsSidebarOpen]     = useState(window.innerWidth > 768);
+  const [isSidebarOpen,     setIsSidebarOpen]     = useState(false);
   const [searchQuery,       setSearchQuery]       = useState('');
 
   const hubRef   = useRef(null);
@@ -636,12 +648,12 @@ function Navbar({ children }) {
                 </svg>
               </button>
 
-              {/* Header brand — Spinning ring + THE LEGACY TRUNK */}
+              {/* Header brand — Spinning ring + THE MEMENTO */}
               {/* 🔥 MAGIC FIX: Automatically hides completely when sidebar is open */}
               <div className="lt-header-brand lt-desktop-only">
                 <LogoRing size={38}/>
                 <div>
-                  <span className="lt-header-brand-sub">The Legacy Trunk</span>
+                  <span className="lt-header-brand-sub">The Memento</span>
                   <span className="lt-header-brand-name">THE LEGACY TRUNK</span>
                 </div>
               </div>

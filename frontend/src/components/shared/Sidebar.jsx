@@ -85,9 +85,10 @@ export default function Sidebar({
       {/* ══════ SIDEBAR ══════ */}
       <aside className={`lt-sidebar${isSidebarOpen?' lt-sb-open':' lt-sb-closed'}`}>
         <div className="lt-sb-head">
-          {/* 🔥 Logo and Brand Name removed from here as requested */}
-          
-          <div className="lt-sb-user" onClick={() => navigate('/profile')}>
+          <div className="lt-sb-user" onClick={() => {
+            navigate('/profile');
+            if(window.innerWidth <= 768) setIsSidebarOpen(false);
+          }}>
             <div className="lt-sb-avatar">
               {user?.avatar
                 ? <img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:'50%',objectFit:'cover'}}/>
@@ -101,7 +102,6 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* 🔥 SCROLLABLE WRAPPER ADDED HERE */}
         <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
           <div className="lt-mobile-search">
             <form onSubmit={handleSearch} className="lt-mobile-search-form">
@@ -115,7 +115,7 @@ export default function Sidebar({
             {NAV_LINKS.map(({to,icon,label,sub}) => (
               <SbLink key={to} to={to} icon={icon} label={label} sub={sub}
                 active={location.pathname===to}
-                onClick={() => window.innerWidth<=768 && setIsSidebarOpen(false)}/>
+                onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}/>
             ))}
           </div>
 
@@ -125,7 +125,7 @@ export default function Sidebar({
               <SbLink key={to} to={to} icon={icon} label={label} sub={sub} hot={hot}
                 badge={hot?unreadCount:0}
                 active={location.pathname===to}
-                onClick={() => window.innerWidth<=768 && setIsSidebarOpen(false)}/>
+                onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}/>
             ))}
           </div>
         </div>
