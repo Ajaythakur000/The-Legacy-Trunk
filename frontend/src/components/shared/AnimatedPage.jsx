@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 // ─── Cinematic page transition variants ──────────────────────────────────────
 const variants = {
@@ -136,7 +136,7 @@ function GoldBurst() {
         ctx.fill();
       });
       frame++;
-      if (frame < 120) raf = requestAnimationFrame(draw);
+      if (frame < 45) raf = requestAnimationFrame(draw);
     };
 
     raf = requestAnimationFrame(draw);
@@ -164,21 +164,16 @@ function GoldBurst() {
 
 // ─── Rune flash overlay on transition ────────────────────────────────────────
 function RuneFlash() {
+  const [hidden, setHidden] = useState(false);
+
+  if (hidden) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0.8 }}
       animate={{ opacity: 0 }}
-      transition={{ duration: 1.2, ease: 'easeOut' }}
-      // ✅ KEY FIX: after animation ends, remove from hit-testing + stacking
-      onAnimationComplete={(definition) => {
-        if (definition === 'animate') {
-          const el = document.getElementById('lt-rune-flash');
-          if (el) {
-            el.style.display = 'none';
-          }
-        }
-      }}
-      id="lt-rune-flash"
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      onAnimationComplete={() => setHidden(true)}
       style={{
         position: 'fixed',
         inset: 0,
@@ -193,7 +188,7 @@ function RuneFlash() {
       <motion.div
         initial={{ opacity: 1, scale: 0.8, letterSpacing: '8px' }}
         animate={{ opacity: 0, scale: 1.5, letterSpacing: '28px' }}
-        transition={{ duration: 1.5, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         style={{
           fontFamily: "'Cinzel', serif",
           fontSize: 16,
@@ -218,6 +213,7 @@ function AnimatedPage({
   duration = 1.2,
 }) {
   const chosen = variants[variant] || variants.runeRise;
+  const fastDuration = Math.min(duration, 0.28);
 
   return (
     <>
@@ -230,10 +226,10 @@ function AnimatedPage({
         animate="animate"
         exit="exit"
         transition={{
-          duration,
+          duration: fastDuration,
           ease: [0.22, 1, 0.36, 1],
-          filter: { duration: duration * 0.9 },
-          clipPath: { duration: duration * 1.2, ease: [0.4, 0, 0.2, 1] },
+          filter: { duration: fastDuration * 0.8 },
+          clipPath: { duration: fastDuration * 0.9, ease: [0.4, 0, 0.2, 1] },
         }}
         style={{ width: '100%', height: '100%' }}
       >
