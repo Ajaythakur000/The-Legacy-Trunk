@@ -3,12 +3,10 @@ import { useRef, useEffect } from 'react';
 
 // ─── Cinematic page transition variants ──────────────────────────────────────
 const variants = {
-
-  // Option 1: VAULT DOOR — page seals in like an ancient vault opening
   vaultDoor: {
     initial: {
       opacity: 0,
-      y: 40, // Thoda aur deep se aayega
+      y: 40,
       clipPath: 'inset(0 50% 0 50%)',
       filter: 'brightness(2) blur(6px)',
     },
@@ -26,7 +24,6 @@ const variants = {
     },
   },
 
-  // Option 2: ANCIENT SCROLL — unfurls from top like a parchment
   scroll: {
     initial: {
       opacity: 0,
@@ -51,7 +48,6 @@ const variants = {
     },
   },
 
-  // Option 3: GOLD FADE — elegant gold shimmer dissolve
   goldFade: {
     initial: {
       opacity: 0,
@@ -70,7 +66,6 @@ const variants = {
     },
   },
 
-  // Option 4: RUNE RISE — rises from the depths like ancient runes awakening
   runeRise: {
     initial: {
       opacity: 0,
@@ -91,7 +86,6 @@ const variants = {
       filter: 'blur(8px)',
     },
   },
-
 };
 
 // ─── Gold particle burst on page enter ──────────────────────────────────────
@@ -102,10 +96,15 @@ function GoldBurst() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (!ctx) return;
 
-    const particles = Array.from({ length: 40 }, () => { // Thode particles badha diye
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+
+    const particles = Array.from({ length: 40 }, () => {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 4 + 1.5;
       return {
@@ -119,14 +118,15 @@ function GoldBurst() {
     });
 
     let frame = 0;
-    let raf;
+    let raf = null;
+
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
+      particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.04; // Gravity thodi slow kar di
-        p.alpha -= 0.015; // Fade out thoda slow kar diya
+        p.vy += 0.04;
+        p.alpha -= 0.015;
         if (p.alpha <= 0) return;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -138,16 +138,25 @@ function GoldBurst() {
       frame++;
       if (frame < 120) raf = requestAnimationFrame(draw);
     };
+
     raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
+    window.addEventListener('resize', resize);
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
       style={{
-        position: 'fixed', inset: 0,
-        pointerEvents: 'none', zIndex: 9999,
+        position: 'fixed',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: 9999,
       }}
     />
   );
@@ -159,23 +168,39 @@ function RuneFlash() {
     <motion.div
       initial={{ opacity: 0.8 }}
       animate={{ opacity: 0 }}
-      transition={{ duration: 1.2, ease: 'easeOut' }} // Flash ka time double kar diya
+      transition={{ duration: 1.2, ease: 'easeOut' }}
+      // ✅ KEY FIX: after animation ends, remove from hit-testing + stacking
+      onAnimationComplete={(definition) => {
+        if (definition === 'animate') {
+          const el = document.getElementById('lt-rune-flash');
+          if (el) {
+            el.style.display = 'none';
+          }
+        }
+      }}
+      id="lt-rune-flash"
       style={{
-        position: 'fixed', inset: 0,
+        position: 'fixed',
+        inset: 0,
         background: 'radial-gradient(ellipse at center, rgba(212,168,80,0.15) 0%, transparent 70%)',
-        pointerEvents: 'none', zIndex: 9998,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        pointerEvents: 'none',
+        zIndex: 9998,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       <motion.div
         initial={{ opacity: 1, scale: 0.8, letterSpacing: '8px' }}
         animate={{ opacity: 0, scale: 1.5, letterSpacing: '28px' }}
-        transition={{ duration: 1.5, ease: 'easeOut' }} // Text aaram se dissolve hoga
+        transition={{ duration: 1.5, ease: 'easeOut' }}
         style={{
           fontFamily: "'Cinzel', serif",
-          fontSize: 16, color: 'rgba(212,168,80,0.7)',
-          userSelect: 'none', whiteSpace: 'nowrap',
-          textShadow: '0 0 20px rgba(212,168,80,0.5)' // Glow add kiya
+          fontSize: 16,
+          color: 'rgba(212,168,80,0.7)',
+          userSelect: 'none',
+          whiteSpace: 'nowrap',
+          textShadow: '0 0 20px rgba(212,168,80,0.5)',
         }}
       >
         ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ✦
@@ -187,20 +212,18 @@ function RuneFlash() {
 // ─── Main AnimatedPage ────────────────────────────────────────────────────────
 function AnimatedPage({
   children,
-  variant = 'runeRise',   // 'vaultDoor' | 'scroll' | 'goldFade' | 'runeRise'
-  showBurst = false,       // gold particle burst on enter
-  showRuneFlash = true,    // rune text dissolves on enter
-  duration = 1.2,          // 🔥 DURATION INCREASED FOR PREMIUM FEEL 🔥
+  variant = 'runeRise',
+  showBurst = false,
+  showRuneFlash = true,
+  duration = 1.2,
 }) {
   const chosen = variants[variant] || variants.runeRise;
 
   return (
     <>
-      {/* Overlay effects */}
       {showRuneFlash && <RuneFlash />}
       {showBurst && <GoldBurst />}
 
-      {/* Page content */}
       <motion.div
         variants={chosen}
         initial="initial"
@@ -208,7 +231,7 @@ function AnimatedPage({
         exit="exit"
         transition={{
           duration,
-          ease: [0.22, 1, 0.36, 1], // Aur smooth easing curve
+          ease: [0.22, 1, 0.36, 1],
           filter: { duration: duration * 0.9 },
           clipPath: { duration: duration * 1.2, ease: [0.4, 0, 0.2, 1] },
         }}

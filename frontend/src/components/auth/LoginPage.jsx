@@ -41,7 +41,7 @@ const S = {
   },
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Sub-components ──────────────────────────────���────────────────────────────
 function StarCanvas() {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
@@ -270,8 +270,11 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setError('');
     const result = await login(form.email, form.password);
+
     if (!result.success) {
       if (result.errorData?.requireOtp) {
         setUnverifiedEmail(result.errorData.email || form.email);
@@ -281,13 +284,14 @@ function LoginPage() {
       setError(result.message || 'Invalid credentials. The vault remains sealed.');
       return;
     }
+
     setFlashSuccess(true);
-    setTimeout(() => navigate('/dashboard', { replace: true }), 600);
+    navigate('/dashboard', { replace: true });
   };
 
   const handleOtpSuccess = () => {
     setShowOtpModal(false);
-    window.location.href = '/dashboard';
+    navigate('/dashboard', { replace: true });
   };
 
   return (

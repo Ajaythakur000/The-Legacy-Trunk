@@ -1,13 +1,13 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
-import { useAuth } from './context/AuthContext'; // 🔥 IMPORTED useAuth HERE
+import { useAuth } from './context/AuthContext';
 
 // Layout & Shared
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
-import AnimatedPage from './components/shared/AnimatedPage'; 
-import ErrorBoundary from './components/shared/ErrorBoundary'; // 🔥 Imported the Shield
+import AnimatedPage from './components/shared/AnimatedPage';
+import ErrorBoundary from './components/shared/ErrorBoundary';
 
 // Auth Pages
 import LoginPage from './components/auth/LoginPage';
@@ -33,20 +33,26 @@ import FamilyOraclePage from './pages/FamilyOraclePage';
 import InvitePage from './pages/InvitePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 
+function PrivateLayout({ children }) {
+  return (
+    <ProtectedRoute>
+      <Navbar>{children}</Navbar>
+    </ProtectedRoute>
+  );
+}
+
 function App() {
   const location = useLocation();
-  const { isInitializing } = useAuth(); // 🔥 EXTRACTED isInitializing
+  const { isInitializing } = useAuth();
 
-  // 🔥 THE ULTIMATE SHIELD: Jab tak auth verify ho raha hai, puri app black rahegi
   if (isInitializing) {
     return <div style={{ background: '#06080f', minHeight: '100vh', width: '100vw' }} />;
   }
 
   return (
     <>
-      {/* 🔥 "WOW" LEVEL PREMIUM NOTIFICATIONS SETUP */}
-      <Toaster 
-        position="top-center" 
+      <Toaster
+        position="top-center"
         reverseOrder={false}
         toastOptions={{
           style: {
@@ -65,7 +71,7 @@ function App() {
           success: {
             style: { borderLeft: '4px solid #e8c87a' },
             iconTheme: { primary: '#e8c87a', secondary: '#06080f' },
-            icon: '✦', 
+            icon: '✦',
           },
           error: {
             style: {
@@ -81,51 +87,40 @@ function App() {
           loading: {
             style: { borderBottom: '2px solid rgba(212,168,80,0.5)' },
             iconTheme: { primary: '#e8c87a', secondary: 'transparent' },
-          }
-        }} 
+          },
+        }}
       />
-      
-      {/* Navbar is the Grand Layout Wrapper */}
-      <Navbar>
-        {/* 🔥 ErrorBoundary ab AnimatePresence ke BAHAAR hai! */}
-        <ErrorBoundary>
-          <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
-              
-              {/* 1. INITIAL REDIRECT */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
 
-              {/* 2. PUBLIC ROUTES */}
-              <Route path="/login" element={<AnimatedPage><LoginPage /></AnimatedPage>} />
-              <Route path="/signup" element={<AnimatedPage><SignupPage /></AnimatedPage>} />
-              <Route path="/invite/:token" element={<AnimatedPage><InvitePage /></AnimatedPage>} />
-              
-              {/* 3. PROTECTED PRIVATE ROUTES */}
-              <Route path="/home" element={<ProtectedRoute><AnimatedPage><HomePage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><AnimatedPage><DashboardPage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><AnimatedPage><ProfilePage /></AnimatedPage></ProtectedRoute>} />
-              
-              {/* Features */}
-              <Route path="/vault" element={<ProtectedRoute><AnimatedPage><VaultRoomPage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/radar" element={<ProtectedRoute><AnimatedPage><FamilyRadarPage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/leaderboard" element={<ProtectedRoute><AnimatedPage><LeaderboardPage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/memory-lane" element={<ProtectedRoute><AnimatedPage><FamilyTimelinePage /></AnimatedPage></ProtectedRoute>} />
-              
-              {/* Stories Engine */}
-              <Route path="/vault-stories" element={<ProtectedRoute><AnimatedPage><VaultStoriesPage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/vault-stories/:storyId" element={<ProtectedRoute><AnimatedPage><StoryDetailPage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/my-stories" element={<ProtectedRoute><AnimatedPage><MyStoriesPage /></AnimatedPage></ProtectedRoute>} />
-              <Route path="/search" element={<ProtectedRoute><AnimatedPage><SearchResultsPage /></AnimatedPage></ProtectedRoute>} />
-              
-              <Route path="/oracle" element={<ProtectedRoute><AnimatedPage><FamilyOraclePage /></AnimatedPage></ProtectedRoute>} />
+      <ErrorBoundary>
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
-              {/* 4. CATCH-ALL REDIRECT (Security) */}
-              <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* Public routes (NO Navbar wrapper) */}
+            <Route path="/login" element={<AnimatedPage showRuneFlash={false} showBurst={false}><LoginPage /></AnimatedPage>} />
+            <Route path="/signup" element={<AnimatedPage showRuneFlash={false} showBurst={false}><SignupPage /></AnimatedPage>} />
+            <Route path="/invite/:token" element={<AnimatedPage showRuneFlash={false} showBurst={false}><InvitePage /></AnimatedPage>} />
 
-            </Routes>
-          </AnimatePresence>
-        </ErrorBoundary>
-      </Navbar>
+            {/* Private routes (Navbar only here) */}
+            <Route path="/home" element={<PrivateLayout><AnimatedPage><HomePage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/dashboard" element={<PrivateLayout><AnimatedPage><DashboardPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/profile" element={<PrivateLayout><AnimatedPage><ProfilePage /></AnimatedPage></PrivateLayout>} />
+
+            <Route path="/vault" element={<PrivateLayout><AnimatedPage><VaultRoomPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/radar" element={<PrivateLayout><AnimatedPage><FamilyRadarPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/leaderboard" element={<PrivateLayout><AnimatedPage><LeaderboardPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/memory-lane" element={<PrivateLayout><AnimatedPage><FamilyTimelinePage /></AnimatedPage></PrivateLayout>} />
+
+            <Route path="/vault-stories" element={<PrivateLayout><AnimatedPage><VaultStoriesPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/vault-stories/:storyId" element={<PrivateLayout><AnimatedPage><StoryDetailPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/my-stories" element={<PrivateLayout><AnimatedPage><MyStoriesPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/search" element={<PrivateLayout><AnimatedPage><SearchResultsPage /></AnimatedPage></PrivateLayout>} />
+            <Route path="/oracle" element={<PrivateLayout><AnimatedPage><FamilyOraclePage /></AnimatedPage></PrivateLayout>} />
+
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </AnimatePresence>
+      </ErrorBoundary>
     </>
   );
 }

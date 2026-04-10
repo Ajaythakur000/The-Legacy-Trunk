@@ -1,5 +1,5 @@
 import axios from 'axios';
-import toast from 'react-hot-toast'; 
+import toast from 'react-hot-toast';
 
 // 🔴 IMPORTANT: backend routes '/api/...' pe mounted hain
 // Isliye base URL me '/api' ensure karo
@@ -37,15 +37,17 @@ api.interceptors.response.use(
       // Local storage clear karo
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
-      // Optionally, ek error message dikha sakte ho (AuthContext bhi dikhayega)
-      // toast.error("Session expired. The vault is locked. 🔒", { id: 'auth-err' });
 
-      // Agar user login ya signup page par nahi hai, toh usko login par bhejo
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
-        window.location.href = '/login'; 
+      // login/signup/invite pages par redirect skip
+      const p = window.location.pathname;
+      const isPublic = p === '/login' || p === '/signup' || p.startsWith('/invite/');
+
+      if (!isPublic) {
+        // hard reload se race/flicker aati thi
+        window.history.replaceState({}, '', '/login');
+        window.dispatchEvent(new PopStateEvent('popstate'));
       }
-    } 
+    }
     // Baaki ke existing error handlers
     else if (!error.response && error.code !== 'ECONNABORTED') {
       toast.error('Network Error: The vault is currently unreachable. Check your internet! 🌐', { id: 'net-err' });

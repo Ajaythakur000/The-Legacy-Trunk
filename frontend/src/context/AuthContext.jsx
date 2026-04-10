@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { loginApi, signupApi } from '../api/authApi';
-import api from '../api/axios'; 
+import api from '../api/axios';
 import { connectSocket, disconnectSocket } from '../services/socket';
-import toast from 'react-hot-toast'; 
+import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
@@ -15,9 +15,8 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true); 
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  // 🔥 NEW IMPROVED EFFECT: handles unmounts and ensures completion state
   useEffect(() => {
     let mounted = true;
 
@@ -27,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       try {
         if (token) {
           connectSocket(token);
-          await fetchFreshProfile(); // wait for real verification
+          await fetchFreshProfile();
         }
       } finally {
         if (mounted) setIsInitializing(false);
@@ -49,16 +48,17 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(response.data));
       }
     } catch (error) {
-      console.error("Failed to fetch fresh profile data:", error);
+      console.error('Failed to fetch fresh profile data:', error);
       if (error.response && error.response.status === 401) {
         logout();
-        toast.error("Session expired. Please log in again. 🔒");
+        toast.error('Session expired. Please log in again. 🔒');
       }
     }
   };
 
   const login = async (email, password) => {
     setLoading(true);
+    setIsInitializing(true); // ✅ prevent post-login flicker/stuck during auth re-init
     try {
       const data = await loginApi({ email, password });
 
@@ -67,16 +67,17 @@ export const AuthProvider = ({ children }) => {
 
       if (!receivedToken) throw new Error('Token not received from server');
 
-      setToken(receivedToken);
-      setUser(receivedUser);
-
       localStorage.setItem('token', receivedToken);
       localStorage.setItem('user', JSON.stringify(receivedUser));
 
+      setUser(receivedUser);
+      setToken(receivedToken);
+
       return { success: true, data };
     } catch (error) {
+      setIsInitializing(false); // ✅ release lock on failed login
       const message = error?.response?.data?.message || error.message || 'Login failed';
-      return { success: false, message, errorData: error?.response?.data }; 
+      return { success: false, message, errorData: error?.response?.data };
     } finally {
       setLoading(false);
     }
@@ -113,28 +114,29 @@ export const AuthProvider = ({ children }) => {
     disconnectSocket();
     setToken(null);
     setUser(null);
+    setIsInitializing(false);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   };
 
   const switchActiveCircle = async (circleId) => {
     if (!user) return;
-    
+
     const previousUser = { ...user };
-    
+
     const updatedUser = { ...user, activeCircleId: circleId };
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
-    
+
     try {
       await api.put('/users/profile', { activeCircleId: circleId });
-      fetchFreshProfile(); 
+      fetchFreshProfile();
     } catch (error) {
-      console.error("Failed to save switched circle to backend:", error);
-      
+      console.error('Failed to save switched circle to backend:', error);
+
       setUser(previousUser);
       localStorage.setItem('user', JSON.stringify(previousUser));
-      toast.error("Failed to switch vault. Access Denied.");
+      toast.error('Failed to switch vault. Access Denied.');
     }
   };
 
@@ -152,7 +154,7 @@ export const AuthProvider = ({ children }) => {
     setUser,
     setToken,
     switchActiveCircle,
-    fetchFreshProfile, 
+    fetchFreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
