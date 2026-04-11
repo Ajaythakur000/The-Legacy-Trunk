@@ -21,37 +21,11 @@ import { initializeSocket } from './socket/socketHandler.js';
 
 const app = express();
 
-// 🔴 IMPORTANT: trim spaces in FRONTEND_URL CSV to avoid false CORS mismatch
-const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
-  : [
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'http://localhost:5174',
-      'http://127.0.0.1:5174',
-      'http://localhost:3000',
-      'http://localhost:5175',
-      'http://127.0.0.1:5175',
-      'http://localhost:5176',
-      'http://127.0.0.1:5176',
-      'http://localhost:5178',
-      'http://127.0.0.1:5178',
-
-    ];
-
+// 🔴 FIX: Temporary open CORS for easy Vercel Deployment
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`Blocked CORS request from: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: "*", // Allows any frontend to connect (Safe for now, best for Vercel deployment)
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  credentials: true,
+  // credentials: true (Removed temporarily because origin: "*" doesn't support credentials: true in some cases)
 };
 
 app.use(cors(corsOptions));
@@ -99,13 +73,12 @@ const connectDB = async () => {
 
 const server = http.createServer(app);
 
-// 🔴 IMPORTANT: set path explicitly to match frontend socketService path
+// 🔴 FIX: Open Socket.IO CORS too
 export const io = new Server(server, {
   path: '/socket.io',
   cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST'],
-    credentials: true
+    origin: "*", // Allows Socket to connect from Vercel
+    methods: ['GET', 'POST']
   },
 });
 
