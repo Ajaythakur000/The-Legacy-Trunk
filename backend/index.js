@@ -21,11 +21,11 @@ import { initializeSocket } from './socket/socketHandler.js';
 
 const app = express();
 
-// 🔴 FIX: Temporary open CORS for easy Vercel Deployment
+
 const corsOptions = {
-  origin: "*", // Allows any frontend to connect (Safe for now, best for Vercel deployment)
+  origin: "*", 
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  // credentials: true (Removed temporarily because origin: "*" doesn't support credentials: true in some cases)
+ 
 };
 
 app.use(cors(corsOptions));
