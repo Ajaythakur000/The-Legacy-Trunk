@@ -73,35 +73,31 @@ const CSS = `
   }
   .fr-map-chamber::before { content:''; position:absolute; top:0; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent); z-index:20; pointer-events:none; }
   .fr-map-chamber::after  { content:''; position:absolute; bottom:0; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,rgba(212,168,80,0.25),transparent); z-index:20; pointer-events:none; }
-  
+
   .fr-map-inner { height: 520px; position: relative; }
-  
-  /* 🔥 CHANGE 1: Naya Map CSS Filter */
-  .fr-map-inner .leaflet-container { 
-    height: 100%; width: 100%; background: #020617 !important; 
-    filter: brightness(0.72) contrast(1.35) saturate(0.45) sepia(0.55) hue-rotate(5deg) invert(0); 
+
+  /* ── FIXED: filter only on tile pane, NOT on leaflet-container ── */
+  .fr-map-inner .leaflet-container {
+    height: 100%; width: 100%; background: #020817 !important;
   }
-  .fr-map-inner .leaflet-tile-container {
-    filter: brightness(1) contrast(1.1);
+  .fr-map-inner .leaflet-tile-pane {
+    filter: brightness(0.52) contrast(1.45) saturate(0.25) sepia(0.7) hue-rotate(180deg);
   }
 
-  /* 🔥 CHANGE 4: Map vignette & glow edges */
+  /* Map vignette & glow edges */
   .fr-map-inner::after {
     content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(6,8,15,0.55) 75%, rgba(6,8,15,0.85) 100%);
-    pointer-events: none;
-    z-index: 15;
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 38%, rgba(6,8,15,0.52) 72%, rgba(6,8,15,0.88) 100%);
+    pointer-events: none; z-index: 15;
   }
   .fr-map-inner::before {
     content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at top left, rgba(212,168,80,0.08) 0%, transparent 45%),
-                radial-gradient(ellipse at bottom right, rgba(212,168,80,0.06) 0%, transparent 45%);
-    pointer-events: none;
-    z-index: 14;
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at top left,    rgba(212,168,80,0.09) 0%, transparent 45%),
+      radial-gradient(ellipse at bottom right, rgba(212,168,80,0.07) 0%, transparent 45%);
+    pointer-events: none; z-index: 14;
   }
 
   .fr-corner { position:absolute; width:22px; height:22px; border-color:rgba(212,168,80,0.6); border-style:solid; z-index:30; pointer-events:none; }
@@ -219,6 +215,10 @@ const CSS = `
   .fr-root .leaflet-popup-tip { background:rgba(10,14,24,0.97) !important; }
   .fr-root .leaflet-popup-content { margin:0 !important; }
 
+  /* Hide leaflet attribution (optional) */
+  .fr-root .leaflet-control-attribution { background: rgba(6,8,15,0.7) !important; color: rgba(212,168,80,0.3) !important; font-size: 8px !important; }
+  .fr-root .leaflet-control-attribution a { color: rgba(212,168,80,0.5) !important; }
+
   /* KEYFRAMES */
   @keyframes frFloat { 0%{opacity:0;transform:translate(0,0) scale(1)} 15%{opacity:1} 85%{opacity:0.7} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0.2)} }
   @keyframes frSweep { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -283,15 +283,14 @@ function DustLayer() {
 function RadarOverlay({width,height}){
   const cx=width/2,cy=height/2,maxR=Math.min(width,height)*0.48;
   return(
-    /* 🔥 CHANGE 3: Opacity badhayi for better radar feel */
-    <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',opacity:0.28,pointerEvents:'none',zIndex:25}} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice">
+    <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',opacity:0.32,pointerEvents:'none',zIndex:25}} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="frSG" cx="0%" cy="50%" r="100%"><stop offset="0%" stopColor="rgba(212,168,80,0.55)"/><stop offset="100%" stopColor="rgba(212,168,80,0)"/></radialGradient>
         <radialGradient id="frCG" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="rgba(212,168,80,0.12)"/><stop offset="100%" stopColor="rgba(212,168,80,0)"/></radialGradient>
       </defs>
-      {[0.25,0.5,0.75,1].map((r,i)=><circle key={i} cx={cx} cy={cy} r={maxR*r} fill="none" stroke="rgba(212,168,80,0.15)" strokeWidth="0.5"/>)}
-      <line x1={cx} y1={cy-maxR} x2={cx} y2={cy+maxR} stroke="rgba(212,168,80,0.08)" strokeWidth="0.5"/>
-      <line x1={cx-maxR} y1={cy} x2={cx+maxR} y2={cy} stroke="rgba(212,168,80,0.08)" strokeWidth="0.5"/>
+      {[0.25,0.5,0.75,1].map((r,i)=><circle key={i} cx={cx} cy={cy} r={maxR*r} fill="none" stroke="rgba(212,168,80,0.18)" strokeWidth="0.6"/>)}
+      <line x1={cx} y1={cy-maxR} x2={cx} y2={cy+maxR} stroke="rgba(212,168,80,0.1)" strokeWidth="0.5"/>
+      <line x1={cx-maxR} y1={cy} x2={cx+maxR} y2={cy} stroke="rgba(212,168,80,0.1)" strokeWidth="0.5"/>
       <circle cx={cx} cy={cy} r={maxR} fill="url(#frCG)"/>
       <circle cx={cx} cy={cy} r={4} fill="rgba(212,168,80,0.7)"/>
       <g className="fr-sweep-group" style={{transformOrigin:`${cx}px ${cy}px`}}>
@@ -458,13 +457,23 @@ function FamilyRadarPage() {
             <div className="fr-corner fr-corner-bl"/><div className="fr-corner fr-corner-br"/>
             <div className="fr-map-label">◉ ORACLE'S EYE · LIVE SURVEILLANCE</div>
             <div className="fr-map-inner" ref={chamberRef}>
-              <MapContainer center={center} zoom={13} style={{height:'100%',width:'100%',zIndex:0}} scrollWheelZoom touchZoom dragging zoomControl={false}>
+              <MapContainer
+                center={center}
+                zoom={13}
+                style={{height:'100%',width:'100%',zIndex:0}}
+                scrollWheelZoom
+                touchZoom
+                dragging
+                zoomControl={false}
+              >
                 <TouchpadPanHandler/>
-                {/* 🔥 CHANGE 2: Naya TileLayer */}
-                <TileLayer 
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-      />
+                {/* ── FIXED: OpenStreetMap tiles — works on all deployments ── */}
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  maxZoom={19}
+                  crossOrigin=""
+                />
                 {myLocation&&!isGhostModeOn&&(
                   <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
                   <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color:'rgba(212,168,80,0.6)',fillColor:'rgba(212,168,80,0.06)',fillOpacity:1,weight:1}}/>
