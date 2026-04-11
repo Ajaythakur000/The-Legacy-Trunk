@@ -21,11 +21,26 @@ import { initializeSocket } from './socket/socketHandler.js';
 
 const app = express();
 
+// 🟢 FIX 1: Strict Allowed Origins (Sirf inhi links se request aayegi)
+const allowedOrigins = [
+  'http://localhost:5173',               //  local frontend
+  'http://localhost:5174',               // Backup local port
+  'https://the-legacy-trunk.vercel.app'  // Live Vercel Frontend
+];
 
+// 🟢 FIX 2: Secure Express CORS with Credentials
 const corsOptions = {
-  origin: "*", 
+  origin: function (origin, callback) {
+    // Agar origin nahi hai (jaise Postman ya server-to-server), ya phir allowed list mein hai
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`Blocked CORS request from: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
- 
+  credentials: true, // IMPORTANT: Iske bina Login/Cookies kaam nahi karenge
 };
 
 app.use(cors(corsOptions));
@@ -73,12 +88,13 @@ const connectDB = async () => {
 
 const server = http.createServer(app);
 
-// 🔴 FIX: Open Socket.IO CORS too
+//  FIX 3: Secure Socket.IO CORS with Credentials
 export const io = new Server(server, {
   path: '/socket.io',
   cors: {
-    origin: "*", // Allows Socket to connect from Vercel
-    methods: ['GET', 'POST']
+    origin: allowedOrigins, // Sirf allowed links hi connect honge
+    methods: ['GET', 'POST'],
+    credentials: true       // Socket ke liye bhi cookies allow karna zaroori hai
   },
 });
 
