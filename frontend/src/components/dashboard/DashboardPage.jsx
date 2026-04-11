@@ -297,6 +297,9 @@ function DashboardPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteLink, setInviteLink] = useState('');
   const [inviteTab, setInviteTab] = useState('magic');
+  
+  // 🔥 FIX: Custom Remove Modal State
+  const [memberToRemove, setMemberToRemove] = useState(null);
 
   const isCircleAdmin = useMemo(() => {
     if (!selectedCircle || !user?._id) return false;
@@ -338,13 +341,25 @@ function DashboardPage() {
     finally { setActiveAction(null); }
   };
 
-  const handleRemoveMember = async (memberId, memberName) => {
+  // 🔥 FIX: Replaced window.confirm with Custom Modal Logic
+  const handleRemoveClick = (memberId, memberName) => {
     if (!selectedCircleId) return toast.error('Select a circle first');
-    if (!window.confirm(`Remove ${memberName} from this family?`)) return;
-    setActiveAction(`remove_${memberId}`);
-    try { await removeMemberFromCircleApi(selectedCircleId, memberId); toast.success(`${memberName} removed.`); await loadCircleDetails(selectedCircleId); }
-    catch (e2) { toast.error(e2?.response?.data?.message || 'Failed to remove'); }
-    finally { setActiveAction(null); }
+    setMemberToRemove({ id: memberId, name: memberName });
+  };
+
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove || !selectedCircleId) return;
+    setActiveAction(`remove_${memberToRemove.id}`);
+    try { 
+      await removeMemberFromCircleApi(selectedCircleId, memberToRemove.id); 
+      toast.success(`${memberToRemove.name} removed.`); 
+      await loadCircleDetails(selectedCircleId); 
+      setMemberToRemove(null);
+    } catch (e2) { 
+      toast.error(e2?.response?.data?.message || 'Failed to remove'); 
+    } finally { 
+      setActiveAction(null); 
+    }
   };
 
   const handleSendDirectInvite = async (e) => {
@@ -412,7 +427,6 @@ function DashboardPage() {
         input::placeholder{color:rgba(255,255,255,0.2);font-style:italic;}
         input:-webkit-autofill,select:-webkit-autofill{-webkit-box-shadow:0 0 0 30px #0c1020 inset!important;-webkit-text-fill-color:rgba(255,255,255,0.88)!important;}
         
-        /* 🔥 FIX: COMPLETELY CUSTOMIZED SELECT DROPDOWN FOR THEME MATCH */
         .premium-select {
           appearance: none;
           -webkit-appearance: none;
@@ -450,7 +464,6 @@ function DashboardPage() {
           border-bottom: 1px solid rgba(212,168,80,0.1);
         }
         
-        /* Select dropdown wrapper to add custom arrow */
         .select-wrapper {
           position: relative;
           display: inline-flex;
@@ -518,7 +531,6 @@ function DashboardPage() {
             Welcome back, <span style={{ color: 'rgba(212,168,80,0.75)', fontStyle: 'normal', fontFamily: "'Cinzel',serif" }}>{user?.name?.split(' ')[0] || 'Guardian'}</span>. Your legacy awaits.
           </motion.p>
 
-          {/* 🔥 FIX: Circle selector custom themed wrapper and class */}
           {circles.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} 
               style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
@@ -591,7 +603,7 @@ function DashboardPage() {
                     <MemberRow key={m._id} m={m} isSelf={isSelf} isAdmin={isAdm}
                       isRemoving={activeAction === `remove_${m._id}`}
                       canRemove={isCircleAdmin && !isAdm}
-                      onRemove={handleRemoveMember} activeAction={activeAction} />
+                      onRemove={handleRemoveClick} activeAction={activeAction} />
                   );
                 })}
               </div>
@@ -806,6 +818,67 @@ function DashboardPage() {
                   style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg,rgba(220,38,38,0.8),rgba(185,28,28,0.8))', border: '1px solid rgba(255,100,100,0.3)', borderRadius: 12, color: '#ffffff', fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s', position: 'relative', overflow: 'hidden' }}>
                   Confirm Destruction
                 </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* ── CUSTOM REMOVE MODAL ── */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {memberToRemove && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: 20 }}
+              onClick={e => { if (e.target === e.currentTarget) setMemberToRemove(null); }}
+            >
+              <motion.div
+                initial={{ scale: 0.88, y: 28, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.88, y: 28, opacity: 0 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                style={{ background: 'rgba(18,10,10,0.98)', border: '1px solid rgba(220,60,60,0.3)', borderRadius: 24, width: '100%', maxWidth: 420, padding: '44px 36px', position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.9), inset 0 1px 0 rgba(220,60,60,0.15)', textAlign: 'center' }}
+              >
+                <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(220,60,60,0.6),transparent)' }} />
+                <CornerAccents />
+
+                <button onClick={() => setMemberToRemove(null)}
+                  style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(220,60,60,0.22)', background: 'rgba(255,255,255,0.04)', color: 'rgba(220,60,60,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(220,60,60,0.7)'; e.currentTarget.style.color = '#f08080'; e.currentTarget.style.background = 'rgba(220,60,60,0.1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(220,60,60,0.22)'; e.currentTarget.style.color = 'rgba(220,60,60,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}>
+                  ✕
+                </button>
+
+                <div style={{ fontSize: '32px', marginBottom: '12px', filter: 'drop-shadow(0 0 12px rgba(220,38,38,0.4))' }}>⚠️</div>
+                
+                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#f08080', textShadow: '0 0 30px rgba(220,60,60,0.3)', marginBottom: 12 }}>
+                  Sever Ties?
+                </div>
+                <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.5)', marginBottom: 32, marginTop: 0, lineHeight: 1.5 }}>
+                  Are you sure you want to banish <strong style={{ color: '#e8c87a', fontStyle: 'normal' }}>{memberToRemove.name}</strong> from the vault? This action cannot be undone.
+                </p>
+
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <button 
+                    onClick={() => setMemberToRemove(null)}
+                    style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Space Mono', monospace", fontSize: '11px', textTransform: 'uppercase', letterSpacing: 1, cursor: 'pointer', transition: 'all 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
+                  >
+                    Cancel
+                  </button>
+                  
+                  <motion.button 
+                    onClick={confirmRemoveMember}
+                    disabled={!!activeAction}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                    style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg,rgba(220,38,38,0.8),rgba(185,28,28,0.8))', border: '1px solid rgba(255,100,100,0.3)', borderRadius: '10px', color: '#ffffff', fontFamily: "'Space Mono', monospace", fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1, cursor: activeAction ? 'not-allowed' : 'pointer', boxShadow: '0 0 20px rgba(220,38,38,0.2)' }}
+                  >
+                    {activeAction ? '...' : 'Remove'}
+                  </motion.button>
+                </div>
               </motion.div>
             </motion.div>
           )}
