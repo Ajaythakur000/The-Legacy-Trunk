@@ -8,10 +8,8 @@ import { awardPoints, handleStoryPostStreak } from './gamificationService.js';
 const hasStoryAccess = (story, user) => {
   if (!story || !user) return false;
 
-  // Public story -> all authenticated users can access
   if (story.isGlobalPublic) return true;
 
-  // Private story -> only same active circle
   if (!story.originCircleId || !user.activeCircleId) return false;
 
   return String(story.originCircleId) === String(user.activeCircleId);
@@ -63,14 +61,10 @@ const createStory = async (req, res) => {
 
     const createdStory = await story.save();
 
-    // Award 10 points for posting a story (to both User Heatmap & Family)
     if (targetCircleId) {
       await awardPoints(req.user._id, targetCircleId, 10);
     }
 
-    // ==========================================
-    //  CRITICAL FIX: UPDATE STREAK HERE!
-    // ==========================================
     await handleStoryPostStreak(req.user._id);
 
     const populated = await Story.findById(createdStory._id)
@@ -105,7 +99,6 @@ const deleteStory = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this story' });
     }
 
-    //  NEW: Deduct 10 points when story is deleted
     if (story.originCircleId) {
       await awardPoints(story.user, story.originCircleId, -10);
     }
@@ -144,31 +137,26 @@ const toggleLikeStory = async (req, res) => {
     let updatedStory;
 
     if (alreadyLiked) {
-      //  FIX: Use $pull to guarantee removal (Bug C)
       updatedStory = await Story.findByIdAndUpdate(
         storyId,
         { $pull: { likes: req.user._id } },
         { new: true }
       );
       
-      // Deduct points only if it's someone else's post
       if (userId !== storyOwnerId && story.originCircleId) {
         await awardPoints(req.user._id, story.originCircleId, -pointsToAward);
       }
     } else {
-      //  FIX: Use $addToSet to guarantee uniqueness (no double count!) (Bug C)
       updatedStory = await Story.findByIdAndUpdate(
         storyId,
         { $addToSet: { likes: req.user._id } },
         { new: true }
       );
 
-      // Award points only if it's someone else's post
       if (userId !== storyOwnerId && story.originCircleId) {
         await awardPoints(req.user._id, story.originCircleId, pointsToAward);
       }
 
-      // Send Notification (Only if liking someone else's post)
       if (userId !== storyOwnerId) {
         const io = req.app.get('io');
         const newNotif = await Notification.create({
@@ -218,7 +206,6 @@ const addCommentToStory = async (req, res) => {
     const userId = req.user._id.toString();
     const storyOwnerId = story.user.toString();
 
-    // Notification Logic
     if (userId !== storyOwnerId) {
       const io = req.app.get('io');
       const newNotif = await Notification.create({
@@ -240,8 +227,8 @@ const addCommentToStory = async (req, res) => {
     }
 
     const populatedStory = await Story.findById(story._id)
-      .populate('comments.user', 'name')
-      .populate('user', 'name');
+      .populate('comments.user', 'name avatar')
+      .populate('user', 'name avatar');
 
     return res.status(201).json({
       message: 'Comment added successfully',
@@ -263,9 +250,9 @@ const getCircleFeed = async (req, res) => {
     }
 
     const stories = await Story.find({ originCircleId: circleId })
-      .populate('user', 'name email relationToAdmin')
+      .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName')
-      .populate('comments.user', 'name')
+      .populate('comments.user', 'name avatar')
       .sort({ createdAt: -1 })
       .limit(15); 
 
@@ -288,7 +275,7 @@ const getMyFamilyStories = async (req, res) => {
         { sharedWith: req.user.activeCircleId },
       ]
     })
-      .populate('user', 'name relationToAdmin')
+      .populate('user', 'name relationToAdmin avatar')
       .sort({ createdAt: -1 })
       .limit(15); 
 
@@ -302,7 +289,7 @@ const getMyFamilyStories = async (req, res) => {
 const getGlobalStories = async (req, res) => {
   try {
     const stories = await Story.find({ isGlobalPublic: true })
-      .populate('user', 'name')
+      .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
       .sort({ createdAt: -1 })
       .limit(50); 
@@ -317,9 +304,9 @@ const getGlobalStories = async (req, res) => {
 const getStoryById = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id)
-      .populate('user', 'name email relationToAdmin')
+      .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName')
-      .populate('comments.user', 'name'); 
+      .populate('comments.user', 'name avatar'); 
 
     if (!story) return res.status(404).json({ message: 'Story not found' });
 
@@ -371,9 +358,9 @@ const updateStory = async (req, res) => {
 const getMyStories = async (req, res) => {
   try {
     const stories = await Story.find({ user: req.user._id })
-      .populate('user', 'name')
+      .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
-      .populate('comments.user', 'name')
+      .populate('comments.user', 'name avatar')
       .sort({ createdAt: -1 });
 
     return res.status(200).json(stories);

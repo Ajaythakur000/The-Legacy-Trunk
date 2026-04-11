@@ -7,7 +7,7 @@ const stripHtml = (html) => {
   return html.replace(/<[^>]*>?/gm, '');
 };
 
-//  SECURITY FIX: In-Memory Rate Limiter to protect Gemini API Quota
+// 🔒 SECURITY FIX: In-Memory Rate Limiter to protect Gemini API Quota
 const aiRateLimits = new Map();
 const RATE_LIMIT_WINDOW_MS = 10000; // 10 seconds cooldown per user
 
@@ -43,7 +43,7 @@ export const askOracle = async (req, res) => {
       return res.status(400).json({ message: "Question is too long (Max 300 characters)." });
     }
 
-    //  SECURITY FIX: Apply Rate Limiter
+    // 🔒 SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const isMember = await FamilyCircle.exists({ _id: circleId, members: req.user._id });
@@ -102,7 +102,7 @@ export const askOracle = async (req, res) => {
 };
 
 // ==============================================
-//  2. AI COPILOT: ENHANCE STORY
+// 🪄 2. AI COPILOT: ENHANCE STORY (DYNAMIC FIX)
 // ==============================================
 export const enhanceStory = async (req, res) => {
   try {
@@ -113,28 +113,58 @@ export const enhanceStory = async (req, res) => {
 
     if (!text) return res.status(400).json({ message: "Rough text is required!" });
 
-    //  SECURITY FIX: Payload Size Limit (Max 3000 chars for enhancement)
+    // 🔒 SECURITY FIX: Payload Size Limit
     if (String(text).trim().length > 3000) {
       return res.status(400).json({ message: "Text is too long for enhancement (Max 3000 characters)." });
     }
 
-    //  SECURITY FIX: Apply Rate Limiter
+    // 🔒 SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const selectedTone = tone || "Nostalgic and Warm";
-
-    const prompt = `You are an expert storyteller for a family vault app. 
-    Take the following rough notes written by a user and transform them into a beautifully written, engaging paragraph.
     
-    Rough Notes: "${text}"
-    Target Tone: ${selectedTone}
+    // 🔥 DYNAMIC INSTRUCTIONS BASED ON SELECTED OPTION 🔥
+    let toneInstructions = "";
+
+    if (selectedTone.includes("Correct Grammar")) {
+      toneInstructions = `
+      1. ONLY correct grammar, spelling, and punctuation errors.
+      2. STRICTLY maintain the original language. If the user wrote in pure English, return pure English. If they wrote in Hindi/Hinglish, keep it that way. DO NOT translate.
+      3. DO NOT expand, summarize, or alter the original meaning or length of the text.
+      4. Do not add emojis unless they were in the original text.`;
+    } 
+    else if (selectedTone.includes("Expand")) {
+      toneInstructions = `
+      1. Expand the existing notes beautifully by adding descriptive details, context, and vivid imagery.
+      2. Maintain the original language of the text.
+      3. Add suitable emojis to make it engaging.`;
+    } 
+    else if (selectedTone.includes("Professional")) {
+      toneInstructions = `
+      1. Rewrite the text to be formal, respectful, and highly professional.
+      2. Maintain the original language of the text.
+      3. Keep emojis to an absolute minimum or remove them entirely.
+      4. Ensure perfect grammar and clear sentence structure.`;
+    } 
+    else {
+      // For creative tones (Funny, Emotional, Sarcastic, etc.)
+      toneInstructions = `
+      1. Rewrite and polish the notes to perfectly match the "${selectedTone}" tone.
+      2. Make it highly engaging, expressive, and impactful.
+      3. You may use a natural conversational style (including Hinglish if it fits the vibe naturally), but heavily lean into the requested tone.
+      4. Add suitable emojis to match the vibe perfectly.`;
+    }
+
+    const prompt = `You are an expert editor and storyteller for a family vault app. 
+    Analyze the following text and modify it based strictly on the requested action/tone.
+    
+    Original Text: "${text}"
+    Requested Action/Tone: ${selectedTone}
     
     Instructions:
-    1. Do not invent new facts, just polish and expand the existing notes beautifully.
-    2. Write in a conversational "Hinglish" (Hindi + English) style that Indian families use on WhatsApp.
-    3. Add suitable emojis.
-    4. Output ONLY the finalized story paragraph, nothing else. No introductory text.
-    5. CRITICAL: Do NOT output any HTML tags. Only plain text.`;
+    ${toneInstructions}
+    - Output ONLY the finalized text. No introductory remarks, no quotes around the output.
+    - CRITICAL: Do NOT output any HTML tags. Only plain text.`;
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(prompt);
@@ -153,7 +183,7 @@ export const enhanceStory = async (req, res) => {
 };
 
 // ==============================================
-//  3. AI COPILOT: GENERATE TITLE
+// 🏷️ 3. AI COPILOT: GENERATE TITLE
 // ==============================================
 export const generateTitle = async (req, res) => {
   try {
@@ -164,12 +194,12 @@ export const generateTitle = async (req, res) => {
 
     if (!storyText) return res.status(400).json({ message: "Story text is required to generate a title!" });
 
-    //  SECURITY FIX: Payload Size Limit (Max 5000 chars to read for title)
+    // 🔒 SECURITY FIX: Payload Size Limit
     if (String(storyText).trim().length > 5000) {
       return res.status(400).json({ message: "Story is too long for title generation (Max 5000 characters)." });
     }
 
-    //  SECURITY FIX: Apply Rate Limiter
+    // 🔒 SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const prompt = `Read the following family story and generate exactly ONE short, catchy, and emotional title for it. 

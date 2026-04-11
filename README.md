@@ -1,24 +1,11 @@
-<!-- ============================================================ -->
-<!--           THE LEGACY TRUNK — README                         -->
-<!-- ============================================================ -->
-
 <div align="center">
 
-<br/>
-
-```
-✦  ᚦ ᛖ  ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ  ᛏ ᚱ ᚢ ᚾ ᚲ  ✦
-```
-
-<img src="./frontend/public/finall_logo.png" alt="The Legacy Trunk" width="130"/>
-
-<br/><br/>
-
 # ✦ &nbsp; THE LEGACY TRUNK &nbsp; ✦
-
 ### *A Dark Fantasy Family Memory Vault*
 
 > *"Every family has a story. Seal yours for the generations to come."*
+
+</div>
 
 <br/>
 
@@ -29,22 +16,15 @@
 ![Socket.io](https://img.shields.io/badge/⚡_Socket.io-d4a850?style=for-the-badge&labelColor=06080f)
 ![Gemini](https://img.shields.io/badge/🤖_Gemini_AI-d4a850?style=for-the-badge&labelColor=06080f)
 
-<br/>
 
----
-
-*Created & Developed by* &nbsp; **Ajay Thakur**
-
----
-
-<br/>
 
 </div>
 
 
 ## 📜 &nbsp; Table of Contents
+ 
 
-> [About](#%EF%B8%8F-about-the-project) &nbsp;·&nbsp; [Features](#%EF%B8%8F-live-features) &nbsp;·&nbsp; [Tech Stack](#%EF%B8%8F-tech-stack) &nbsp;·&nbsp; [Structure](#-project-structure) &nbsp;·&nbsp; [Setup](#-getting-started) &nbsp;·&nbsp; [API](#-api-routes) &nbsp;·&nbsp; [Design System](#-design-system) &nbsp;·&nbsp; [Contributing](#-contributing)
+**[About](#%EF%B8%8F-about-the-project)** &nbsp; ✦ &nbsp; **[Features](#-live-features)** &nbsp; ✦ &nbsp; **[Tech Stack](#%EF%B8%8F-tech-stack)** &nbsp; ✦ &nbsp; **[Structure](#-project-structure)** &nbsp; ✦ &nbsp; **[Setup](#-getting-started)** &nbsp; ✦ &nbsp; **[API](#-api-routes)**
 
 <br/>
 
@@ -515,175 +495,9 @@ npm run build
 
 <br/>
 
----
 
-<br/>
 
-## 🎨 Design System
 
-```
-  ✦  The Dark Fantasy Design System — applied on every single page  ✦
-```
-
-The Legacy Trunk uses a fully custom design system. Every component follows these rules exactly.
-
-<br/>
-
-### ✦ Color Palette
-
-```css
-/* Backgrounds */
---bg-cosmos:      #06080f                  /* Deep cosmos black — page background */
---bg-card:        rgba(12, 16, 32, 0.85)   /* Card & modal background */
-
-/* Gold Accents */
---gold-bright:    #e8c87a                  /* Headings, active states */
---gold-primary:   #d4a850                  /* Buttons, borders */
---gold-dim:       rgba(212, 168, 80, 0.22) /* Subtle card borders */
---gold-label:     rgba(212, 168, 80, 0.55) /* Monospace labels */
---gold-muted:     rgba(212, 168, 80, 0.18) /* Rune footer text */
-
-/* Text */
---text-primary:   rgba(255, 255, 255, 0.88) /* Main body text */
---text-secondary: rgba(255, 255, 255, 0.38) /* Italic muted text */
-
-/* Semantic */
---error:          #f08080                   /* on rgba(220, 60, 60, 0.12) bg */
---success:        #6ee87a                   /* on rgba(60, 168, 80, 0.10) bg */
---online:         #4ade80                   /* Online status dot */
-```
-
-<br/>
-
-### ✦ Typography
-
-```
-Headings    →  'Cinzel', serif
-               font-weight: 700
-               color: #e8c87a
-               text-shadow: 0 0 40px rgba(212,168,80,0.3)
-
-Body Text   →  'Cormorant Garamond', serif
-               font-style: italic
-               font-size: 16–18px
-
-Labels      →  'Space Mono', monospace
-               font-size: 9px
-               letter-spacing: 2.5px
-               text-transform: uppercase
-               color: rgba(212,168,80,0.55)
-```
-
-<br/>
-
-### ✦ Card & Modal Structure
-
-Every card and modal in the app follows this exact anatomy:
-
-```
-┌──────────────────────────────────────────┐  ← border: 1px solid rgba(212,168,80,0.22)
-│ ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔  │  ← Gold shimmer line top
-│ ◤                                    ◥  │  ← Corner accents (18×18px, 2-side gold border)
-│                                          │
-│      background: rgba(12,16,32,0.85)     │
-│      border-radius: 20px                 │
-│      box-shadow: 0 20px 60px rgba(0,0,0,0.6)
-│      + Mouse spotlight radial-gradient   │
-│        follows cursor on hover           │
-│                                          │
-│ ◣                                    ◢  │  ← Corner accents
-│ ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁  │  ← Gold shimmer line bottom (dimmer)
-└──────────────────────────────────────────┘
-```
-
-<br/>
-
-### ✦ Background Effects (every full-page component)
-
-```
-Layer 0 — CSS background: #06080f
-
-Layer 1 — <StarCanvas />
-           140+ gold dots (rgba 212,180,80) twinkle via sin wave opacity
-           Drawn on HTML5 <canvas> with requestAnimationFrame
-
-Layer 2 — <DustLayer />
-           18–24 gold/blue radial-gradient motes
-           Float upward via CSS @keyframes ltFloat
-           Random duration 6–14s, random delay 0–12s
-
-Layer 3 — Atmospheric radial-gradient overlay
-           rgba(212,130,40,0.05) glow from top-center
-```
-
-<br/>
-
-### ✦ Animation Keyframes
-
-```css
-@keyframes ltFloat      { /* Dust mote float: opacity 0→1→0, translate upward */   }
-@keyframes ltRingSpin   { /* Logo ring: rotate(0deg) → rotate(360deg) 18s */        }
-@keyframes ltShine      { /* Button shimmer sweep: left -100% → 150% */             }
-@keyframes ltDot        { /* Loading dot bounce: scale 0.6 → 1 → 0.6 */            }
-@keyframes ltPulseGlow  { /* Button glow pulse: box-shadow dim ↔ bright */          }
-@keyframes ltScrollRune { /* Top ticker: translateX(0) → translateX(-50%) */        }
-```
-
-<br/>
-
-### ✦ Page Transition Variants (`AnimatedPage.jsx`)
-
-```javascript
-'runeRise'   // Default — rises from depth with blur dissolve
-'vaultDoor'  // Vault door opens from center outward via clipPath
-'scroll'     // Ancient parchment unfurls from top via scaleY
-'goldFade'   // Gold shimmer dissolve via brightness + saturate filter
-```
-
-<br/>
-
-### ✦ Rune Footer
-
-Every card, modal, and page ends with:
-
-```
-✦   ᚦ ᛖ   ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ   ᛏ ᚱ ᚢ ᚾ ᚲ   ✦
-
-font-family: 'Cinzel', serif
-font-size: 10–11px | letter-spacing: 4–6px
-color: rgba(212,168,80,0.18) | user-select: none
-```
-
-<br/>
-
----
-
-<br/>
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow the existing **Dark Fantasy Design System** for all UI changes.
-
-```bash
-# 1. Fork the repo
-
-# 2. Create your feature branch
-git checkout -b feature/AmazingFeature
-
-# 3. Commit your changes
-git commit -m 'Add AmazingFeature'
-
-# 4. Push to your branch
-git push origin feature/AmazingFeature
-
-# 5. Open a Pull Request
-```
-
-<br/>
-
----
-
-<br/>
 
 ## 📄 License
 
@@ -716,7 +530,7 @@ Distributed under the **MIT License**.
 
 <div align="center">
 
-```
+```text
 ✦  ᚦ ᛖ  ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ  ᛏ ᚱ ᚢ ᚾ ᚲ  ✦
 ```
 
