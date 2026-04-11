@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import { createPortal } from 'react-dom'; // 🔥 Added createPortal to fix scroll issue
+import { createPortal } from 'react-dom'; 
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
@@ -10,7 +10,7 @@ import {
   removeMemberFromCircleApi, generateInviteLinkApi,
   sendFamilyInviteApi, deleteCircleApi
 } from '../../api/circleApi';
-import UpcomingEventsWidget from '../../components/dashboard/UpcomingEventsWidget';
+import UpcomingEventsWidget from './UpcomingEventsWidget';
 import VaultGateway from "../modals/VaultGateway";
 
 // ─── Star Canvas ─────────────────────────────────────────────────────────────
@@ -298,7 +298,6 @@ function DashboardPage() {
   const [inviteLink, setInviteLink] = useState('');
   const [inviteTab, setInviteTab] = useState('magic');
   
-  // 🔥 FIX: Custom Remove Modal State
   const [memberToRemove, setMemberToRemove] = useState(null);
 
   const isCircleAdmin = useMemo(() => {
@@ -341,7 +340,6 @@ function DashboardPage() {
     finally { setActiveAction(null); }
   };
 
-  // 🔥 FIX: Replaced window.confirm with Custom Modal Logic
   const handleRemoveClick = (memberId, memberName) => {
     if (!selectedCircleId) return toast.error('Select a circle first');
     setMemberToRemove({ id: memberId, name: memberName });
