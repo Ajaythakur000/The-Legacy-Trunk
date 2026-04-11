@@ -461,7 +461,10 @@ function FamilyRadarPage() {
               <MapContainer center={center} zoom={13} style={{height:'100%',width:'100%',zIndex:0}} scrollWheelZoom touchZoom dragging zoomControl={false}>
                 <TouchpadPanHandler/>
                 {/* 🔥 CHANGE 2: Naya TileLayer */}
-                <TileLayer attribution='&copy; <a href="https://stadia.maps.com">Stadia</a> &copy; <a href="https://openmaptiles.org">OpenMapTiles</a>' url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"/>
+                <TileLayer 
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      />
                 {myLocation&&!isGhostModeOn&&(
                   <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
                   <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color:'rgba(212,168,80,0.6)',fillColor:'rgba(212,168,80,0.06)',fillOpacity:1,weight:1}}/>
