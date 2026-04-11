@@ -88,6 +88,9 @@ const buildUserResponse = (user, bondPoints = 0) => ({
 const registerUser = async (req, res) => {
   try {
     let { name, email, password, role, familyCode, relationToAdmin } = req.body;
+    
+    // LOG 1: Start
+    console.log(`\n--- REGISTRATION FLOW STARTED FOR: ${email} ---`);
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'name, email and password are required' });
@@ -102,6 +105,9 @@ const registerUser = async (req, res) => {
     relationToAdmin = relationToAdmin ? relationToAdmin.trim() : '';
 
     let userExists = await FamilyMember.findOne({ email });
+    
+    // LOG 2: Existing User Check
+    console.log("-> 1. Checked existing user. Exists?", !!userExists);
 
     if (userExists && userExists.isVerified) {
       return res.status(400).json({ message: 'User already exists' });
@@ -112,6 +118,7 @@ const registerUser = async (req, res) => {
         });
       }
       await FamilyMember.deleteOne({ email });
+      console.log("-> 1.5. Cleaned up unverified existing user.");
     }
 
     let circleId;
@@ -132,12 +139,17 @@ const registerUser = async (req, res) => {
       finalFamilyCode = normalizedCode;
     }
 
+    // LOG 3: Setup done, moving to DB creation
+    console.log("-> 2. Role & Circle setup done. Role:", role);
+
     const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const salt = await bcrypt.genSalt(10);
     const hashedOtp = await bcrypt.hash(plainOtp, salt);
 
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
+    // LOG 4: DB Creation start
+    console.log("-> 3. Creating user in Database...");
     const user = await FamilyMember.create({
       name,
       email,
@@ -152,6 +164,8 @@ const registerUser = async (req, res) => {
       otpAttempts: 0,
       otpBlockedUntil: null,
     });
+    // LOG 5: DB Creation success
+    console.log("-> 4. User created in DB successfully. ID:", user._id);
 
     if (role === 'admin') {
       const newCircle = await FamilyCircle.create({
@@ -168,6 +182,9 @@ const registerUser = async (req, res) => {
       });
     }
 
+    // LOG 6: Before sending email
+    console.log("-> 5. Attempting to send OTP email via Nodemailer...");
+    
     //  Using Premium Welcome Template
     const mailResult = await sendOtpEmail({
       to: user.email,
@@ -175,6 +192,10 @@ const registerUser = async (req, res) => {
       otpPlain: plainOtp,
       otpHtml: getWelcomeOtpTemplate(user.name, plainOtp),
     });
+
+    // LOG 7: After sending email
+    console.log("-> 6. Email send process finished. Result:", mailResult.ok);
+    console.log("--- REGISTRATION FLOW ENDED ---\n");
 
     return res.status(201).json({
       message: mailResult.ok
@@ -185,7 +206,7 @@ const registerUser = async (req, res) => {
       mailSent: mailResult.ok,
     });
   } catch (error) {
-    console.error('Register Error:', error.message);
+    console.error('Register Error (Caught in Catch Block):', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
