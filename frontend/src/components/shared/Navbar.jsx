@@ -448,7 +448,8 @@ const GLOBAL_CSS = `
   .lt-profile-box {
     min-width:235px; background:rgba(8,10,22,0.98);
     border:1px solid rgba(212,168,80,0.2); border-radius:16px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.7); overflow:hidden; position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,168,80,0.05);
+    overflow:hidden; position:relative;
   }
   .lt-profile-box::before {
     content:''; position:absolute; top:0; left:15%; right:15%; height:1px;
@@ -510,18 +511,96 @@ const GLOBAL_CSS = `
 `;
 
 // ─── RUNE CRYSTAL ─────────────────────────────────────────────────────────────
-function RuneCrystal({ lit }) {
-  const c  = lit ? '#e8c87a'             : 'rgba(212,168,80,0.3)';
-  const cm = lit ? 'rgba(232,200,122,0.65)' : 'rgba(212,168,80,0.12)';
-  const cf = lit ? 'rgba(212,168,80,0.16)' : 'rgba(212,168,80,0.04)';
+// 🔥 ALCHEMIST VIAL UPDATE: Liquid fills up based on streak!
+function RuneCrystal({ lit, streak = 0 }) {
+  // liquid fill level: 0 streak=empty, scales up to 100% at streak 10+
+  const fillPct = lit ? Math.min(100, 18 + Math.min(streak, 10) * 8.2) : 0;
+  const vialTop = 6.5;
+  const vialBot = 20.5;
+  const vialH   = vialBot - vialTop;
+  const liquidY = vialBot - (fillPct / 100) * vialH; // liquid surface Y
+
+  const stroke  = lit ? '#e8c87a'                : 'rgba(212,168,80,0.35)';
+  const liquidT = lit ? 'rgba(255,210,60,0.80)'  : 'transparent';
+  const liquidB = lit ? 'rgba(232,140,30,0.95)'  : 'transparent';
+  const glowCol = lit ? 'rgba(255,200,50,0.30)'  : 'transparent';
+  const uid     = 'avial'; // unique id prefix for defs
+
   return (
-    <svg className="lt-rune-crystal" viewBox="0 0 18 22" fill="none">
-      <polygon points="9,1 16,7 13,20 5,20 2,7" fill={cf} stroke={c} strokeWidth="1"/>
-      <polygon points="9,3 14,7.5 9,11 4,7.5" fill={cm} opacity="0.4"/>
-      <polygon points="9,11 13,13 9,19 5,13" fill={cm} opacity="0.22"/>
-      <line x1="9" y1="3" x2="9" y2="19" stroke={c} strokeWidth="0.5" opacity="0.5"/>
-      <text x="9" y="15.5" textAnchor="middle" fontSize="5.5" fill={c} opacity="0.85" fontFamily="serif">ᛋ</text>
-      <line x1="7" y1="2" x2="11" y2="2" stroke={c} strokeWidth="1" strokeLinecap="round"/>
+    <svg
+      className="lt-rune-crystal"
+      viewBox="0 0 18 26"
+      fill="none"
+      style={{ width: 18, height: 22, overflow: 'visible', flexShrink: 0 }}
+    >
+      <defs>
+        {/* liquid gradient top=bright, bottom=deep amber */}
+        <linearGradient id={`${uid}lg`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={liquidT} />
+          <stop offset="100%" stopColor={liquidB} />
+        </linearGradient>
+        {/* clip to vial interior so liquid never overflows glass */}
+        <clipPath id={`${uid}cp`}>
+          <rect x="4.8" y="6.5" width="8.4" height="14" rx="3.8" />
+        </clipPath>
+      </defs>
+
+      {/* ── CORK ── */}
+      <rect x="6.2" y="1" width="5.6" height="3.6" rx="1.3"
+        fill={lit ? 'rgba(180,130,40,0.7)' : 'rgba(212,168,80,0.15)'}
+        stroke={stroke} strokeWidth="0.65" />
+      {/* cork texture lines */}
+      <line x1="7.8"  y1="1.5" x2="7.8"  y2="4.4" stroke={stroke} strokeWidth="0.35" opacity="0.55" />
+      <line x1="9"    y1="1.5" x2="9"    y2="4.4" stroke={stroke} strokeWidth="0.35" opacity="0.55" />
+      <line x1="10.2" y1="1.5" x2="10.2" y2="4.4" stroke={stroke} strokeWidth="0.35" opacity="0.55" />
+
+      {/* ── NECK ── */}
+      <rect x="6.6" y="4.6" width="4.8" height="2.2" rx="0.6"
+        fill="rgba(212,168,80,0.04)" stroke={stroke} strokeWidth="0.55" />
+
+      {/* ── VIAL BODY (glass) ── */}
+      <rect x="4.4" y="6.5" width="9.2" height="14" rx="4.2"
+        fill="rgba(255,255,255,0.03)" stroke={stroke} strokeWidth="0.85" />
+
+      {/* ── LIQUID (fills from bottom up based on streak) ── */}
+      {lit && fillPct > 0 && (
+        <>
+          {/* main liquid body */}
+          <rect
+            x="4.4" y={liquidY}
+            width="9.2" height={vialBot - liquidY + 4.2}
+            rx="4.2"
+            fill={`url(#${uid}lg)`}
+            clipPath={`url(#${uid}cp)`}
+          />
+          {/* liquid surface shimmer */}
+          <line
+            x1="6"  y1={liquidY + 0.6}
+            x2="12" y2={liquidY + 0.6}
+            stroke="rgba(255,240,140,0.7)" strokeWidth="0.55"
+            clipPath={`url(#${uid}cp)`}
+          />
+          {/* small rising bubble 1 */}
+          <circle cx="7.8"  cy={liquidY + 3.5} r="0.85"
+            fill="rgba(255,240,100,0.38)"
+            clipPath={`url(#${uid}cp)`}
+          />
+          {/* small rising bubble 2 */}
+          <circle cx="10.5" cy={liquidY + 7}   r="0.6"
+            fill="rgba(255,240,100,0.28)"
+            clipPath={`url(#${uid}cp)`}
+          />
+        </>
+      )}
+
+      {/* ── GLASS HIGHLIGHT (left edge reflection) ── */}
+      <line x1="6.0" y1="8.5" x2="6.0" y2="19"
+        stroke="rgba(255,255,255,0.15)" strokeWidth="0.9" strokeLinecap="round" />
+
+      {/* ── BOTTOM AMBIENT GLOW (only when lit) ── */}
+      {lit && (
+        <ellipse cx="9" cy="21.2" rx="3.8" ry="0.9" fill={glowCol} />
+      )}
     </svg>
   );
 }
@@ -754,7 +833,8 @@ function Navbar({ children }) {
               {/* ── RUNE CRYSTAL STREAK ── */}
               <div className={`lt-streak-wrap${currentStreak>0?' lt-streak-lit':''}`}
                 title={currentStreak>0?`Legacy Streak: ${currentStreak} Days`:'Post a memory to ignite your streak'}>
-                <RuneCrystal lit={currentStreak>0}/>
+                {/* 🔥 UPDATED VIAL USE HERE 🔥 */}
+                <RuneCrystal lit={currentStreak>0} streak={currentStreak}/>
                 {currentStreak>0
                   ? <span className="lt-streak-num">{currentStreak}</span>
                   : <span className="lt-streak-label">Streak</span>

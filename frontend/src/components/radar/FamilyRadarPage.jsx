@@ -73,8 +73,37 @@ const CSS = `
   }
   .fr-map-chamber::before { content:''; position:absolute; top:0; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent); z-index:20; pointer-events:none; }
   .fr-map-chamber::after  { content:''; position:absolute; bottom:0; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,rgba(212,168,80,0.25),transparent); z-index:20; pointer-events:none; }
+  
   .fr-map-inner { height: 520px; position: relative; }
-  .fr-map-inner .leaflet-container { height:100%; width:100%; background:#020617 !important; filter:brightness(0.88) contrast(1.15) saturate(1.3) hue-rotate(10deg); }
+  
+  /* 🔥 CHANGE 1: Naya Map CSS Filter */
+  .fr-map-inner .leaflet-container { 
+    height: 100%; width: 100%; background: #020617 !important; 
+    filter: brightness(0.72) contrast(1.35) saturate(0.45) sepia(0.55) hue-rotate(5deg) invert(0); 
+  }
+  .fr-map-inner .leaflet-tile-container {
+    filter: brightness(1) contrast(1.1);
+  }
+
+  /* 🔥 CHANGE 4: Map vignette & glow edges */
+  .fr-map-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(6,8,15,0.55) 75%, rgba(6,8,15,0.85) 100%);
+    pointer-events: none;
+    z-index: 15;
+  }
+  .fr-map-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top left, rgba(212,168,80,0.08) 0%, transparent 45%),
+                radial-gradient(ellipse at bottom right, rgba(212,168,80,0.06) 0%, transparent 45%);
+    pointer-events: none;
+    z-index: 14;
+  }
+
   .fr-corner { position:absolute; width:22px; height:22px; border-color:rgba(212,168,80,0.6); border-style:solid; z-index:30; pointer-events:none; }
   .fr-corner-tl { top:12px; left:12px;  border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
   .fr-corner-tr { top:12px; right:12px; border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
@@ -254,7 +283,8 @@ function DustLayer() {
 function RadarOverlay({width,height}){
   const cx=width/2,cy=height/2,maxR=Math.min(width,height)*0.48;
   return(
-    <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',opacity:0.18,pointerEvents:'none',zIndex:25}} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice">
+    /* 🔥 CHANGE 3: Opacity badhayi for better radar feel */
+    <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',opacity:0.28,pointerEvents:'none',zIndex:25}} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice">
       <defs>
         <radialGradient id="frSG" cx="0%" cy="50%" r="100%"><stop offset="0%" stopColor="rgba(212,168,80,0.55)"/><stop offset="100%" stopColor="rgba(212,168,80,0)"/></radialGradient>
         <radialGradient id="frCG" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="rgba(212,168,80,0.12)"/><stop offset="100%" stopColor="rgba(212,168,80,0)"/></radialGradient>
@@ -430,7 +460,8 @@ function FamilyRadarPage() {
             <div className="fr-map-inner" ref={chamberRef}>
               <MapContainer center={center} zoom={13} style={{height:'100%',width:'100%',zIndex:0}} scrollWheelZoom touchZoom dragging zoomControl={false}>
                 <TouchpadPanHandler/>
-                <TileLayer attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"/>
+                {/* 🔥 CHANGE 2: Naya TileLayer */}
+                <TileLayer attribution='&copy; <a href="https://stadia.maps.com">Stadia</a> &copy; <a href="https://openmaptiles.org">OpenMapTiles</a>' url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"/>
                 {myLocation&&!isGhostModeOn&&(
                   <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
                   <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color:'rgba(212,168,80,0.6)',fillColor:'rgba(212,168,80,0.06)',fillOpacity:1,weight:1}}/>

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom'; // 🔥 Added createPortal to fix scroll issue
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import {
   createCircleApi, getCircleByIdApi, getMyCirclesApi,
   removeMemberFromCircleApi, generateInviteLinkApi,
@@ -286,8 +288,10 @@ function DashboardPage() {
   const [loadingCircles, setLoadingCircles] = useState(false);
   const [loadingCircleDetails, setLoadingCircleDetails] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -298,8 +302,6 @@ function DashboardPage() {
     if (!selectedCircle || !user?._id) return false;
     return String(selectedCircle?.admin?._id || selectedCircle?.admin) === String(user._id);
   }, [selectedCircle, user]);
-
-  const clearFlash = () => { setError(''); setSuccess(''); };
 
   const loadMyCircles = async () => {
     setLoadingCircles(true);
@@ -324,55 +326,61 @@ function DashboardPage() {
   }, [selectedCircleId]);
 
   const handleCreateCircle = async (e) => {
-    e.preventDefault(); clearFlash();
-    if (!newCircleName.trim()) return setError('Circle name is required');
+    e.preventDefault(); 
+    if (!newCircleName.trim()) return toast.error('Circle name is required');
     setActiveAction('createCircle');
     try {
       const created = await createCircleApi({ circleName: newCircleName.trim() });
-      setSuccess(`Family "${created.circleName}" created!`);
+      toast.success(`Family "${created.circleName}" created!`);
       setNewCircleName(''); await loadMyCircles();
       if (created?._id) setSelectedCircleId(created._id);
-    } catch (e2) { setError(e2?.response?.data?.message || 'Failed to create circle'); }
+    } catch (e2) { toast.error(e2?.response?.data?.message || 'Failed to create circle'); }
     finally { setActiveAction(null); }
   };
 
   const handleRemoveMember = async (memberId, memberName) => {
-    clearFlash();
-    if (!selectedCircleId) return setError('Select a circle first');
+    if (!selectedCircleId) return toast.error('Select a circle first');
     if (!window.confirm(`Remove ${memberName} from this family?`)) return;
     setActiveAction(`remove_${memberId}`);
-    try { await removeMemberFromCircleApi(selectedCircleId, memberId); setSuccess(`${memberName} removed.`); await loadCircleDetails(selectedCircleId); }
-    catch (e2) { setError(e2?.response?.data?.message || 'Failed to remove'); }
+    try { await removeMemberFromCircleApi(selectedCircleId, memberId); toast.success(`${memberName} removed.`); await loadCircleDetails(selectedCircleId); }
+    catch (e2) { toast.error(e2?.response?.data?.message || 'Failed to remove'); }
     finally { setActiveAction(null); }
   };
 
   const handleSendDirectInvite = async (e) => {
-    e.preventDefault(); clearFlash();
-    if (!inviteEmail.trim()) return setError('Enter an email address');
+    e.preventDefault(); 
+    if (!inviteEmail.trim()) return toast.error('Enter an email address');
     setActiveAction('sendInvite');
-    try { const res = await sendFamilyInviteApi(selectedCircleId, { email: inviteEmail.trim() }); setSuccess(res.message); setInviteEmail(''); }
-    catch (err) { setError(err?.response?.data?.message || 'Failed to send invite'); }
+    try { const res = await sendFamilyInviteApi(selectedCircleId, { email: inviteEmail.trim() }); toast.success(res.message); setInviteEmail(''); }
+    catch (err) { toast.error(err?.response?.data?.message || 'Failed to send invite'); }
     finally { setActiveAction(null); }
   };
 
-  const handleDeleteCircle = async () => {
-    clearFlash();
-    const confirmName = window.prompt(`DANGER: Type "${selectedCircle?.circleName}" to permanently delete:`);
-    if (confirmName !== selectedCircle?.circleName) { if (confirmName !== null) setError('Name mismatch. Cancelled.'); return; }
+  const triggerDeleteModal = () => {
+    setDeleteConfirmText('');
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteCircle = async () => {
+    if (deleteConfirmText !== selectedCircle?.circleName) { 
+      toast.error('Name mismatch. Vault not deleted.'); 
+      return; 
+    }
+    setShowDeleteModal(false);
     setActiveAction('deleteCircle');
     try {
       await deleteCircleApi(selectedCircleId);
-      setSuccess(`Family "${selectedCircle?.circleName}" deleted.`);
+      toast.success(`Family "${selectedCircle?.circleName}" deleted.`);
       const data = await getMyCirclesApi(); const list = Array.isArray(data) ? data : []; setCircles(list);
       if (list.length > 0) setSelectedCircleId(list[0]._id); else { setSelectedCircleId(''); setSelectedCircle(null); }
-    } catch (err) { setError(err?.response?.data?.message || 'Failed to delete'); }
+    } catch (err) { toast.error(err?.response?.data?.message || 'Failed to delete'); }
     finally { setActiveAction(null); }
   };
 
   const handleGenerateInvite = async () => {
-    clearFlash(); setActiveAction('generateLink');
+    setActiveAction('generateLink');
     try { const data = await generateInviteLinkApi(selectedCircleId); const fullUrl = `${window.location.origin}/invite/${data.token}`; setInviteLink(fullUrl); setShowInviteModal(true); }
-    catch (err) { setError(err?.response?.data?.message || 'Failed to generate link'); }
+    catch (err) { toast.error(err?.response?.data?.message || 'Failed to generate link'); }
     finally { setActiveAction(null); }
   };
 
@@ -422,7 +430,6 @@ function DashboardPage() {
 
       {/* ── HERO HEADER ── */}
       <div style={{ position: 'relative', paddingTop: 26, overflow: 'hidden' }}>
-        {/* Atmospheric gradient behind hero */}
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,130,40,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         <motion.div
@@ -468,7 +475,6 @@ function DashboardPage() {
             </motion.div>
           )}
 
-          {/* Decorative rune divider */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, marginTop: 28 }}>
             <div style={{ flex: 1, maxWidth: 150, height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.25))' }} />
             <span style={{ fontFamily: "'Cinzel',serif", fontSize: 12, letterSpacing: 7, color: 'rgba(212,168,80,0.2)' }}>✦ ᚦ ᛖ ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ ✦</span>
@@ -476,7 +482,6 @@ function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Bottom gold beam */}
         <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.4),rgba(212,168,80,0.4),transparent)', animation: 'ltBeam 4s ease-in-out infinite' }} />
       </div>
 
@@ -497,24 +502,6 @@ function DashboardPage() {
           </div>
           <div style={{ flex: 1, height: 1, background: 'linear-gradient(270deg,rgba(212,168,80,0.3),transparent)' }} />
         </motion.div>
-
-        {/* ── ALERTS ── */}
-        <AnimatePresence>
-          {error && (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              style={{ background: 'rgba(220,60,60,0.12)', border: '1px solid rgba(220,60,60,0.3)', borderRadius: 14, padding: '13px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Space Mono',monospace", fontSize: 11, color: '#f08080' }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#f08080" strokeWidth="2" style={{ width: 14, height: 14, flexShrink: 0 }}><circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" /></svg>
-              {error}
-            </motion.div>
-          )}
-          {success && (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              style={{ background: 'rgba(60,168,80,0.10)', border: '1px solid rgba(60,168,80,0.3)', borderRadius: 14, padding: '13px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Space Mono',monospace", fontSize: 11, color: '#6ee87a' }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#6ee87a" strokeWidth="2" style={{ width: 14, height: 14, flexShrink: 0 }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-              {success}
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* ── MAIN GRID ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
@@ -553,10 +540,8 @@ function DashboardPage() {
           {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-            {/* Upcoming Events */}
             {selectedCircleId && <UpcomingEventsWidget circleId={selectedCircleId} />}
 
-            {/* Found a New Family (MOVED HERE) */}
             <SectionCard>
               <div style={{ fontFamily: "'Cinzel',serif", fontSize: 16, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 20px rgba(212,168,80,0.3)', marginBottom: 4 }}>
                 Create a New Vault
@@ -583,7 +568,6 @@ function DashboardPage() {
               </form>
             </SectionCard>
 
-            {/* Invite Panel */}
             {isCircleAdmin ? (
               <SectionCard>
                 <div style={{ marginBottom: 20 }}>
@@ -595,7 +579,6 @@ function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Invite tabs */}
                 <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(212,168,80,0.15)', padding: 4, borderRadius: 12, marginBottom: 20, gap: 3 }}>
                   {[
                     { key: 'magic', label: '🪄 Magic Link' },
@@ -685,7 +668,6 @@ function DashboardPage() {
               </SectionCard>
             )}
 
-            {/* Danger Zone */}
             {isCircleAdmin && selectedCircleId && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
                 style={{ background: 'rgba(220,38,38,0.06)', border: '1px dashed rgba(220,38,38,0.3)', borderRadius: 20, padding: '24px 28px', position: 'relative', overflow: 'hidden' }}>
@@ -695,7 +677,7 @@ function DashboardPage() {
                 <p style={{ fontStyle: 'italic', fontSize: 14, color: 'rgba(240,128,128,0.55)', marginBottom: 18, marginTop: 0, lineHeight: 1.6 }}>
                   Permanently erase this family vault. This cannot be undone.
                 </p>
-                <motion.button onClick={handleDeleteCircle} disabled={!!activeAction}
+                <motion.button onClick={triggerDeleteModal} disabled={!!activeAction}
                   whileHover={!activeAction ? { scale: 1.02 } : {}} whileTap={!activeAction ? { scale: 0.97 } : {}}
                   style={{ width: '100%', padding: '12px', background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)', borderRadius: 10, color: '#f08080', fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', cursor: activeAction ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: activeAction === 'deleteCircle' ? 0.6 : 1 }}
                   onMouseEnter={e => { if (!activeAction) { e.currentTarget.style.background = 'rgba(220,38,38,0.25)'; e.currentTarget.style.color = '#ff6b6b'; } }}
@@ -711,72 +693,127 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* Rune footer */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
           style={{ textAlign: 'center', marginTop: 60, fontFamily: "'Cinzel',serif", fontSize: 11, letterSpacing: 6, color: 'rgba(212,168,80,0.12)', userSelect: 'none' }}>
           ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
         </motion.div>
       </div>
 
-      {/* ── INVITE MODAL ── */}
-      <AnimatePresence>
-        {showInviteModal && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 }}
-            onClick={e => { if (e.target === e.currentTarget) setShowInviteModal(false); }}
-          >
+      {/* ── CUSTOM DELETE MODAL ── */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showDeleteModal && (
             <motion.div
-              initial={{ scale: 0.88, y: 28, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.88, y: 28, opacity: 0 }}
-              transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-              style={{ background: 'rgba(12,16,32,0.98)', border: '1px solid rgba(212,168,80,0.28)', borderRadius: 24, width: '100%', maxWidth: 420, padding: '44px 36px', position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.9), inset 0 1px 0 rgba(212,168,80,0.15)', textAlign: 'center' }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: 20 }}
+              onClick={e => { if (e.target === e.currentTarget) setShowDeleteModal(false); }}
             >
-              <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.8),transparent)' }} />
-              <CornerAccents />
+              <motion.div
+                initial={{ scale: 0.88, y: 28, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.88, y: 28, opacity: 0 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                style={{ background: 'rgba(18,10,10,0.98)', border: '1px solid rgba(220,60,60,0.3)', borderRadius: 24, width: '100%', maxWidth: 420, padding: '44px 36px', position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.9), inset 0 1px 0 rgba(220,60,60,0.15)', textAlign: 'center' }}
+              >
+                <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(220,60,60,0.6),transparent)' }} />
+                <CornerAccents />
 
-              <button onClick={() => setShowInviteModal(false)}
-                style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(212,168,80,0.22)', background: 'rgba(255,255,255,0.04)', color: 'rgba(212,168,80,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.7)'; e.currentTarget.style.color = '#e8c87a'; e.currentTarget.style.background = 'rgba(212,168,80,0.1)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(212,168,80,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}>
-                ✕
-              </button>
+                <button onClick={() => setShowDeleteModal(false)}
+                  style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(220,60,60,0.22)', background: 'rgba(255,255,255,0.04)', color: 'rgba(220,60,60,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(220,60,60,0.7)'; e.currentTarget.style.color = '#f08080'; e.currentTarget.style.background = 'rgba(220,60,60,0.1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(220,60,60,0.22)'; e.currentTarget.style.color = 'rgba(220,60,60,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}>
+                  ✕
+                </button>
 
-              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 30px rgba(212,168,80,0.3)', marginBottom: 6 }}>
-                Vault Entry Portal
-              </div>
-              <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.35)', marginBottom: 24, marginTop: 0 }}>
-                Scan to enter the family vault. Valid for 48 hours.
-              </p>
-
-              {/* QR Code */}
-              <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(212,168,80,0.25)', borderRadius: 18, padding: 20, display: 'inline-block', marginBottom: 24, position: 'relative' }}>
-                <CornerAccents size={12} inset={8} opacity={0.5} />
-                <div style={{ background: '#fff', padding: 12, borderRadius: 8, display: 'inline-block' }}>
-                  <QRCodeSVG value={inviteLink} size={170} fgColor="#06080f" />
+                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#f08080', textShadow: '0 0 30px rgba(220,60,60,0.3)', marginBottom: 6 }}>
+                  Destroy Vault
                 </div>
-              </div>
+                <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.4)', marginBottom: 24, marginTop: 0 }}>
+                  This action is irreversible. Type <strong style={{ color: '#e8c87a', fontStyle: 'normal' }}>{selectedCircle?.circleName}</strong> to confirm.
+                </p>
 
-              {/* Link copy */}
-              <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(212,168,80,0.2)', borderRadius: 12, display: 'flex', overflow: 'hidden' }}>
-                <input type="text" value={inviteLink} readOnly
-                  style={{ flex: 1, background: 'transparent', border: 'none', padding: '11px 14px', fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(212,168,80,0.5)', outline: 'none', letterSpacing: '0.5px' }} />
-                <motion.button onClick={handleCopyLink}
+                <div style={{ marginBottom: 24, textAlign: 'left' }}>
+                  <DarkInput 
+                    value={deleteConfirmText} 
+                    onChange={(e) => setDeleteConfirmText(e.target.value)} 
+                    placeholder="Type vault name here..." 
+                  />
+                </div>
+
+                <motion.button onClick={confirmDeleteCircle}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                  style={{ background: linkCopied ? 'rgba(74,222,128,0.2)' : 'linear-gradient(135deg,#c9933a,#e8a820)', border: 'none', padding: '0 20px', color: linkCopied ? '#4ade80' : '#1a0f00', fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s', position: 'relative', overflow: 'hidden' }}>
-                  {!linkCopied && <div style={{ position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)', transform: 'skewX(-20deg)', animation: 'ltShine 3s ease-in-out infinite' }} />}
-                  {linkCopied ? '✓ Copied!' : 'Copy ✦'}
+                  style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg,rgba(220,38,38,0.8),rgba(185,28,28,0.8))', border: '1px solid rgba(255,100,100,0.3)', borderRadius: 12, color: '#ffffff', fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s', position: 'relative', overflow: 'hidden' }}>
+                  Confirm Destruction
                 </motion.button>
-              </div>
-
-              <div style={{ marginTop: 18, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: 4, color: 'rgba(212,168,80,0.15)', userSelect: 'none' }}>
-                ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      {/* ── INVITE MODAL ── */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showInviteModal && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: 20 }}
+              onClick={e => { if (e.target === e.currentTarget) setShowInviteModal(false); }}
+            >
+              <motion.div
+                initial={{ scale: 0.88, y: 28, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.88, y: 28, opacity: 0 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                style={{ background: 'rgba(12,16,32,0.98)', border: '1px solid rgba(212,168,80,0.28)', borderRadius: 24, width: '100%', maxWidth: 420, padding: '44px 36px', position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.9), inset 0 1px 0 rgba(212,168,80,0.15)', textAlign: 'center' }}
+              >
+                <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.8),transparent)' }} />
+                <CornerAccents />
+
+                <button onClick={() => setShowInviteModal(false)}
+                  style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(212,168,80,0.22)', background: 'rgba(255,255,255,0.04)', color: 'rgba(212,168,80,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.7)'; e.currentTarget.style.color = '#e8c87a'; e.currentTarget.style.background = 'rgba(212,168,80,0.1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(212,168,80,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}>
+                  ✕
+                </button>
+
+                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 30px rgba(212,168,80,0.3)', marginBottom: 6 }}>
+                  Vault Entry Portal
+                </div>
+                <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.35)', marginBottom: 24, marginTop: 0 }}>
+                  Scan to enter the family vault. Valid for 48 hours.
+                </p>
+
+                {/* QR Code */}
+                <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(212,168,80,0.25)', borderRadius: 18, padding: 20, display: 'inline-block', marginBottom: 24, position: 'relative' }}>
+                  <CornerAccents size={12} inset={8} opacity={0.5} />
+                  <div style={{ background: '#fff', padding: 12, borderRadius: 8, display: 'inline-block' }}>
+                    <QRCodeSVG value={inviteLink} size={170} fgColor="#06080f" />
+                  </div>
+                </div>
+
+                {/* Link copy */}
+                <div style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(212,168,80,0.2)', borderRadius: 12, display: 'flex', overflow: 'hidden' }}>
+                  <input type="text" value={inviteLink} readOnly
+                    style={{ flex: 1, background: 'transparent', border: 'none', padding: '11px 14px', fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(212,168,80,0.5)', outline: 'none', letterSpacing: '0.5px' }} />
+                  <motion.button onClick={handleCopyLink}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                    style={{ background: linkCopied ? 'rgba(74,222,128,0.2)' : 'linear-gradient(135deg,#c9933a,#e8a820)', border: 'none', padding: '0 20px', color: linkCopied ? '#4ade80' : '#1a0f00', fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s', position: 'relative', overflow: 'hidden' }}>
+                    {!linkCopied && <div style={{ position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)', transform: 'skewX(-20deg)', animation: 'ltShine 3s ease-in-out infinite' }} />}
+                    {linkCopied ? '✓ Copied!' : 'Copy ✦'}
+                  </motion.button>
+                </div>
+
+                <div style={{ marginTop: 18, fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: 4, color: 'rgba(212,168,80,0.15)', userSelect: 'none' }}>
+                  ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

@@ -16,27 +16,88 @@ function CornerAccents({ size = 14, inset = 10, opacity = 0.3 }) {
   );
 }
 
-function ActionButton({ onClick, title, active, activeColor = '#e8c87a', children, style: extraStyle }) {
-  const [hovered, setHovered] = useState(false);
+// Gold gradient def — shared across icons
+const GOLD_GRAD_ID = 'ltShieldGrad';
+const GoldGradDef = () => (
+  <defs>
+    <linearGradient id={GOLD_GRAD_ID} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stopColor="rgba(232,200,122,0.95)" />
+      <stop offset="100%" stopColor="rgba(180,130,40,0.75)" />
+    </linearGradient>
+  </defs>
+);
+
+// ── Curio Button shell ────────────────────────────────────────────────────────
+function CurioBtn({ onClick, active, children, style: extra, className = '' }) {
+  const [hov, setHov] = useState(false);
   return (
     <motion.button
-      onClick={onClick} title={title}
-      whileHover={{ scale: 1.15, y: -2 }}
-      whileTap={{ scale: 0.9 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      whileHover={{ scale: 1.05, y: -2 }}
+      whileTap={{ scale: 0.94 }}
+      className={className}
       style={{
-        background: hovered ? `rgba(212,168,80,0.08)` : 'transparent',
-        border: `1px solid ${hovered || active ? 'rgba(212,168,80,0.3)' : 'transparent'}`,
-        borderRadius: 10, padding: '8px 10px',
-        display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer',
-        transition: 'all 0.2s', ...extraStyle,
+        position: 'relative',
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '9px 13px',
+        borderRadius: 12,
+        border: `1px solid ${hov || active ? 'rgba(212,168,80,0.38)' : 'rgba(212,168,80,0.12)'}`,
+        background: hov
+          ? 'linear-gradient(135deg,rgba(212,168,80,0.08),rgba(212,168,80,0.03))'
+          : 'rgba(12,16,32,0.55)',
+        cursor: 'pointer',
+        transition: 'border-color .25s, background .25s',
+        boxShadow: hov ? '0 8px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(212,168,80,0.08)' : 'none',
+        ...extra,
       }}
     >
       {children}
     </motion.button>
   );
 }
+
+// ── Icon medallion ────────────────────────────────────────────────────────────
+function IconMedallion({ active, activeGlow = 'rgba(212,168,80,0.35)', pulse = false, children }) {
+  return (
+    <div style={{
+      width: 36, height: 36, borderRadius: '50%',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+      background: active
+        ? 'radial-gradient(circle at 35% 35%,rgba(212,168,80,0.45),rgba(180,130,40,0.25))'
+        : 'radial-gradient(circle at 35% 35%,rgba(212,168,80,0.14),rgba(212,168,80,0.05))',
+      border: `1px solid ${active ? 'rgba(212,168,80,0.65)' : 'rgba(212,168,80,0.2)'}`,
+      boxShadow: active
+        ? `0 0 ${pulse ? '20px' : '12px'} ${activeGlow}, inset 0 1px 0 rgba(255,255,255,0.1)`
+        : 'inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2)',
+      transition: 'all .35s',
+      animation: active && pulse ? 'ltIconPulse 2.5s ease-in-out infinite' : 'none',
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// ── Curio label ───────────────────────────────────────────────────────────────
+function CurioLabel({ count, name, active, activeColor = '#e8c87a' }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, letterSpacing: '0.5px', color: active ? activeColor : 'rgba(212,168,80,0.5)', lineHeight: 1, transition: 'color .25s' }}>
+        {count}
+      </span>
+      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '2px', textTransform: 'uppercase', color: active ? 'rgba(212,168,80,0.6)' : 'rgba(212,168,80,0.3)', lineHeight: 1, marginTop: 3, transition: 'color .25s' }}>
+        {name}
+      </span>
+    </div>
+  );
+}
+
+// ── Separator ─────────────────────────────────────────────────────────────────
+const BarSep = () => (
+  <div style={{ width: 1, height: 36, background: 'rgba(212,168,80,0.1)', flexShrink: 0, margin: '0 2px' }} />
+);
 
 function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) {
   const isAuthor = Boolean(currentUser?._id && story?.user?._id && String(story.user._id) === String(currentUser._id));
@@ -209,6 +270,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             {/* Avatar */}
             <div style={{ position: 'relative' }}>
+              {/* 🔥 FIXED BUG: justifyContent instead of justify-content */}
               <div style={{ width: 50, height: 50, borderRadius: '50%', border: '1.5px solid rgba(212,168,80,0.45)', overflow: 'hidden', background: 'linear-gradient(135deg,#1a1410,#0f0c08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {story?.user?.avatar ? (
                   <img src={story.user.avatar} alt={story?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -302,39 +364,194 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete, onEdit }) 
 
         {/* ── ACTION BAR ── */}
         {!isEditing && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 28, paddingTop: 18, borderTop: '1px solid rgba(212,168,80,0.1)', flexWrap: 'wrap' }}>
-            {/* Like */}
-            <ActionButton onClick={() => typeof onLike === 'function' && onLike(story._id)} title="Protect Memory" active={isLikedByMe}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={isLikedByMe ? '#e8c87a' : 'none'} stroke={isLikedByMe ? '#e8c87a' : 'rgba(212,168,80,0.5)'} strokeWidth="1.5">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: isLikedByMe ? '#e8c87a' : 'rgba(212,168,80,0.4)', letterSpacing: '1px' }}>{story?.likes?.length || 0}</span>
-            </ActionButton>
+          <>
+            <style>{`
+              @keyframes ltIconPulse {
+                0%,100% { box-shadow: 0 0 10px rgba(212,168,80,0.25), inset 0 1px 0 rgba(255,255,255,0.1); }
+                50%      { box-shadow: 0 0 24px rgba(212,168,80,0.55), inset 0 1px 0 rgba(255,255,255,0.15); }
+              }
+              @keyframes ltArchivedPulse {
+                0%,100% { box-shadow: 0 0 0 2px rgba(180,130,30,0.12), 0 0 12px rgba(180,130,30,0.2); }
+                50%      { box-shadow: 0 0 0 3px rgba(180,130,30,0.22), 0 0 28px rgba(180,130,30,0.45); }
+              }
+              @keyframes ltNeedleSpin {
+                0%   { transform: rotate(0deg);   }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
 
-            {/* Comment */}
-            <ActionButton onClick={() => setShowComments(!showComments)} title="Reflections" active={showComments}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={showComments ? 'rgba(212,168,80,0.15)' : 'none'} stroke={showComments ? '#e8c87a' : 'rgba(212,168,80,0.5)'} strokeWidth="1.5">
-                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-              </svg>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, color: showComments ? '#e8c87a' : 'rgba(212,168,80,0.4)', letterSpacing: '1px' }}>{story?.comments?.length || 0}</span>
-            </ActionButton>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 28, paddingTop: 18, borderTop: '1px solid rgba(212,168,80,0.1)', flexWrap: 'wrap' }}>
 
-            {/* Share */}
-            <ActionButton onClick={handleShare} title="Pass On Memory" active={isShared}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill={isShared ? 'rgba(74,222,128,0.15)' : 'none'} stroke={isShared ? '#4ade80' : 'rgba(212,168,80,0.5)'} strokeWidth="1.5">
-                <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </ActionButton>
+              {/* ── LIKE — Dimensional Shield ── */}
+              <CurioBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe}>
+                <IconMedallion active={isLikedByMe} activeGlow="rgba(212,168,80,0.4)" pulse={isLikedByMe}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <GoldGradDef />
+                    <path
+                      d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                      fill={isLikedByMe ? `url(#${GOLD_GRAD_ID})` : 'none'}
+                      stroke={isLikedByMe ? 'rgba(232,200,122,0.85)' : 'rgba(212,168,80,0.5)'}
+                      strokeWidth="1.5" strokeLinejoin="round"
+                    />
+                    {isLikedByMe && (
+                      <path d="M9 12l2 2 4-4"
+                        stroke="rgba(26,15,0,0.85)" strokeWidth="2"
+                        strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                    )}
+                  </svg>
+                </IconMedallion>
+                <CurioLabel count={story?.likes?.length || 0} name="Protect" active={isLikedByMe} />
+              </CurioBtn>
 
-            {/* Download */}
-            {images.length > 0 && (
-              <ActionButton onClick={handleDownloadImage} title="Archive Image" active={isDownloaded} style={{ marginLeft: 'auto' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill={isDownloaded ? 'rgba(212,168,80,0.15)' : 'none'} stroke={isDownloaded ? '#e8c87a' : 'rgba(212,168,80,0.5)'} strokeWidth="1.5">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-              </ActionButton>
-            )}
-          </div>
+              <BarSep />
+
+              {/* ── COMMENT — Family Register Scroll ── */}
+              <CurioBtn onClick={() => setShowComments(!showComments)} active={showComments}>
+                <IconMedallion active={showComments} activeGlow="rgba(212,168,80,0.3)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M4 19V6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H8l-4 3z"
+                      fill={showComments ? 'rgba(212,168,80,0.14)' : 'none'}
+                      stroke={showComments ? 'rgba(212,168,80,0.85)' : 'rgba(212,168,80,0.5)'}
+                      strokeWidth="1.5" strokeLinejoin="round"
+                    />
+                    <line x1="8" y1="9" x2="16" y2="9"
+                      stroke={showComments ? 'rgba(212,168,80,0.65)' : 'rgba(212,168,80,0.3)'}
+                      strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="8" y1="12" x2="13" y2="12"
+                      stroke={showComments ? 'rgba(212,168,80,0.5)' : 'rgba(212,168,80,0.22)'}
+                      strokeWidth="1.2" strokeLinecap="round" />
+                  </svg>
+                </IconMedallion>
+                <CurioLabel count={story?.comments?.length || 0} name="Reflect" active={showComments} />
+              </CurioBtn>
+
+              <BarSep />
+
+              {/* ── SHARE — Compass Beacon ── */}
+              <CurioBtn onClick={handleShare} active={isShared} style={isShared ? {} : {}}>
+                <IconMedallion
+                  active={isShared}
+                  activeGlow="rgba(74,222,128,0.25)"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    style={{ transformOrigin: 'center' }}>
+                    <circle cx="12" cy="12" r="9"
+                      stroke={isShared ? 'rgba(74,222,128,0.4)' : 'rgba(212,168,80,0.25)'}
+                      strokeWidth="1" />
+                    <circle cx="12" cy="12" r="2.2"
+                      fill={isShared ? 'rgba(74,222,128,0.7)' : 'rgba(212,168,80,0.45)'} />
+                    {/* N needle — spins on share */}
+                    <path d="M12 12 L15 5.5"
+                      stroke={isShared ? 'rgba(74,222,128,0.9)' : 'rgba(212,168,80,0.65)'}
+                      strokeWidth="1.6" strokeLinecap="round"
+                      style={{ transformOrigin: '12px 12px', animation: isShared ? 'ltNeedleSpin .7s ease-out' : 'none' }} />
+                    {/* S needle */}
+                    <path d="M12 12 L9 18.5"
+                      stroke={isShared ? 'rgba(74,222,128,0.4)' : 'rgba(212,168,80,0.25)'}
+                      strokeWidth="1.2" strokeLinecap="round" />
+                    {/* Cardinal marks */}
+                    <line x1="12" y1="3.5" x2="12" y2="5.5"
+                      stroke={isShared ? 'rgba(74,222,128,0.4)' : 'rgba(212,168,80,0.2)'}
+                      strokeWidth="1" strokeLinecap="round" />
+                    <line x1="12" y1="18.5" x2="12" y2="20.5"
+                      stroke={isShared ? 'rgba(74,222,128,0.3)' : 'rgba(212,168,80,0.15)'}
+                      strokeWidth="1" strokeLinecap="round" />
+                    <line x1="3.5" y1="12" x2="5.5" y2="12"
+                      stroke={isShared ? 'rgba(74,222,128,0.3)' : 'rgba(212,168,80,0.15)'}
+                      strokeWidth="1" strokeLinecap="round" />
+                    <line x1="18.5" y1="12" x2="20.5" y2="12"
+                      stroke={isShared ? 'rgba(74,222,128,0.3)' : 'rgba(212,168,80,0.15)'}
+                      strokeWidth="1" strokeLinecap="round" />
+                  </svg>
+                </IconMedallion>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '2px', textTransform: 'uppercase', color: isShared ? '#4ade80' : 'rgba(212,168,80,0.35)', lineHeight: 1, transition: 'color .3s' }}>
+                    {isShared ? 'Passed On' : 'Pass On'}
+                  </span>
+                </div>
+              </CurioBtn>
+
+              <BarSep />
+
+              {/* ── DOWNLOAD — Wax Seal → ARCHIVED plate ── */}
+              {images.length > 0 && (
+                <CurioBtn
+                  onClick={handleDownloadImage}
+                  active={isDownloaded}
+                  style={{ marginLeft: 'auto' }}
+                >
+                  <div style={{
+                    width: 36, height: 36, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                    background: isDownloaded
+                      ? 'radial-gradient(circle at 35% 35%,rgba(160,110,20,0.6),rgba(100,70,10,0.4))'
+                      : 'radial-gradient(circle at 35% 35%,rgba(212,168,80,0.14),rgba(212,168,80,0.05))',
+                    border: `1px solid ${isDownloaded ? 'rgba(180,130,30,0.8)' : 'rgba(212,168,80,0.2)'}`,
+                    transition: 'all .4s',
+                    animation: isDownloaded ? 'ltArchivedPulse 3s ease-in-out infinite' : 'none',
+                  }}>
+                    {isDownloaded ? (
+                      /* ARCHIVED plate */
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="7" width="20" height="10" rx="2"
+                          fill="rgba(160,110,20,0.55)" stroke="rgba(200,150,30,0.75)" strokeWidth="1" />
+                        {/* Embossed lines */}
+                        <line x1="4" y1="9" x2="20" y2="9"
+                          stroke="rgba(212,168,80,0.3)" strokeWidth="0.5" />
+                        <line x1="4" y1="15" x2="20" y2="15"
+                          stroke="rgba(212,168,80,0.3)" strokeWidth="0.5" />
+                        <text x="12" y="13.5" textAnchor="middle"
+                          fontFamily="Space Mono, monospace" fontSize="4.5"
+                          fontWeight="700" fill="rgba(232,200,122,0.95)"
+                          letterSpacing="1.5">ARCHIVED</text>
+                      </svg>
+                    ) : (
+                      /* Wax seal / download */
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="9"
+                          stroke="rgba(212,168,80,0.35)" strokeWidth="1"
+                          strokeDasharray="3 2.5" />
+                        <circle cx="12" cy="12" r="5.5"
+                          stroke="rgba(212,168,80,0.2)" strokeWidth="0.8" />
+                        <path d="M12 8v4.5M9.5 10.5l2.5 2.5 2.5-2.5"
+                          stroke="rgba(212,168,80,0.65)" strokeWidth="1.5"
+                          strokeLinecap="round" strokeLinejoin="round" />
+                        <line x1="8.5" y1="15.5" x2="15.5" y2="15.5"
+                          stroke="rgba(212,168,80,0.4)" strokeWidth="1.2"
+                          strokeLinecap="round" />
+                      </svg>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span style={{
+                      fontFamily: "'Space Mono',monospace",
+                      fontSize: isDownloaded ? 9 : 13,
+                      fontWeight: 700,
+                      letterSpacing: isDownloaded ? '2px' : '0.5px',
+                      textTransform: isDownloaded ? 'uppercase' : 'none',
+                      color: isDownloaded ? '#c9933a' : 'rgba(212,168,80,0.5)',
+                      lineHeight: 1, transition: 'all .35s',
+                    }}>
+                      {isDownloaded ? 'Sealed' : 'Archive'}
+                    </span>
+                    <span style={{
+                      fontFamily: "'Space Mono',monospace",
+                      fontSize: 7, letterSpacing: '2px',
+                      textTransform: 'uppercase',
+                      color: isDownloaded ? 'rgba(180,130,30,0.7)' : 'rgba(212,168,80,0.3)',
+                      lineHeight: 1, marginTop: 3, transition: 'color .35s',
+                    }}>
+                      {isDownloaded ? 'Permanent' : 'Seal Image'}
+                    </span>
+                  </div>
+                </CurioBtn>
+              )}
+
+            </div>
+          </>
         )}
 
         {/* Comments */}

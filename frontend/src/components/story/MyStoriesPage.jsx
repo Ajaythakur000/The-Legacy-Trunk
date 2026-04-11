@@ -260,23 +260,69 @@ function MyStoriesPage() {
 
   useEffect(() => { loadMyStories(); }, []);
 
-  const handleLike    = async (id) => {
-    try { await toggleLikeStoryApi(id); await loadMyStories(); toast.success('Liked! ✦'); }
-    catch { toast.error('Failed to like'); }
+  // 🔥 FIX: Optimistic Like Update 
+  const handleLike = async (id) => {
+    // Local Update pehle
+    setStories(prevStories => prevStories.map(story => {
+      if (story._id === id) {
+        const isLikedByMe = story.likes?.includes(user._id);
+        const newLikes = isLikedByMe 
+          ? story.likes.filter(userId => String(userId) !== String(user._id)) 
+          : [...(story.likes || []), user._id];
+        return { ...story, likes: newLikes };
+      }
+      return story;
+    }));
+
+    // Background Backend API Call
+    try { 
+      await toggleLikeStoryApi(id); 
+    } catch { 
+      // Undo local change if backend fails
+      await loadMyStories();
+      toast.error('Failed to like'); 
+    }
   };
+
+  // 🔥 FIX: Optimistic Comment Update
   const handleComment = async (id, text) => {
     const tId = toast.loading('Posting...');
-    try { await addCommentToStoryApi(id, text); await loadMyStories(); toast.success('Comment added!', { id: tId }); }
-    catch { toast.error('Could not post', { id: tId }); }
+    try { 
+      const response = await addCommentToStoryApi(id, text); 
+      // Sirf single story ko locally update karein backend response aane par
+      setStories(prevStories => prevStories.map(story => {
+        if(story._id === id) {
+           return {
+             ...story,
+             comments: [...(story.comments || []), response.data || { _id: Date.now(), text, user }]
+           };
+        }
+        return story;
+      }));
+      toast.success('Comment added!', { id: tId }); 
+    } catch { 
+      toast.error('Could not post', { id: tId }); 
+    }
   };
+
+  // Delete & Edit remain mostly same but without blinking screen via strict loading states
   const handleDelete  = async (id) => {
     const tId = toast.loading('Deleting from the vault...');
-    try { await deleteStoryApi(id); await loadMyStories(); toast.success('Memory released', { id: tId }); }
+    try { 
+      await deleteStoryApi(id); 
+      setStories(prev => prev.filter(s => s._id !== id)); // Local delete
+      toast.success('Memory released', { id: tId }); 
+    }
     catch (err) { toast.error(err?.response?.data?.message || 'Failed to delete', { id: tId }); }
   };
+  
   const handleEdit    = async (storyId, updatedData) => {
     const tId = toast.loading('Rewriting the scroll...');
-    try { await updateStoryApi(storyId, updatedData); await loadMyStories(); toast.success('Memory updated! ✦', { id: tId }); }
+    try { 
+      const res = await updateStoryApi(storyId, updatedData); 
+      setStories(prev => prev.map(s => s._id === storyId ? {...s, ...updatedData} : s)); // Local update
+      toast.success('Memory updated! ✦', { id: tId }); 
+    }
     catch (err) { toast.error(err?.response?.data?.message || 'Failed to update', { id: tId }); }
   };
 

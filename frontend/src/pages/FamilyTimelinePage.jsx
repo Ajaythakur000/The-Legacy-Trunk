@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import LegacyBookExporter from '../components/features/LegacyBookExporter';
@@ -234,7 +234,7 @@ function SnakeRow({ node, index, isLast }) {
     : 'M 80 0 C 80 50, 20 50, 20 100';
 
   return (
-    <div className="snake-row" style={S.snakeRow}>
+    <div className="snake-row" style={S.snakeRow} id={isLast ? "last-milestone" : ""}>
 
       {/* ── Gold snake SVG ── zIndex:1 stays BEHIND hover zone (z:20) */}
       {!isLast && (
@@ -330,11 +330,6 @@ function FamilyTimelinePage() {
     fetchTimeline();
   }, [user?.activeCircleId]);
 
-  /* ── Original scroll logic — unchanged ── */
-  const scrollToBottom = useCallback(() => {
-    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-  }, []);
-
   if (!user) return null;
 
   return (
@@ -394,9 +389,10 @@ function FamilyTimelinePage() {
         )}
       </div>
 
-      {/* FAB: Download Memories — original logic preserved */}
+      {/* FAB: Download Memories — Fixed position styling */}
       {milestones.length > 0 && (
         <button
+          className="fixed-fab-download"
           style={S.fabDownload}
           onClick={() => exporterRef.current?.generatePDF()}
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px) scale(1.04)'; }}
@@ -413,32 +409,8 @@ function FamilyTimelinePage() {
         </button>
       )}
 
-      {/* FAB: Scroll to bottom — original logic preserved */}
-      {milestones.length > 0 && (
-        <button
-          style={S.fabScroll}
-          onClick={scrollToBottom}
-          onMouseEnter={e => {
-            e.currentTarget.style.transform   = 'scale(1.12)';
-            e.currentTarget.style.borderColor = 'rgba(212,168,80,0.9)';
-            e.currentTarget.style.boxShadow   = '0 0 30px rgba(212,168,80,0.4)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.transform   = 'scale(1)';
-            e.currentTarget.style.borderColor = 'rgba(212,168,80,0.4)';
-            e.currentTarget.style.boxShadow   = '0 0 20px rgba(212,168,80,0.15)';
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke="rgba(212,168,80,0.9)" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </button>
-      )}
-
       {/* ══════════════════════════════════════════
-          ALL CSS
+         ALL CSS
       ══════════════════════════════════════════ */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;1,400;1,600&family=Space+Mono:wght@400;700&display=swap');
@@ -476,7 +448,15 @@ function FamilyTimelinePage() {
         .gold-path { animation:breathGold 3s infinite alternate; }
         .node-core { animation:nodeGlow 2.5s infinite ease-in-out; }
 
-        /* ══════════════════════════════════════
+        /* 🔥 FIX FOR FLOATING BUTTONS - Ensuring they are locked to viewport */
+        .fixed-fab-download {
+          position: fixed !important;
+          bottom: 40px !important;
+          right: 40px !important;
+          z-index: 9999 !important;
+        }
+
+        /* ══════════════════════════════════════════
            Z-INDEX STACK (most important fix):
            canvas      → z:0   (stars, furthest back)
            dustLayer   → z:1   (motes)
@@ -484,7 +464,7 @@ function FamilyTimelinePage() {
            snake svg   → z:1   (line, behind node)
            hover-zone  → z:20  (node + badge, above line)
            popup-card  → z:50  (card, topmost)
-        ══════════════════════════════════════ */
+        ══════════════════════════════════════════ */
 
         /* ── Hover zone ── */
         .hover-zone {
@@ -678,7 +658,6 @@ const S = {
     overflow: 'visible',
   },
 
-  /* KEY FIX — zIndex:1 keeps snake line behind hover zone (z:20) */
   snakeSvg: {
     position: 'absolute', top: '50%', left: 0,
     width: '100%', height: '100%',
@@ -731,11 +710,6 @@ const S = {
     color: 'rgba(212,168,80,0.55)', textTransform: 'uppercase',
   },
 
-  /* ── POPUP CARD ──
-     background: rgba(8,11,24,0.97) → near-opaque, no bleed-through
-     zIndex: 50                      → above snake (1) and hover zone (20)
-     isolation: isolate              → own stacking context, stops parent bleed
-  */
   popupCard: {
     position: 'absolute', top: '50%',
     width: 370,
@@ -881,18 +855,6 @@ const S = {
     transform: 'skewX(-20deg)',
     animation: 'ltShine 3s infinite',
     pointerEvents: 'none',
-  },
-
-  fabScroll: {
-    position: 'fixed', bottom: 40, left: 40, zIndex: 200,
-    background: 'rgba(8,11,24,0.95)',
-    border: '1px solid rgba(212,168,80,0.4)',
-    borderRadius: '50%', width: 58, height: 58,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 0 20px rgba(212,168,80,0.15)',
-    transition: 'all 0.3s ease',
-    animation: 'ltPulseGlow 4s infinite ease-in-out',
   },
 };
 

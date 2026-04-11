@@ -58,7 +58,8 @@ const GLOBAL_STYLES = `
   .react-datepicker__day--disabled { color: rgba(255,255,255,.2) !important; }
   .react-datepicker__triangle { display: none !important; }
 
-  .sc-select option { background: #0b1020; color: #e8c87a; }
+  .sc-select option { background: #0b1020; color: #e8c87a; padding: 10px; }
+  .sc-select option:disabled { color: rgba(212,168,80,.3); font-style: italic; }
   .sc-file-label:hover { border-color: rgba(212,168,80,.55) !important; background: rgba(212,168,80,.07) !important; color: rgba(212,168,80,.85) !important; }
 `;
 
@@ -186,18 +187,22 @@ function GoldToggle({ checked, onChange, label, icon, accentBlue }) {
   );
 }
 
-// ─── Tone pill ────────────────────────────────────────────────────────────────
+// ─── Tone Dropdown Options ──────────────────────────────────────────────────
+// 🔥 ALL TONES RE-ADDED AND EXPANDED
 const TONES = [
-  { value: 'Nostalgic and Warm',    label: 'Nostalgic', icon: '❤️' },
-  { value: '😂 Very Funny',          label: 'Funny',     icon: '😂' },
-  { value: '🥺 Emotional',           label: 'Emotional', icon: '🥺' },
-  { value: '🚀 Excited & Energetic', label: 'Excited',   icon: '🚀' },
-  { value: '📖 Storybook Tale',       label: 'Storybook', icon: '📖' },
-  { value: '🧐 Sarcastic & Witty',   label: 'Sarcastic', icon: '🧐' },
-  { value: '😎 Gen-Z Slang',          label: 'Gen-Z',     icon: '😎' },
-  { value: '📜 Poetic & Deep',        label: 'Poetic',    icon: '📜' },
-  { value: '👔 Formal & Respectful',  label: 'Formal',    icon: '👔' },
-  { value: '🦸‍♂️ Action Movie Style',  label: 'Action',    icon: '🦸' },
+  { value: 'Correct Grammar & Improve Flow', label: 'Correct Grammar', icon: '✍️' },
+  { value: 'Expand and add more details',    label: 'Expand Details',  icon: '✨' },
+  { value: '👔 Formal & Professional',       label: 'Professional',    icon: '👔' },
+  { value: 'Nostalgic and Warm',             label: 'Nostalgic',       icon: '❤️' },
+  { value: '📖 Storybook Tale',              label: 'Storybook',       icon: '📖' },
+  { value: '😂 Very Funny',                  label: 'Funny',           icon: '😂' },
+  { value: '🥺 Emotional',                   label: 'Emotional',       icon: '🥺' },
+  { value: '🚀 Excited & Energetic',         label: 'Excited',         icon: '🚀' },
+  { value: '🧐 Sarcastic & Witty',           label: 'Sarcastic',       icon: '🧐' },
+  { value: '😎 Gen-Z Slang',                 label: 'Gen-Z Slang',     icon: '😎' },
+  { value: '📜 Poetic & Deep',               label: 'Poetic',          icon: '📜' },
+  { value: '🕵️ Mysterious & Cryptic',        label: 'Mysterious',      icon: '🕵️' },
+  { value: '🎬 Cinematic Epic',              label: 'Cinematic',       icon: '🎬' },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -210,7 +215,10 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
   const [mediaPreviews, setMediaPreviews] = useState([]);
   const [isMilestone, setIsMilestone] = useState(false);
   const [milestoneDate, setMilestoneDate] = useState(null);
-  const [tone, setTone]             = useState('Nostalgic and Warm');
+  
+  // 🔥 Default is empty so "Select Tone" shows up
+  const [tone, setTone]             = useState('');
+  
   const [aiLoading, setAiLoading]   = useState(false);
   const [showCollageMaker, setShowCollageMaker] = useState(false);
 
@@ -264,8 +272,10 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
 
   const handleEnhanceStory = async () => {
     if (!content.trim()) return toast.error('Write some notes first!');
+    if (!tone) return toast.error('Select an AI Tone first!');
     setAiLoading(true);
-    const tid = toast.loading(`Polishing with ${tone.toLowerCase()}...`);
+    const selectedLabel = TONES.find(t => t.value === tone)?.label || 'Enhancing';
+    const tid = toast.loading(`Polishing with ${selectedLabel}...`);
     try {
       const res = await api.post('/ai/enhance-story', { text: content, tone });
       setContent(res.data.enhancedText);
@@ -288,7 +298,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
     fd.append('circleId', activeCircleId);
     fd.append('isMilestone', isMilestone ? 'true' : 'false');
     if (isMilestone && milestoneDate) fd.append('milestoneDate', milestoneDate.toISOString());
-    fd.append('tone', tone);
+    fd.append('tone', tone || 'Original');
     mediaFiles.forEach(f => fd.append('media', f));
 
     const tid = toast.loading('Sealing in the Vault...');
@@ -297,7 +307,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
       toast.success('Memory sealed! ⚔️', { id: tid });
       setTitle(''); setContent(''); setTags('');
       setIsGlobalPublic(false); setMediaFiles([]); setMediaPreviews([]);
-      setIsMilestone(false); setMilestoneDate(null);
+      setIsMilestone(false); setMilestoneDate(null); setTone('');
     } catch (err) {
       toast.error(err?.message || 'Failed to seal memory', { id: tid });
     }
@@ -399,35 +409,49 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                   className="sc-textarea"
                   style={{ width: '100%', padding: '18px 20px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,.88)', fontFamily: "'Cormorant Garamond',serif", fontSize: 17, outline: 'none', resize: 'vertical', lineHeight: 1.75, boxSizing: 'border-box' }}
                 />
-                {/* Toolbar */}
+                
+                {/* 🔥 FIXED TOOLBAR: Dropdown for AI Tones */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderTop: '1px solid rgba(212,168,80,.1)', background: 'rgba(0,0,0,.25)', flexWrap: 'wrap', gap: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    {/* Tone pills */}
-                    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                      {TONES.slice(0, 5).map(t => (
-                        <button key={t.value} type="button" onClick={() => setTone(t.value)}
-                          style={{ padding: '4px 10px', borderRadius: 6, border: `1px solid ${tone === t.value ? 'rgba(212,168,80,.6)' : 'rgba(212,168,80,.15)'}`, background: tone === t.value ? 'rgba(212,168,80,.12)' : 'transparent', fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '.5px', color: tone === t.value ? '#e8c87a' : 'rgba(212,168,80,.38)', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
-                          {t.icon} {t.label}
-                        </button>
-                      ))}
-                      {/* More tones dropdown */}
-                      <div style={{ position: 'relative' }}>
-                        <select value={tone} onChange={e => setTone(e.target.value)} className="sc-select"
-                          style={{ appearance: 'none', background: 'rgba(212,168,80,.05)', border: '1px solid rgba(212,168,80,.15)', borderRadius: 6, padding: '4px 10px', fontFamily: "'Space Mono',monospace", fontSize: 8, color: 'rgba(212,168,80,.5)', cursor: 'pointer', outline: 'none' }}>
-                          {TONES.map(t => <option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
-                        </select>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: 1 }}>
+                    
+                    {/* Themed Select Dropdown */}
+                    <div style={{ position: 'relative', width: '220px' }}>
+                      <select 
+                        value={tone} 
+                        onChange={e => setTone(e.target.value)} 
+                        className="sc-select"
+                        disabled={aiLoading || !activeCircleId}
+                        style={{ 
+                          width: '100%', appearance: 'none', 
+                          background: 'rgba(212,168,80,.05)', 
+                          border: '1px solid rgba(212,168,80,.3)', 
+                          borderRadius: 8, padding: '8px 30px 8px 12px', 
+                          fontFamily: "'Space Mono',monospace", fontSize: 10, 
+                          color: tone ? '#e8c87a' : 'rgba(212,168,80,.5)', 
+                          cursor: 'pointer', outline: 'none', letterSpacing: '0.5px' 
+                        }}>
+                        <option value="" disabled>✨ Select AI Tone...</option>
+                        {TONES.map(t => (
+                          <option key={t.value} value={t.value}>{t.icon} {t.label}</option>
+                        ))}
+                      </select>
+                      {/* Dropdown Arrow */}
+                      <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'rgba(212,168,80,.5)', fontSize: 10 }}>
+                        ▼
                       </div>
                     </div>
-                    {/* AI Polish */}
+
+                    {/* AI Polish Button */}
                     <motion.button type="button" onClick={handleEnhanceStory}
-                      disabled={aiLoading || !content.trim() || !activeCircleId}
-                      whileHover={content.trim() && !aiLoading ? { scale: 1.04 } : {}}
-                      whileTap={content.trim() && !aiLoading ? { scale: .96 } : {}}
-                      style={{ padding: '5px 12px', border: '1px solid rgba(139,92,246,.3)', borderRadius: 7, background: 'rgba(139,92,246,.06)', fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: 1, color: aiLoading || !content.trim() ? 'rgba(139,92,246,.3)' : 'rgba(139,92,246,.85)', cursor: aiLoading || !content.trim() ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 10, height: 10 }}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
+                      disabled={aiLoading || !content.trim() || !activeCircleId || !tone}
+                      whileHover={content.trim() && !aiLoading && tone ? { scale: 1.04 } : {}}
+                      whileTap={content.trim() && !aiLoading && tone ? { scale: .96 } : {}}
+                      style={{ padding: '7px 14px', border: '1px solid rgba(139,92,246,.4)', borderRadius: 8, background: 'rgba(139,92,246,.08)', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: 1, color: (aiLoading || !content.trim() || !tone) ? 'rgba(139,92,246,.3)' : '#a78bfa', cursor: (aiLoading || !content.trim() || !tone) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 12, height: 12 }}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
                       {aiLoading ? 'Polishing...' : 'AI Polish'}
                     </motion.button>
                   </div>
+
                   <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, color: content.length > 1800 ? 'rgba(248,113,113,.7)' : 'rgba(212,168,80,.25)', letterSpacing: 1, transition: 'color .3s' }}>
                     {content.length}/2000
                   </span>
