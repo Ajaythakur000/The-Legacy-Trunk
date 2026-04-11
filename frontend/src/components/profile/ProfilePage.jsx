@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom'; // 🔥 SOLUTION: createPortal import kiya
+import { createPortal } from 'react-dom'; 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { updateUserProfileApi } from '../../api/authApi';
@@ -193,6 +193,17 @@ function ProfilePage() {
     setFormData(prev => ({ ...prev, name: user?.name || '', bio: user?.bio || '', dateOfBirth: getSafeDateString(user?.dateOfBirth) }));
   }, [user]);
 
+  // 🔥 SOLUTION 1: BODY SCROLL LOCK
+  useEffect(() => {
+    if (isEditing) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    // Cleanup function
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isEditing]);
+
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleImageChange = (e) => {
@@ -252,20 +263,10 @@ function ProfilePage() {
         }
         select option { background:#0c1020; color:rgba(255,255,255,0.88); }
         
-        .premium-scroll::-webkit-scrollbar {
-          width: 6px;
-        }
-        .premium-scroll::-webkit-scrollbar-track {
-          background: rgba(12, 16, 32, 0.4);
-          border-radius: 10px;
-        }
-        .premium-scroll::-webkit-scrollbar-thumb {
-          background: rgba(212, 168, 80, 0.3);
-          border-radius: 10px;
-        }
-        .premium-scroll::-webkit-scrollbar-thumb:hover {
-          background: rgba(212, 168, 80, 0.6);
-        }
+        .premium-scroll::-webkit-scrollbar { width: 6px; }
+        .premium-scroll::-webkit-scrollbar-track { background: rgba(12, 16, 32, 0.4); border-radius: 10px; }
+        .premium-scroll::-webkit-scrollbar-thumb { background: rgba(212, 168, 80, 0.3); border-radius: 10px; }
+        .premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(212, 168, 80, 0.6); }
       `}</style>
 
       <StarCanvas />
@@ -398,16 +399,17 @@ function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* ── Edit Modal (🔥 FIX: Moved to createPortal) ── */}
+      {/* ── Edit Modal (🔥 FIX: Force Viewport Size) ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isEditing && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               style={{ 
-                position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.9)', backdropFilter: 'blur(14px)', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, 
-                padding: '20px', overflow: 'hidden'
+                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', 
+                background: 'rgba(4,6,14,0.92)', backdropFilter: 'blur(16px)', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999999, 
+                padding: '20px', boxSizing: 'border-box'
               }}
               onClick={e => { if (e.target === e.currentTarget) setIsEditing(false); }}
             >
@@ -418,12 +420,12 @@ function ProfilePage() {
                 exit={{ scale: 0.88, y: 28, opacity: 0 }}
                 transition={{ type: 'spring', damping: 22, stiffness: 280 }}
                 style={{
-                  background: 'rgba(12,16,32,0.85)',
-                  border: '1px solid rgba(212,168,80,0.22)',
-                  borderRadius: 20, width: '100%', maxWidth: 480,
+                  background: 'rgba(12,16,32,0.95)',
+                  border: '1px solid rgba(212,168,80,0.3)',
+                  borderRadius: 24, width: '100%', maxWidth: 480,
                   maxHeight: '90vh', overflowY: 'auto', 
                   position: 'relative',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+                  boxShadow: '0 40px 100px rgba(0,0,0,0.9)',
                 }}
               >
                 {/* Inner padding wrapper for scroll content */}
