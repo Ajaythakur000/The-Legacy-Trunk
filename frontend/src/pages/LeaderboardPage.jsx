@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { getLeaderboardApi } from '../api/circleApi';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ─── Badge Logic (UNCHANGED) ─────────────────────────────────────────────────
+
 const getFamilyBadge = (points) => {
   if (points < 500) return {
     title: '🏡 The Quiet Hearth', color: '#d4a850', bg: 'rgba(212,168,80,0.12)',

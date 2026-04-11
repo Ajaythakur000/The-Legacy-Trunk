@@ -3,7 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './context/AuthContext';
 
-// Layout & Shared
+
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
 import AnimatedPage from './components/shared/AnimatedPage';
