@@ -14,14 +14,18 @@ import {
 } from './otpmsg.js';
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  host: 'smtp.gmail.com', 
-  port: 465,              
-  secure: true,        
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+
+  family: 4, 
+  
+ 
+  connectionTimeout: 10000, 
 });
 
 const sendOtpEmail = async ({ to, subject, otpHtml, otpPlain }) => {
