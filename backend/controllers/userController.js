@@ -1,7 +1,6 @@
 import FamilyMember from '../models/familyMember.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
 import { handleDailyLogin } from './gamificationService.js';
 import bcrypt from 'bcryptjs';
 import path from 'path';
@@ -13,32 +12,39 @@ import {
   getResetPasswordTemplate 
 } from './otpmsg.js';
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,            
-  secure: false,         
-  requireTLS: true,     
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  family: 4, 
-  connectionTimeout: 10000, 
-});
-
-
-
+// 🔥 BREVO API EMAIL FUNCTION (No Nodemailer needed)
 const sendOtpEmail = async ({ to, subject, otpHtml, otpPlain }) => {
   try {
-    await transporter.sendMail({
-      from: `"The Legacy Trunk" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html: otpHtml,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "The Legacy Trunk",
+          email: process.env.EMAIL_USER // Tera verified Gmail id
+        },
+        to: [{ email: to }],
+        subject: subject,
+        htmlContent: otpHtml
+      })
     });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Brevo API Error Details:", result);
+      throw new Error(result.message || "Failed to send email via Brevo");
+    }
+
+    console.log("-> Brevo Success: Mail sent successfully to", to);
     return { ok: true };
+
   } catch (err) {
-    console.error('OTP Mail Error:', err?.message || err);
+    console.error('OTP Mail Error (Brevo):', err.message);
     if (process.env.NODE_ENV !== 'production') {
       console.log(`🔐 DEV OTP for ${to}: ${otpPlain}`);
     }
@@ -187,7 +193,7 @@ const registerUser = async (req, res) => {
     }
 
     // LOG 6: Before sending email
-    console.log("-> 5. Attempting to send OTP email via Nodemailer...");
+    console.log("-> 5. Attempting to send OTP email via Brevo API...");
     
     //  Using Premium Welcome Template
     const mailResult = await sendOtpEmail({
