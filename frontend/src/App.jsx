@@ -26,7 +26,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 
 // Stories Pages
 import VaultStoriesPage from './pages/VaultStoriesPage';
-import StoryDetailPage from './pages/StoryDetailPage';
+//import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './components/story/MyStoriesPage';
 import FamilyTimelinePage from './pages/FamilyTimelinePage';
 import FamilyOraclePage from './pages/FamilyOraclePage';
@@ -123,7 +123,7 @@ function App() {
               <Route path="/leaderboard" element={<AnimatedPage><LeaderboardPage /></AnimatedPage>} />
               <Route path="/memory-lane" element={<AnimatedPage><FamilyTimelinePage /></AnimatedPage>} />
               <Route path="/vault-stories" element={<AnimatedPage><VaultStoriesPage /></AnimatedPage>} />
-              <Route path="/vault-stories/:storyId" element={<AnimatedPage><StoryDetailPage /></AnimatedPage>} />
+             
               <Route path="/my-stories" element={<AnimatedPage><MyStoriesPage /></AnimatedPage>} />
               <Route path="/search" element={<AnimatedPage><SearchResultsPage /></AnimatedPage>} />
               <Route path="/oracle" element={<AnimatedPage><FamilyOraclePage /></AnimatedPage>} />
