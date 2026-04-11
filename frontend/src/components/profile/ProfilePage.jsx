@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom'; // 🔥 SOLUTION: createPortal import kiya
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { updateUserProfileApi } from '../../api/authApi';
@@ -251,7 +252,6 @@ function ProfilePage() {
         }
         select option { background:#0c1020; color:rgba(255,255,255,0.88); }
         
-        /* 🔥 NEW CSS: Premium Dark Scrollbar for Modal Box */
         .premium-scroll::-webkit-scrollbar {
           width: 6px;
         }
@@ -398,125 +398,126 @@ function ProfilePage() {
         </motion.div>
       </div>
 
-      {/* ── Edit Modal ── */}
-      <AnimatePresence>
-        {isEditing && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ 
-              /* 🔥 NEW: Poori screen lock, no scroll on body */
-              position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.9)', backdropFilter: 'blur(14px)', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, 
-              padding: '20px', overflow: 'hidden'
-            }}
-            onClick={e => { if (e.target === e.currentTarget) setIsEditing(false); }}
-          >
+      {/* ── Edit Modal (🔥 FIX: Moved to createPortal) ── */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isEditing && (
             <motion.div
-              className="premium-scroll"
-              initial={{ scale: 0.88, y: 28, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.88, y: 28, opacity: 0 }}
-              transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-              style={{
-                /* 🔥 NEW: Box ke andar ka scroll system */
-                background: 'rgba(12,16,32,0.85)',
-                border: '1px solid rgba(212,168,80,0.22)',
-                borderRadius: 20, width: '100%', maxWidth: 480,
-                maxHeight: '90vh', overflowY: 'auto', 
-                position: 'relative',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ 
+                position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.9)', backdropFilter: 'blur(14px)', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, 
+                padding: '20px', overflow: 'hidden'
               }}
+              onClick={e => { if (e.target === e.currentTarget) setIsEditing(false); }}
             >
-              {/* Inner padding wrapper for scroll content */}
-              <div style={{ padding: '44px 36px 36px', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent)' }} />
-                <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.25),transparent)' }} />
-                <CornerAccents />
+              <motion.div
+                className="premium-scroll"
+                initial={{ scale: 0.88, y: 28, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.88, y: 28, opacity: 0 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                style={{
+                  background: 'rgba(12,16,32,0.85)',
+                  border: '1px solid rgba(212,168,80,0.22)',
+                  borderRadius: 20, width: '100%', maxWidth: 480,
+                  maxHeight: '90vh', overflowY: 'auto', 
+                  position: 'relative',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.8)',
+                }}
+              >
+                {/* Inner padding wrapper for scroll content */}
+                <div style={{ padding: '44px 36px 36px', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent)' }} />
+                  <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.25),transparent)' }} />
+                  <CornerAccents />
 
-                {/* Close btn */}
-                <button
-                  onClick={() => setIsEditing(false)}
-                  style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(212,168,80,0.22)', background: 'rgba(255,255,255,0.04)', color: 'rgba(212,168,80,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, transition: 'all 0.2s', zIndex: 10 }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.7)'; e.currentTarget.style.color = '#e8c87a'; e.currentTarget.style.background = 'rgba(212,168,80,0.1)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(212,168,80,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-                >✕</button>
+                  {/* Close btn */}
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(212,168,80,0.22)', background: 'rgba(255,255,255,0.04)', color: 'rgba(212,168,80,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, transition: 'all 0.2s', zIndex: 10 }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.7)'; e.currentTarget.style.color = '#e8c87a'; e.currentTarget.style.background = 'rgba(212,168,80,0.1)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(212,168,80,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                  >✕</button>
 
-                {/* Modal title */}
-                <div style={{ textAlign: 'center', marginBottom: 32 }}>
-                  <LogoRing size={70} />
-                  <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 40px rgba(212,168,80,0.3)', margin: '14px 0 0', letterSpacing: 1 }}>Vault Profile</h2>
-                  <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.38)', fontSize: 14, margin: '4px 0 0' }}>Inscribe your legend</p>
-                </div>
+                  {/* Modal title */}
+                  <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                    <LogoRing size={70} />
+                    <h2 style={{ fontFamily: "'Cinzel',serif", fontSize: 22, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 40px rgba(212,168,80,0.3)', margin: '14px 0 0', letterSpacing: 1 }}>Vault Profile</h2>
+                    <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.38)', fontSize: 14, margin: '4px 0 0' }}>Inscribe your legend</p>
+                  </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {/* Avatar picker */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8 }}>
-                    <div
-                      onClick={() => fileInputRef.current.click()}
-                      style={{ width: 100, height: 100, borderRadius: '50%', border: '2px solid rgba(212,168,80,0.4)', cursor: 'pointer', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg,#1a1410,#0f0c08)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.3s' }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(212,168,80,0.8)'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(212,168,80,0.4)'}
-                    >
-                      {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        <span style={{ fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: '#e8c87a' }}>{initials}</span>
-                      )}
-                      <div style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(4,6,14,0.85)', color: 'rgba(212,168,80,0.8)', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2px', textAlign: 'center', padding: '5px 0', textTransform: 'uppercase' }}>Change</div>
+                  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {/* Avatar picker */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8 }}>
+                      <div
+                        onClick={() => fileInputRef.current.click()}
+                        style={{ width: 100, height: 100, borderRadius: '50%', border: '2px solid rgba(212,168,80,0.4)', cursor: 'pointer', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg,#1a1410,#0f0c08)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color 0.3s' }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(212,168,80,0.8)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(212,168,80,0.4)'}
+                      >
+                        {imagePreview ? (
+                          <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <span style={{ fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: '#e8c87a' }}>{initials}</span>
+                        )}
+                        <div style={{ position: 'absolute', bottom: 0, width: '100%', background: 'rgba(4,6,14,0.85)', color: 'rgba(212,168,80,0.8)', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2px', textAlign: 'center', padding: '5px 0', textTransform: 'uppercase' }}>Change</div>
+                      </div>
+                      <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
+                      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, letterSpacing: '1px', color: 'rgba(212,168,80,0.3)', marginTop: 8 }}>Joined Vault · April 2026</span>
                     </div>
-                    <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
-                    <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 10, letterSpacing: '1px', color: 'rgba(212,168,80,0.3)', marginTop: 8 }}>Joined Vault · April 2026</span>
-                  </div>
 
-                  <DarkInput label="Full Name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Your name in the annals"
-                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.9)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
-                  />
+                    <DarkInput label="Full Name" name="name" value={formData.name} onChange={handleInputChange} placeholder="Your name in the annals"
+                      icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.9)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>}
+                    />
 
-                  <DarkInput label="Family Role" name="familyRole" value={formData.familyRole} onChange={handleInputChange} as="select"
-                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.9)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>}
-                  >
-                    <option value="Family Member">Family Member</option>
-                    <option value="The Patriarch">The Patriarch</option>
-                    <option value="The Matriarch">The Matriarch</option>
-                    <option value="The Guardian">The Guardian</option>
-                    <option value="The Explorer">The Explorer</option>
-                  </DarkInput>
-
-                  <DarkInput label="Personal Motto / Bio" name="bio" value={formData.bio} onChange={handleInputChange} as="textarea" rows={3} maxLength={150} placeholder="A tale of who you are..."
-                    icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.9)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>}
-                  />
-
-                  <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                    <button type="button" onClick={() => setIsEditing(false)}
-                      style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid rgba(212,168,80,0.22)', borderRadius: 10, color: 'rgba(255,255,255,0.38)', fontFamily: "'Cinzel',serif", fontSize: 13, letterSpacing: 1, cursor: 'pointer', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.5)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.38)'; }}
-                    >Cancel</button>
-
-                    <motion.button type="submit" disabled={loading}
-                      whileHover={!loading ? { scale: 1.02, y: -1 } : {}}
-                      whileTap={!loading ? { scale: 0.97 } : {}}
-                      style={{ flex: 1, padding: '14px', position: 'relative', overflow: 'hidden', background: loading ? 'rgba(212,168,80,0.4)' : 'linear-gradient(135deg,#c9933a 0%,#e8a820 50%,#c9933a 100%)', backgroundSize: '200%', border: 'none', borderRadius: 10, color: '#1a0f00', fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', cursor: loading ? 'not-allowed' : 'pointer', animation: !loading ? 'ltPulseGlow 3s ease-in-out infinite' : 'none' }}
+                    <DarkInput label="Family Role" name="familyRole" value={formData.familyRole} onChange={handleInputChange} as="select"
+                      icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.9)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>}
                     >
-                      <div style={{ position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)', transform: 'skewX(-20deg)', animation: !loading ? 'ltShine 3s ease-in-out infinite' : 'none' }} />
-                      {loading ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 5 }}>
-                          {[0, 1, 2].map(i => <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: '#1a0f00', display: 'inline-block', animation: `ltDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />)}
-                        </div>
-                      ) : 'Seal the Vault'}
-                    </motion.button>
-                  </div>
+                      <option value="Family Member">Family Member</option>
+                      <option value="The Patriarch">The Patriarch</option>
+                      <option value="The Matriarch">The Matriarch</option>
+                      <option value="The Guardian">The Guardian</option>
+                      <option value="The Explorer">The Explorer</option>
+                    </DarkInput>
 
-                  {/* Rune footer */}
-                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: 4, color: 'rgba(212,168,80,0.18)', userSelect: 'none', textAlign: 'center', marginTop: 4 }}>
-                    ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
-                  </div>
-                </form>
-              </div>
+                    <DarkInput label="Personal Motto / Bio" name="bio" value={formData.bio} onChange={handleInputChange} as="textarea" rows={3} maxLength={150} placeholder="A tale of who you are..."
+                      icon={<svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,0.9)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>}
+                    />
+
+                    <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                      <button type="button" onClick={() => setIsEditing(false)}
+                        style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid rgba(212,168,80,0.22)', borderRadius: 10, color: 'rgba(255,255,255,0.38)', fontFamily: "'Cinzel',serif", fontSize: 13, letterSpacing: 1, cursor: 'pointer', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.5)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(255,255,255,0.38)'; }}
+                      >Cancel</button>
+
+                      <motion.button type="submit" disabled={loading}
+                        whileHover={!loading ? { scale: 1.02, y: -1 } : {}}
+                        whileTap={!loading ? { scale: 0.97 } : {}}
+                        style={{ flex: 1, padding: '14px', position: 'relative', overflow: 'hidden', background: loading ? 'rgba(212,168,80,0.4)' : 'linear-gradient(135deg,#c9933a 0%,#e8a820 50%,#c9933a 100%)', backgroundSize: '200%', border: 'none', borderRadius: 10, color: '#1a0f00', fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', cursor: loading ? 'not-allowed' : 'pointer', animation: !loading ? 'ltPulseGlow 3s ease-in-out infinite' : 'none' }}
+                      >
+                        <div style={{ position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)', transform: 'skewX(-20deg)', animation: !loading ? 'ltShine 3s ease-in-out infinite' : 'none' }} />
+                        {loading ? (
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: 5 }}>
+                            {[0, 1, 2].map(i => <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: '#1a0f00', display: 'inline-block', animation: `ltDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />)}
+                          </div>
+                        ) : 'Seal the Vault'}
+                      </motion.button>
+                    </div>
+
+                    {/* Rune footer */}
+                    <div style={{ fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: 4, color: 'rgba(212,168,80,0.18)', userSelect: 'none', textAlign: 'center', marginTop: 4 }}>
+                      ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
