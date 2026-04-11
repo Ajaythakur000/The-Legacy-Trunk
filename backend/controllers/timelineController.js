@@ -12,7 +12,7 @@ const getTimelineMilestones = async (req, res) => {
       return res.status(400).json({ message: 'circleId is required' });
     }
 
-    // 🔥 SECURITY FIX: Membership Check
+    //  SECURITY FIX: Membership Check
     // Koi random ID guess karke family ke personal milestones nahi chura payega
     const circle = await FamilyCircle.findOne({ _id: circleId, members: req.user._id });
     if (!circle) {
@@ -28,7 +28,7 @@ const getTimelineMilestones = async (req, res) => {
 
     return res.status(200).json(milestones);
   } catch (error) {
-    // 🔥 HIDDEN BUG FIX: Info leak blocked
+    //  HIDDEN BUG FIX: Info leak blocked
     console.error("getTimelineMilestones Error:", error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }

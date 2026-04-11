@@ -1,8 +1,8 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// 🔴 IMPORTANT: backend routes '/api/...' pe mounted hain
-// Isliye base URL me '/api' ensure karo
+//  backend routes '/api/...' pe mounted hain
+// Isliye base URL me '/api' ensure 
 const getApiBaseUrl = () => {
   const raw =
     import.meta.env.VITE_API_URL ||

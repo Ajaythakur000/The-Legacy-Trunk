@@ -81,7 +81,7 @@ const getCircleById = async (req, res) => {
 };
 
 // ==========================================
-// 🛡️ MODIFIED: SEND INVITE NOTIFICATION (Spam Protection Added)
+//  MODIFIED: SEND INVITE NOTIFICATION (Spam Protection Added)
 // ==========================================
 const sendFamilyInvite = async (req, res) => {
   try {
@@ -168,7 +168,7 @@ const removeMemberFromCircle = async (req, res) => {
   }
 };
 
-// 🔥 FIX: Calculate and attach the top contributor (champion) avatar for each family
+//  FIX: Calculate and attach the top contributor (champion) avatar for each family
 const getLeaderboard = async (req, res) => {
   try {
     const topFamilies = await FamilyCircle.find({})

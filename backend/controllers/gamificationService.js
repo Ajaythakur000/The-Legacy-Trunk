@@ -1,7 +1,7 @@
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 
-// 🔥 HELPER: Get strict YYYY-MM-DD date in Indian Time
+//  HELPER: Get strict YYYY-MM-DD date in Indian Time
 const getISTDateStr = () => {
   const date = new Date();
   const options = { timeZone: 'Asia/Kolkata' };
@@ -11,7 +11,7 @@ const getISTDateStr = () => {
   return `${year}-${month}-${day}`;
 };
 
-// 🔥 HELPER: Calculate difference in days (Timezone agnostic)
+//  HELPER: Calculate difference in days (Timezone agnostic)
 const getDiffDays = (date1Str, date2Str) => {
   if (!date1Str || !date2Str) return 0;
   const [y1, m1, d1] = date1Str.split('-').map(Number);
@@ -32,7 +32,7 @@ export const handleDailyLogin = async (userId, familyCircleId) => {
     const todayStr = getISTDateStr();
     const lastLoginStr = user.lastLoginDate;
 
-    // 🔥 IF USER LOGS IN AND MISSED POSTING YESTERDAY -> RESET STREAK TO 0
+    //  IF USER LOGS IN AND MISSED POSTING YESTERDAY -> RESET STREAK TO 0
     if (user.lastPostDate) {
       const diffPost = getDiffDays(todayStr, user.lastPostDate);
       if (diffPost > 1) {
@@ -62,7 +62,7 @@ export const handleDailyLogin = async (userId, familyCircleId) => {
 };
 
 /**
- * 🔥 NEW STREAK LOGIC (Triggered ONLY when user posts a story)
+ *  NEW STREAK LOGIC (Triggered ONLY when user posts a story)
  */
 export const handleStoryPostStreak = async (userId) => {
   try {

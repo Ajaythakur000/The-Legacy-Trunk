@@ -411,7 +411,61 @@ function DashboardPage() {
         @keyframes ltBeam{0%,100%{opacity:0;transform:scaleX(0)}50%{opacity:1;transform:scaleX(1)}}
         input::placeholder{color:rgba(255,255,255,0.2);font-style:italic;}
         input:-webkit-autofill,select:-webkit-autofill{-webkit-box-shadow:0 0 0 30px #0c1020 inset!important;-webkit-text-fill-color:rgba(255,255,255,0.88)!important;}
-        select option{background:#0c1020;color:rgba(255,255,255,0.88);}
+        
+        /* 🔥 FIX: COMPLETELY CUSTOMIZED SELECT DROPDOWN FOR THEME MATCH */
+        .premium-select {
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          background: rgba(10,14,26,0.9);
+          border: 1px solid rgba(212,168,80,0.4);
+          color: #e8c87a;
+          font-family: 'Cinzel', serif;
+          font-size: 13px;
+          letter-spacing: 1px;
+          padding: 8px 32px 8px 16px;
+          border-radius: 20px;
+          outline: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(212,168,80,0.05);
+        }
+        
+        .premium-select:hover {
+          border-color: rgba(212,168,80,0.7);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.7), 0 0 15px rgba(212,168,80,0.2) inset;
+          background: rgba(12,16,32,0.95);
+        }
+        
+        .premium-select:focus {
+          border-color: #e8c87a;
+          box-shadow: 0 0 0 2px rgba(212,168,80,0.2), 0 8px 30px rgba(0,0,0,0.8);
+        }
+
+        .premium-select option {
+          background: #080a14;
+          color: #e8c87a;
+          font-family: 'Cinzel', serif;
+          padding: 12px;
+          border-bottom: 1px solid rgba(212,168,80,0.1);
+        }
+        
+        /* Select dropdown wrapper to add custom arrow */
+        .select-wrapper {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+        }
+        
+        .select-wrapper::after {
+          content: '▼';
+          position: absolute;
+          right: 14px;
+          color: rgba(212,168,80,0.6);
+          font-size: 10px;
+          pointer-events: none;
+        }
+
         ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:rgba(212,168,80,0.05);} ::-webkit-scrollbar-thumb{background:rgba(212,168,80,0.25);border-radius:2px;}
       `}</style>
 
@@ -464,14 +518,21 @@ function DashboardPage() {
             Welcome back, <span style={{ color: 'rgba(212,168,80,0.75)', fontStyle: 'normal', fontFamily: "'Cinzel',serif" }}>{user?.name?.split(' ')[0] || 'Guardian'}</span>. Your legacy awaits.
           </motion.p>
 
-          {/* Circle selector */}
+          {/* 🔥 FIX: Circle selector custom themed wrapper and class */}
           {circles.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 16px 8px 14px', background: 'rgba(212,168,80,0.08)', border: '1px solid rgba(212,168,80,0.28)', borderRadius: 40 }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80', flexShrink: 0, display: 'inline-block' }} />
-              <select value={selectedCircleId} onChange={e => setSelectedCircleId(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', fontFamily: "'Cinzel',serif", fontSize: 13, color: 'rgba(212,168,80,0.85)', cursor: 'pointer', letterSpacing: '1px' }}>
-                {circles.map(c => <option key={c._id} value={c._id}>{c.circleName || c.name}</option>)}
-              </select>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} 
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 12px #4ade80', flexShrink: 0, display: 'inline-block' }} />
+              
+              <div className="select-wrapper">
+                <select 
+                  className="premium-select"
+                  value={selectedCircleId} 
+                  onChange={e => setSelectedCircleId(e.target.value)}
+                >
+                  {circles.map(c => <option key={c._id} value={c._id}>{c.circleName || c.name}</option>)}
+                </select>
+              </div>
             </motion.div>
           )}
 

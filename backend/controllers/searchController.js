@@ -17,7 +17,7 @@ const searchContent = async (req, res) => {
 
     const keyword = String(q).trim();
 
-    // ✅ Minimal perf/safety guard
+    //  Minimal perf/safety guard
     if (keyword.length > 80) {
       return res.status(400).json({ message: 'Search query too long (max 80 chars)' });
     }
@@ -27,7 +27,7 @@ const searchContent = async (req, res) => {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    // ✅ Escape regex special chars (keeps behavior, avoids unsafe regex patterns)
+    //  Escape regex special chars (keeps behavior, avoids unsafe regex patterns)
     const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escaped, 'i');
 

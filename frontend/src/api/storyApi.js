@@ -13,7 +13,7 @@ import api from './axios';
  * Create Story (multipart/form-data)
  */
 export const createStoryApi = async (formData) => {
-  // ✅ Bas seedha formData pass kar de, Axios baaki khud sambhal lega
+  //  Bas seedha formData pass kar de, Axios baaki khud sambhal lega
   const response = await api.post('/stories', formData);
   return response.data;
 };
@@ -21,7 +21,7 @@ export const createStoryApi = async (formData) => {
  * Active Circle Feed
  */
 export const getCircleFeedApi = async (circleId) => {
-  // 🔥 Ab hum explicitly circleId bhej rahe hain backend ko
+  //  Ab hum explicitly circleId bhej rahe hain backend ko
   const response = await api.get(`/stories/feed?circleId=${circleId}`);
   return response.data;
 };

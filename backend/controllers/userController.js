@@ -6,7 +6,7 @@ import { handleDailyLogin } from './gamificationService.js';
 import bcrypt from 'bcryptjs';
 import path from 'path';
 
-// 🔥 Import templates from your new file
+// Import templates from your new file
 import { 
   getWelcomeOtpTemplate, 
   getLoginOtpTemplate, 
@@ -165,7 +165,7 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // 🔥 Using Premium Welcome Template
+    //  Using Premium Welcome Template
     const mailResult = await sendOtpEmail({
       to: user.email,
       subject: '🗝️ Your Key to The Legacy Trunk',
@@ -398,7 +398,7 @@ const forgotPassword = async (req, res) => {
     user.otpBlockedUntil = null;
     await user.save();
 
-    // 🔥 Using Premium Recovery Template
+    //  Using Premium Recovery Template
     const mailResult = await sendOtpEmail({
       to: user.email,
       subject: '🗝️ Password Reset Key for The Legacy Trunk',

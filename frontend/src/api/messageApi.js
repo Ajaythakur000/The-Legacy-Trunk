@@ -11,7 +11,7 @@ export const getMessagesApi = async (familyCircleId, limit = 50) => {
 };
 
 /**
- * 🔥 NEW: Chat Media Upload karne ki API
+ * Chat Media Upload karne ki API
  * file = image ya audio file ka object
  */
 export const uploadChatMediaApi = async (file) => {

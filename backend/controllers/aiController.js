@@ -7,7 +7,7 @@ const stripHtml = (html) => {
   return html.replace(/<[^>]*>?/gm, '');
 };
 
-// 🔥 SECURITY FIX: In-Memory Rate Limiter to protect Gemini API Quota
+//  SECURITY FIX: In-Memory Rate Limiter to protect Gemini API Quota
 const aiRateLimits = new Map();
 const RATE_LIMIT_WINDOW_MS = 10000; // 10 seconds cooldown per user
 
@@ -38,12 +38,12 @@ export const askOracle = async (req, res) => {
       return res.status(400).json({ message: "Circle ID and Question are required!" });
     }
 
-    // 🔥 SECURITY FIX: Payload Size Limit (Token Protection)
+    // SECURITY FIX: Payload Size Limit (Token Protection)
     if (String(question).trim().length > 300) {
       return res.status(400).json({ message: "Question is too long (Max 300 characters)." });
     }
 
-    // 🔥 SECURITY FIX: Apply Rate Limiter
+    //  SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const isMember = await FamilyCircle.exists({ _id: circleId, members: req.user._id });
@@ -102,7 +102,7 @@ export const askOracle = async (req, res) => {
 };
 
 // ==============================================
-// ✨ 2. AI COPILOT: ENHANCE STORY
+//  2. AI COPILOT: ENHANCE STORY
 // ==============================================
 export const enhanceStory = async (req, res) => {
   try {
@@ -113,12 +113,12 @@ export const enhanceStory = async (req, res) => {
 
     if (!text) return res.status(400).json({ message: "Rough text is required!" });
 
-    // 🔥 SECURITY FIX: Payload Size Limit (Max 3000 chars for enhancement)
+    //  SECURITY FIX: Payload Size Limit (Max 3000 chars for enhancement)
     if (String(text).trim().length > 3000) {
       return res.status(400).json({ message: "Text is too long for enhancement (Max 3000 characters)." });
     }
 
-    // 🔥 SECURITY FIX: Apply Rate Limiter
+    //  SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const selectedTone = tone || "Nostalgic and Warm";
@@ -153,7 +153,7 @@ export const enhanceStory = async (req, res) => {
 };
 
 // ==============================================
-// 🪄 3. AI COPILOT: GENERATE TITLE
+//  3. AI COPILOT: GENERATE TITLE
 // ==============================================
 export const generateTitle = async (req, res) => {
   try {
@@ -164,12 +164,12 @@ export const generateTitle = async (req, res) => {
 
     if (!storyText) return res.status(400).json({ message: "Story text is required to generate a title!" });
 
-    // 🔥 SECURITY FIX: Payload Size Limit (Max 5000 chars to read for title)
+    //  SECURITY FIX: Payload Size Limit (Max 5000 chars to read for title)
     if (String(storyText).trim().length > 5000) {
       return res.status(400).json({ message: "Story is too long for title generation (Max 5000 characters)." });
     }
 
-    // 🔥 SECURITY FIX: Apply Rate Limiter
+    //  SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const prompt = `Read the following family story and generate exactly ONE short, catchy, and emotional title for it. 

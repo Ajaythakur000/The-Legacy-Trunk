@@ -128,7 +128,7 @@ const toggleGhostMode = async (req, res) => {
     user.isGhostModeOn = isGhostModeOn;
     await user.save();
 
-    // ✅ Real-time privacy state sync
+    //  Real-time privacy state sync
     // Frontend can instantly hide/show user on map/list
     if (user.activeCircleId) {
       io.to(String(user.activeCircleId)).emit('member_privacy_changed', {

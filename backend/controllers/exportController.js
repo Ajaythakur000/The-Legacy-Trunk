@@ -104,7 +104,7 @@ const exportToPdf = async (req, res) => {
         `;
 
         stories.forEach(story => {
-            // 🔥 SECURITY FIX: Sanitize all user inputs (Bug 4)
+            // SECURITY FIX: Sanitize all user inputs (Bug 4)
             const safeTitle = escapeHTML(story.title);
             const safeAuthor = escapeHTML(story.user?.name || 'Unknown');
             const safeContent = escapeHTML(story.content).replace(/\n/g, '<br>');
@@ -129,14 +129,14 @@ const exportToPdf = async (req, res) => {
         htmlContent += `</div></body></html>`;
         
         // --- PDF Generation using Puppeteer ---
-        // 🔥 HIDDEN BUG FIX: Added strict sandbox flags and timeout to prevent crashes (Finding 18)
+        //  HIDDEN BUG FIX: Added strict sandbox flags and timeout to prevent crashes (Finding 18)
         const browser = await launch({
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
             timeout: 60000
         });
         const page = await browser.newPage();
         
-        // 🔥 CRITICAL SECURITY FIX: Kill JavaScript inside the headless browser
+        //  CRITICAL SECURITY FIX: Kill JavaScript inside the headless browser
         await page.setJavaScriptEnabled(false);
         
         await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
@@ -153,7 +153,7 @@ const exportToPdf = async (req, res) => {
         res.send(pdfBuffer);
 
     } catch (error) {
-        // 🔥 HIDDEN BUG FIX: Prevented internal DB info leak (Finding 14)
+        // HIDDEN BUG FIX: Prevented internal DB info leak
         console.error("PDF Export Error:", error.message);
         res.status(500).json({ message: 'Internal server error' });
     }

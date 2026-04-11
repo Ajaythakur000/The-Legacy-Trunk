@@ -50,9 +50,7 @@ export const deleteCircleApi = async (circleId) => {
   return response.data;
 };
 
-// ==========================================
-// 🏆 THE LEADERBOARD API
-// ==========================================
+
 /**
  * Fetch Top 10 Families by Bond Points
  */
@@ -61,9 +59,6 @@ export const getLeaderboardApi = async () => {
   return response.data;
 };
 
-// ==========================================
-// 🌟 DASHBOARD WIDGETS API
-// ==========================================
 
 /**
  * Fetch Upcoming Events (Birthdays & Milestones)
@@ -81,9 +76,7 @@ export const getTopContributorApi = async (circleId) => {
   return response.data;
 };
 
-// ==========================================
-// 🪄 MAGIC INVITE API
-// ==========================================
+
 
 /**
  * Generate Magic Invite Link (Admin Only)

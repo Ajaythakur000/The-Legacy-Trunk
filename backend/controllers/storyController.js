@@ -2,8 +2,7 @@ import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 import Notification from '../models/notificationModel.js';
-// 🔥 IMPORT GAMIFICATION SERVICE (Adjust path if needed)
-// 🔥 IMPORT GAMIFICATION SERVICE (Adjust path if needed)
+
 import { awardPoints, handleStoryPostStreak } from './gamificationService.js';
 
 const hasStoryAccess = (story, user) => {
@@ -64,13 +63,13 @@ const createStory = async (req, res) => {
 
     const createdStory = await story.save();
 
-    // 🔥 Award 10 points for posting a story (to both User Heatmap & Family)
+    // Award 10 points for posting a story (to both User Heatmap & Family)
     if (targetCircleId) {
       await awardPoints(req.user._id, targetCircleId, 10);
     }
 
     // ==========================================
-    // 🔥 CRITICAL FIX: UPDATE STREAK HERE!
+    //  CRITICAL FIX: UPDATE STREAK HERE!
     // ==========================================
     await handleStoryPostStreak(req.user._id);
 
@@ -106,7 +105,7 @@ const deleteStory = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this story' });
     }
 
-    // 🔥 NEW: Deduct 10 points when story is deleted
+    //  NEW: Deduct 10 points when story is deleted
     if (story.originCircleId) {
       await awardPoints(story.user, story.originCircleId, -10);
     }
@@ -145,7 +144,7 @@ const toggleLikeStory = async (req, res) => {
     let updatedStory;
 
     if (alreadyLiked) {
-      // 🔥 FIX: Use $pull to guarantee removal (Bug C)
+      //  FIX: Use $pull to guarantee removal (Bug C)
       updatedStory = await Story.findByIdAndUpdate(
         storyId,
         { $pull: { likes: req.user._id } },
@@ -157,7 +156,7 @@ const toggleLikeStory = async (req, res) => {
         await awardPoints(req.user._id, story.originCircleId, -pointsToAward);
       }
     } else {
-      // 🔥 FIX: Use $addToSet to guarantee uniqueness (no double count!) (Bug C)
+      //  FIX: Use $addToSet to guarantee uniqueness (no double count!) (Bug C)
       updatedStory = await Story.findByIdAndUpdate(
         storyId,
         { $addToSet: { likes: req.user._id } },

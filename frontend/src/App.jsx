@@ -32,12 +32,19 @@ import FamilyTimelinePage from './pages/FamilyTimelinePage';
 import FamilyOraclePage from './pages/FamilyOraclePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 
-// 🔥 THE FIX: Sidebar ab kabhi nahi hatega, sirf Outlet ke andar ka content badlega
+// 🔥 THE FIX: Yahan AnimatePresence aur key add kiya hai sirf content (Outlet) ke liye
 function ProtectedLayout() {
+  const location = useLocation(); // Location hook yahan use hoga key ke liye
   return (
     <ProtectedRoute>
       <Navbar>
-        <Outlet /> 
+        {/* Navbar/Sidebar static rahenge, bas ye andar wala hissa animate hoga */}
+        <AnimatePresence mode="wait">
+          {/* Key is important here so Framer Motion knows the page changed */}
+          <div key={location.pathname} style={{ width: '100%', height: '100%' }}> 
+            <Outlet /> 
+          </div>
+        </AnimatePresence>
       </Navbar>
     </ProtectedRoute>
   );
@@ -94,9 +101,10 @@ function App() {
       />
 
       <ErrorBoundary>
+        {/* Bahar ka AnimatePresence abhi public routes (Login/Signup) ke liye kaam karega */}
         <AnimatePresence mode="wait">
-          {/* 🔥 THE FIX: key=location.pathname hata diya taaki layout destroy na ho */}
-          <Routes location={location}>
+          {/* 🔥 MAIN FIX: Yahan se 'key={location.pathname}' REMOVE kar diya hai */}
+          <Routes location={location}> 
             <Route path="/" element={<Navigate to="/login" replace />} />
 
             {/* Public Routes */}
@@ -104,8 +112,9 @@ function App() {
             <Route path="/signup" element={<AnimatedPage showRuneFlash={false} showBurst={false}><SignupPage /></AnimatedPage>} />
             <Route path="/invite/:token" element={<AnimatedPage showRuneFlash={false} showBurst={false}><InvitePage /></AnimatedPage>} />
 
-            {/* 🔥 Protected Routes Wrapper (Sidebar stays mounted) */}
+            {/* Protected Routes Wrapper */}
             <Route element={<ProtectedLayout />}>
+              {/* Yahan se key hatayi hai kyunki ab internal AnimatePresence manage kar raha hai */}
               <Route path="/home" element={<AnimatedPage><HomePage /></AnimatedPage>} />
               <Route path="/dashboard" element={<AnimatedPage><DashboardPage /></AnimatedPage>} />
               <Route path="/profile" element={<AnimatedPage><ProfilePage /></AnimatedPage>} />

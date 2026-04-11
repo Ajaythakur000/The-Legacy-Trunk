@@ -27,7 +27,7 @@ export const loginApi = async (payload) => {
   return response.data;
 };
 
-// 🔥 NAYA API FUNCTION: Profile Update ke liye
+
 /**
  * Update Profile API
  * payload example:

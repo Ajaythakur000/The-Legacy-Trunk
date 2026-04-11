@@ -44,7 +44,7 @@ export const markAllAsRead = async (req, res) => {
 };
 
 // ==========================================
-// ✅ ACCEPT INVITE LOGIC
+//  ACCEPT INVITE LOGIC
 // ==========================================
 export const acceptInvite = async (req, res) => {
   try {
