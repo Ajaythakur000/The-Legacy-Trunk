@@ -6,6 +6,8 @@ import CollageMaker from '../../pages/CollageMaker';
 import { motion, AnimatePresence } from 'framer-motion';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+// 🔥 NAYA HATHIYAR: Image compression ke liye
+import imageCompression from 'browser-image-compression';
 
 // ─── Global styles injected once ─────────────────────────────────────────────
 const GLOBAL_STYLES = `
@@ -221,6 +223,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
   
   const [aiLoading, setAiLoading]   = useState(false);
   const [showCollageMaker, setShowCollageMaker] = useState(false);
+  const [compressing, setCompressing] = useState(false); // To show compression state
 
   const cardRef = useRef(null);
   const [spotlight, setSpotlight]   = useState({ x: 50, y: 50 });
@@ -239,14 +242,66 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
     return () => urls.forEach(u => URL.revokeObjectURL(u));
   }, [mediaFiles]);
 
-  const handleFileSelect = (e) => {
+  // 🔥 NAYA PRO HATHIYAR WALA FUNCTION (Frontend Compression)
+  const handleFileSelect = async (e) => {
     const selected = Array.from(e.target.files);
-    if (mediaFiles.length + selected.length > 5) { toast.error('Max 5 photos allowed!'); return; }
-    const valid = selected.filter(f => {
-      if (f.size / (1024 * 1024) > 15) { toast.error(`"${f.name}" exceeds 15MB`); return false; }
-      return true;
-    });
-    if (valid.length) setMediaFiles(p => [...p, ...valid]);
+    if (!selected.length) return;
+
+    if (mediaFiles.length + selected.length > 5) { 
+      toast.error('Max 5 photos allowed!'); 
+      return; 
+    }
+
+    setCompressing(true);
+    let tid;
+    
+    // Sirf tabhi toast dikhayenge jab file badi ho
+    if (selected.some(f => f.size > 2 * 1024 * 1024)) {
+       tid = toast.loading("Optimizing high-res photos...");
+    }
+
+    const compressedFiles = [];
+    
+    const options = {
+      maxSizeMB: 8,          // Cloudinary ki 10MB limit se bachne ke liye safe margin
+      maxWidthOrHeight: 1920, // HD quality maintain rahegi
+      useWebWorker: true,    // Browser freeze nahi hoga
+      initialQuality: 0.85   // Best quality for memories
+    };
+
+    for (const file of selected) {
+      // Agar file image nahi hai (jaise video), toh directly allow kar de agar 15MB se kam hai
+      if (!file.type.startsWith('image/')) {
+        if (file.size / (1024 * 1024) > 15) {
+          toast.error(`"${file.name}" exceeds 15MB`);
+        } else {
+          compressedFiles.push(file);
+        }
+        continue;
+      }
+
+      try {
+        // Compress the image
+        const compressedFile = await imageCompression(file, options);
+        compressedFiles.push(compressedFile);
+        console.log(`Original: ${(file.size/1024/1024).toFixed(2)}MB -> Compressed: ${(compressedFile.size/1024/1024).toFixed(2)}MB`);
+      } catch (error) {
+        console.error("Compression failed for", file.name, error);
+        // Fallback: Agar compress fail ho gaya toh check kar ki wo upload limit mein hai ya nahi
+        if (file.size / (1024 * 1024) > 15) {
+           toast.error(`"${file.name}" exceeds 15MB and couldn't be optimized.`);
+        } else {
+           compressedFiles.push(file);
+        }
+      }
+    }
+
+    if (compressedFiles.length > 0) {
+      setMediaFiles(prev => [...prev, ...compressedFiles]);
+    }
+    
+    if (tid) toast.success("Photos optimized successfully!", { id: tid });
+    setCompressing(false);
     e.target.value = null;
   };
 
@@ -380,12 +435,12 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                   onChange={e => setTitle(e.target.value)}
                   placeholder="What is this moment called?"
                   maxLength={150}
-                  disabled={!activeCircleId || uploading || aiLoading}
+                  disabled={!activeCircleId || uploading || aiLoading || compressing}
                   icon={iconPen}
                   style={{ fontSize: 19, fontWeight: 600, letterSpacing: '-.2px' }}
                 />
               </div>
-              <GoldButton small onClick={handleAutoTitle} disabled={aiLoading || !content.trim() || !activeCircleId}>
+              <GoldButton small onClick={handleAutoTitle} disabled={aiLoading || compressing || !content.trim() || !activeCircleId}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 11, height: 11 }}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                 AI Title
               </GoldButton>
@@ -405,7 +460,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                   onChange={e => setContent(e.target.value)}
                   placeholder="Describe this moment… who was there, what happened, how it felt…"
                   rows={7} maxLength={2000}
-                  disabled={!activeCircleId || uploading || aiLoading}
+                  disabled={!activeCircleId || uploading || aiLoading || compressing}
                   className="sc-textarea"
                   style={{ width: '100%', padding: '18px 20px', background: 'transparent', border: 'none', color: 'rgba(255,255,255,.88)', fontFamily: "'Cormorant Garamond',serif", fontSize: 17, outline: 'none', resize: 'vertical', lineHeight: 1.75, boxSizing: 'border-box' }}
                 />
@@ -420,7 +475,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                         value={tone} 
                         onChange={e => setTone(e.target.value)} 
                         className="sc-select"
-                        disabled={aiLoading || !activeCircleId}
+                        disabled={aiLoading || compressing || !activeCircleId}
                         style={{ 
                           width: '100%', appearance: 'none', 
                           background: 'rgba(212,168,80,.05)', 
@@ -443,10 +498,10 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
 
                     {/* AI Polish Button */}
                     <motion.button type="button" onClick={handleEnhanceStory}
-                      disabled={aiLoading || !content.trim() || !activeCircleId || !tone}
-                      whileHover={content.trim() && !aiLoading && tone ? { scale: 1.04 } : {}}
-                      whileTap={content.trim() && !aiLoading && tone ? { scale: .96 } : {}}
-                      style={{ padding: '7px 14px', border: '1px solid rgba(139,92,246,.4)', borderRadius: 8, background: 'rgba(139,92,246,.08)', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: 1, color: (aiLoading || !content.trim() || !tone) ? 'rgba(139,92,246,.3)' : '#a78bfa', cursor: (aiLoading || !content.trim() || !tone) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      disabled={aiLoading || compressing || !content.trim() || !activeCircleId || !tone}
+                      whileHover={content.trim() && !aiLoading && !compressing && tone ? { scale: 1.04 } : {}}
+                      whileTap={content.trim() && !aiLoading && !compressing && tone ? { scale: .96 } : {}}
+                      style={{ padding: '7px 14px', border: '1px solid rgba(139,92,246,.4)', borderRadius: 8, background: 'rgba(139,92,246,.08)', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: 1, color: (aiLoading || compressing || !content.trim() || !tone) ? 'rgba(139,92,246,.3)' : '#a78bfa', cursor: (aiLoading || compressing || !content.trim() || !tone) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 12, height: 12 }}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01z"/></svg>
                       {aiLoading ? 'Polishing...' : 'AI Polish'}
                     </motion.button>
@@ -465,7 +520,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
               name="tags" value={tags}
               onChange={e => setTags(e.target.value)}
               placeholder="goa, wedding, 2025 — separate by commas"
-              disabled={!activeCircleId || uploading || aiLoading}
+              disabled={!activeCircleId || uploading || aiLoading || compressing}
               icon={iconTag}
             />
 
@@ -479,18 +534,18 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                     <svg viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,80,.7)" strokeWidth="1.5" style={{ width: 14, height: 14 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
                     Attach Memories
                   </div>
-                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: 1.5, color: 'rgba(212,168,80,.3)' }}>Up to 5 photos · Max 15MB each</div>
+                  <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: 1.5, color: 'rgba(212,168,80,.3)' }}>Up to 5 photos · Auto-optimized</div>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <GoldButton small ghost onClick={() => setShowCollageMaker(true)} disabled={!activeCircleId || uploading || aiLoading}>
+                  <GoldButton small ghost onClick={() => setShowCollageMaker(true)} disabled={!activeCircleId || uploading || aiLoading || compressing}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 10, height: 10 }}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
                     Collage
                   </GoldButton>
                   <label className="sc-file-label"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid rgba(212,168,80,.25)', borderRadius: 10, fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(212,168,80,.55)', cursor: !activeCircleId || uploading ? 'not-allowed' : 'pointer', transition: 'all .25s', background: 'rgba(212,168,80,.04)' }}>
-                    <input type="file" multiple accept="image/*,video/*,audio/*" onChange={handleFileSelect} disabled={!activeCircleId || uploading || aiLoading} style={{ display: 'none' }} />
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid rgba(212,168,80,.25)', borderRadius: 10, fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: 'rgba(212,168,80,.55)', cursor: !activeCircleId || uploading || compressing ? 'not-allowed' : 'pointer', transition: 'all .25s', background: 'rgba(212,168,80,.04)' }}>
+                    <input type="file" multiple accept="image/*,video/*,audio/*" onChange={handleFileSelect} disabled={!activeCircleId || uploading || aiLoading || compressing} style={{ display: 'none' }} />
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 11, height: 11 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    Upload
+                    {compressing ? 'Optimizing...' : 'Upload'}
                   </label>
                 </div>
               </div>
@@ -505,15 +560,15 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                         style={{ position: 'relative', width: 80, height: 80, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(212,168,80,.3)', boxShadow: '0 4px 16px rgba(0,0,0,.5)' }}>
                         <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.15)' }} />
-                        <button type="button" onClick={e => { e.preventDefault(); removeFile(idx); }}
-                          style={{ position: 'absolute', top: 5, right: 5, width: 20, height: 20, borderRadius: '50%', background: 'rgba(6,8,15,.88)', border: '1px solid rgba(212,168,80,.4)', color: '#e8c87a', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, transition: 'all .2s' }}>✕</button>
+                        <button type="button" onClick={e => { e.preventDefault(); removeFile(idx); }} disabled={compressing}
+                          style={{ position: 'absolute', top: 5, right: 5, width: 20, height: 20, borderRadius: '50%', background: 'rgba(6,8,15,.88)', border: '1px solid rgba(212,168,80,.4)', color: '#e8c87a', cursor: compressing ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, transition: 'all .2s', opacity: compressing ? 0.5 : 1 }}>✕</button>
                       </motion.div>
                     ))}
                     {mediaFiles.length < 5 && (
-                      <label style={{ width: 80, height: 80, borderRadius: 10, border: '1px dashed rgba(212,168,80,.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(212,168,80,.3)', gap: 4, transition: 'all .2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,.5)'; e.currentTarget.style.color = 'rgba(212,168,80,.6)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,.2)'; e.currentTarget.style.color = 'rgba(212,168,80,.3)'; }}>
-                        <input type="file" multiple accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
+                      <label style={{ width: 80, height: 80, borderRadius: 10, border: '1px dashed rgba(212,168,80,.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: compressing ? 'not-allowed' : 'pointer', color: 'rgba(212,168,80,.3)', gap: 4, transition: 'all .2s', opacity: compressing ? 0.5 : 1 }}
+                        onMouseEnter={e => { if(!compressing) { e.currentTarget.style.borderColor = 'rgba(212,168,80,.5)'; e.currentTarget.style.color = 'rgba(212,168,80,.6)';} }}
+                        onMouseLeave={e => { if(!compressing) { e.currentTarget.style.borderColor = 'rgba(212,168,80,.2)'; e.currentTarget.style.color = 'rgba(212,168,80,.3)';} }}>
+                        <input type="file" multiple accept="image/*" onChange={handleFileSelect} disabled={compressing || uploading} style={{ display: 'none' }} />
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 18, height: 18 }}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: 1 }}>Add</span>
                       </label>
@@ -546,7 +601,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
                           showTimeSelect timeFormat="HH:mm" timeIntervals={15}
                           dateFormat="MMM d, yyyy h:mm aa"
                           placeholderText="Select Date & Time..."
-                          disabled={uploading}
+                          disabled={uploading || compressing}
                         />
                       </div>
                     </motion.div>
@@ -562,7 +617,7 @@ function StoryComposer({ activeCircleId, onPostStory, uploading }) {
 
             {/* ── SUBMIT ── */}
             <div style={{ marginTop: 4 }}>
-              <GoldButton type="submit" fullWidth disabled={uploading || aiLoading || !activeCircleId}>
+              <GoldButton type="submit" fullWidth disabled={uploading || aiLoading || compressing || !activeCircleId}>
                 {uploading ? (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
                     {[0, 1, 2].map(i => <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: '#1a0f00', display: 'inline-block', animation: `scDot 1.2s ${i * .2}s ease-in-out infinite` }} />)}
