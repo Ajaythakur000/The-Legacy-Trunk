@@ -5,9 +5,10 @@
 
 > *"Every family has a story. Seal yours for the generations to come."*
 
+<br/>
 
-</div>
 🔗 **[Live Demo : The Legacy Trunk](https://the-legacy-trunk.vercel.app/)**
+
 <br/>
 
 ![React](https://img.shields.io/badge/⚛_React_19-d4a850?style=for-the-badge&labelColor=06080f)
@@ -17,11 +18,7 @@
 ![Socket.io](https://img.shields.io/badge/⚡_Socket.io-d4a850?style=for-the-badge&labelColor=06080f)
 ![Gemini](https://img.shields.io/badge/🤖_Gemini_AI-d4a850?style=for-the-badge&labelColor=06080f)
 
-
-
 </div>
-
-
 ## 📜 &nbsp; Table of Contents
  
 
