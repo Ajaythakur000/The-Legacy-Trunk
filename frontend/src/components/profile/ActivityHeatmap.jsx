@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 
 function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [tooltip, setTooltip] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -30,7 +29,7 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
       if (targetMonth < 0) { targetMonth += 12; targetYear -= 1; }
 
       const d = new Date(targetYear, targetMonth, 1);
-      const monthName = d.toLocaleString('default', { month: 'short' });
+      const monthName = d.toLocaleString('default', { month: 'short' }).toUpperCase();
       const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
       const firstDayOfWeek = new Date(targetYear, targetMonth, 1).getDay();
       const weeks = [];
@@ -62,174 +61,102 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
     return { monthsData: data, totalPoints: total, activeDays: activeCount, currentYear: cYear };
   }, [activityMap]);
 
+  // Comic Color Palette for pixels
   const getColor = (level, isFuture) => {
-    if (isFuture) return 'transparent';
-    const colors = ['rgba(255,255,255,0.05)', 'rgba(212,168,80,0.3)', 'rgba(212,168,80,0.55)', 'rgba(212,168,80,0.78)', '#e8c87a'];
+    if (isFuture) return '#F5F5F5'; // Future days have the same background as the board
+    const colors = ['#F5F5F5', '#FFD23F', '#FF7B00', '#FF3D81', '#3FE0FF'];
     return colors[level];
   };
 
-  const getGlow = (level) => {
-    if (level === 0) return 'none';
-    const glows = ['none', 'none', '0 0 4px rgba(212,168,80,0.3)', '0 0 8px rgba(212,168,80,0.5)', '0 0 12px rgba(212,168,80,0.8)'];
-    return glows[level];
-  };
-
   return (
-    <>
-      <style>{`
-        @keyframes hm-appear { from{opacity:0;transform:scaleY(0)} to{opacity:1;transform:scaleY(1)} }
-        .hm-cell {
-          box-sizing: border-box;
-          border: 1px solid rgba(255,255,255,0.03);
-          transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-          transform-origin: center;
-        }
-        .hm-cell:hover {
-          transform: scale(1.5) !important;
-          border-color: rgba(212,168,80,0.8) !important;
-          z-index: 20;
-          position: relative;
-        }
-      `}</style>
-
-      <div style={{
-        background: 'rgba(12,16,32,0.85)',
-        border: '1px solid rgba(212,168,80,0.22)',
-        borderRadius: 20, padding: '36px 40px',
-        position: 'relative',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-        overflowX: 'auto',
-      }}>
-        {/* Gold lines */}
-        <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent)' }} />
-        <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.25),transparent)' }} />
-
-        {/* Corner accents */}
-        {[
-          { top: 12, left: 12, borderWidth: '1px 0 0 1px', borderRadius: '4px 0 0 0' },
-          { top: 12, right: 12, borderWidth: '1px 1px 0 0', borderRadius: '0 4px 0 0' },
-          { bottom: 12, left: 12, borderWidth: '0 0 1px 1px', borderRadius: '0 0 0 4px' },
-          { bottom: 12, right: 12, borderWidth: '0 1px 1px 0', borderRadius: '0 0 4px 0' },
-        ].map((s, i) => (
-          <div key={i} style={{ position: 'absolute', width: 18, height: 18, borderColor: 'rgba(212,168,80,0.5)', borderStyle: 'solid', ...s }} />
-        ))}
-
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 20, marginBottom: 32 }}>
-          <div>
-            <h3 style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 40px rgba(212,168,80,0.3)', margin: '0 0 4px', letterSpacing: 1 }}>
-              Chronicle of Activity
-            </h3>
-            <p style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(212,168,80,0.55)', margin: 0 }}>
-              Legacy points · Past 12 months
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Stat cards */}
-            {[
-              { val: totalPoints.toLocaleString(), lbl: 'Legacy Points', icon: '✦' },
-              { val: activeDays, lbl: 'Active Days', icon: '◈' },
-              { val: maxStreak, lbl: 'Max Streak', icon: '⚡' },
-            ].map((s, i) => (
-              <div key={i} style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(212,168,80,0.12)', borderRadius: 12, padding: '10px 18px', textAlign: 'center', minWidth: 80 }}>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 20px rgba(212,168,80,0.4)', lineHeight: 1 }}>{s.val}</div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(212,168,80,0.45)', marginTop: 4 }}>{s.lbl}</div>
-              </div>
-            ))}
-
-            {/* Period dropdown */}
-            <div style={{ position: 'relative' }} ref={dropdownRef}>
-              <div
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                style={{ background: 'rgba(212,168,80,0.06)', border: '1px solid rgba(212,168,80,0.22)', padding: '10px 16px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontFamily: "'Space Mono',monospace", fontSize: 10, letterSpacing: '1px', color: 'rgba(212,168,80,0.6)', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,168,80,0.12)'; e.currentTarget.style.borderColor = 'rgba(212,168,80,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(212,168,80,0.06)'; e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; }}
-              >
-                Current
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </div>
-
-              {isDropdownOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  style={{ position: 'absolute', top: '110%', right: 0, background: 'rgba(12,16,32,0.97)', border: '1px solid rgba(212,168,80,0.22)', borderRadius: 12, boxShadow: '0 20px 40px rgba(0,0,0,0.7)', zIndex: 100, minWidth: 130, overflow: 'hidden' }}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.5),transparent)' }} />
-                  <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', fontFamily: "'Space Mono',monospace", fontSize: 10, letterSpacing: '1px', color: '#e8c87a', background: 'rgba(212,168,80,0.06)' }}>
-                    Current <span>✓</span>
-                  </div>
-                  {currentYear > 2026 && <div style={{ padding: '10px 16px', fontFamily: "'Space Mono',monospace", fontSize: 10, color: 'rgba(212,168,80,0.5)', cursor: 'pointer' }}>2026</div>}
-                  {currentYear === 2026 && <div style={{ padding: '10px 16px', fontFamily: "'Space Mono',monospace", fontSize: 9, color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }}>No past years</div>}
-                </motion.div>
-              )}
-            </div>
-          </div>
+    <div style={{ background: '#FFF', border: '6px solid #171719', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 0px 0px #171719', position: 'relative' }}>
+      
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24, marginBottom: 32 }}>
+        <div>
+          <h3 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#171719', margin: '0 0 8px' }}>
+            ACTIVITY TRACKER 🕹️
+          </h3>
+          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#171719', margin: 0 }}>
+            Checking your consistency for the past 12 months.
+          </p>
         </div>
 
-        {/* Heatmap grid */}
-        <div style={{ minWidth: 860 }}>
-          <div style={{ display: 'flex', gap: 10 }}>
-            {monthsData.map((month, mIndex) => (
-              <div key={mIndex} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div style={{ display: 'flex', gap: 3 }}>
-                  {month.weeks.map((week, wIndex) => (
-                    <div key={wIndex} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                      {week.map((day, dIndex) =>
-                        day ? (
-                          <div
-                            key={day.date}
-                            className={!day.isFuture ? 'hm-cell' : ''}
-                            title={`${day.count} points · ${day.tooltipDate}`}
-                            style={{
-                              width: 13, height: 13,
-                              backgroundColor: getColor(day.level, day.isFuture),
-                              borderRadius: 3,
-                              cursor: day.isFuture ? 'default' : 'pointer',
-                              border: day.isFuture ? 'none' : '1px solid rgba(255,255,255,0.03)',
-                              boxShadow: day.isFuture ? 'none' : getGlow(day.level),
-                            }}
-                          />
-                        ) : (
-                          <div key={`e-${mIndex}-${wIndex}-${dIndex}`} style={{ width: 13, height: 13, background: 'transparent' }} />
-                        )
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1px', color: 'rgba(212,168,80,0.4)', textAlign: 'center' }}>
-                  {month.name}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 18, justifyContent: 'flex-end' }}>
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1px', color: 'rgba(212,168,80,0.35)' }}>Less</span>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Stat cards */}
           {[
-            'rgba(255,255,255,0.05)',
-            'rgba(212,168,80,0.3)',
-            'rgba(212,168,80,0.55)',
-            'rgba(212,168,80,0.78)',
-            '#e8c87a',
-          ].map((c, i) => (
-            <div key={i} style={{ width: 13, height: 13, borderRadius: 3, background: c, border: '1px solid rgba(255,255,255,0.04)', boxShadow: i > 1 ? `0 0 ${i * 3}px rgba(212,168,80,${i * 0.15})` : 'none' }} />
+            { val: totalPoints.toLocaleString(), lbl: 'TOTAL PTS', color: '#FFD23F' },
+            { val: activeDays, lbl: 'ACTIVE DAYS', color: '#3FE0FF' },
+            { val: maxStreak, lbl: 'MAX STREAK', color: '#00C853' },
+          ].map((s, i) => (
+            <div key={i} style={{ background: s.color, border: '4px solid #171719', borderRadius: 12, padding: '12px 20px', textAlign: 'center', minWidth: 100, boxShadow: '4px 4px 0px 0px #171719', transform: i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)' }}>
+              <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 28, color: '#171719', lineHeight: 1 }}>{s.val}</div>
+              <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 12, color: '#171719', marginTop: 4 }}>{s.lbl}</div>
+            </div>
           ))}
-          <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1px', color: 'rgba(212,168,80,0.35)' }}>More</span>
-        </div>
 
-        {/* Rune footer */}
-        <div style={{ marginTop: 20, fontFamily: "'Cinzel',serif", fontSize: 10, letterSpacing: 4, color: 'rgba(212,168,80,0.18)', userSelect: 'none', textAlign: 'center' }}>
-          ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
+          {/* Period dropdown */}
+          <div style={{ position: 'relative' }} ref={dropdownRef}>
+            <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} style={{ background: '#FFF', border: '4px solid #171719', padding: '12px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontFamily: "'Luckiest Guy',cursive", fontSize: 16, color: '#171719', boxShadow: '4px 4px 0px 0px #171719', transition: 'transform 0.1s' }}>
+              CURRENT 📅
+            </button>
+            {isDropdownOpen && (
+              <div style={{ position: 'absolute', top: '110%', right: 0, background: '#FFF', border: '4px solid #171719', borderRadius: 12, boxShadow: '6px 6px 0px 0px #171719', zIndex: 100, minWidth: 150, overflow: 'hidden' }}>
+                <div style={{ padding: '16px', fontFamily: "'Luckiest Guy',cursive", fontSize: 16, color: '#FF3D81', borderBottom: '3px solid #171719', background: '#F5F5F5' }}>CURRENT ✓</div>
+                {currentYear === 2026 && <div style={{ padding: '16px', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: '#171719', cursor: 'not-allowed' }}>No past years</div>}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </>
+
+      {/* Heatmap grid */}
+      <div style={{ width: '100%', overflowX: 'auto', paddingBottom: 16 }}>
+        {/* CHANGED: Removed dashed border and fixed width. Changed to inline-flex so background wraps correctly */}
+        <div style={{ display: 'inline-flex', gap: 16, background: '#F5F5F5', padding: '24px', borderRadius: '16px', minWidth: '100%', boxSizing: 'border-box' }}>
+          {monthsData.map((month, mIndex) => (
+            <div key={mIndex} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {month.weeks.map((week, wIndex) => (
+                  <div key={wIndex} style={{ display: 'grid', gridTemplateRows: 'repeat(7, 16px)', gap: 4 }}>
+                    {week.map((day, dIndex) =>
+                      day ? (
+                        <div
+                          key={day.date}
+                          title={`${day.count} points · ${day.tooltipDate}`}
+                          style={{
+                            width: 16, height: 16, boxSizing: 'border-box',
+                            backgroundColor: getColor(day.level, day.isFuture),
+                            borderRadius: 4,
+                            cursor: day.isFuture ? 'default' : 'pointer',
+                            border: day.isFuture ? '2px dashed rgba(23,23,25,0.15)' : '2px solid #171719',
+                          }}
+                        />
+                      ) : (
+                        // Empty slot placeholder
+                        <div key={`e-${mIndex}-${wIndex}-${dIndex}`} style={{ width: 16, height: 16, boxSizing: 'border-box', border: '2px dashed rgba(23,23,25,0.15)', borderRadius: 4 }} />
+                      )
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 12, color: '#171719', textAlign: 'center' }}>
+                {month.name}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
+        <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719' }}>LAZY</span>
+        {['#F5F5F5', '#FFD23F', '#FF7B00', '#FF3D81', '#3FE0FF'].map((c, i) => (
+          <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: c, border: '3px solid #171719' }} />
+        ))}
+        <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719' }}>ACTIVE!</span>
+      </div>
+    </div>
   );
 }
 

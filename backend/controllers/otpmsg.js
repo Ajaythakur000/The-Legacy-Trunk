@@ -1,89 +1,205 @@
 // controllers/otpmsg.js
 
+// Email-safe Pop-Art Color Palette
 const theme = {
-  bgOuter: '#04060a',      // Deep dark background
-  bgInner: '#0c1020',      // Card background
-  gold: '#e8c87a',         // Primary signature gold
-  goldMuted: '#d4a850',    // Secondary gold
-  textLight: '#ffffff',
-  textMuted: '#a0aabf',
-  border: '1px solid rgba(212, 168, 80, 0.25)',
-  fontFamily: "'Georgia', 'Times New Roman', serif",
+  bgOuter: '#FFF6E5',      // Cream comic page background
+  bgInner: '#FFFFFF',      // White panel background
+  primary: '#FFD23F',      // Yellow action color
+  secondary: '#3FE0FF',    // Cyan action color
+  accent: '#FF3D81',       // Pink action color
+  black: '#171719',        // Ink black for borders/text
+  gray: '#F5F5F5',         // Light gray for inset panels
+  fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif", // Safest fallback
+  headingFont: "Impact, 'Arial Black', Arial, sans-serif", // Blocky comic feel
   monoFont: "'Courier New', Courier, monospace"
 };
 
 // 1. Template for New Registration (Welcome)
 export const getWelcomeOtpTemplate = (name, otp) => `
-<div style="background-color: ${theme.bgOuter}; padding: 40px 20px; font-family: ${theme.fontFamily}; text-align: center; color: ${theme.textLight};">
-  <div style="max-width: 500px; margin: 0 auto; background-color: ${theme.bgInner}; padding: 40px; border-radius: 16px; border: ${theme.border}; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+<div style="background-color: ${theme.bgOuter}; padding: 40px 10px; font-family: ${theme.fontFamily}; color: ${theme.black};">
+  
+  <!-- Outer Shadow Table (Fakes the box-shadow) -->
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;">
+    <tr>
+      <td style="background-color: ${theme.black}; padding: 8px 8px 0px 8px; border-radius: 20px;">
+        
+        <!-- Inner Card Table -->
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${theme.bgInner}; border: 4px solid ${theme.black}; border-radius: 16px; text-align: center;">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="background-color: ${theme.primary}; padding: 30px 20px; border-bottom: 4px solid ${theme.black}; border-radius: 12px 12px 0 0;">
+              <div style="font-size: 50px; margin-bottom: 10px; line-height: 1;">👋</div>
+              <h1 style="font-family: ${theme.headingFont}; font-size: 32px; color: ${theme.black}; margin: 0; text-transform: uppercase; letter-spacing: 1px;">
+                HEY, ${name}!
+              </h1>
+            </td>
+          </tr>
 
-    <h2 style="font-size: 22px; margin-bottom: 8px; font-weight: normal;">Welcome to the Vault, <strong style="color: ${theme.gold};">${name}</strong></h2>
-    <p style="color: ${theme.textMuted}; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-      Your bloodline has summoned you. Use the ancient key below to unlock your digital estate and begin preserving your history.
-    </p>
+          <!-- Body -->
+          <tr>
+            <td style="padding: 30px 20px;">
+              <p style="font-size: 18px; font-weight: bold; line-height: 1.5; margin: 0 0 25px 0;">
+                Welcome to the Scrapbook! You're almost in. Use this super-secret code to unlock your account.
+              </p>
 
-    <div style="background: rgba(212, 168, 80, 0.05); border: 1px dashed ${theme.goldMuted}; padding: 24px; border-radius: 12px; margin-bottom: 30px;">
-      <span style="font-family: ${theme.monoFont}; font-size: 42px; font-weight: bold; letter-spacing: 12px; color: ${theme.gold};">${otp}</span>
-    </div>
+              <!-- Code Box -->
+              <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; background-color: ${theme.gray}; border: 3px dashed ${theme.black};">
+                <tr>
+                  <td style="padding: 20px 30px;">
+                    <span style="font-family: ${theme.headingFont}; font-size: 42px; color: ${theme.accent}; letter-spacing: 8px;">
+                      ${otp}
+                    </span>
+                  </td>
+                </tr>
+              </table>
 
-    <p style="color: ${theme.textMuted}; font-size: 13px; font-style: italic;">
-      This key will turn to dust in exactly 10 minutes.<br/>Guard it with your life.
-    </p>
+              <!-- Warning Tag -->
+              <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 25px auto 0 auto; background-color: ${theme.black}; color: ${theme.primary}; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 10px 15px; font-weight: bold; font-size: 14px; text-transform: uppercase;">
+                    ⏳ QUICK! EXPLODES IN 10 MINS!
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px; border-top: 4px solid ${theme.black}; background-color: ${theme.bgOuter}; border-radius: 0 0 12px 12px;">
+              <div style="font-family: ${theme.headingFont}; font-size: 18px; color: ${theme.black};">
+                THE LEGACY TRUNK 💥
+              </div>
+            </td>
+          </tr>
 
-    <div style="margin-top: 40px; font-size: 10px; letter-spacing: 4px; color: rgba(212, 168, 80, 0.3);">
-      ✦ ᚦ ᛖ ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ ✦
-    </div>
-  </div>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
 </div>
 `;
 
 // 2. Template for Login (Unverified User)
 export const getLoginOtpTemplate = (name, otp) => `
-<div style="background-color: ${theme.bgOuter}; padding: 40px 20px; font-family: ${theme.fontFamily}; text-align: center; color: ${theme.textLight};">
-  <div style="max-width: 500px; margin: 0 auto; background-color: ${theme.bgInner}; padding: 40px; border-radius: 16px; border: ${theme.border}; box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+<div style="background-color: ${theme.bgOuter}; padding: 40px 10px; font-family: ${theme.fontFamily}; color: ${theme.black};">
+  
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;">
+    <tr>
+      <td style="background-color: ${theme.black}; padding: 8px 8px 0px 8px; border-radius: 20px;">
+        
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${theme.bgInner}; border: 4px solid ${theme.black}; border-radius: 16px; text-align: center;">
+          
+          <tr>
+            <td style="background-color: ${theme.secondary}; padding: 30px 20px; border-bottom: 4px solid ${theme.black}; border-radius: 12px 12px 0 0;">
+              <div style="font-size: 50px; margin-bottom: 10px; line-height: 1;">🔐</div>
+              <h1 style="font-family: ${theme.headingFont}; font-size: 32px; color: ${theme.black}; margin: 0; text-transform: uppercase; letter-spacing: 1px;">
+                WELCOME BACK!
+              </h1>
+            </td>
+          </tr>
 
-    <h2 style="font-size: 22px; margin-bottom: 8px; font-weight: normal;">Welcome Back, <strong style="color: ${theme.gold};">${name}</strong></h2>
-    <p style="color: ${theme.textMuted}; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-      You attempt to enter the vault, but your identity remains unverified. The Oracle requires proof of your lineage.
-    </p>
+          <tr>
+            <td style="padding: 30px 20px;">
+              <p style="font-size: 18px; font-weight: bold; line-height: 1.5; margin: 0 0 25px 0;">
+                Looks like you need to verify your identity, ${name}. Here is your access key for the vault!
+              </p>
 
-    <div style="background: rgba(212, 168, 80, 0.05); border: 1px solid ${theme.goldMuted}; padding: 24px; border-radius: 12px; margin-bottom: 30px;">
-      <div style="font-size: 12px; color: ${theme.textMuted}; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">Your Access Key</div>
-      <span style="font-family: ${theme.monoFont}; font-size: 42px; font-weight: bold; letter-spacing: 12px; color: ${theme.gold};">${otp}</span>
-    </div>
+              <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; background-color: ${theme.bgInner}; border: 4px solid ${theme.black}; border-radius: 8px;">
+                <tr>
+                  <td style="background-color: ${theme.black}; color: ${theme.secondary}; padding: 8px; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
+                    ACCESS KEY
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px 30px;">
+                    <span style="font-family: ${theme.headingFont}; font-size: 42px; color: ${theme.black}; letter-spacing: 8px;">
+                      ${otp}
+                    </span>
+                  </td>
+                </tr>
+              </table>
 
-    <p style="color: ${theme.textMuted}; font-size: 13px; font-style: italic;">
-      Valid for 10 minutes. Do not share this sequence with outsiders.
-    </p>
+              <p style="font-size: 14px; font-weight: bold; color: ${theme.textMuted}; margin-top: 25px;">
+                Valid for 10 minutes. Keep it secret!
+              </p>
+            </td>
+          </tr>
+          
+          <tr>
+            <td style="padding: 20px; border-top: 4px solid ${theme.black}; background-color: ${theme.bgOuter}; border-radius: 0 0 12px 12px;">
+              <div style="font-family: ${theme.headingFont}; font-size: 18px; color: ${theme.black};">
+                THE LEGACY TRUNK 💥
+              </div>
+            </td>
+          </tr>
 
-    <div style="margin-top: 40px; font-size: 10px; letter-spacing: 4px; color: rgba(212, 168, 80, 0.3);">
-      ✦ ᚦ ᛖ ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ ✦
-    </div>
-  </div>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
 </div>
 `;
 
 // 3. Template for Password Reset
 export const getResetPasswordTemplate = (name, otp) => `
-<div style="background-color: ${theme.bgOuter}; padding: 40px 20px; font-family: ${theme.fontFamily}; text-align: center; color: ${theme.textLight};">
-  <div style="max-width: 500px; margin: 0 auto; background-color: #120505; padding: 40px; border-radius: 16px; border: 1px solid rgba(220, 60, 60, 0.3); box-shadow: 0 15px 40px rgba(0,0,0,0.8);">
+<div style="background-color: ${theme.bgOuter}; padding: 40px 10px; font-family: ${theme.fontFamily}; color: ${theme.black};">
+  
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;">
+    <tr>
+      <td style="background-color: ${theme.black}; padding: 8px 8px 0px 8px; border-radius: 20px;">
+        
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${theme.bgInner}; border: 4px solid ${theme.black}; border-radius: 16px; text-align: center;">
+          
+          <tr>
+            <td style="background-color: ${theme.accent}; padding: 30px 20px; border-bottom: 4px solid ${theme.black}; border-radius: 12px 12px 0 0;">
+              <div style="font-size: 50px; margin-bottom: 10px; line-height: 1;">🚨</div>
+              <h1 style="font-family: ${theme.headingFont}; font-size: 32px; color: ${theme.bgInner}; margin: 0; text-transform: uppercase; letter-spacing: 1px;">
+                LOST YOUR KEY?
+              </h1>
+            </td>
+          </tr>
 
-    <h2 style="font-size: 22px; margin-bottom: 8px; font-weight: normal;">Forging a New Key, <strong style="color: #f08080;">${name}</strong></h2>
-    <p style="color: ${theme.textMuted}; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-      It seems your original key was lost to the shadows. Use this temporal code to forge a new password and reclaim your vault.
-    </p>
+          <tr>
+            <td style="padding: 30px 20px;">
+              <p style="font-size: 18px; font-weight: bold; line-height: 1.5; margin: 0 0 25px 0;">
+                Don't panic, ${name}! Use the code below to reset your password and get back to your memories.
+              </p>
 
-    <div style="background: rgba(220, 60, 60, 0.05); border: 1px dashed rgba(220, 60, 60, 0.5); padding: 24px; border-radius: 12px; margin-bottom: 30px;">
-      <span style="font-family: ${theme.monoFont}; font-size: 42px; font-weight: bold; letter-spacing: 12px; color: #f08080;">${otp}</span>
-    </div>
+              <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; background-color: ${theme.primary}; border: 4px dashed ${theme.black};">
+                <tr>
+                  <td style="padding: 20px 30px;">
+                    <span style="font-family: ${theme.headingFont}; font-size: 42px; color: ${theme.black}; letter-spacing: 8px;">
+                      ${otp}
+                    </span>
+                  </td>
+                </tr>
+              </table>
 
-    <p style="color: ${theme.textMuted}; font-size: 13px; font-style: italic;">
-      This code expires in 10 minutes. If you did not request this, secure your account immediately.
-    </p>
+              <p style="font-size: 14px; font-weight: bold; color: ${theme.textMuted}; margin-top: 25px;">
+                Expires in 10 minutes. Ignore this if you didn't request a reset!
+              </p>
+            </td>
+          </tr>
+          
+          <tr>
+            <td style="padding: 20px; border-top: 4px solid ${theme.black}; background-color: ${theme.bgOuter}; border-radius: 0 0 12px 12px;">
+              <div style="font-family: ${theme.headingFont}; font-size: 18px; color: ${theme.black};">
+                THE LEGACY TRUNK 💥
+              </div>
+            </td>
+          </tr>
 
-    <div style="margin-top: 40px; font-size: 10px; letter-spacing: 4px; color: rgba(220, 60, 60, 0.3);">
-      ✦ ᚦ ᛖ ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ ✦
-    </div>
-  </div>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
 </div>
 `;

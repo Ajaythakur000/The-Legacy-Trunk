@@ -1,95 +1,32 @@
 import { motion } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 
-// ─── Cinematic page transition variants ──────────────────────────────────────
+// ─── Comic page transition variants ──────────────────────────────────────────
 const variants = {
   vaultDoor: {
-    initial: {
-      opacity: 0,
-      y: 40,
-      clipPath: 'inset(0 50% 0 50%)',
-      filter: 'brightness(2) blur(6px)',
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      clipPath: 'inset(0 0% 0 0%)',
-      filter: 'brightness(1) blur(0px)',
-    },
-    exit: {
-      opacity: 0,
-      y: -30,
-      clipPath: 'inset(0 50% 0 50%)',
-      filter: 'brightness(2) blur(6px)',
-    },
+    initial: { opacity: 0, scale: 0.8, rotate: -4 },
+    animate: { opacity: 1, scale: 1, rotate: 0 },
+    exit: { opacity: 0, scale: 1.1, rotate: 4 },
   },
-
   scroll: {
-    initial: {
-      opacity: 0,
-      scaleY: 0.5,
-      y: -50,
-      transformOrigin: 'top center',
-      filter: 'sepia(1) brightness(2.5)',
-    },
-    animate: {
-      opacity: 1,
-      scaleY: 1,
-      y: 0,
-      transformOrigin: 'top center',
-      filter: 'sepia(0) brightness(1)',
-    },
-    exit: {
-      opacity: 0,
-      scaleY: 0.5,
-      y: 50,
-      transformOrigin: 'bottom center',
-      filter: 'sepia(1) brightness(2.5)',
-    },
+    initial: { opacity: 0, y: 100, scale: 0.9 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -100, scale: 0.9 },
   },
-
   goldFade: {
-    initial: {
-      opacity: 0,
-      y: 20,
-      filter: 'brightness(3) saturate(0)',
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      filter: 'brightness(1) saturate(1)',
-    },
-    exit: {
-      opacity: 0,
-      y: -20,
-      filter: 'brightness(3) saturate(0)',
-    },
+    initial: { opacity: 0, x: -50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 50 },
   },
-
   runeRise: {
-    initial: {
-      opacity: 0,
-      y: 60,
-      scale: 0.94,
-      filter: 'blur(10px)',
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      filter: 'blur(0px)',
-    },
-    exit: {
-      opacity: 0,
-      y: -40,
-      scale: 1.05,
-      filter: 'blur(8px)',
-    },
+    initial: { opacity: 0, y: 40, scale: 0.95 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: -40, scale: 1.05 },
   },
 };
 
-// ─── Gold particle burst on page enter ──────────────────────────────────────
-function GoldBurst() {
+// ─── Comic Action Burst on page enter ─────────────────────────────────────────
+function ComicBurst() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -104,16 +41,18 @@ function GoldBurst() {
     };
     resize();
 
-    const particles = Array.from({ length: 40 }, () => {
+    const particles = Array.from({ length: 25 }, () => {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 4 + 1.5;
+      const speed = Math.random() * 15 + 5;
+      const colors = ['#FFD23F', '#FF3D81', '#3FE0FF', '#171719'];
       return {
         x: canvas.width / 2, y: canvas.height / 2,
         vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 2,
-        r: Math.random() * 3 + 1,
-        alpha: 1,
-        gold: Math.random() > 0.2,
+        vy: Math.sin(angle) * speed,
+        size: Math.random() * 20 + 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        life: 1,
       };
     });
 
@@ -125,18 +64,30 @@ function GoldBurst() {
       particles.forEach((p) => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.04;
-        p.alpha -= 0.015;
-        if (p.alpha <= 0) return;
+        p.life -= 0.04;
+        p.rotation += 10;
+        p.size *= 0.95;
+        if (p.life <= 0) return;
+        
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.strokeStyle = '#171719';
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.gold
-          ? `rgba(212,180,80,${p.alpha})`
-          : `rgba(255,255,255,${p.alpha * 0.5})`;
+        // Draw a rough star/burst shape
+        for (let i = 0; i < 5; i++) {
+          ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * p.size, -Math.sin((18 + i * 72) * Math.PI / 180) * p.size);
+          ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (p.size/2), -Math.sin((54 + i * 72) * Math.PI / 180) * (p.size/2));
+        }
+        ctx.closePath();
         ctx.fill();
+        ctx.stroke();
+        ctx.restore();
       });
       frame++;
-      if (frame < 45) raf = requestAnimationFrame(draw);
+      if (frame < 30) raf = requestAnimationFrame(draw);
     };
 
     raf = requestAnimationFrame(draw);
@@ -149,88 +100,55 @@ function GoldBurst() {
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        pointerEvents: 'none',
-        zIndex: 9999,
-      }}
-    />
-  );
+  return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }} />;
 }
 
-// ─── Rune flash overlay on transition ────────────────────────────────────────
-function RuneFlash() {
+// ─── Pop-Art screen wipe on transition ───────────────────────────────────────
+function ComicWipe() {
   const [hidden, setHidden] = useState(false);
 
   if (hidden) return null;
 
   return (
     <motion.div
-      initial={{ opacity: 0.8 }}
-      animate={{ opacity: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
+      initial={{ scaleY: 1 }}
+      animate={{ scaleY: 0 }}
+      transition={{ duration: 0.4, ease: [0.8, 0, 0.2, 1] }}
       onAnimationComplete={() => setHidden(true)}
       style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'radial-gradient(ellipse at center, rgba(212,168,80,0.15) 0%, transparent 70%)',
-        pointerEvents: 'none',
-        zIndex: 9998,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        position: 'fixed', inset: 0,
+        background: '#FFD23F',
+        transformOrigin: 'top',
+        pointerEvents: 'none', zIndex: 9998,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        borderBottom: '8px solid #171719'
       }}
     >
       <motion.div
-        initial={{ opacity: 1, scale: 0.8, letterSpacing: '8px' }}
-        animate={{ opacity: 0, scale: 1.5, letterSpacing: '28px' }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        style={{
-          fontFamily: "'Cinzel', serif",
-          fontSize: 16,
-          color: 'rgba(212,168,80,0.7)',
-          userSelect: 'none',
-          whiteSpace: 'nowrap',
-          textShadow: '0 0 20px rgba(212,168,80,0.5)',
-        }}
+        initial={{ scale: 1, rotate: -10 }} animate={{ scale: 0, rotate: 10 }} transition={{ duration: 0.3 }}
+        style={{ fontFamily: "'Luckiest Guy', cursive", fontSize: 80, color: '#FF3D81', textShadow: '4px 4px 0px #171719', WebkitTextStroke: '2px #171719' }}
       >
-        ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ✦
+        POW!
       </motion.div>
     </motion.div>
   );
 }
 
 // ─── Main AnimatedPage ────────────────────────────────────────────────────────
-function AnimatedPage({
-  children,
-  variant = 'runeRise',
-  showBurst = false,
-  showRuneFlash = true,
-  duration = 1.2,
-}) {
+function AnimatedPage({ children, variant = 'runeRise', showBurst = false, showRuneFlash = true, duration = 0.5 }) {
   const chosen = variants[variant] || variants.runeRise;
-  const fastDuration = Math.min(duration, 0.28);
 
   return (
     <>
-      {showRuneFlash && <RuneFlash />}
-      {showBurst && <GoldBurst />}
+      {showRuneFlash && <ComicWipe />}
+      {showBurst && <ComicBurst />}
 
       <motion.div
         variants={chosen}
         initial="initial"
         animate="animate"
         exit="exit"
-        transition={{
-          duration: fastDuration,
-          ease: [0.22, 1, 0.36, 1],
-          filter: { duration: fastDuration * 0.8 },
-          clipPath: { duration: fastDuration * 0.9, ease: [0.4, 0, 0.2, 1] },
-        }}
+        transition={{ type: 'spring', damping: 20, stiffness: 150 }}
         style={{ width: '100%', height: '100%' }}
       >
         {children}

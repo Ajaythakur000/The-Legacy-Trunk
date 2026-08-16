@@ -3,7 +3,6 @@ import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './context/AuthContext';
 
-
 import Navbar from './components/shared/Navbar';
 import ProtectedRoute from './components/shared/ProtectedRoute';
 import AnimatedPage from './components/shared/AnimatedPage';
@@ -26,21 +25,17 @@ import LeaderboardPage from './pages/LeaderboardPage';
 
 // Stories Pages
 import VaultStoriesPage from './pages/VaultStoriesPage';
-//import StoryDetailPage from './pages/StoryDetailPage';
 import MyStoriesPage from './components/story/MyStoriesPage';
 import FamilyTimelinePage from './pages/FamilyTimelinePage';
 import FamilyOraclePage from './pages/FamilyOraclePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 
-// 🔥 THE FIX: Yahan AnimatePresence aur key add kiya hai sirf content (Outlet) ke liye
 function ProtectedLayout() {
-  const location = useLocation(); // Location hook yahan use hoga key ke liye
+  const location = useLocation(); 
   return (
     <ProtectedRoute>
       <Navbar>
-        {/* Navbar/Sidebar static rahenge, bas ye andar wala hissa animate hoga */}
         <AnimatePresence mode="wait">
-          {/* Key is important here so Framer Motion knows the page changed */}
           <div key={location.pathname} style={{ width: '100%', height: '100%' }}> 
             <Outlet /> 
           </div>
@@ -55,7 +50,7 @@ function App() {
   const { isInitializing } = useAuth();
 
   if (isInitializing) {
-    return <div style={{ background: '#06080f', minHeight: '100vh' }} />;
+    return <div style={{ background: '#FFF6E5', minHeight: '100vh', backgroundImage: 'radial-gradient(#171719 2px, transparent 2.5px)', backgroundSize: '20px 20px' }} />;
   }
 
   return (
@@ -65,45 +60,35 @@ function App() {
         reverseOrder={false}
         toastOptions={{
           style: {
-            background: 'linear-gradient(145deg, #0f1322 0%, #06080f 100%)',
-            color: '#e8c87a',
-            border: '1px solid rgba(212,168,80,0.3)',
+            background: '#FFFFFF',
+            color: '#171719',
+            border: '4px solid #171719',
             borderRadius: '12px',
-            padding: '14px 24px',
-            fontFamily: "'Cinzel', serif",
-            fontWeight: '600',
-            fontSize: '13px',
+            padding: '16px 24px',
+            fontFamily: "'Luckiest Guy', cursive",
+            fontSize: '16px',
             letterSpacing: '1px',
-            boxShadow: '0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(212,168,80,0.15)',
-            backdropFilter: 'blur(20px)',
+            boxShadow: '8px 8px 0px 0px #171719',
           },
           success: {
-            style: { borderLeft: '4px solid #e8c87a' },
-            iconTheme: { primary: '#e8c87a', secondary: '#06080f' },
-            icon: '✦',
+            style: { background: '#00C853', color: '#FFF' },
+            iconTheme: { primary: '#FFF', secondary: '#00C853' },
+            icon: 'BAM! 💥',
           },
           error: {
-            style: {
-              background: 'linear-gradient(145deg, #1f0b0b 0%, #0a0404 100%)',
-              color: '#f08080',
-              border: '1px solid rgba(220,60,60,0.3)',
-              borderLeft: '4px solid #f08080',
-              boxShadow: '0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(220,60,60,0.15)',
-            },
-            iconTheme: { primary: '#f08080', secondary: '#0a0404' },
-            icon: '⚠️',
+            style: { background: '#FF3D81', color: '#FFF' },
+            iconTheme: { primary: '#FFF', secondary: '#FF3D81' },
+            icon: 'OOPS! ⚠️',
           },
           loading: {
-            style: { borderBottom: '2px solid rgba(212,168,80,0.5)' },
-            iconTheme: { primary: '#e8c87a', secondary: 'transparent' },
+            style: { background: '#3FE0FF', color: '#171719' },
+            iconTheme: { primary: '#171719', secondary: 'transparent' },
           },
         }}
       />
 
       <ErrorBoundary>
-        {/* Bahar ka AnimatePresence abhi public routes (Login/Signup) ke liye kaam karega */}
         <AnimatePresence mode="wait">
-          {/* 🔥 MAIN FIX: Yahan se 'key={location.pathname}' REMOVE kar diya hai */}
           <Routes location={location}> 
             <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -114,7 +99,6 @@ function App() {
 
             {/* Protected Routes Wrapper */}
             <Route element={<ProtectedLayout />}>
-              {/* Yahan se key hatayi hai kyunki ab internal AnimatePresence manage kar raha hai */}
               <Route path="/home" element={<AnimatedPage><HomePage /></AnimatedPage>} />
               <Route path="/dashboard" element={<AnimatedPage><DashboardPage /></AnimatedPage>} />
               <Route path="/profile" element={<AnimatedPage><ProfilePage /></AnimatedPage>} />
@@ -123,7 +107,6 @@ function App() {
               <Route path="/leaderboard" element={<AnimatedPage><LeaderboardPage /></AnimatedPage>} />
               <Route path="/memory-lane" element={<AnimatedPage><FamilyTimelinePage /></AnimatedPage>} />
               <Route path="/vault-stories" element={<AnimatedPage><VaultStoriesPage /></AnimatedPage>} />
-             
               <Route path="/my-stories" element={<AnimatedPage><MyStoriesPage /></AnimatedPage>} />
               <Route path="/search" element={<AnimatedPage><SearchResultsPage /></AnimatedPage>} />
               <Route path="/oracle" element={<AnimatedPage><FamilyOraclePage /></AnimatedPage>} />

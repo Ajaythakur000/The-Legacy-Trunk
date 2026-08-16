@@ -12,41 +12,21 @@ function TypingIndicator({ typingUsers = [] }) {
     <AnimatePresence>
       {uniqueNames.length > 0 ? (
         <motion.div
-          key="typing"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 6 }}
-          transition={{ duration: 0.2 }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '4px 0', height: 26,
-          }}
+          key="typing" initial={{ opacity: 0, y: 10, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.8 }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 12, padding: '8px 16px', background: '#FFF', border: '3px solid #171719', borderRadius: 20, boxShadow: '4px 4px 0px 0px #171719' }}
         >
-          {/* Animated dots */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <div style={{ display: 'flex', gap: 4 }}>
             {[0, 1, 2].map(i => (
-              <div key={i} style={{
-                width: 5, height: 5, borderRadius: '50%',
-                background: 'rgba(212,168,80,0.6)',
-                animation: `vrPulse 1.2s ${i * 0.2}s ease-in-out infinite`,
-                boxShadow: '0 0 4px rgba(212,168,80,0.3)',
-              }} />
+              <motion.div key={i} animate={{ y: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.1 }}
+                style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF3D81', border: '2px solid #171719' }} />
             ))}
           </div>
-          <span style={{
-            fontFamily: "'Cormorant Garamond',serif",
-            fontStyle: 'italic', fontSize: 13,
-            color: 'rgba(212,168,80,0.55)',
-            letterSpacing: 0.3,
-          }}>
-            <span style={{ color: 'rgba(212,168,80,0.8)', fontStyle: 'normal', fontFamily: "'Cinzel',serif", fontSize: 11 }}>
-              {uniqueNames.join(', ')}
-            </span>
-            {' '}{uniqueNames.length > 1 ? 'are inscribing' : 'is inscribing'}...
+          <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719' }}>
+            {uniqueNames.join(', ')} {uniqueNames.length > 1 ? 'ARE TYPING...' : 'IS TYPING...'}
           </span>
         </motion.div>
       ) : (
-        <div key="empty" style={{ height: 26 }} />
+        <div key="empty" style={{ height: 42 }} />
       )}
     </AnimatePresence>
   );

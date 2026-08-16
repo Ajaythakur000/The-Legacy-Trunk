@@ -13,38 +13,36 @@ function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {
   };
 
   return (
-    <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(212,168,80,0.15)', borderRadius: 14, padding: '20px 22px', position: 'relative', overflow: 'hidden' }}>
-      {/* Gold top line */}
-      <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.4),transparent)' }} />
-
-      {/* Section label */}
-      <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(212,168,80,0.45)', marginBottom: 16 }}>
-        ✦ Family Reflections
+    <div style={{ marginTop: 24, background: '#FFD23F', border: '4px solid #171719', borderRadius: 16, padding: '24px', position: 'relative', boxShadow: 'inset 4px 4px 0px rgba(255,255,255,0.4)' }}>
+      
+      {/* Title */}
+      <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: '#171719', marginBottom: 16, textTransform: 'uppercase' }}>
+        💬 FAMILY CHATTER
       </div>
 
       {/* Comments list */}
       <AnimatePresence>
         {comments.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginBottom: 16, maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10,
-            scrollbarWidth: 'thin', scrollbarColor: 'rgba(212,168,80,0.2) transparent' }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginBottom: 20, maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16, paddingRight: 8 }}>
             {comments.map((c, idx) => {
               const initials = c?.user?.name ? c.user.name.charAt(0).toUpperCase() : '?';
               return (
-                <motion.div key={c._id || idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}
-                  style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <motion.div key={c._id || idx} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}
+                  style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                   {/* Mini avatar */}
-                  <div style={{ width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(212,168,80,0.3)', background: 'linear-gradient(135deg,#1a1410,#0f0c08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #171719', background: '#3FE0FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '2px 2px 0px 0px #171719' }}>
                     {c?.user?.avatar ? (
                       <img src={c.user.avatar} alt={c?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                     ) : (
-                      <span style={{ fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700, color: '#e8c87a' }}>{initials}</span>
+                      <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 18, color: '#171719' }}>{initials}</span>
                     )}
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(212,168,80,0.04)', border: '1px solid rgba(212,168,80,0.1)', borderRadius: 10, padding: '8px 14px' }}>
-                    <div style={{ fontFamily: "'Cinzel',serif", fontSize: 11, color: 'rgba(212,168,80,0.8)', marginBottom: 4, fontWeight: 600 }}>
-                      {c?.user?.name || 'Anonymous'}
+                  {/* Comic Speech Bubble */}
+                  <div style={{ flex: 1, background: '#FFF', border: '3px solid #171719', borderRadius: 16, borderTopLeftRadius: 0, padding: '12px 16px', boxShadow: '4px 4px 0px 0px #171719', position: 'relative' }}>
+                    <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#FF3D81', marginBottom: 4 }}>
+                      {c?.user?.name || 'SOMEONE'}
                     </div>
-                    <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, fontStyle: 'italic' }}>
+                    <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#171719', lineHeight: 1.4 }}>
                       {c.text}
                     </div>
                   </div>
@@ -56,45 +54,34 @@ function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {
       </AnimatePresence>
 
       {/* Input form */}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <div style={{
-          flex: 1, border: `1px solid ${focused ? 'rgba(212,168,80,0.55)' : 'rgba(212,168,80,0.2)'}`,
-          borderRadius: 10, background: focused ? 'rgba(212,168,80,0.04)' : 'rgba(255,255,255,0.02)',
-          transition: 'all 0.3s', position: 'relative', overflow: 'hidden',
-          boxShadow: focused ? '0 0 0 3px rgba(212,168,80,0.07)' : 'none',
-        }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
           <input
             value={text} onChange={e => setText(e.target.value)}
-            placeholder="Add your reflection…"
+            placeholder="Say something..."
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-            style={{ width: '100%', padding: '11px 16px', background: 'transparent', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.88)', fontFamily: "'Cormorant Garamond',serif", fontSize: 16, fontStyle: 'italic', boxSizing: 'border-box' }}
+            style={{ 
+              width: '100%', padding: '14px 16px', background: '#FFF', 
+              border: '3px solid #171719', borderRadius: 12, outline: 'none', 
+              color: '#171719', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, 
+              boxSizing: 'border-box', boxShadow: focused ? '6px 6px 0px 0px #3FE0FF' : '4px 4px 0px 0px #171719',
+              transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s'
+            }}
           />
-          <div style={{ position: 'absolute', bottom: 0, left: '8%', right: '8%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.5),transparent)', transform: focused ? 'scaleX(1)' : 'scaleX(0)', transition: 'transform 0.4s ease' }} />
         </div>
 
         <motion.button type="submit" disabled={!text.trim()}
-          whileHover={text.trim() ? { scale: 1.04, y: -1 } : {}}
-          whileTap={text.trim() ? { scale: 0.96 } : {}}
+          whileHover={text.trim() ? { scale: 1.05 } : {}}
+          whileTap={text.trim() ? { scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 0px 0px #171719' } : {}}
           style={{
-            padding: '11px 20px', position: 'relative', overflow: 'hidden',
-            background: text.trim() ? 'linear-gradient(135deg,#c9933a,#e8a820)' : 'rgba(212,168,80,0.15)',
-            border: 'none', borderRadius: 10,
-            color: text.trim() ? '#1a0f00' : 'rgba(212,168,80,0.3)',
-            fontFamily: "'Cinzel',serif", fontSize: 11, fontWeight: 700,
-            letterSpacing: 1.5, textTransform: 'uppercase',
-            cursor: text.trim() ? 'pointer' : 'not-allowed',
-            transition: 'all 0.3s', whiteSpace: 'nowrap',
-            boxShadow: text.trim() ? '0 4px 16px rgba(212,168,80,0.25)' : 'none',
+            padding: '14px 20px', background: text.trim() ? '#00C853' : '#ccc',
+            border: '3px solid #171719', borderRadius: 12, color: text.trim() ? '#FFF' : '#171719',
+            fontFamily: "'Luckiest Guy',cursive", fontSize: 16, cursor: text.trim() ? 'pointer' : 'not-allowed',
+            boxShadow: text.trim() ? '4px 4px 0px 0px #171719' : 'none', transition: 'all 0.2s', whiteSpace: 'nowrap'
           }}>
-          {text.trim() && <div style={{ position: 'absolute', top: 0, left: '-100%', width: '60%', height: '100%', background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)', transform: 'skewX(-20deg)', animation: 'ltShine 3s ease-in-out infinite' }} />}
-          Inscribe
+          SEND
         </motion.button>
       </form>
-
-      <style>{`
-        @keyframes ltShine{0%,70%{left:-100%}100%{left:150%}}
-        input::placeholder{color:rgba(255,255,255,0.2);font-style:italic;}
-      `}</style>
     </div>
   );
 }

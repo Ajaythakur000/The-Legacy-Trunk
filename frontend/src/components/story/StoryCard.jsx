@@ -1,104 +1,33 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom'; // Added for custom modal
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import StoryCommentBox from './StoryCommentBox';
 import StoryExportTemplate from './StoryExportTemplate';
 import { motion, AnimatePresence } from 'framer-motion';
 
-function CornerAccents({ size = 14, inset = 10, opacity = 0.3 }) {
-  const base = { position: 'absolute', width: size, height: size, borderColor: `rgba(212,168,80,${opacity})`, borderStyle: 'solid' };
-  return (
-    <>
-      <div style={{ ...base, top: inset, left: inset, borderWidth: '1px 0 0 1px', borderRadius: '3px 0 0 0' }} />
-      <div style={{ ...base, top: inset, right: inset, borderWidth: '1px 1px 0 0', borderRadius: '0 3px 0 0' }} />
-      <div style={{ ...base, bottom: inset, left: inset, borderWidth: '0 0 1px 1px', borderRadius: '0 0 0 3px' }} />
-      <div style={{ ...base, bottom: inset, right: inset, borderWidth: '0 1px 1px 0', borderRadius: '0 0 4px 0' }} />
-    </>
-  );
-}
-
-// Gold gradient def — shared across icons
-const GOLD_GRAD_ID = 'ltShieldGrad';
-const GoldGradDef = () => (
-  <defs>
-    <linearGradient id={GOLD_GRAD_ID} x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"   stopColor="rgba(232,200,122,0.95)" />
-      <stop offset="100%" stopColor="rgba(180,130,40,0.75)" />
-    </linearGradient>
-  </defs>
-);
-
-// ── Curio Button shell ────────────────────────────────────────────────────────
-function CurioBtn({ onClick, active, children, style: extra, className = '' }) {
-  const [hov, setHov] = useState(false);
+// ── Comic Action Button ───────────────────────────────────────────────────────
+function ComicActionBtn({ onClick, active, icon, label, color }) {
   return (
     <motion.button
       onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
       whileHover={{ scale: 1.05, y: -2 }}
-      whileTap={{ scale: 0.94 }}
-      className={className}
+      whileTap={{ scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 0px 0px #171719' }}
       style={{
-        position: 'relative',
         display: 'flex', alignItems: 'center', gap: 8,
-        padding: '9px 13px',
-        borderRadius: 12,
-        border: `1px solid ${hov || active ? 'rgba(212,168,80,0.38)' : 'rgba(212,168,80,0.12)'}`,
-        background: hov
-          ? 'linear-gradient(135deg,rgba(212,168,80,0.08),rgba(212,168,80,0.03))'
-          : 'rgba(12,16,32,0.55)',
+        padding: '8px 16px', borderRadius: 12,
+        background: active ? color : '#FFF',
+        border: '3px solid #171719',
+        color: active ? '#FFF' : '#171719',
+        fontFamily: "'Luckiest Guy', cursive", fontSize: 16,
         cursor: 'pointer',
-        transition: 'border-color .25s, background .25s',
-        boxShadow: hov ? '0 8px 24px rgba(0,0,0,0.35),0 0 0 1px rgba(212,168,80,0.08)' : 'none',
-        ...extra,
+        boxShadow: '4px 4px 0px 0px #171719',
+        transition: 'background 0.2s, color 0.2s'
       }}
     >
-      {children}
+      <span style={{ fontSize: 20 }}>{icon}</span> {label}
     </motion.button>
   );
 }
-
-// ── Icon medallion ────────────────────────────────────────────────────────────
-function IconMedallion({ active, activeGlow = 'rgba(212,168,80,0.35)', pulse = false, children }) {
-  return (
-    <div style={{
-      width: 36, height: 36, borderRadius: '50%',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexShrink: 0,
-      background: active
-        ? 'radial-gradient(circle at 35% 35%,rgba(212,168,80,0.45),rgba(180,130,40,0.25))'
-        : 'radial-gradient(circle at 35% 35%,rgba(212,168,80,0.14),rgba(212,168,80,0.05))',
-      border: `1px solid ${active ? 'rgba(212,168,80,0.65)' : 'rgba(212,168,80,0.2)'}`,
-      boxShadow: active
-        ? `0 0 ${pulse ? '20px' : '12px'} ${activeGlow}, inset 0 1px 0 rgba(255,255,255,0.1)`
-        : 'inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2)',
-      transition: 'all .35s',
-      animation: active && pulse ? 'ltIconPulse 2.5s ease-in-out infinite' : 'none',
-    }}>
-      {children}
-    </div>
-  );
-}
-
-// ── Curio label ───────────────────────────────────────────────────────────────
-function CurioLabel({ count, name, active, activeColor = '#e8c87a' }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 13, fontWeight: 700, letterSpacing: '0.5px', color: active ? activeColor : 'rgba(212,168,80,0.5)', lineHeight: 1, transition: 'color .25s' }}>
-        {count}
-      </span>
-      <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 7, letterSpacing: '2px', textTransform: 'uppercase', color: active ? 'rgba(212,168,80,0.6)' : 'rgba(212,168,80,0.3)', lineHeight: 1, marginTop: 3, transition: 'color .25s' }}>
-        {name}
-      </span>
-    </div>
-  );
-}
-
-// ── Separator ─────────────────────────────────────────────────────────────────
-const BarSep = () => (
-  <div style={{ width: 1, height: 36, background: 'rgba(212,168,80,0.1)', flexShrink: 0, margin: '0 2px' }} />
-);
 
 function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
   const isAuthor = Boolean(currentUser?._id && story?.user?._id && String(story.user._id) === String(currentUser._id));
@@ -108,35 +37,21 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
   const canManage = isAuthor || isCircleAdmin;
 
   const [showComments, setShowComments] = useState(false);
-  const [showShieldAnim, setShowShieldAnim] = useState(false);
+  const [showPopAnim, setShowPopAnim] = useState(false);
   const isLikedByMe = Boolean(currentUser?._id && story?.likes?.some(id => String(id) === String(currentUser._id)));
   const [isShared, setIsShared] = useState(false);
   const [isDownloaded, setIsDownloaded] = useState(false);
   const exportRef = useRef();
-  const cardRef = useRef(null);
-  const [spotlightPos, setSpotlightPos] = useState({ x: 50, y: 50 });
-  const [isHovering, setIsHovering] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // State for custom delete modal
-
-  const handleMouseMove = useCallback((e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    setSpotlightPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  }, []);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const images = [];
   if (story?.mediaUrls?.length > 0) images.push(...story.mediaUrls);
   else if (story?.mediaUrl) images.push(story.mediaUrl);
 
   useEffect(() => {
-    let t; if (showShieldAnim) t = setTimeout(() => setShowShieldAnim(false), 1000);
+    let t; if (showPopAnim) t = setTimeout(() => setShowPopAnim(false), 800);
     return () => clearTimeout(t);
-  }, [showShieldAnim]);
-
-  useEffect(() => {
-    let t; if (isShared) t = setTimeout(() => setIsShared(false), 2000);
-    return () => clearTimeout(t);
-  }, [isShared]);
+  }, [showPopAnim]);
 
   const confirmDelete = () => {
     if (!story?._id || typeof onDelete !== 'function') return;
@@ -145,27 +60,24 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
   };
 
   const getFormattedDates = () => {
-    if (!story?.createdAt) return { displayDate: '', eventBadge: null, timeTravelBadge: null };
+    if (!story?.createdAt) return { displayDate: '', eventBadge: null };
     const postDateObj = new Date(story.createdAt);
     const postDateStr = postDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    let eventDateStr = null, timeTravelBadge = null;
+    let eventDateStr = null;
     if (story.isMilestone && story.milestoneDate) {
-      const eventDateObj = new Date(story.milestoneDate);
-      eventDateStr = eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const yearDiff = postDateObj.getFullYear() - eventDateObj.getFullYear();
-      if (yearDiff > 0) timeTravelBadge = `⏳ ${yearDiff} Year${yearDiff > 1 ? 's' : ''} Ago`;
+      eventDateStr = new Date(story.milestoneDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
-    if (eventDateStr === postDateStr) return { displayDate: postDateStr, eventBadge: null, timeTravelBadge: null };
-    return { displayDate: postDateStr, eventBadge: eventDateStr ? `Event: ${eventDateStr}` : null, timeTravelBadge };
+    if (eventDateStr === postDateStr) return { displayDate: postDateStr, eventBadge: null };
+    return { displayDate: postDateStr, eventBadge: eventDateStr ? `EVENT: ${eventDateStr}` : null };
   };
-  const { displayDate, eventBadge, timeTravelBadge } = getFormattedDates();
+  const { displayDate, eventBadge } = getFormattedDates();
 
   const handleShare = async () => {
     if (!story?._id) return;
-    const shareData = { title: story.title || 'Family Memory', text: `Check out this memory: "${story.title || 'A special moment'}"`, url: `${window.location.origin}/vault-stories/${story._id}` };
+    const shareData = { title: story.title || 'Family Memory', text: `Look at this memory: "${story.title}"`, url: `${window.location.origin}/vault-stories/${story._id}` };
     try {
       if (navigator.share) await navigator.share(shareData);
-      else { await navigator.clipboard.writeText(shareData.url); toast.success('Link copied! 📋', { style: { borderRadius: '12px', background: '#1e293b', color: '#fff' } }); setIsShared(true); }
+      else { await navigator.clipboard.writeText(shareData.url); toast.success('Link copied! 📋'); setIsShared(true); setTimeout(() => setIsShared(false), 2000); }
     } catch {}
   };
 
@@ -176,8 +88,8 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
   const handleDoubleTap = (e) => {
     e.preventDefault();
     if (!isLikedByMe && story?._id && typeof onLike === 'function') onLike(story._id);
-    setShowShieldAnim(false);
-    setTimeout(() => setShowShieldAnim(true), 10);
+    setShowPopAnim(false);
+    setTimeout(() => setShowPopAnim(true), 10);
   };
 
   const getOptimizedUrl = (url) => {
@@ -189,399 +101,162 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
     if (images.length === 0) return null;
     if (story?.mediaType === 'video') {
       return (
-        <div style={{ marginTop: 24, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(212,168,80,0.3)', boxShadow: '0 8px 30px rgba(0,0,0,0.5)', position: 'relative', zIndex: 5 }}>
-          <video controls preload="metadata" style={{ width: '100%', maxHeight: 500, background: '#000', display: 'block' }}>
+        <div style={{ marginTop: 24, border: '4px solid #171719', borderRadius: 16, overflow: 'hidden', boxShadow: '8px 8px 0px 0px #171719', background: '#FFD23F', padding: 8 }}>
+          <video controls preload="metadata" style={{ width: '100%', maxHeight: 500, background: '#000', display: 'block', borderRadius: 8, border: '3px solid #171719' }}>
             <source src={images[0]} />
           </video>
         </div>
       );
     }
-    const imgProps = {
-      loading: 'lazy', decoding: 'async',
-      onError: e => { e.target.onerror = null; e.target.src = '/web-app-manifest-512x512.png'; e.target.style.objectFit = 'contain'; e.target.style.padding = '20px'; },
-    };
+    
     const count = images.length;
-    const ShieldAnim = () => showShieldAnim ? (
-      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', animation: 'shieldPop 1s cubic-bezier(0.175,0.885,0.32,1.275) forwards', pointerEvents: 'none', filter: 'drop-shadow(0 10px 20px rgba(212,168,80,0.6))' }}>
-        <svg width="110" height="110" viewBox="0 0 24 24" fill="rgba(212,168,80,0.9)" stroke="rgba(232,200,122,0.5)" strokeWidth="1">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        </svg>
-      </div>
+    const PopAnim = () => showPopAnim ? (
+      <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 10 }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', fontSize: 100, filter: 'drop-shadow(4px 4px 0px #171719)', zIndex: 10 }}>
+        💥
+      </motion.div>
     ) : null;
 
     if (count === 1) {
       return (
-        <div onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(212,168,80,0.3)', boxShadow: '0 8px 30px rgba(0,0,0,0.5)', cursor: 'pointer', userSelect: 'none', zIndex: 5 }}>
-          <img {...imgProps} src={getOptimizedUrl(images[0])} alt={story?.title} style={{ width: '100%', maxHeight: 580, objectFit: 'cover', display: 'block' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6,8,15,0.4) 0%, transparent 50%)' }} />
-          <ShieldAnim />
+        <div onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, background: '#FFF', padding: '12px 12px 40px', border: '4px solid #171719', borderRadius: 8, boxShadow: '8px 8px 0px 0px #171719', cursor: 'pointer', userSelect: 'none', transform: 'rotate(-1deg)' }}>
+          <img src={getOptimizedUrl(images[0])} alt={story?.title} style={{ width: '100%', maxHeight: 580, objectFit: 'cover', display: 'block', border: '3px solid #171719' }} />
+          <PopAnim />
         </div>
       );
     }
     return (
-      <div onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, display: 'grid', gridTemplateColumns: count === 2 ? '1fr 1fr' : '1fr 1fr', gap: 3, height: 420, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(212,168,80,0.3)', boxShadow: '0 8px 30px rgba(0,0,0,0.5)', cursor: 'pointer', zIndex: 5 }}>
+      <div onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, display: 'grid', gridTemplateColumns: count === 2 ? '1fr 1fr' : '1fr 1fr', gap: 12, background: '#3FE0FF', padding: 12, borderRadius: 16, border: '4px solid #171719', boxShadow: '8px 8px 0px 0px #171719', cursor: 'pointer' }}>
         {images.slice(0, count === 2 ? 2 : 1).map((img, i) => (
-          <img key={i} {...imgProps} src={getOptimizedUrl(img)} alt={`media-${i}`}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: count > 2 && i === 0 ? 'span 2' : 'auto' }} />
+          <img key={i} src={getOptimizedUrl(img)} alt={`media-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: count > 2 && i === 0 ? 'span 2' : 'auto', border: '3px solid #171719', borderRadius: 8 }} />
         ))}
-        <ShieldAnim />
+        <PopAnim />
       </div>
     );
   };
 
   if (!story) return null;
-
   const initials = story?.user?.name ? story.user.name.charAt(0).toUpperCase() : 'U';
 
   return (
     <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
       style={{
-        background: 'rgba(12,16,32,0.88)',
-        border: '1px solid rgba(212,168,80,0.18)',
-        borderRadius: 20, padding: '36px 40px',
-        position: 'relative', overflow: 'hidden',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+        background: '#FFFFFF', border: '4px solid #171719', borderRadius: 24,
+        padding: '32px', position: 'relative', boxShadow: '12px 12px 0px 0px #171719',
         marginBottom: 24,
       }}
     >
-      {/* Spotlight */}
-      <div style={{ position: 'absolute', inset: 0, borderRadius: 20, pointerEvents: 'none', zIndex: 0, overflow: 'hidden', background: isHovering ? `radial-gradient(300px at ${spotlightPos.x}px ${spotlightPos.y}px, rgba(212,168,80,0.06) 0%, transparent 70%)` : 'none' }} />
-      {/* Gold lines */}
-      <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.6),transparent)', zIndex: 1 }} />
-      <div style={{ position: 'absolute', bottom: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.18),transparent)', zIndex: 1 }} />
-      <CornerAccents />
-
       {/* Milestone ribbon */}
       {story.isMilestone && (
-        <div style={{ position: 'absolute', top: 0, right: 40, background: 'linear-gradient(135deg,#c9933a,#e8a820)', color: '#1a0f00', padding: '5px 16px', borderRadius: '0 0 10px 10px', fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '2.5px', textTransform: 'uppercase', fontWeight: 700, boxShadow: '0 4px 16px rgba(212,168,80,0.4)', zIndex: 10 }}>
-          ✦ Family Milestone ✦
+        <div style={{ position: 'absolute', top: -4, right: 30, background: '#FFD23F', color: '#171719', padding: '8px 16px', border: '4px solid #171719', borderTop: 'none', borderRadius: '0 0 12px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 16, boxShadow: '4px 4px 0px 0px #171719', zIndex: 10 }}>
+          ⭐ MILESTONE
         </div>
       )}
 
-      {/* zIndex adjusted to ensure buttons are clickable */}
-      <div style={{ position: 'relative', zIndex: 5 }}>
-        {/* ── HEADER ── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, marginTop: story.isMilestone ? 16 : 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            {/* Avatar */}
-            <div style={{ position: 'relative' }}>
-              <div style={{ width: 50, height: 50, borderRadius: '50%', border: '1.5px solid rgba(212,168,80,0.45)', overflow: 'hidden', background: 'linear-gradient(135deg,#1a1410,#0f0c08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {story?.user?.avatar ? (
-                  <img src={story.user.avatar} alt={story?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <span style={{ fontFamily: "'Cinzel',serif", fontSize: 18, fontWeight: 700, color: '#e8c87a' }}>{initials}</span>
-                )}
-              </div>
-              <div style={{ position: 'absolute', bottom: 0, right: 0, width: 12, height: 12, borderRadius: '50%', background: '#4ade80', border: '2px solid #06080f', boxShadow: '0 0 6px #4ade80' }} />
+      {/* ── HEADER ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, marginTop: story.isMilestone ? 24 : 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* Avatar */}
+          <div style={{ width: 56, height: 56, borderRadius: '50%', border: '4px solid #171719', background: '#FF3D81', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 0px 0px #171719' }}>
+            {story?.user?.avatar ? (
+              <img src={story.user.avatar} alt={story?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+            ) : (
+              <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#FFF' }}>{initials}</span>
+            )}
+          </div>
+          <div>
+            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: '#171719', letterSpacing: 1 }}>
+              {story?.user?.name || 'UNKNOWN'}
             </div>
-
-            <div>
-              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.88)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                {story?.user?.name || 'Unknown'}
-                {timeTravelBadge && (
-                  <span style={{ background: 'rgba(212,168,80,0.12)', border: '1px solid rgba(212,168,80,0.3)', color: 'rgba(212,168,80,0.8)', padding: '2px 8px', borderRadius: 6, fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '1px', textTransform: 'uppercase' }}>
-                    {timeTravelBadge}
-                  </span>
-                )}
-              </div>
-              <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(212,168,80,0.4)' }}>
-                {displayDate} {eventBadge && <span style={{ color: 'rgba(212,168,80,0.6)' }}>· {eventBadge}</span>}
-              </div>
+            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: '#171719' }}>
+              {displayDate} {eventBadge && <span style={{ background: '#3FE0FF', padding: '2px 6px', borderRadius: 4, border: '2px solid #171719' }}>{eventBadge}</span>}
             </div>
           </div>
-
-          {/* Delete (Edit removed) */}
-          {canManage && (
-            <div style={{ display: 'flex', gap: 8, position: 'relative', zIndex: 10 }}>
-              <button onClick={() => setShowDeleteModal(true)}
-                style={{ background: 'rgba(220,60,60,0.06)', border: '1px solid rgba(220,60,60,0.2)', borderRadius: 8, padding: '6px 12px', fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(240,128,128,0.6)', cursor: 'pointer', transition: 'all 0.2s', zIndex: 10 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,60,60,0.12)'; e.currentTarget.style.color = '#f08080'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,60,60,0.06)'; e.currentTarget.style.color = 'rgba(240,128,128,0.6)'; }}>
-                Delete
-              </button>
-            </div>
-          )}
         </div>
 
-        <div>
-          {/* Title */}
-          <h3 style={{ margin: '0 0 14px', fontFamily: "'Cinzel',serif", fontSize: 26, fontWeight: 700, color: 'rgba(255,255,255,0.95)', lineHeight: 1.3, textShadow: '0 0 30px rgba(212,168,80,0.1)' }}>
-            {story.title}
-          </h3>
-
-          {/* Tone badge */}
-          {story.tone && story.tone !== 'Nostalgic and Warm' && (
-            <div style={{ marginBottom: 14 }}>
-              <span style={{ display: 'inline-block', padding: '3px 10px', border: '1px solid rgba(212,168,80,0.2)', borderRadius: 6, fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(212,168,80,0.5)' }}>
-                {story.tone.replace(/[^\w\s-]/gi, '').trim()}
-              </span>
-            </div>
-          )}
-
-          {/* Divider */}
-          <div style={{ height: 1, background: 'linear-gradient(90deg,rgba(212,168,80,0.2),transparent)', marginBottom: 16 }} />
-
-          {/* Content */}
-          <p style={{ margin: 0, fontFamily: "'Cormorant Garamond',serif", fontSize: 18, color: 'rgba(255,255,255,0.75)', lineHeight: 1.85, whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>
-            {story.content}
-          </p>
-        </div>
-
-        {/* Media */}
-        {renderMediaGrid()}
-
-        {/* ── ACTION BAR ── */}
-        <style>{`
-          @keyframes ltIconPulse {
-            0%,100% { box-shadow: 0 0 10px rgba(212,168,80,0.25), inset 0 1px 0 rgba(255,255,255,0.1); }
-            50%      { box-shadow: 0 0 24px rgba(212,168,80,0.55), inset 0 1px 0 rgba(255,255,255,0.15); }
-          }
-          @keyframes ltArchivedPulse {
-            0%,100% { box-shadow: 0 0 0 2px rgba(180,130,30,0.12), 0 0 12px rgba(180,130,30,0.2); }
-            50%      { box-shadow: 0 0 0 3px rgba(180,130,30,0.22), 0 0 28px rgba(180,130,30,0.45); }
-          }
-          @keyframes ltNeedleSpin {
-            0%   { transform: rotate(0deg);   }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 28, paddingTop: 18, borderTop: '1px solid rgba(212,168,80,0.1)', flexWrap: 'wrap', position: 'relative', zIndex: 10 }}>
-
-          {/* ── LIKE — Dimensional Shield ── */}
-          <CurioBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe}>
-            <IconMedallion active={isLikedByMe} activeGlow="rgba(212,168,80,0.4)" pulse={isLikedByMe}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <GoldGradDef />
-                <path
-                  d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-                  fill={isLikedByMe ? `url(#${GOLD_GRAD_ID})` : 'none'}
-                  stroke={isLikedByMe ? 'rgba(232,200,122,0.85)' : 'rgba(212,168,80,0.5)'}
-                  strokeWidth="1.5" strokeLinejoin="round"
-                />
-                {isLikedByMe && (
-                  <path d="M9 12l2 2 4-4"
-                    stroke="rgba(26,15,0,0.85)" strokeWidth="2"
-                    strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                )}
-              </svg>
-            </IconMedallion>
-            <CurioLabel count={story?.likes?.length || 0} name="Protect" active={isLikedByMe} />
-          </CurioBtn>
-
-          <BarSep />
-
-          {/* ── COMMENT — Family Register Scroll ── */}
-          <CurioBtn onClick={() => setShowComments(!showComments)} active={showComments}>
-            <IconMedallion active={showComments} activeGlow="rgba(212,168,80,0.3)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M4 19V6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H8l-4 3z"
-                  fill={showComments ? 'rgba(212,168,80,0.14)' : 'none'}
-                  stroke={showComments ? 'rgba(212,168,80,0.85)' : 'rgba(212,168,80,0.5)'}
-                  strokeWidth="1.5" strokeLinejoin="round"
-                />
-                <line x1="8" y1="9" x2="16" y2="9"
-                  stroke={showComments ? 'rgba(212,168,80,0.65)' : 'rgba(212,168,80,0.3)'}
-                  strokeWidth="1.2" strokeLinecap="round" />
-                <line x1="8" y1="12" x2="13" y2="12"
-                  stroke={showComments ? 'rgba(212,168,80,0.5)' : 'rgba(212,168,80,0.22)'}
-                  strokeWidth="1.2" strokeLinecap="round" />
-              </svg>
-            </IconMedallion>
-            <CurioLabel count={story?.comments?.length || 0} name="Reflect" active={showComments} />
-          </CurioBtn>
-
-          <BarSep />
-
-          {/* ── SHARE — Compass Beacon ── */}
-          <CurioBtn onClick={handleShare} active={isShared} style={isShared ? {} : {}}>
-            <IconMedallion
-              active={isShared}
-              activeGlow="rgba(74,222,128,0.25)"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                style={{ transformOrigin: 'center' }}>
-                <circle cx="12" cy="12" r="9"
-                  stroke={isShared ? 'rgba(74,222,128,0.4)' : 'rgba(212,168,80,0.25)'}
-                  strokeWidth="1" />
-                <circle cx="12" cy="12" r="2.2"
-                  fill={isShared ? 'rgba(74,222,128,0.7)' : 'rgba(212,168,80,0.45)'} />
-                {/* N needle — spins on share */}
-                <path d="M12 12 L15 5.5"
-                  stroke={isShared ? 'rgba(74,222,128,0.9)' : 'rgba(212,168,80,0.65)'}
-                  strokeWidth="1.6" strokeLinecap="round"
-                  style={{ transformOrigin: '12px 12px', animation: isShared ? 'ltNeedleSpin .7s ease-out' : 'none' }} />
-                {/* S needle */}
-                <path d="M12 12 L9 18.5"
-                  stroke={isShared ? 'rgba(74,222,128,0.4)' : 'rgba(212,168,80,0.25)'}
-                  strokeWidth="1.2" strokeLinecap="round" />
-                {/* Cardinal marks */}
-                <line x1="12" y1="3.5" x2="12" y2="5.5"
-                  stroke={isShared ? 'rgba(74,222,128,0.4)' : 'rgba(212,168,80,0.2)'}
-                  strokeWidth="1" strokeLinecap="round" />
-                <line x1="12" y1="18.5" x2="12" y2="20.5"
-                  stroke={isShared ? 'rgba(74,222,128,0.3)' : 'rgba(212,168,80,0.15)'}
-                  strokeWidth="1" strokeLinecap="round" />
-                <line x1="3.5" y1="12" x2="5.5" y2="12"
-                  stroke={isShared ? 'rgba(74,222,128,0.3)' : 'rgba(212,168,80,0.15)'}
-                  strokeWidth="1" strokeLinecap="round" />
-                <line x1="18.5" y1="12" x2="20.5" y2="12"
-                  stroke={isShared ? 'rgba(74,222,128,0.3)' : 'rgba(212,168,80,0.15)'}
-                  strokeWidth="1" strokeLinecap="round" />
-              </svg>
-            </IconMedallion>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span style={{ fontFamily: "'Space Mono',monospace", fontSize: 8, letterSpacing: '2px', textTransform: 'uppercase', color: isShared ? '#4ade80' : 'rgba(212,168,80,0.35)', lineHeight: 1, transition: 'color .3s' }}>
-                {isShared ? 'Passed On' : 'Pass On'}
-              </span>
-            </div>
-          </CurioBtn>
-
-          <BarSep />
-
-          {/* ── DOWNLOAD — Wax Seal → ARCHIVED plate ── */}
-          {images.length > 0 && (
-            <CurioBtn
-              onClick={handleDownloadImage}
-              active={isDownloaded}
-              style={{ marginLeft: 'auto' }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-                background: isDownloaded
-                  ? 'radial-gradient(circle at 35% 35%,rgba(160,110,20,0.6),rgba(100,70,10,0.4))'
-                  : 'radial-gradient(circle at 35% 35%,rgba(212,168,80,0.14),rgba(212,168,80,0.05))',
-                border: `1px solid ${isDownloaded ? 'rgba(180,130,30,0.8)' : 'rgba(212,168,80,0.2)'}`,
-                transition: 'all .4s',
-                animation: isDownloaded ? 'ltArchivedPulse 3s ease-in-out infinite' : 'none',
-              }}>
-                {isDownloaded ? (
-                  /* ARCHIVED plate */
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="7" width="20" height="10" rx="2"
-                      fill="rgba(160,110,20,0.55)" stroke="rgba(200,150,30,0.75)" strokeWidth="1" />
-                    {/* Embossed lines */}
-                    <line x1="4" y1="9" x2="20" y2="9"
-                      stroke="rgba(212,168,80,0.3)" strokeWidth="0.5" />
-                    <line x1="4" y1="15" x2="20" y2="15"
-                      stroke="rgba(212,168,80,0.3)" strokeWidth="0.5" />
-                    <text x="12" y="13.5" textAnchor="middle"
-                      fontFamily="Space Mono, monospace" fontSize="4.5"
-                      fontWeight="700" fill="rgba(232,200,122,0.95)"
-                      letterSpacing="1.5">ARCHIVED</text>
-                  </svg>
-                ) : (
-                  /* Wax seal / download */
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="9"
-                      stroke="rgba(212,168,80,0.35)" strokeWidth="1"
-                      strokeDasharray="3 2.5" />
-                    <circle cx="12" cy="12" r="5.5"
-                      stroke="rgba(212,168,80,0.2)" strokeWidth="0.8" />
-                    <path d="M12 8v4.5M9.5 10.5l2.5 2.5 2.5-2.5"
-                      stroke="rgba(212,168,80,0.65)" strokeWidth="1.5"
-                      strokeLinecap="round" strokeLinejoin="round" />
-                    <line x1="8.5" y1="15.5" x2="15.5" y2="15.5"
-                      stroke="rgba(212,168,80,0.4)" strokeWidth="1.2"
-                      strokeLinecap="round" />
-                  </svg>
-                )}
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span style={{
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: isDownloaded ? 9 : 13,
-                  fontWeight: 700,
-                  letterSpacing: isDownloaded ? '2px' : '0.5px',
-                  textTransform: isDownloaded ? 'uppercase' : 'none',
-                  color: isDownloaded ? '#c9933a' : 'rgba(212,168,80,0.5)',
-                  lineHeight: 1, transition: 'all .35s',
-                }}>
-                  {isDownloaded ? 'Sealed' : 'Archive'}
-                </span>
-                <span style={{
-                  fontFamily: "'Space Mono',monospace",
-                  fontSize: 7, letterSpacing: '2px',
-                  textTransform: 'uppercase',
-                  color: isDownloaded ? 'rgba(180,130,30,0.7)' : 'rgba(212,168,80,0.3)',
-                  lineHeight: 1, marginTop: 3, transition: 'color .35s',
-                }}>
-                  {isDownloaded ? 'Permanent' : 'Seal Image'}
-                </span>
-              </div>
-            </CurioBtn>
-          )}
-
-        </div>
-
-        {/* Comments */}
-        <AnimatePresence>
-          {showComments && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-              style={{ marginTop: 20, overflow: 'hidden' }}>
-              <StoryCommentBox storyId={story._id} comments={story.comments} onCommentSubmit={onComment} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Rune footer */}
-        <div style={{ marginTop: 20, textAlign: 'center', fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: 4, color: 'rgba(212,168,80,0.12)', userSelect: 'none' }}>
-          ✦ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ✦
-        </div>
+        {/* Delete */}
+        {canManage && (
+          <button onClick={() => setShowDeleteModal(true)} style={{ background: '#FF3D81', border: '3px solid #171719', borderRadius: 10, padding: '8px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#FFF', cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+            TRASH 🗑️
+          </button>
+        )}
       </div>
+
+      <div>
+        {/* Title */}
+        <h3 style={{ margin: '0 0 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#FF7B00', WebkitTextStroke: '1px #171719', textShadow: '2px 2px 0px #171719' }}>
+          {story.title}
+        </h3>
+
+        {/* Tone badge */}
+        {story.tone && story.tone !== 'Original' && (
+          <div style={{ marginBottom: 16 }}>
+            <span style={{ display: 'inline-block', padding: '4px 12px', border: '3px solid #171719', borderRadius: 8, background: '#FFD23F', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719', boxShadow: '2px 2px 0px 0px #171719' }}>
+              {story.tone.replace(/[^\w\s-]/gi, '').trim()} FLAVOR
+            </span>
+          </div>
+        )}
+
+        {/* Content */}
+        <p style={{ margin: 0, fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#171719', lineHeight: 1.6, whiteSpace: 'pre-wrap', background: '#F5F5F5', padding: 16, border: '3px dashed #171719', borderRadius: 12 }}>
+          {story.content}
+        </p>
+      </div>
+
+      {/* Media */}
+      {renderMediaGrid()}
+
+      {/* ── ACTION BAR ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, flexWrap: 'wrap' }}>
+        <ComicActionBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe} icon={isLikedByMe ? '❤️' : '🤍'} label={story?.likes?.length || 0} color="#FF3D81" />
+        <ComicActionBtn onClick={() => setShowComments(!showComments)} active={showComments} icon="💬" label={story?.comments?.length || 0} color="#3FE0FF" />
+        <ComicActionBtn onClick={handleShare} active={isShared} icon="🚀" label="SHARE" color="#FFD23F" />
+        {images.length > 0 && (
+          <div style={{ marginLeft: 'auto' }}>
+            <ComicActionBtn onClick={handleDownloadImage} active={isDownloaded} icon="📸" label="POSTER" color="#00C853" />
+          </div>
+        )}
+      </div>
+
+      {/* Comments */}
+      <AnimatePresence>
+        {showComments && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
+            <StoryCommentBox storyId={story._id} comments={story.comments} onCommentSubmit={onComment} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <StoryExportTemplate ref={exportRef} story={story} />
 
-      {/* ── CUSTOM EPIC DELETE MODAL ── */}
+      {/* ── CUSTOM DELETE MODAL ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {showDeleteModal && (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(4,6,14,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: 20 }}
-              onClick={e => { if (e.target === e.currentTarget) setShowDeleteModal(false); }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(23,23,25,0.9)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: 20 }}
             >
               <motion.div
-                initial={{ scale: 0.88, y: 28, opacity: 0 }}
-                animate={{ scale: 1, y: 0, opacity: 1 }}
-                exit={{ scale: 0.88, y: 28, opacity: 0 }}
-                transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-                style={{ background: 'rgba(18,10,10,0.98)', border: '1px solid rgba(220,60,60,0.3)', borderRadius: 24, width: '100%', maxWidth: 400, padding: '44px 36px', position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.9), inset 0 1px 0 rgba(220,60,60,0.15)', textAlign: 'center' }}
+                initial={{ scale: 0.8, rotate: -5 }} animate={{ scale: 1, rotate: 2 }} exit={{ scale: 0.8, rotate: 5 }} transition={{ type: 'spring', bounce: 0.6 }}
+                style={{ background: '#FFF', border: '6px solid #171719', borderRadius: 24, width: '100%', maxWidth: 400, padding: '40px', position: 'relative', boxShadow: '16px 16px 0px 0px #171719', textAlign: 'center' }}
               >
-                <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(220,60,60,0.6),transparent)' }} />
-                <CornerAccents opacity={0.5} />
-
-                <div style={{ fontSize: 40, marginBottom: 16, filter: 'drop-shadow(0 0 16px rgba(220,60,60,0.4))' }}>⚔️</div>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 20, fontWeight: 700, color: '#f08080', textShadow: '0 0 30px rgba(220,60,60,0.3)', marginBottom: 8 }}>
-                  Erase Memory
+                <div style={{ fontSize: 60, marginBottom: 16 }}>💣</div>
+                <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 36, color: '#FF3D81', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719', marginBottom: 16 }}>
+                  TRASH IT?
                 </div>
-                <p style={{ fontStyle: 'italic', fontSize: 15, color: 'rgba(255,255,255,0.4)', marginBottom: 32, marginTop: 0, lineHeight: 1.6 }}>
-                  Are you sure you want to permanently delete this memory from the vault? This cannot be undone.
+                <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#171719', marginBottom: 32 }}>
+                  Once it's gone, it's gone forever. Are you sure?
                 </p>
 
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <motion.button onClick={() => setShowDeleteModal(false)}
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                    style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, color: 'rgba(255,255,255,0.6)', fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)'; e.currentTarget.style.color = '#fff'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}>
-                    Keep It
+                <div style={{ display: 'flex', gap: 16 }}>
+                  <motion.button onClick={() => setShowDeleteModal(false)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                    style={{ flex: 1, padding: '14px', background: '#FFF', border: '4px solid #171719', borderRadius: 12, color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+                    NOPE
                   </motion.button>
-                  <motion.button onClick={confirmDelete}
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                    style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg,rgba(220,38,38,0.8),rgba(185,28,28,0.8))', border: '1px solid rgba(255,100,100,0.3)', borderRadius: 12, color: '#ffffff', fontFamily: "'Cinzel',serif", fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', cursor: 'pointer', transition: 'all 0.3s' }}>
-                    Erase
+                  <motion.button onClick={confirmDelete} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                    style={{ flex: 1, padding: '14px', background: '#FF3D81', border: '4px solid #171719', borderRadius: 12, color: '#FFF', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+                    DO IT!
                   </motion.button>
                 </div>
               </motion.div>
@@ -590,7 +265,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
         </AnimatePresence>,
         document.body
       )}
-
     </motion.div>
   );
 }

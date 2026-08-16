@@ -1,19 +1,7 @@
 import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom'; // 🔥 Added this to fix scroll & z-index issues
+import { createPortal } from 'react-dom';
 import { getUpcomingEventsApi } from '../../api/circleApi';
 import { motion, AnimatePresence } from 'framer-motion';
-
-function CornerAccents({ size = 14, inset = 10, opacity = 0.35 }) {
-  const base = { position: 'absolute', width: size, height: size, borderColor: `rgba(212,168,80,${opacity})`, borderStyle: 'solid' };
-  return (
-    <>
-      <div style={{ ...base, top: inset, left: inset, borderWidth: '1px 0 0 1px', borderRadius: '3px 0 0 0' }} />
-      <div style={{ ...base, top: inset, right: inset, borderWidth: '1px 1px 0 0', borderRadius: '0 3px 0 0' }} />
-      <div style={{ ...base, bottom: inset, left: inset, borderWidth: '0 0 1px 1px', borderRadius: '0 0 0 3px' }} />
-      <div style={{ ...base, bottom: inset, right: inset, borderWidth: '0 1px 1px 0', borderRadius: '0 0 4px 0' }} />
-    </>
-  );
-}
 
 function UpcomingEventsWidget({ circleId }) {
   const [events, setEvents] = useState([]);
@@ -26,19 +14,15 @@ function UpcomingEventsWidget({ circleId }) {
       if (!circleId) return;
       setLoading(true); setError('');
       try { const data = await getUpcomingEventsApi(circleId); setEvents(data || []); }
-      catch (err) { setError('Failed to load upcoming events'); }
+      catch (err) { setError('Failed to load events'); }
       finally { setLoading(false); }
     };
     fetchEvents();
   }, [circleId]);
 
-  // Prevent background scrolling when modal is open
   useEffect(() => {
-    if (isModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    if (isModalOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
     return () => { document.body.style.overflow = 'unset'; };
   }, [isModalOpen]);
 
@@ -52,143 +36,85 @@ function UpcomingEventsWidget({ circleId }) {
     return `In ${diffDays} days`;
   };
 
-  // Compact button
+  // Compact button on Dashboard
   if (!isModalOpen) {
     return (
       <motion.div
-        whileHover={{ y: -3, scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ y: -6, scale: 1.02 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setIsModalOpen(true)}
         style={{
-          background: 'rgba(12,16,32,0.88)',
-          border: '1px solid rgba(212,168,80,0.22)',
-          borderRadius: 18, padding: '18px 22px',
-          cursor: 'pointer', position: 'relative', overflow: 'hidden',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          transition: 'box-shadow 0.3s',
+          background: '#FFD23F', border: '6px solid #171719', borderRadius: 24, padding: '24px 32px',
+          cursor: 'pointer', position: 'relative', overflow: 'hidden', boxShadow: '12px 12px 0px 0px #171719',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', transform: 'rotate(-1deg)'
         }}
       >
-        <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.6),transparent)' }} />
-        <CornerAccents size={12} inset={8} opacity={0.35} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <motion.span
-            animate={{ rotate: [0, -10, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            style={{ fontSize: 28, filter: 'drop-shadow(0 0 8px rgba(212,168,80,0.5))' }}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <motion.span animate={{ rotate: [0, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: 48, filter: 'drop-shadow(4px 4px 0px #171719)' }}>
             📅
           </motion.span>
           <div>
-            <div style={{ fontFamily: "'Cinzel',serif", fontSize: 14, fontWeight: 700, color: '#e8c87a', letterSpacing: 0.5 }}>Family Calendar</div>
-            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1.5px', color: 'rgba(212,168,80,0.4)', marginTop: 2 }}>
-              {loading ? 'Consulting the oracle…' : `${events.length} upcoming events`}
+            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#171719', letterSpacing: 1 }}>FAMILY CALENDAR</div>
+            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 16, color: '#171719', marginTop: 4 }}>
+              {loading ? 'CHECKING DATES...' : `${events.length} UPCOMING EVENTS`}
             </div>
           </div>
         </div>
-
-        <motion.div animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-          style={{ color: 'rgba(212,168,80,0.5)', fontSize: 16 }}>→</motion.div>
+        <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#171719' }}>→</div>
       </motion.div>
     );
   }
 
-  // 🔥 FIX: Modal rendered through createPortal to ensure it stays on top of everything and allows internal scrolling
+  // Expanded Modal
   return createPortal(
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        style={{ 
-          position: 'fixed', inset: 0, 
-          background: 'rgba(4,6,14,0.88)', backdropFilter: 'blur(14px)', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', 
-          zIndex: 99999, padding: 20, overflow: 'hidden' 
-        }}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(23,23,25,0.9)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: 20, overflow: 'hidden' }}
         onClick={e => { if (e.target === e.currentTarget) setIsModalOpen(false); }}
       >
-        <style>
-          {`
-            .premium-scroll::-webkit-scrollbar { width: 6px; }
-            .premium-scroll::-webkit-scrollbar-track { background: rgba(12, 16, 32, 0.4); border-radius: 10px; }
-            .premium-scroll::-webkit-scrollbar-thumb { background: rgba(212, 168, 80, 0.3); border-radius: 10px; }
-            .premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(212, 168, 80, 0.6); }
-            @keyframes ltDot{0%,80%,100%{transform:scale(0.6);opacity:0.5}40%{transform:scale(1);opacity:1}}
-          `}
-        </style>
-        
         <motion.div
-          className="premium-scroll"
-          initial={{ scale: 0.88, y: 28, opacity: 0 }}
-          animate={{ scale: 1, y: 0, opacity: 1 }}
-          exit={{ scale: 0.88, y: 28, opacity: 0 }}
-          transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-          style={{ 
-            background: 'rgba(12,16,32,0.98)', border: '1px solid rgba(212,168,80,0.25)', 
-            borderRadius: 22, width: '100%', maxWidth: 460, 
-            position: 'relative', boxShadow: '0 40px 100px rgba(0,0,0,0.9)',
-            maxHeight: '90vh', overflowY: 'auto'
-          }}
+          initial={{ scale: 0.8, y: 30, rotate: 2 }} animate={{ scale: 1, y: 0, rotate: -1 }} exit={{ scale: 0.8, y: 30, rotate: 2 }} transition={{ type: 'spring', bounce: 0.5 }}
+          style={{ background: '#FFF', border: '6px solid #171719', borderRadius: 24, width: '100%', maxWidth: 500, position: 'relative', boxShadow: '16px 16px 0px 0px #171719', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
         >
-          <div style={{ padding: '38px 32px' }}>
-            <div style={{ position: 'absolute', top: 0, left: '15%', right: '15%', height: 1, background: 'linear-gradient(90deg,transparent,rgba(212,168,80,0.7),transparent)' }} />
-            <CornerAccents size={16} inset={12} opacity={0.45} />
-
-            <button onClick={() => setIsModalOpen(false)}
-              style={{ position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(212,168,80,0.22)', background: 'rgba(255,255,255,0.03)', color: 'rgba(212,168,80,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, transition: 'all 0.2s', zIndex: 10 }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.7)'; e.currentTarget.style.color = '#e8c87a'; e.currentTarget.style.background = 'rgba(212,168,80,0.1)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,168,80,0.22)'; e.currentTarget.style.color = 'rgba(212,168,80,0.45)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}>
+          {/* Header */}
+          <div style={{ padding: '24px', borderBottom: '6px solid #171719', background: '#3FE0FF', borderTopLeftRadius: 18, borderTopRightRadius: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 28, color: '#171719', textShadow: '2px 2px 0px #FFF' }}>
+              📅 CALENDAR
+            </div>
+            <button onClick={() => setIsModalOpen(false)} style={{ width: 40, height: 40, borderRadius: '50%', border: '4px solid #171719', background: '#FF3D81', color: '#FFF', cursor: 'pointer', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, boxShadow: '4px 4px 0px 0px #171719' }}>
               ✕
             </button>
+          </div>
 
-            <div style={{ fontFamily: "'Cinzel',serif", fontSize: 19, fontWeight: 700, color: '#e8c87a', textShadow: '0 0 30px rgba(212,168,80,0.3)', marginBottom: 4, textAlign: 'center' }}>
-              📅 Upcoming Events
-            </div>
-            <div style={{ fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '2px', color: 'rgba(212,168,80,0.4)', marginBottom: 24, textAlign: 'center' }}>
-              Family milestones & birthdays
-            </div>
-
+          {/* Body */}
+          <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
             {loading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, padding: '30px 0' }}>
-                {[0, 1, 2].map(i => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: '#e8c87a', display: 'inline-block', animation: `ltDot 1.2s ${i * 0.2}s ease-in-out infinite` }} />)}
-              </div>
+              <div style={{ textAlign: 'center', fontFamily: "'Luckiest Guy',cursive", fontSize: 24, padding: '40px 0' }}>LOADING DATES...</div>
             ) : error ? (
-              <p style={{ textAlign: 'center', color: '#f08080', fontFamily: "'Space Mono',monospace", fontSize: 11, padding: '20px 0' }}>⚠ {error}</p>
+              <div style={{ textAlign: 'center', fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#FF3D81', padding: '40px 0' }}>⚠️ {error}</div>
             ) : events.length === 0 ? (
-              <p style={{ textAlign: 'center', fontStyle: 'italic', color: 'rgba(255,255,255,0.3)', fontSize: 16, padding: '20px 0' }}>No upcoming events in the annals.</p>
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <div style={{ fontSize: 60, marginBottom: 16 }}>🦗</div>
+                <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#171719' }}>NOTHING HAPPENING!</div>
+                <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16 }}>Go make some plans.</p>
+              </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {events.map((evt, index) => {
                   const isBirthday = evt.type === 'birthday';
                   const daysLeftStr = calculateDaysLeft(evt.date);
                   const isToday = daysLeftStr === 'TODAY!';
                   return (
-                    <motion.div key={index}
-                      initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.07 }}
-                      style={{
-                        display: 'flex', alignItems: 'center', padding: '14px 16px',
-                        background: isToday ? 'rgba(212,168,80,0.1)' : 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${isToday ? 'rgba(212,168,80,0.4)' : 'rgba(212,168,80,0.1)'}`,
-                        borderLeft: `3px solid ${isBirthday ? '#ec4899' : '#e8c87a'}`,
-                        borderRadius: 14,
-                      }}
+                    <motion.div key={index} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }}
+                      style={{ display: 'flex', alignItems: 'center', padding: '16px', background: isToday ? '#FFD23F' : '#F5F5F5', border: '4px solid #171719', borderRadius: 16, boxShadow: '4px 4px 0px 0px #171719', transform: isToday ? 'scale(1.02)' : 'none' }}
                     >
-                      <motion.div
-                        animate={isToday ? { scale: [1, 1.2, 1] } : {}}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
-                        style={{ fontSize: 28, marginRight: 14, filter: isToday ? 'drop-shadow(0 0 8px rgba(212,168,80,0.6))' : 'none' }}
-                      >
-                        {isBirthday ? '🎂' : '🌟'}
-                      </motion.div>
+                      <div style={{ fontSize: 40, marginRight: 16, filter: 'drop-shadow(2px 2px 0px #171719)' }}>
+                        {isBirthday ? '🎂' : '⭐'}
+                      </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.88)', marginBottom: 5 }}>{evt.title}</div>
-                        <span style={{
-                          fontFamily: "'Space Mono',monospace", fontSize: 9, letterSpacing: '1.5px', textTransform: 'uppercase',
-                          color: isToday ? '#e8c87a' : 'rgba(212,168,80,0.5)',
-                          background: isToday ? 'rgba(212,168,80,0.15)' : 'rgba(212,168,80,0.06)',
-                          border: `1px solid ${isToday ? 'rgba(212,168,80,0.4)' : 'rgba(212,168,80,0.15)'}`,
-                          padding: '3px 10px', borderRadius: 6,
-                        }}>
+                        <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: '#171719', marginBottom: 4 }}>{evt.title}</div>
+                        <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 14, color: isToday ? '#FFF' : '#171719', background: isToday ? '#FF3D81' : '#FFF', border: '2px solid #171719', padding: '4px 12px', borderRadius: 8, textTransform: 'uppercase' }}>
                           {daysLeftStr}
                         </span>
                       </div>
@@ -197,10 +123,6 @@ function UpcomingEventsWidget({ circleId }) {
                 })}
               </div>
             )}
-
-            <div style={{ marginTop: 22, textAlign: 'center', fontFamily: "'Cinzel',serif", fontSize: 9, letterSpacing: 4, color: 'rgba(212,168,80,0.12)', userSelect: 'none' }}>
-              ✦ &nbsp; ᚦ ᛖ &nbsp; ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ &nbsp; ᛏ ᚱ ᚢ ᚾ ᚲ &nbsp; ✦
-            </div>
           </div>
         </motion.div>
       </motion.div>

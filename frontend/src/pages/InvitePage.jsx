@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { joinViaInviteApi } from '../api/circleApi';
+import { motion } from 'framer-motion';
 
 function InvitePage() {
-  const { token } = useParams(); // URL se /invite/:token nikalega
+  const { token } = useParams(); 
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
   
@@ -12,54 +13,82 @@ function InvitePage() {
   const [processing, setProcessing] = useState(true);
 
   useEffect(() => {
-    // Agar Auth state load ho rahi hai, toh wait karo
     if (loading) return;
 
     const processInvite = async () => {
-      // 1. Agar user logged in NAHI hai -> Seedha Signup pe bhejo Magic Link ke sath
       if (!isAuthenticated) {
         navigate(`/signup?inviteToken=${token}`, { replace: true });
         return;
       }
 
-      // 2. Agar user LOGGED IN hai -> Turant token use karke family join karwao
       try {
         await joinViaInviteApi(token);
-        // Join success! Seedha dashboard bhej do
         navigate('/dashboard', { replace: true });
       } catch (err) {
         setProcessing(false);
-        setError(err?.response?.data?.message || 'This invite link is invalid or has expired.');
+        setError(err?.response?.data?.message || 'This invite link is totally busted or expired!');
       }
     };
 
     processInvite();
   }, [token, isAuthenticated, loading, navigate]);
 
-  // Premium Loading State
+  // Comic Loading State
   if (processing || loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', fontFamily: 'system-ui' }}>
-        <div style={{ fontSize: '40px', animation: 'pulse 1.5s infinite' }}>🪄</div>
-        <h2 style={{ color: '#0f172a', marginTop: '16px' }}>Opening the Vault...</h2>
-        <style>{`@keyframes pulse { 0% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.5; transform: scale(0.9); } }`}</style>
+      <div style={{ 
+        minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+        background: '#FFD23F', backgroundImage: 'radial-gradient(#171719 2px, transparent 2.5px)', backgroundSize: '20px 20px',
+        padding: 20 
+      }}>
+        <motion.div 
+          animate={{ rotate: [0, -5, 5, -5, 0], scale: [1, 1.1, 1] }}
+          transition={{ repeat: Infinity, duration: 1 }}
+          style={{ fontSize: '80px', textShadow: '4px 4px 0px #171719' }}
+        >
+          🎟️
+        </motion.div>
+        <h2 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 36, color: '#FFF', textShadow: '4px 4px 0px #171719', WebkitTextStroke: '2px #171719', marginTop: '24px', textAlign: 'center' }}>
+          CHECKING TICKET...
+        </h2>
       </div>
     );
   }
 
-  // Premium Error State (If token expired or invalid)
+  // Comic Error State
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', padding: '20px', fontFamily: 'system-ui' }}>
-      <div style={{ background: '#fff', borderRadius: '24px', padding: '40px', maxWidth: '400px', width: '100%', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔗❌</div>
-        <h2 style={{ margin: '0 0 12px 0', color: '#0f172a', fontSize: '1.5rem', fontWeight: '800' }}>Link Expired</h2>
-        <p style={{ color: '#64748b', fontSize: '15px', lineHeight: '1.5', marginBottom: '24px' }}>
-          {error} Ask the family admin to generate a new invite link.
+    <div style={{ 
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+      background: '#FFF6E5', backgroundImage: 'radial-gradient(#171719 2px, transparent 2.5px)', backgroundSize: '20px 20px',
+      padding: '20px' 
+    }}>
+      <motion.div 
+        initial={{ scale: 0.8, rotate: 2 }} animate={{ scale: 1, rotate: -2 }} transition={{ type: 'spring', bounce: 0.6 }}
+        style={{ 
+          background: '#FFFFFF', border: '4px solid #171719', borderRadius: '16px', padding: '40px', 
+          maxWidth: '440px', width: '100%', textAlign: 'center', boxShadow: '12px 12px 0px 0px #171719' 
+        }}
+      >
+        <div style={{ fontSize: '64px', marginBottom: '16px' }}>💥</div>
+        <h2 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 36, color: '#FF3D81', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719', margin: '0 0 12px 0' }}>
+          OH SNAP!
+        </h2>
+        <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, color: '#171719', fontSize: '18px', lineHeight: '1.5', marginBottom: '30px' }}>
+          {error} Tell the family boss to generate a fresh invite link.
         </p>
-        <Link to="/dashboard" style={{ display: 'inline-block', background: '#0f172a', color: '#fff', textDecoration: 'none', padding: '12px 24px', borderRadius: '12px', fontWeight: 'bold', transition: 'transform 0.2s' }}>
-          Go to Dashboard
+        <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+          <motion.button 
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 0px 0px #171719' }}
+            style={{ 
+              background: '#3FE0FF', border: '4px solid #171719', color: '#171719', 
+              padding: '16px 24px', borderRadius: '12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, 
+              boxShadow: '6px 6px 0px 0px #171719', cursor: 'pointer', width: '100%', transition: 'box-shadow 0.1s' 
+            }}
+          >
+            BACK TO BASE
+          </motion.button>
         </Link>
-      </div>
+      </motion.div>
     </div>
   );
 }

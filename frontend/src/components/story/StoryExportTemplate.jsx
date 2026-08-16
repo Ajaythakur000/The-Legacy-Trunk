@@ -11,15 +11,11 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
       if (!printRef.current || isExporting) return;
       setIsExporting(true);
 
-      const loadingToast = toast.loading('Sealing the memory scroll... 📜', {
+      const loadingToast = toast.loading('PRINTING POSTER... 🖨️', {
         style: {
-          borderRadius: '12px',
-          background: 'rgba(12,16,32,0.95)',
-          color: '#e8c87a',
-          border: '1px solid rgba(212,168,80,0.3)',
-          fontFamily: "'Space Mono', monospace",
-          fontSize: 11,
-          letterSpacing: '1px',
+          borderRadius: '12px', background: '#3FE0FF', color: '#171719',
+          border: '4px solid #171719', fontFamily: "'Luckiest Guy', cursive", fontSize: 16,
+          boxShadow: '4px 4px 0px 0px #171719'
         },
       });
 
@@ -28,24 +24,21 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
         element.style.display = 'flex';
 
         const canvas = await html2canvas(element, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#06080f',
+          scale: 2, useCORS: true, logging: false, backgroundColor: '#FFD23F',
         });
 
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
         const a = document.createElement('a');
         a.href = imgData;
-        a.download = `Vault_${story?.title?.replace(/\s+/g, '_') || 'Memory'}.jpg`;
+        a.download = `Scrapbook_${story?.title?.replace(/\s+/g, '_') || 'Memory'}.jpg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
 
-        toast.success('Memory scroll sealed ✦', { id: loadingToast });
+        toast.success('POSTER READY! 💥', { id: loadingToast });
       } catch (err) {
         console.error('Image generation failed:', err);
-        toast.error('The vault seal broke. Try again.', { id: loadingToast });
+        toast.error('Printer jammed! Try again.', { id: loadingToast });
       } finally {
         printRef.current.style.display = 'none';
         setIsExporting(false);
@@ -55,202 +48,89 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
 
   const imageUrl = story?.mediaUrls?.length > 0 ? story.mediaUrls[0] : story?.mediaUrl;
   const dateObj = new Date(story?.createdAt || Date.now());
-  const formattedDate = dateObj.toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  });
-  const firstLetter  = story?.content ? story.content.charAt(0).toUpperCase() : '';
-  const restOfContent = story?.content ? story.content.slice(1) : '';
+  const formattedDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  /* ─────────────────────────────────────────────────────────
-     The export poster — fully off-screen, only html2canvas
-     sees it. Dimensions: 800px wide, auto height.
-  ──────────────────────────────────────────────────────────── */
+  // Fallback to standard web-safe fonts for html2canvas
+  const popFont = "Impact, 'Arial Black', sans-serif";
+  const bodyFont = "Arial, sans-serif";
+
   return (
     <div style={{ overflow: 'hidden', height: 0, width: 0, position: 'absolute' }}>
       <div
         ref={printRef}
         style={{
-          display: 'none',
-          position: 'absolute',
-          left: '-9999px',
-          top: 0,
-          width: 800,
-          minHeight: 600,
-          backgroundColor: '#06080f',
+          display: 'none', position: 'absolute', left: '-9999px', top: 0,
+          width: 800, minHeight: 800,
+          backgroundColor: '#FFD23F',
+          backgroundImage: 'radial-gradient(#171719 3px, transparent 4px)',
+          backgroundSize: '30px 30px',
           flexDirection: 'column',
-          padding: '64px 64px 56px',
-          boxSizing: 'border-box',
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          color: '#e2e8f0',
+          padding: '40px', boxSizing: 'border-box',
           position: 'relative',
         }}
       >
-        {/*
-          NOTE for html2canvas: web fonts sometimes don't load in time.
-          Georgia is the serif fallback — still beautiful.
-          If you need Cinzel in export, preload it before calling generateImage.
-        */}
-
-        {/* ── Decorative background layers ── */}
-        {/* Outer border frame */}
+        {/* Main white cutout box */}
         <div style={{
-          position: 'absolute', inset: 20,
-          border: '1px solid rgba(212,168,80,0.15)',
-          pointerEvents: 'none',
-        }}/>
-        {/* Inner border frame */}
-        <div style={{
-          position: 'absolute', inset: 28,
-          border: '1px solid rgba(212,168,80,0.08)',
-          pointerEvents: 'none',
-        }}/>
-
-        {/* Corner ornaments — rendered as inline border divs */}
-        {[
-          { top: 20,    left:  20,  borderTop: '2px solid rgba(212,168,80,0.6)', borderLeft:  '2px solid rgba(212,168,80,0.6)' },
-          { top: 20,    right: 20,  borderTop: '2px solid rgba(212,168,80,0.6)', borderRight: '2px solid rgba(212,168,80,0.6)' },
-          { bottom: 20, left:  20,  borderBottom: '2px solid rgba(212,168,80,0.6)', borderLeft: '2px solid rgba(212,168,80,0.6)' },
-          { bottom: 20, right: 20,  borderBottom: '2px solid rgba(212,168,80,0.6)', borderRight: '2px solid rgba(212,168,80,0.6)' },
-        ].map((s, i) => (
-          <div key={i} style={{ position: 'absolute', width: 28, height: 28, ...s, pointerEvents: 'none' }}/>
-        ))}
-
-        {/* ── HEADER ── */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: 44,
-          borderBottom: '1px solid rgba(212,168,80,0.22)',
-          paddingBottom: 22,
+          background: '#FFF', border: '8px solid #171719', borderRadius: 24,
+          padding: '40px', display: 'flex', flexDirection: 'column',
+          boxShadow: '24px 24px 0px 0px #3FE0FF, 24px 24px 0px 8px #171719',
+          position: 'relative'
         }}>
-          {/* Logo + brand */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: '50%',
-              border: '1px solid rgba(212,168,80,0.4)',
-              background: 'linear-gradient(135deg, #1a1410, #0f0c08)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 700, color: '#e8c87a',
-              letterSpacing: 1,
-            }}>
-              LT
-            </div>
-            <div>
-              <div style={{ fontSize: 14, letterSpacing: '3px', textTransform: 'uppercase',
-                color: '#e8c87a', fontWeight: 700, fontFamily: 'Georgia, serif' }}>
-                The Legacy Trunk
-              </div>
-              <div style={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase',
-                color: 'rgba(212,168,80,0.45)', marginTop: 2, fontFamily: 'Georgia, serif' }}>
-                Family Memory Vault
-              </div>
-            </div>
+
+          {/* Comic Burst Decoration */}
+          <div style={{ position: 'absolute', top: -30, right: -30, background: '#FF3D81', color: '#FFF', border: '6px solid #171719', borderRadius: '50%', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 32, transform: 'rotate(15deg)', boxShadow: '8px 8px 0px 0px #171719', zIndex: 10 }}>
+            POW!
           </div>
 
-          {/* Date */}
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 12, letterSpacing: '2px', textTransform: 'uppercase',
-              color: 'rgba(212,168,80,0.45)', fontFamily: 'Georgia, serif' }}>
-              Archived
+          {/* ── HEADER ── */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, borderBottom: '6px solid #171719', paddingBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 60, height: 60, borderRadius: '50%', border: '4px solid #171719', background: '#3FE0FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, color: '#171719', fontFamily: popFont }}>
+                LT
+              </div>
+              <div>
+                <div style={{ fontSize: 24, color: '#171719', fontFamily: popFont, textTransform: 'uppercase' }}>
+                  THE LEGACY TRUNK
+                </div>
+                <div style={{ fontSize: 14, color: '#FF3D81', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
+                  Family Scrapbook
+                </div>
+              </div>
             </div>
-            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)',
-              marginTop: 4, fontStyle: 'italic', fontFamily: 'Georgia, serif' }}>
+            <div style={{ textAlign: 'right', background: '#171719', color: '#FFF', padding: '10px 20px', borderRadius: 12, fontFamily: popFont, fontSize: 18 }}>
               {formattedDate}
             </div>
           </div>
-        </div>
 
-        {/* ── TITLE ── */}
-        <div style={{
-          width: '60px', height: '2px',
-          background: 'linear-gradient(90deg, transparent, #d4af37, transparent)',
-          margin: '0 auto 20px',
-        }}/>
-        <h1 style={{
-          fontSize: 42, color: '#e8c87a',
-          margin: '0 0 36px', lineHeight: 1.25,
-          textAlign: 'center', fontWeight: 400,
-          letterSpacing: '1px',
-          textShadow: '0 0 40px rgba(212,168,80,0.3)',
-          fontFamily: 'Georgia, serif',
-        }}>
-          {story?.title || 'Untitled Memory'}
-        </h1>
-
-        {/* ── IMAGE ── */}
-        {imageUrl && (story?.mediaType === 'photo' || story?.mediaType === 'image' || !story?.mediaType) && (
-          <div style={{
-            width: '100%', marginBottom: 40,
-            padding: 12,
-            background: 'rgba(0,0,0,0.4)',
-            border: '1px solid rgba(212,168,80,0.35)',
-            display: 'flex', justifyContent: 'center',
+          {/* ── TITLE ── */}
+          <h1 style={{
+            fontSize: 56, color: '#FFD23F', WebkitTextStroke: '2px #171719', textShadow: '6px 6px 0px #171719',
+            margin: '0 0 30px', lineHeight: 1.1, textAlign: 'center', fontFamily: popFont, textTransform: 'uppercase'
           }}>
-            <img
-              src={imageUrl}
-              alt="Memory"
-              crossOrigin="anonymous"
-              style={{
-                maxWidth: '100%', maxHeight: 420,
-                objectFit: 'contain',
-                border: '3px solid rgba(212,168,80,0.25)',
-              }}
-            />
+            {story?.title || 'UNTITLED MEMORY'}
+          </h1>
+
+          {/* ── IMAGE ── */}
+          {imageUrl && (story?.mediaType === 'photo' || story?.mediaType === 'image' || !story?.mediaType) && (
+            <div style={{ width: '100%', marginBottom: 40, padding: 16, background: '#FFF', border: '6px solid #171719', boxShadow: '12px 12px 0px 0px #FF3D81', transform: 'rotate(-2deg)' }}>
+              <img src={imageUrl} alt="Memory" crossOrigin="anonymous" style={{ width: '100%', maxHeight: 400, objectFit: 'cover', border: '4px solid #171719', display: 'block' }} />
+            </div>
+          )}
+
+          {/* ── CONTENT ── */}
+          <div style={{ flex: 1, background: '#F5F5F5', border: '4px dashed #171719', borderRadius: 16, padding: 24, marginBottom: 40 }}>
+            <p style={{ fontSize: 24, lineHeight: 1.6, color: '#171719', margin: 0, whiteSpace: 'pre-wrap', fontFamily: bodyFont, fontWeight: 700 }}>
+              {story?.content}
+            </p>
           </div>
-        )}
 
-        {/* ── CONTENT with Drop Cap ── */}
-        <div style={{ flex: 1 }}>
-          <p style={{
-            fontSize: 20, lineHeight: 1.9,
-            color: 'rgba(255,255,255,0.72)',
-            margin: 0,
-            whiteSpace: 'pre-wrap',
-            textAlign: 'justify',
-            fontFamily: 'Georgia, serif',
-          }}>
-            {firstLetter && (
-              <span style={{
-                float: 'left',
-                fontSize: 72, lineHeight: '56px',
-                paddingTop: 6, paddingRight: 10,
-                color: '#d4af37',
-                fontWeight: 400,
-                fontFamily: 'Georgia, serif',
-              }}>
-                {firstLetter}
-              </span>
-            )}
-            {restOfContent}
-          </p>
-        </div>
+          {/* ── SIGNATURE FOOTER ── */}
+          <div style={{ textAlign: 'center', paddingTop: 20 }}>
+            <div style={{ fontSize: 24, color: '#171719', fontFamily: popFont, letterSpacing: 2, background: '#3FE0FF', display: 'inline-block', padding: '10px 24px', border: '4px solid #171719', borderRadius: 12, boxShadow: '6px 6px 0px 0px #171719', transform: 'rotate(2deg)' }}>
+              POSTED BY: {story?.user?.name || 'A FAMILY MEMBER'}
+            </div>
+          </div>
 
-        {/* ── SIGNATURE FOOTER ── */}
-        <div style={{
-          marginTop: 52, textAlign: 'center',
-          paddingTop: 28,
-          borderTop: '1px solid rgba(212,168,80,0.15)',
-        }}>
-          <div style={{
-            width: 40, height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(212,168,80,0.5), transparent)',
-            margin: '0 auto 16px',
-          }}/>
-          <div style={{
-            fontSize: 18, color: 'rgba(212,168,80,0.6)',
-            fontStyle: 'italic', fontFamily: 'Georgia, serif',
-            letterSpacing: '0.5px',
-          }}>
-            — Cherished by {story?.user?.name || 'A Family Member'} —
-          </div>
-          <div style={{
-            marginTop: 14,
-            fontFamily: 'Georgia, serif',
-            fontSize: 10, letterSpacing: '4px',
-            color: 'rgba(212,168,80,0.18)',
-            userSelect: 'none',
-          }}>
-            ✦   ᚦ ᛖ   ᛚ ᛖ ᚷ ᚨ ᚲ ᛃ   ᛏ ᚱ ᚢ ᚾ ᚲ   ✦
-          </div>
         </div>
       </div>
     </div>

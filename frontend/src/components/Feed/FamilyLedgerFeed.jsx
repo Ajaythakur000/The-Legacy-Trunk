@@ -1,7 +1,6 @@
-// File Path: src/components/feed/FamilyLedgerFeed.jsx
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getCircleFeedApi, toggleLikeStoryApi, addCommentToStoryApi, deleteStoryApi } from '../../api/storyApi';
 import { useAuth } from '../../context/AuthContext';
 import { getSocket } from '../../services/socket.js';
@@ -49,7 +48,6 @@ export default function FamilyLedgerFeed() {
     });
   };
 
-  
   socket.off('new_story_added', onNewStory);
   socket.on('new_story_added', onNewStory);
 
@@ -78,56 +76,66 @@ export default function FamilyLedgerFeed() {
   };
 
   const handleCommentSubmit = async (storyId, text) => {
-    const tId = toast.loading('Whispering to the vault... ✍️');
+    const tId = toast.loading('Scribbling note... ✍️');
     try {
       await addCommentToStoryApi(storyId, text);
       await loadFeed();
-      toast.success('Comment sealed! 💬', { id: tId });
+      toast.success('Note attached! 💬', { id: tId });
     } catch (e) { toast.error('Failed to comment ❌', { id: tId }); }
   };
 
   const handleDelete = async (storyId) => {
-    const tId = toast.loading('Erasing memory... 🗑️');
+    const tId = toast.loading('Ripping page out... 🗑️');
     try {
       await deleteStoryApi(storyId);
       await loadFeed();
-      toast.success('Memory erased completely! 💥', { id: tId });
+      toast.success('Page ripped out! 💥', { id: tId });
     } catch (err) { toast.error('Failed to delete ❌', { id: tId }); }
   };
 
   const sortedStories = useMemo(() => [...stories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [stories]);
 
+  // NEW COMIC UI FOR EMPTY/LOCKED STATES
   if (!activeCircleId) {
     return (
-      <div style={{ textAlign: 'center', background: '#fef2f2', padding: '40px', borderRadius: '24px', border: '1px solid #fca5a5' }}>
-        <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }}>🔐</span>
-        <h3 style={{ color: '#991b1b', margin: '0 0 8px 0', fontSize: '1.5rem' }}>No Vault Selected</h3>
-        <p style={{ color: '#b91c1c', margin: 0 }}>Please select a Family Circle to view stories.</p>
+      <div style={{ textAlign: 'center', background: '#FFF', padding: '40px', borderRadius: 24, border: '6px solid #171719', boxShadow: '12px 12px 0px 0px #171719' }}>
+        <span style={{ fontSize: 60, display: 'block', marginBottom: 16 }}>🔐</span>
+        <h3 style={{ fontFamily: "'Luckiest Guy',cursive", color: '#FF3D81', margin: '0 0 8px', fontSize: 32 }}>VAULT LOCKED!</h3>
+        <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, color: '#171719', margin: 0, fontSize: 18 }}>Select a Family Circle to see the scrapbook.</p>
       </div>
     );
   }
 
   return (
     <div>
-      {error && <div style={{ color: '#b91c1c', background: '#fef2f2', padding: '16px', borderRadius: '16px', borderLeft: '4px solid #ef4444', marginBottom: '24px' }}>{error}</div>}
+      <AnimatePresence>
+        {error && (
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+            style={{ background: '#FF3D81', padding: '16px', borderRadius: 16, border: '4px solid #171719', marginBottom: '24px', fontFamily: "'Luckiest Guy',cursive", color: '#FFF', textAlign: 'center', boxShadow: '6px 6px 0px 0px #171719' }}>
+            ⚠️ {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {loadingFeed ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '20px' }}>
           <StorySkeleton /><StorySkeleton /><StorySkeleton />
         </div>
       ) : sortedStories.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 20px', background: '#f8fafc', borderRadius: '32px', border: '2px dashed #cbd5e1' }}>
-          <span style={{ fontSize: '60px', opacity: 0.4, filter: 'grayscale(100%)', display: 'block', marginBottom: '20px' }}>📸</span>
-          <h3 style={{ color: '#334155', margin: '0 0 10px 0', fontSize: '1.5rem' }}>The vault is empty!</h3>
-          <p style={{ color: '#94a3b8', margin: 0, fontSize: '1.1rem' }}>Head to Vault Stories to be the first to save a memory.</p>
-        </div>
+        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} style={{ textAlign: 'center', padding: '80px 20px', background: '#FFF', borderRadius: 24, border: '6px solid #171719', boxShadow: '12px 12px 0px 0px #171719' }}>
+          <span style={{ fontSize: 80, display: 'block', marginBottom: 20 }}>👻</span>
+          <h3 style={{ fontFamily: "'Luckiest Guy',cursive", color: '#171719', margin: '0 0 10px', fontSize: 32 }}>NOTHING TO SEE HERE!</h3>
+          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, color: '#171719', margin: 0, fontSize: 18 }}>Be the first to paste a memory into the scrapbook!</p>
+        </motion.div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          {sortedStories.map((s, index) => (
-            <motion.div key={s._id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}>
-              <StoryCard story={s} currentUser={user} onLike={handleLike} onComment={handleCommentSubmit} onDelete={handleDelete} />
-            </motion.div>
-          ))}
+          <AnimatePresence mode="popLayout">
+            {sortedStories.map((s, index) => (
+              <motion.div key={s._id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}>
+                <StoryCard story={s} currentUser={user} onLike={handleLike} onComment={handleCommentSubmit} onDelete={handleDelete} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </div>
