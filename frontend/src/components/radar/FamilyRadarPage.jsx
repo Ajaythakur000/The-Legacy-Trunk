@@ -208,11 +208,19 @@ function FamilyRadarPage() {
 
   const normalizeMembers=useCallback(raw=>{
     if(!Array.isArray(raw))return[];
+    const now = Date.now();
     return raw.map((m,idx)=>{
       const latR=m?.latitude??m?.currentLocation?.coordinates?.[1]??m?.location?.coordinates?.[1]??m?.liveLocation?.coordinates?.[1];
       const lngR=m?.longitude??m?.currentLocation?.coordinates?.[0]??m?.location?.coordinates?.[0]??m?.liveLocation?.coordinates?.[0];
       return{_id:String(m?._id||m?.memberId||`member-${idx}`),name:m?.name||m?.memberName||'Unknown',latitude:typeof latR==='number'?latR:Number(latR),longitude:typeof lngR==='number'?lngR:Number(lngR),isOnline:Boolean(m?.isOnline),isGhostModeOn:Boolean(m?.isGhostModeOn),updatedAt:m?.updatedAt||m?.lastLocationUpdatedAt||m?.lastSeenAt||null};
-    }).filter(m=>m._id!==myUserId);
+    }).filter(m=>{
+      if (m._id===myUserId) return false;
+      // ZOMBIE FILTER: Remove if no last seen, or > 30 days
+      if (!m.updatedAt) return false;
+      const days = (now - new Date(m.updatedAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (days > 30) return false;
+      return true;
+    });
   },[myUserId]);
 
   const loadFamilyRadar=useCallback(async()=>{
@@ -302,8 +310,8 @@ function FamilyRadarPage() {
               <MapContainer center={center} zoom={13} style={{height:'100%',width:'100%',zIndex:0}} scrollWheelZoom touchZoom dragging zoomControl={false}>
                 <TouchpadPanHandler/>
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {myLocation&&!isGhostModeOn&&(
                   <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
