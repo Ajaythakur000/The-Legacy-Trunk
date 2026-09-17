@@ -102,8 +102,10 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
               Memory Scrapbook
             </div>
 
-            <div style={{ width: 120, height: 120, borderRadius: '50%', border: '1px solid #D4B895', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, marginBottom: 40 }}>
-              <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '1px dashed #3E2723' }}></div>
+            <div style={{ width: 120, height: 120, borderRadius: '50%', border: '1px solid #D4B895', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, marginBottom: 40, background: '#FFF' }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '1px dashed #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <img src="/finall_logo.png" alt="Logo" crossOrigin="anonymous" style={{ width: '80%', height: '80%', objectFit: 'contain', filter: 'sepia(0.8) opacity(0.8)' }} />
+              </div>
             </div>
 
             <div style={{ marginTop: 'auto', color: '#8C7B6B', fontFamily: typewriterFont, fontSize: 14 }}>
