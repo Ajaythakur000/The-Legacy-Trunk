@@ -225,12 +225,10 @@ export default function Sidebar({
           background: #FFF; border: 1px solid transparent; color: #3E2723;
           transition: all 0.1s ease;
         }
-        .lt-sb-link:hover {
-          background: #C89B3C; border: none;
+        .lt-sb-link:hover { background: #C89B3C; border: 1px solid #C89B3C;
           box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); 
         }
-        .lt-sb-link.lt-active {
-          background: #D4B895; border: none;
+        .lt-sb-link.lt-active { background: #D4B895; border: 1px solid #D4B895;
           box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); animation: ltActivePop 0.3s ease;
         }
 

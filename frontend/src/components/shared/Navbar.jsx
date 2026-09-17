@@ -54,8 +54,8 @@ const GLOBAL_CSS = `
   .lt-sb-section { padding:0 12px; margin-top:16px; }
   .lt-sec-label { font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; padding:0 6px; margin-bottom:8px; }
   .lt-sb-link { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; margin-bottom:8px; text-decoration:none; cursor:pointer; border: 1px solid transparent; transition:all 0.2s; color: #3E2723; }
-  .lt-sb-link:hover { background:#C89B3C; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);  }
-  .lt-sb-link.lt-active { background:#D4B895; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
+  .lt-sb-link:hover { background: #C89B3C; border: 1px solid #C89B3C; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);  }
+  .lt-sb-link.lt-active { background: #D4B895; border: 1px solid #D4B895; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
   .lt-sb-icon { width:32px; height:32px; border-radius:8px; flex-shrink:0; background:#FFF; border: none; display:flex; align-items:center; justify-content:center; font-size:16px; }
   .lt-sb-lbl { font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; }
   .lt-sb-sublbl { font-family:'Courier Prime', monospace; font-size:11px; font-weight:bold; color:#3E2723; }
@@ -155,8 +155,8 @@ const GLOBAL_CSS = `
     font-family:'Courier Prime', monospace; font-weight:700; font-size:14px; color:#3E2723;
     transition:all 0.1s; border: 1px solid transparent;
   }
-  .lt-dd-item:hover { background:#C89B3C; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);  }
-  .lt-dd-item.lt-dd-active { background:#D4B895; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
+  .lt-dd-item:hover { background: #C89B3C; border: 1px solid #C89B3C; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);  }
+  .lt-dd-item.lt-dd-active { background: #D4B895; border: 1px solid #D4B895; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
 
   /* ── Icon button (bell etc.) ── */
   .lt-icon-btn {
@@ -203,8 +203,8 @@ const GLOBAL_CSS = `
   .lt-profile-email { font-family:'Courier Prime', monospace; font-weight:700; font-size:12px; color:#3E2723; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .lt-profile-links { padding:12px; }
   .lt-profile-link { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:12px; background:#FFF; border: 1px solid transparent; font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; border-radius:8px; cursor:pointer; text-decoration:none; transition:all 0.1s; margin-bottom:8px; }
-  .lt-profile-link:hover { background:#D4B895; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);  }
-  .lt-profile-link.lt-danger:hover { background:#1E352F; color:#FFF; }
+  .lt-profile-link:hover { background: #D4B895; border: 1px solid #D4B895; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);  }
+  .lt-profile-link.lt-danger:hover { background: #1E352F; color: #FFF; border: 1px solid #1E352F; }
 
   .lt-page-wrap { flex:1; overflow-y:auto; position:relative; background:transparent; padding: 20px; }
 
