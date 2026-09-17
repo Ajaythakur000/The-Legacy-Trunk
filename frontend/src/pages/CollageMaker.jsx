@@ -2,40 +2,39 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, X, Plus, Scissors, Check, Settings2, Image as ImageIcon, LayoutGrid } from 'lucide-react';
 
-// ── NEW POP-ART FRAMES ──
 const FRAMES = [
-  { id: 'none', label: 'None', sub: 'Raw cuts', swatch: { border: '3px dashed #3E2723', background: '#FFF' }, style: {} },
-  { id: 'vintage', label: 'Vintage Frame', sub: 'Old photo', swatch: { border: '1px solid #D4B895', background: '#FDFBF7' }, style: { border: '8px solid #EEDEC1', padding: '12px', background: '#FDFBF7' } },
-  { id: 'polaroid', label: 'Polaroid', sub: 'Classic', swatch: { border: 'none', background: '#FFF', paddingBottom: 8 }, style: { background: '#FFF', padding: '16px 16px 60px', border: 'none' } },
-  { id: 'kraft', label: 'Kraft Paper', sub: 'Brown paper', swatch: { border: 'none', background: '#D4B895' }, style: { background: '#D4B895', padding: '16px', border: '1px dashed #3E2723' } },
-  { id: 'parchment', label: 'Parchment', sub: 'Aged script', swatch: { border: 'none', background: '#EEDEC1' }, style: { background: '#EEDEC1', padding: '16px', border: '1px solid rgba(62,39,35,0.2)' } },
-  { id: 'darkwood', label: 'Dark Wood', sub: 'Elegant', swatch: { border: 'none', background: '#3E2723' }, style: { background: '#3E2723', padding: '16px', border: '2px solid #C89B3C' } },
+  { id: 'none', label: 'Raw Cuts', sub: 'No border', swatch: { border: '1px dashed #8C7B6B', background: 'transparent' }, style: {} },
+  { id: 'vintage', label: 'Vintage Frame', sub: 'Classic matting', swatch: { border: '4px solid #EEDEC1', background: '#FDFBF7' }, style: { border: '12px solid #EEDEC1', padding: '12px', background: '#FDFBF7' } },
+  { id: 'polaroid', label: 'Polaroid', sub: 'Nostalgic', swatch: { border: '2px solid #FFF', borderBottom: '8px solid #FFF', background: '#F5F5F5' }, style: { background: '#FFF', padding: '16px 16px 64px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } },
+  { id: 'kraft', label: 'Kraft Paper', sub: 'Scrapbook feel', swatch: { background: '#D4B895' }, style: { background: '#D4B895', padding: '16px', border: '1px dashed #8C7B6B' } },
+  { id: 'darkwood', label: 'Mahogany', sub: 'Elegant dark wood', swatch: { background: '#3E2723', border: '1px solid #C89B3C' }, style: { background: '#3E2723', padding: '16px', border: '2px solid #C89B3C' } },
 ];
 
 const FILTERS = [
-  { id: 'none',      label: 'Original',  sub: 'No filter',   css: 'none' },
-  { id: 'comicbook', label: 'Print',     sub: 'High contrast', css: 'saturate(1.5) contrast(1.3)' },
-  { id: 'noir',      label: 'Noir',      sub: 'B&W',         css: 'grayscale(1) contrast(1.5)' },
-  { id: 'retro',     label: 'Retro',     sub: 'Faded',       css: 'sepia(0.5) contrast(1.1) saturate(1.2)' },
+  { id: 'none',      label: 'Original',  css: 'none' },
+  { id: 'comicbook', label: 'Vivid',     css: 'saturate(1.5) contrast(1.3)' },
+  { id: 'noir',      label: 'Noir',      css: 'grayscale(1) contrast(1.5)' },
+  { id: 'retro',     label: 'Sepia',     css: 'sepia(0.6) contrast(1.1) saturate(1.2)' },
 ];
 
 const LAYOUTS = [
-  { id: '2',      label: '2 Photos', cols: '1fr 1fr', rows: '1fr',       n: 2, spans: {} },
-  { id: '3',      label: '3 Photos', cols: '1fr 1fr', rows: '1fr 1fr',     n: 3, spans: { 0: '1 / span 2' } },
-  { id: '4',      label: '4 Photos', cols: '1fr 1fr', rows: '1fr 1fr',     n: 4, spans: {} },
-  { id: 'banner', label: 'Banner',   cols: '1fr',     rows: '1fr 1fr 1fr', n: 3, spans: {} },
-  { id: 'hero',   label: 'Hero',     cols: '2fr 1fr', rows: '1fr 1fr',     n: 3, spans: { 0: 'auto / auto / 1 / span 2' } },
-  { id: '5',      label: '5 Photos', cols: '1fr 1fr', rows: '1fr 1fr 1fr', n: 5, spans: { 0: '1 / span 2' } },
+  { id: '2',      label: 'Split',   cols: '1fr 1fr', rows: '1fr',       n: 2, spans: {} },
+  { id: '3',      label: 'Trio',    cols: '1fr 1fr', rows: '1fr 1fr',     n: 3, spans: { 0: '1 / span 2' } },
+  { id: '4',      label: 'Grid',    cols: '1fr 1fr', rows: '1fr 1fr',     n: 4, spans: {} },
+  { id: 'banner', label: 'Strip',   cols: '1fr',     rows: '1fr 1fr 1fr', n: 3, spans: {} },
+  { id: 'hero',   label: 'Hero',    cols: '2fr 1fr', rows: '1fr 1fr',     n: 3, spans: { 0: 'auto / auto / 1 / span 2' } },
+  { id: '5',      label: 'Mosaic',  cols: '1fr 1fr', rows: '1fr 1fr 1fr', n: 5, spans: { 0: '1 / span 2' } },
 ];
 
 const SliderRow = ({ label, value, min, max, unit = '', onChange }) => (
   <div style={{ marginBottom: 20 }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontFamily: "'Courier Prime', monospace", color: '#3E2723', fontSize: 14 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontFamily: "'Courier Prime', monospace", color: '#8C7B6B', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
       <span>{label}</span>
       <span>{value}{unit}</span>
     </div>
-    <input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))} style={{ width: '100%', accentColor: '#1E352F' }} />
+    <input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))} style={{ width: '100%', accentColor: '#3E2723', height: 4 }} />
   </div>
 );
 
@@ -81,19 +80,19 @@ function ImageSlot({ src, onRemove, filterCss, borderRadius, frameActive }) {
     return () => container.removeEventListener('wheel', handleWheel);
   }, [clampTransform]);
 
-  const btnStyle = { background: '#FFF', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontFamily: "'Courier Prime', monospace", fontSize: 18, color: '#3E2723', boxShadow: '1px 2px 8px rgba(0,0,0,0.1)' };
+  const btnStyle = { background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(4px)', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 4, width: 28, height: 28, cursor: 'pointer', fontFamily: "'Courier Prime', monospace", fontSize: 16, color: '#3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center' };
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', borderRadius: frameActive ? 0 : borderRadius, cursor: 'grab', background: '#FFF' }} onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
+    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', borderRadius: frameActive ? 0 : borderRadius, cursor: 'grab', background: '#EEDEC1' }} onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
       <img ref={imgRef} src={src} alt="" draggable={false} onLoad={() => { setTransform(t => { const clamped = clampTransform(t.x, t.y, t.scale); return { ...t, x: clamped.x, y: clamped.y }; }); }}
         style={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', filter: filterCss, transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`, transformOrigin: 'center center', pointerEvents: 'none' }} />
       
-      <div className="hide-on-capture" style={{ position: 'absolute', bottom: 10, left: 10, display: 'flex', gap: 8, zIndex: 10 }}>
+      <div className="hide-on-capture" style={{ position: 'absolute', bottom: 8, left: 8, display: 'flex', gap: 6, zIndex: 10 }}>
         <button onMouseDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTransform(t => { const s = Math.min(3, t.scale + 0.15); const c = clampTransform(t.x, t.y, s); return {x:c.x, y:c.y, scale:s} }); }} style={btnStyle}>+</button>
         <button onMouseDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTransform(t => { const s = Math.max(0.5, t.scale - 0.15); const c = clampTransform(t.x, t.y, s); return {x:c.x, y:c.y, scale:s} }); }} style={btnStyle}>-</button>
       </div>
 
-      <button className="hide-on-capture" onMouseDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, background: '#1E352F', color: '#FFF', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontFamily: "'Courier Prime', monospace", boxShadow: '1px 2px 8px rgba(0,0,0,0.1)' }}>✕</button>
+      <button className="hide-on-capture" onMouseDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, background: 'rgba(62,39,35,0.8)', color: '#FFF', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
     </div>
   );
 }
@@ -106,11 +105,10 @@ function CollageMaker({ onClose, onSave }) {
   const [activeFilter, setActiveFilter] = useState('none');
   const [activeFrame, setActiveFrame]   = useState('none');
   const [gridGap, setGridGap]           = useState(8);
-  const [borderRadius, setBorderRadius] = useState(0); // Pop art defaults to sharp corners
+  const [borderRadius, setBorderRadius] = useState(0); 
   const [brightness, setBrightness]     = useState(100);
   const [contrast, setContrast]         = useState(100);
   const [saturation, setSaturation]     = useState(100);
-  const [vignette, setVignette]         = useState(0);
 
   const collageRef = useRef(null);
   const currentLayout = LAYOUTS.find(l => l.id === layout) || LAYOUTS[1];
@@ -134,45 +132,51 @@ function CollageMaker({ onClose, onSave }) {
   const handleSaveCollage = async () => {
     if (!Object.values(slotImages).some(Boolean)) return toast.error('Add at least one photo!');
     setIsProcessing(true);
-    const tId = toast.loading('Gluing it together...');
+    const tId = toast.loading('Developing photo...');
     try {
       const bgColor = currentFrame.style.background || '#FFF';
       const canvas = await html2canvas(collageRef.current, { scale: 2, useCORS: true, backgroundColor: bgColor, ignoreElements: el => el.classList.contains('hide-on-capture') });
       canvas.toBlob(blob => {
         if (!blob) throw new Error('Canvas failed');
         onSave(new File([blob], `collage-${Date.now()}.png`, { type: 'image/png' }));
-        toast.success('Collage Ready! 💥', { id: tId });
+        toast.success('Photo Developed.', { id: tId });
       }, 'image/png');
-    } catch (err) { toast.error('Failed to make collage.', { id: tId }); } finally { setIsProcessing(false); }
+    } catch (err) { toast.error('Failed to develop photo.', { id: tId }); } finally { setIsProcessing(false); }
   };
 
-  const TABS = ['layout', 'filters', 'frames', 'adjust'];
+  const TABS = [
+    { id: 'layout', label: 'Layout', icon: LayoutGrid },
+    { id: 'filters', label: 'Filters', icon: ImageIcon },
+    { id: 'frames', label: 'Frames', icon: Scissors },
+    { id: 'adjust', label: 'Adjust', icon: Settings2 }
+  ];
 
   return (
-    // 🔥 FIX: Strict height rules added here so the inner content can scroll
-    <div style={{ display: 'flex', flexDirection: 'column', height: '85vh', maxHeight: '750px', width: '100%', background: '#FFF', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '85vh', maxHeight: '750px', width: '100%', background: '#FDFBF7', overflow: 'hidden' }}>
       
       {/* ── HEADER ── */}
-      <div style={{ padding: '24px', borderBottom: '1px dashed rgba(62,39,35,0.2)', background: '#C89B3C', flexShrink: 0 }}>
-        <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 32, color: '#3E2723' }}>COLLAGE MAKER ✒️</div>
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(62,39,35,0.1)', background: '#FDFBF7', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        <Camera size={24} color="#3E2723" />
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', fontStyle: 'italic' }}>The Darkroom Studio</div>
       </div>
 
       {/* ── BODY ── */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         
-        {/* PREVIEW */}
-        <div style={{ flex: '1.5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#FDFBF7', backgroundImage: 'none',  }}>
-          <div style={{ width: '100%', maxWidth: 400, aspectRatio: '1/1', boxShadow: '4px 8px 24px rgba(0,0,0,0.1)', border: 'none', background: '#FFF' }}>
-            <div ref={collageRef} style={{ width: '100%', height: '100%', transition: 'all .2s ease', ...currentFrame.style }}>
-              <div style={{ width: '100%', height: '100%', display: 'grid', gap: `${gridGap}px`, gridTemplateColumns: currentLayout.cols, gridTemplateRows: currentLayout.rows, borderRadius: activeFrame === 'none' ? borderRadius : 0, overflow: 'hidden', background: '#3E2723' }}>
+        {/* PREVIEW (Dark Wood Desk) */}
+        <div style={{ flex: '1.5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#2D1A11', backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E")', boxShadow: 'inset -10px 0 20px rgba(0,0,0,0.5)' }}>
+          <div style={{ width: '100%', maxWidth: 400, aspectRatio: '1/1', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', background: 'transparent' }}>
+            <div ref={collageRef} style={{ width: '100%', height: '100%', transition: 'all .3s ease', ...currentFrame.style }}>
+              <div style={{ width: '100%', height: '100%', display: 'grid', gap: `${gridGap}px`, gridTemplateColumns: currentLayout.cols, gridTemplateRows: currentLayout.rows, borderRadius: activeFrame === 'none' ? borderRadius : 0, overflow: 'hidden', background: '#1A0F0A' }}>
                 {Array.from({ length: currentLayout.n }, (_, i) => (
-                  <div key={i} style={{ position: 'relative', background: '#FFF', borderRadius: activeFrame !== 'none' ? 0 : borderRadius, overflow: 'hidden', gridColumn: currentLayout.spans[i] || 'auto' }}>
+                  <div key={i} style={{ position: 'relative', background: '#EEDEC1', borderRadius: activeFrame !== 'none' ? 0 : borderRadius, overflow: 'hidden', gridColumn: currentLayout.spans[i] || 'auto' }}>
                     {slotImages[i] ? (
                       <ImageSlot src={slotImages[i]} filterCss={composedFilter} borderRadius={borderRadius} frameActive={activeFrame !== 'none'} onRemove={() => setSlotImages(p => ({ ...p, [i]: null }))} />
                     ) : (
-                      <label className="hide-on-capture" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', cursor: 'pointer', background: '#D4B895', color: '#3E2723', border: '2px dashed #D4B895', fontFamily: "'Courier Prime', monospace", fontSize: 18 }}>
+                      <label className="hide-on-capture" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', cursor: 'pointer', background: 'transparent', color: 'rgba(62,39,35,0.4)', border: '1px dashed rgba(62,39,35,0.2)', transition: 'all 0.2s' }}>
                         <input type="file" accept="image/*" onChange={e => handleImageUpload(i, e)} style={{ display: 'none' }} />
-                        <span style={{ fontSize: 32 }}>+</span> ADD PIC
+                        <Plus size={24} style={{ marginBottom: 8 }} />
+                        <span style={{ fontFamily: "'Courier Prime', monospace", fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Attach Photo</span>
                       </label>
                     )}
                   </div>
@@ -182,58 +186,66 @@ function CollageMaker({ onClose, onSave }) {
           </div>
         </div>
 
-        {/* CONTROLS */}
-        <div style={{ flex: 1, borderLeft: '1px solid rgba(62,39,35,0.1)', display: 'flex', flexDirection: 'column', background: '#FFF', minHeight: 0 }}>
+        {/* CONTROLS (Manila Folder Style) */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#FDFBF7', minHeight: 0 }}>
           
-          <div style={{ display: 'flex', borderBottom: '1px solid rgba(62,39,35,0.1)', flexShrink: 0 }}>
-            {TABS.map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)} style={{ flex: 1, padding: '16px 0', background: activeTab === tab ? '#3E2723' : '#FFF', color: activeTab === tab ? '#FFF' : '#3E2723', border: 'none', borderRight: 'none', fontFamily: "'Courier Prime', monospace", fontSize: 14, cursor: 'pointer' }}>
-                {tab.toUpperCase()}
-              </button>
-            ))}
+          {/* Tabs */}
+          <div style={{ display: 'flex', background: '#EEDEC1', borderBottom: '1px solid rgba(62,39,35,0.2)', flexShrink: 0, padding: '10px 10px 0 10px', gap: 4 }}>
+            {TABS.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: '12px 0', background: activeTab === tab.id ? '#FDFBF7' : 'rgba(253,251,247,0.4)', color: activeTab === tab.id ? '#3E2723' : '#8C7B6B', border: '1px solid rgba(62,39,35,0.2)', borderBottom: activeTab === tab.id ? '1px solid #FDFBF7' : '1px solid rgba(62,39,35,0.2)', borderRadius: '6px 6px 0 0', fontFamily: "'Courier Prime', monospace", fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, transition: 'all 0.2s', marginBottom: activeTab === tab.id ? -1 : 0 }}>
+                  <Icon size={16} strokeWidth={1.5} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div style={{ padding: 24, flex: 1, overflowY: 'auto' }}>
+          <div style={{ padding: '30px 24px', flex: 1, overflowY: 'auto' }}>
             <AnimatePresence mode="wait">
-              <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
+              <motion.div key={activeTab} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.2 }}>
                 
                 {activeTab === 'layout' && (<>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 30 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 40 }}>
                     {LAYOUTS.map(l => (
-                      <button key={l.id} onClick={() => setLayout(l.id)} style={{ padding: '12px', borderRadius: 12, border: 'none', background: layout === l.id ? '#D4B895' : '#FFF', color: '#3E2723', cursor: 'pointer', fontFamily: "'Courier Prime', monospace", fontSize: 14, boxShadow: layout === l.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: layout === l.id ? 'translate(-2px,-2px)' : 'none' }}>
+                      <button key={l.id} onClick={() => setLayout(l.id)} style={{ padding: '16px 12px', borderRadius: 4, border: activeLayout(l.id) ? '1px solid #3E2723' : '1px solid rgba(62,39,35,0.2)', background: activeLayout(l.id) ? 'rgba(62,39,35,0.05)' : 'transparent', color: '#3E2723', cursor: 'pointer', fontFamily: "'Courier Prime', monospace", fontSize: 13, transition: 'all 0.2s' }}>
                         {l.label}
                       </button>
                     ))}
                   </div>
-                  <SliderRow label="GRID GAP" value={gridGap} min={0} max={30} unit="px" onChange={setGridGap} />
-                  <SliderRow label="ROUND EDGES" value={borderRadius} min={0} max={40} unit="px" onChange={setBorderRadius} />
+                  <SliderRow label="Gutter Width" value={gridGap} min={0} max={40} unit="px" onChange={setGridGap} />
+                  <SliderRow label="Corner Curve" value={borderRadius} min={0} max={40} unit="px" onChange={setBorderRadius} />
                 </>)}
 
                 {activeTab === 'filters' && (<>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     {FILTERS.map(f => (
-                      <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{ padding: '16px', borderRadius: 12, border: 'none', background: activeFilter === f.id ? '#C89B3C' : '#FFF', cursor: 'pointer', boxShadow: activeFilter === f.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: activeFilter === f.id ? 'translate(-2px,-2px)' : 'none' }}>
-                        <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 16, color: '#3E2723' }}>{f.label}</div>
+                      <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{ padding: '20px 12px', borderRadius: 4, border: activeFilter === f.id ? '1px solid #3E2723' : '1px solid rgba(62,39,35,0.2)', background: activeFilter === f.id ? 'rgba(62,39,35,0.05)' : 'transparent', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s' }}>
+                        <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 13, color: '#3E2723', textTransform: 'uppercase' }}>{f.label}</div>
                       </button>
                     ))}
                   </div>
                 </>)}
 
                 {activeTab === 'frames' && (<>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {FRAMES.map(f => (
-                      <button key={f.id} onClick={() => setActiveFrame(f.id)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px', borderRadius: 12, border: 'none', background: activeFrame === f.id ? '#1E352F' : '#FFF', cursor: 'pointer', boxShadow: activeFrame === f.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: activeFrame === f.id ? 'translate(-2px,-2px)' : 'none' }}>
-                        <div style={{ width: 40, height: 40, borderRadius: 8, ...f.swatch }} />
-                        <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 16, color: activeFrame === f.id ? '#FFF' : '#3E2723' }}>{f.label}</div>
+                      <button key={f.id} onClick={() => setActiveFrame(f.id)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px', borderRadius: 4, border: activeFrame === f.id ? '1px solid #3E2723' : '1px solid rgba(62,39,35,0.2)', background: activeFrame === f.id ? 'rgba(62,39,35,0.05)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s' }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 2, ...f.swatch }} />
+                        <div style={{ textAlign: 'left' }}>
+                           <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 14, color: '#3E2723', textTransform: 'uppercase' }}>{f.label}</div>
+                           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 12, color: '#8C7B6B', fontStyle: 'italic', marginTop: 4 }}>{f.sub}</div>
+                        </div>
                       </button>
                     ))}
                   </div>
                 </>)}
 
                 {activeTab === 'adjust' && (<>
-                  <SliderRow label="BRIGHTNESS" value={brightness} min={50} max={150} unit="%" onChange={setBrightness} />
-                  <SliderRow label="CONTRAST" value={contrast} min={50} max={150} unit="%" onChange={setContrast} />
-                  <SliderRow label="SATURATION" value={saturation} min={0} max={200} unit="%" onChange={setSaturation} />
+                  <SliderRow label="Exposure" value={brightness} min={50} max={150} unit="%" onChange={setBrightness} />
+                  <SliderRow label="Contrast" value={contrast} min={50} max={150} unit="%" onChange={setContrast} />
+                  <SliderRow label="Color Depth" value={saturation} min={0} max={200} unit="%" onChange={setSaturation} />
                 </>)}
 
               </motion.div>
@@ -241,14 +253,18 @@ function CollageMaker({ onClose, onSave }) {
           </div>
 
           {/* ACTIONS */}
-          <div style={{ padding: 24, borderTop: '1px dashed rgba(62,39,35,0.2)', display: 'flex', gap: 16, background: '#D4B895', flexShrink: 0 }}>
-            <button onClick={onClose} style={{ flex: 1, padding: '16px', background: '#FFF', border: 'none', borderRadius: 12, fontFamily: "'Courier Prime', monospace", fontSize: 18, cursor: 'pointer', boxShadow: '2px 4px 12px rgba(0,0,0,0.1)' }}>CANCEL</button>
-            <button onClick={handleSaveCollage} disabled={isProcessing} style={{ flex: 2, padding: '16px', background: '#00C853', color: '#FFF', border: 'none', borderRadius: 12, fontFamily: "'Courier Prime', monospace", fontSize: 18, cursor: 'pointer', boxShadow: '2px 4px 12px rgba(0,0,0,0.1)' }}>{isProcessing ? 'SAVING...' : 'ADD TO SCRAPBOOK 📜'}</button>
+          <div style={{ padding: '20px 24px', borderTop: '1px solid rgba(62,39,35,0.1)', display: 'flex', gap: 16, background: '#FDFBF7', flexShrink: 0 }}>
+            <button onClick={onClose} style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid rgba(62,39,35,0.3)', borderRadius: 4, color: '#3E2723', fontFamily: "'Courier Prime', monospace", fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, cursor: 'pointer' }}>Cancel</button>
+            <button onClick={handleSaveCollage} disabled={isProcessing} style={{ flex: 2, padding: '14px', background: '#3E2723', color: '#FDFBF7', border: 'none', borderRadius: 4, fontFamily: "'Courier Prime', monospace", fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'opacity 0.2s' }}>
+              <Check size={16} /> {isProcessing ? 'Developing...' : 'Add to Scrapbook'}
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
+
+  function activeLayout(id) { return layout === id; }
 }
 
 export default CollageMaker;
