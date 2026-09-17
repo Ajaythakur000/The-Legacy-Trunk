@@ -11,16 +11,16 @@ function ComicActionBtn({ onClick, active, icon, label, color }) {
     <motion.button
       onClick={onClick}
       whileHover={{ scale: 1.05, y: -2 }}
-      whileTap={{ scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 0px 0px #171719' }}
+      whileTap={{ scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' }}
       style={{
         display: 'flex', alignItems: 'center', gap: 8,
         padding: '8px 16px', borderRadius: 12,
         background: active ? color : '#FFF',
-        border: '3px solid #171719',
-        color: active ? '#FFF' : '#171719',
-        fontFamily: "'Luckiest Guy', cursive", fontSize: 16,
+        border: '1px solid #3E2723',
+        color: active ? '#FFF' : '#3E2723',
+        fontFamily: "'Playfair Display', serif", fontSize: 16,
         cursor: 'pointer',
-        boxShadow: '4px 4px 0px 0px #171719',
+        boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)',
         transition: 'background 0.2s, color 0.2s'
       }}
     >
@@ -107,8 +107,8 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
     if (story?.mediaType === 'video') {
       return (
-        <div className="scrapbook-tape" style={{ marginTop: 24, border: '4px solid var(--pop-black)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--comic-shadow)', background: 'var(--pop-yellow)', padding: 8 }}>
-          <video controls preload="metadata" style={{ width: '100%', maxHeight: 500, background: '#000', display: 'block', borderRadius: 8, border: '3px solid var(--pop-black)', filter: vintageFilter }}>
+        <div className="scrapbook-tape" style={{ marginTop: 24, border: '2px solid var(--pop-black)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--comic-shadow)', background: 'var(--pop-yellow)', padding: 8 }}>
+          <video controls preload="metadata" style={{ width: '100%', maxHeight: 500, background: '#000', display: 'block', borderRadius: 8, border: '1px solid var(--pop-black)', filter: vintageFilter }}>
             <source src={images[0]} />
           </video>
         </div>
@@ -124,16 +124,16 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
     if (count === 1) {
       return (
-        <div className="scrapbook-tape" onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, background: '#FFF', padding: '12px 12px 40px', border: '4px solid var(--pop-black)', borderRadius: 8, boxShadow: 'var(--comic-shadow)', cursor: 'pointer', userSelect: 'none', transform: 'rotate(-1deg)' }}>
-          <img src={getOptimizedUrl(images[0])} alt={story?.title} style={{ width: '100%', maxHeight: 580, objectFit: 'cover', display: 'block', border: '3px solid var(--pop-black)', filter: vintageFilter }} />
+        <div className="scrapbook-tape" onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, background: '#FFF', padding: '12px 12px 40px', border: '2px solid var(--pop-black)', borderRadius: 8, boxShadow: 'var(--comic-shadow)', cursor: 'pointer', userSelect: 'none', transform: 'rotate(-1deg)' }}>
+          <img src={getOptimizedUrl(images[0])} alt={story?.title} style={{ width: '100%', maxHeight: 580, objectFit: 'cover', display: 'block', border: '1px solid var(--pop-black)', filter: vintageFilter }} />
           <PopAnim />
         </div>
       );
     }
     return (
-      <div className="scrapbook-tape" onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, display: 'grid', gridTemplateColumns: count === 2 ? '1fr 1fr' : '1fr 1fr', gap: 12, background: 'var(--pop-cyan)', padding: 12, borderRadius: 16, border: '4px solid var(--pop-black)', boxShadow: 'var(--comic-shadow)', cursor: 'pointer' }}>
+      <div className="scrapbook-tape" onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, display: 'grid', gridTemplateColumns: count === 2 ? '1fr 1fr' : '1fr 1fr', gap: 12, background: 'var(--pop-cyan)', padding: 12, borderRadius: 16, border: '2px solid var(--pop-black)', boxShadow: 'var(--comic-shadow)', cursor: 'pointer' }}>
         {images.slice(0, count === 2 ? 2 : 1).map((img, i) => (
-          <img key={i} src={getOptimizedUrl(img)} alt={`media-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: count > 2 && i === 0 ? 'span 2' : 'auto', border: '3px solid var(--pop-black)', borderRadius: 8, filter: vintageFilter }} />
+          <img key={i} src={getOptimizedUrl(img)} alt={`media-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: count > 2 && i === 0 ? 'span 2' : 'auto', border: '1px solid var(--pop-black)', borderRadius: 8, filter: vintageFilter }} />
         ))}
         <PopAnim />
       </div>
@@ -154,7 +154,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
     >
       {/* Milestone ribbon */}
       {story.isMilestone && (
-        <div style={{ position: 'absolute', top: -3, right: 30, background: 'var(--pop-yellow)', color: 'var(--pop-black)', padding: '8px 16px', border: 'var(--comic-border)', borderTop: 'none', borderRadius: '0 0 12px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 16, boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)', zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: -3, right: 30, background: 'var(--pop-yellow)', color: 'var(--pop-black)', padding: '8px 16px', border: 'var(--comic-border)', borderTop: 'none', borderRadius: '0 0 12px 12px', fontFamily: "'Playfair Display', serif", fontSize: 16, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)', zIndex: 10 }}>
           ⭐ MILESTONE
         </div>
       )}
@@ -163,15 +163,15 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, marginTop: story.isMilestone ? 24 : 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* Avatar */}
-          <div style={{ width: 56, height: 56, borderRadius: '50%', border: 'var(--comic-border)', background: 'var(--pop-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', border: 'var(--comic-border)', background: 'var(--pop-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>
             {story?.user?.avatar ? (
               <img src={story.user.avatar} alt={story?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
             ) : (
-              <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#FFF' }}>{initials}</span>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#FFF' }}>{initials}</span>
             )}
           </div>
           <div>
-            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: 'var(--pop-black)', letterSpacing: 1 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: 'var(--pop-black)', letterSpacing: 1 }}>
               {story?.user?.name || 'UNKNOWN'}
             </div>
             <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--pop-black)' }}>
@@ -182,7 +182,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
         {/* Delete */}
         {canManage && (
-          <button onClick={() => setShowDeleteModal(true)} style={{ background: 'var(--pop-pink)', border: 'var(--comic-border)', borderRadius: 10, padding: '8px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#FFF', cursor: 'pointer', boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)' }}>
+          <button onClick={() => setShowDeleteModal(true)} style={{ background: 'var(--pop-pink)', border: 'var(--comic-border)', borderRadius: 10, padding: '8px 12px', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#FFF', cursor: 'pointer', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>
             TRASH 🗑️
           </button>
         )}
@@ -190,14 +190,14 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
       <div>
         {/* Title */}
-        <h3 style={{ margin: '0 0 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: 'var(--pop-orange)', WebkitTextStroke: '1px var(--pop-black)', textShadow: '2px 2px 0px var(--pop-black)' }}>
+        <h3 style={{ margin: '0 0 12px', fontFamily: "'Playfair Display', serif", fontSize: 32, color: 'var(--pop-orange)', WebkitTextStroke: '1px var(--pop-black)', textShadow: '2px 2px 0px var(--pop-black)' }}>
           {story.title}
         </h3>
 
         {/* Tone badge */}
         {story.tone && story.tone !== 'Original' && (
           <div style={{ marginBottom: 16 }}>
-            <span style={{ display: 'inline-block', padding: '4px 12px', border: 'var(--comic-border)', borderRadius: 8, background: 'var(--pop-yellow)', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: 'var(--pop-black)', boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)' }}>
+            <span style={{ display: 'inline-block', padding: '4px 12px', border: 'var(--comic-border)', borderRadius: 8, background: 'var(--pop-yellow)', fontFamily: "'Playfair Display', serif", fontSize: 14, color: 'var(--pop-black)', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>
               {story.tone.replace(/[^\w\s-]/gi, '').trim()} FLAVOR
             </span>
           </div>
@@ -214,9 +214,9 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
       {/* ── ACTION BAR ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, flexWrap: 'wrap' }}>
-        <ComicActionBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe} icon={isLikedByMe ? '❤️' : '🤍'} label={story?.likes?.length || 0} color="#FF3D81" />
-        <ComicActionBtn onClick={() => setShowComments(!showComments)} active={showComments} icon="💬" label={story?.comments?.length || 0} color="#3FE0FF" />
-        <ComicActionBtn onClick={handleShare} active={isShared} icon="🚀" label="SHARE" color="#FFD23F" />
+        <ComicActionBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe} icon={isLikedByMe ? '❤️' : '🤍'} label={story?.likes?.length || 0} color="#632020" />
+        <ComicActionBtn onClick={() => setShowComments(!showComments)} active={showComments} icon="💬" label={story?.comments?.length || 0} color="#8B5A2B" />
+        <ComicActionBtn onClick={handleShare} active={isShared} icon="🚀" label="SHARE" color="#D4B895" />
         {images.length > 0 && (
           <div style={{ marginLeft: 'auto' }}>
             <ComicActionBtn onClick={handleDownloadImage} active={isDownloaded} icon="📸" label="POSTER" color="#00C853" />
@@ -245,23 +245,23 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
             >
               <motion.div
                 initial={{ scale: 0.8, rotate: -5 }} animate={{ scale: 1, rotate: 2 }} exit={{ scale: 0.8, rotate: 5 }} transition={{ type: 'spring', bounce: 0.6 }}
-                style={{ background: '#FFF', border: '6px solid #171719', borderRadius: 24, width: '100%', maxWidth: 400, padding: '40px', position: 'relative', boxShadow: '16px 16px 0px 0px #171719', textAlign: 'center' }}
+                style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, width: '100%', maxWidth: 400, padding: '40px', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', textAlign: 'center' }}
               >
                 <div style={{ fontSize: 60, marginBottom: 16 }}>💣</div>
-                <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 36, color: '#FF3D81', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719', marginBottom: 16 }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#632020', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723', marginBottom: 16 }}>
                   TRASH IT?
                 </div>
-                <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#171719', marginBottom: 32 }}>
+                <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', marginBottom: 32 }}>
                   Once it's gone, it's gone forever. Are you sure?
                 </p>
 
                 <div style={{ display: 'flex', gap: 16 }}>
                   <motion.button onClick={() => setShowDeleteModal(false)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                    style={{ flex: 1, padding: '14px', background: '#FFF', border: '4px solid #171719', borderRadius: 12, color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+                    style={{ flex: 1, padding: '14px', background: '#FFF', border: '2px solid #3E2723', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
                     NOPE
                   </motion.button>
                   <motion.button onClick={confirmDelete} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                    style={{ flex: 1, padding: '14px', background: '#FF3D81', border: '4px solid #171719', borderRadius: 12, color: '#FFF', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+                    style={{ flex: 1, padding: '14px', background: '#632020', border: '2px solid #3E2723', borderRadius: 12, color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
                     DO IT!
                   </motion.button>
                 </div>

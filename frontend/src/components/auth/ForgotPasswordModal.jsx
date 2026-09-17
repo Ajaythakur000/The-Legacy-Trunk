@@ -12,9 +12,9 @@ function ComicRuneBox({ index, value, inputRef, onChange, onKeyDown, onPaste }) 
       onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
       style={{
         width: 48, height: 56, fontSize: 28, fontWeight: 700, textAlign: 'center',
-        fontFamily: "'Luckiest Guy',cursive", background: '#FFF', border: '3px solid #171719', borderRadius: 8,
-        color: '#171719', outline: 'none',
-        boxShadow: focused ? '4px 4px 0px 0px #FF3D81' : '4px 4px 0px 0px #171719',
+        fontFamily: "'Playfair Display', serif", background: '#FFF', border: '1px solid #3E2723', borderRadius: 8,
+        color: '#3E2723', outline: 'none',
+        boxShadow: focused ? '4px 4px 0px 0px #632020' : '4px 4px 0px 0px #3E2723',
         transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.1s', cursor: 'text',
       }}
     />
@@ -33,9 +33,9 @@ function ComicDarkInput({ type = 'text', placeholder, value, onChange, required,
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         style={{
           width: '100%', padding: `14px ${type === 'password' ? '45px' : '16px'} 14px ${icon ? '44px' : '16px'}`,
-          background: '#FFF', border: '3px solid #171719', borderRadius: '12px', color: '#171719',
+          background: '#FFF', border: '1px solid #3E2723', borderRadius: '12px', color: '#3E2723',
           fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: 16, outline: 'none', boxSizing: 'border-box',
-          boxShadow: focused ? '4px 4px 0px 0px #3FE0FF' : '4px 4px 0px 0px #171719', transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s ease',
+          boxShadow: focused ? '4px 4px 0px 0px #8B5A2B' : '4px 4px 0px 0px #3E2723', transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s ease',
         }}
       />
       {type === 'password' && (
@@ -99,54 +99,54 @@ function ForgotPasswordModal({ onClose }) {
     }
   };
 
-  const iconEmail = <svg viewBox="0 0 24 24" fill="none" stroke="#171719" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="M2 7l10 7 10-7" /></svg>;
-  const iconLock  = <svg viewBox="0 0 24 24" fill="none" stroke="#171719" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>;
+  const iconEmail = <svg viewBox="0 0 24 24" fill="none" stroke="#3E2723" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="3" /><path d="M2 7l10 7 10-7" /></svg>;
+  const iconLock  = <svg viewBox="0 0 24 24" fill="none" stroke="#3E2723" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(255, 246, 229, 0.9)', backgroundImage: 'radial-gradient(#171719 2px, transparent 2.5px)', backgroundSize: '20px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(255, 246, 229, 0.9)', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 }}>
       
       <motion.div initial={{ opacity: 0, scale: 0.8, rotate: 2 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
-        style={{ background: '#FFFFFF', border: '4px solid #171719', borderRadius: 16, padding: '40px', width: '100%', maxWidth: 440, boxShadow: '16px 16px 0px 0px #171719', position: 'relative' }}>
+        style={{ background: '#FFFFFF', border: '2px solid #3E2723', borderRadius: 16, padding: '40px', width: '100%', maxWidth: 440, boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', position: 'relative' }}>
         
-        <button onClick={onClose} style={{ position: 'absolute', top: -15, right: -15, width: 40, height: 40, borderRadius: '50%', background: '#FF3D81', border: '4px solid #171719', color: '#FFF', cursor: 'pointer', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, boxShadow: '4px 4px 0px 0px #171719', zIndex: 10 }}>X</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: -15, right: -15, width: 40, height: 40, borderRadius: '50%', background: '#632020', border: '2px solid #3E2723', color: '#FFF', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', zIndex: 10 }}>X</button>
 
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ width: 60, height: 60, margin: '0 auto 10px', borderRadius: '50%', background: '#FFD23F', border: '4px solid #171719', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 0px 0px #171719', transform: 'rotate(-10deg)' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#171719" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 26, height: 26 }}><circle cx="7.5" cy="15.5" r="5.5" /><path d="M21 2l-9.6 9.6M15.5 7.5l3 3M18 5l2 2" /></svg>
+          <div style={{ width: 60, height: 60, margin: '0 auto 10px', borderRadius: '50%', background: '#D4B895', border: '2px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-10deg)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#3E2723" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 26, height: 26 }}><circle cx="7.5" cy="15.5" r="5.5" /><path d="M21 2l-9.6 9.6M15.5 7.5l3 3M18 5l2 2" /></svg>
           </div>
-          <h2 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#FF7B00', margin: '0 0 10px', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#A0522D', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
             {step === 1 ? 'LOST YOUR KEY?' : 'NEW PASSWORD'}
           </h2>
-          <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#171719' }}>{step === 1 ? 'Enter your email to get a reset code.' : 'Enter the code & pick a new password.'}</p>
+          <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#3E2723' }}>{step === 1 ? 'Enter your email to get a reset code.' : 'Enter the code & pick a new password.'}</p>
         </div>
 
         <AnimatePresence mode="wait">
-          {error && <motion.div key="err" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#FF3D81', border: '3px solid #171719', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Luckiest Guy', cursive", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 0px 0px #171719' }}>ERROR: {error}</motion.div>}
-          {success && <motion.div key="ok" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#00C853', border: '3px solid #171719', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Luckiest Guy', cursive", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 0px 0px #171719' }}>SUCCESS: {success}</motion.div>}
+          {error && <motion.div key="err" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#632020', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>ERROR: {error}</motion.div>}
+          {success && <motion.div key="ok" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#00C853', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>SUCCESS: {success}</motion.div>}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
             <motion.form key="step1" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.3 }} onSubmit={handleRequestOtp}>
               <ComicDarkInput type="email" placeholder="name@family.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={iconEmail} />
-              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 0px 0px #171719' } : {}}
-                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#3FE0FF', border: '4px solid #171719', borderRadius: 12, color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 0px 0px #171719' }}>
+              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
+                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#8B5A2B', border: '2px solid #3E2723', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}>
                 {loading ? 'SENDING...' : 'SEND THE CODE!'}
               </motion.button>
             </motion.form>
           ) : (
             <motion.form key="step2" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.3 }} onSubmit={handleResetPassword}>
-              <label style={{ display: 'block', fontFamily: "'Luckiest Guy', cursive", fontSize: 14, color: '#171719', marginBottom: 6, textAlign: 'center' }}>ENTER CODE</label>
+              <label style={{ display: 'block', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', marginBottom: 6, textAlign: 'center' }}>ENTER CODE</label>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
                 {otpArr.map((val, i) => <ComicRuneBox key={i} index={i} value={val} inputRef={el => (inputRefs.current[i] = el)} onChange={handleOtpChange} onKeyDown={handleOtpKeyDown} onPaste={handleOtpPaste} />)}
               </div>
               <ComicDarkInput type="password" placeholder="New Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required icon={iconLock} />
-              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 0px 0px #171719' } : {}}
-                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#FFD23F', border: '4px solid #171719', borderRadius: 12, color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 0px 0px #171719', marginBottom: 16 }}>
+              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
+                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#D4B895', border: '2px solid #3E2723', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', marginBottom: 16 }}>
                 {loading ? 'SAVING...' : 'CHANGE PASSWORD!'}
               </motion.button>
               <div style={{ textAlign: 'center' }}>
-                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Luckiest Guy', cursive", fontSize: 14, color: '#FF3D81', cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
+                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#632020', cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
               </div>
             </motion.form>
           )}

@@ -22,7 +22,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
       setIsExporting(true);
       
       const loadingToastId = toast.loading("PRINTING THE COMIC BOOK! 🖨️", {
-        style: { borderRadius: '12px', background: '#3FE0FF', color: '#171719', border: '4px solid #171719', fontFamily: "'Luckiest Guy', cursive", fontSize: 16, boxShadow: '4px 4px 0px 0px #171719' },
+        style: { borderRadius: '12px', background: '#8B5A2B', color: '#3E2723', border: '2px solid #3E2723', fontFamily: "'Playfair Display', serif", fontSize: 16, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' },
       });
       
       const prevPosition = printRef.current.style.position;
@@ -43,7 +43,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
           await waitForImages(pageEl);
           
           const canvas = await html2canvas(pageEl, {
-            scale: 2, useCORS: true, logging: false, backgroundColor: '#FFF6E5', 
+            scale: 2, useCORS: true, logging: false, backgroundColor: '#FDFBF7', 
             width: 794, height: 1123, windowWidth: 794, windowHeight: 1123, allowTaint: true,
           });
           
@@ -74,10 +74,10 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
   const pageBase = {
     width: 794, height: 1123,
-    backgroundColor: '#FFD23F', 
-    backgroundImage: 'radial-gradient(#171719 3px, transparent 4px)',
+    backgroundColor: '#D4B895', 
+    backgroundImage: 'radial-gradient(#3E2723 3px, transparent 4px)',
     backgroundSize: '30px 30px',
-    color: '#171719', position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
+    color: '#3E2723', position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
   };
 
   return (
@@ -88,25 +88,25 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
             PAGE 1 — COVER (POP ART)
         ══════════════════════════════════════════════ */}
         <div className="pdf-page" style={pageBase}>
-          <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '12px solid #171719', borderRadius: 24, boxShadow: '24px 24px 0px 0px #FF3D81, 24px 24px 0px 12px #171719', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, textAlign: 'center' }}>
+          <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '12px solid #3E2723', borderRadius: 24, boxShadow: '24px 24px 15px 0px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, textAlign: 'center' }}>
             
-            <div style={{ position: 'absolute', top: -40, left: -40, background: '#3FE0FF', color: '#171719', border: '8px solid #171719', borderRadius: '50%', width: 150, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 36, transform: 'rotate(-15deg)', boxShadow: '12px 12px 0px 0px #171719', zIndex: 10 }}>
+            <div style={{ position: 'absolute', top: -40, left: -40, background: '#8B5A2B', color: '#3E2723', border: '8px solid #3E2723', borderRadius: '50%', width: 150, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 36, transform: 'rotate(-15deg)', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', zIndex: 10 }}>
               VOL. 1
             </div>
 
-            <div style={{ fontSize: 24, fontFamily: popFont, color: '#FF3D81', borderBottom: '6px solid #171719', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 24, fontFamily: popFont, color: '#632020', borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
               THE OFFICIAL ARCHIVE OF
             </div>
 
-            <div style={{ fontSize: 90, color: '#FFD23F', WebkitTextStroke: '4px #171719', textShadow: '12px 12px 0px #171719', fontFamily: popFont, lineHeight: 1, marginBottom: 20, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 90, color: '#D4B895', WebkitTextStroke: '4px #3E2723', textShadow: '12px 12px 0px #3E2723', fontFamily: popFont, lineHeight: 1, marginBottom: 20, textTransform: 'uppercase' }}>
               {circleName || 'OUR FAMILY'}
             </div>
             
-            <div style={{ fontSize: 60, color: '#3FE0FF', WebkitTextStroke: '3px #171719', textShadow: '8px 8px 0px #171719', fontFamily: popFont, lineHeight: 1, marginBottom: 80, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 60, color: '#8B5A2B', WebkitTextStroke: '3px #3E2723', textShadow: '8px 8px 0px #3E2723', fontFamily: popFont, lineHeight: 1, marginBottom: 80, textTransform: 'uppercase' }}>
               COMIC BOOK
             </div>
 
-            <div style={{ marginTop: 'auto', background: '#171719', color: '#FFF', padding: '16px 32px', borderRadius: 16, fontFamily: popFont, fontSize: 24 }}>
+            <div style={{ marginTop: 'auto', background: '#3E2723', color: '#FFF', padding: '16px 32px', borderRadius: 16, fontFamily: popFont, fontSize: 24 }}>
               PRINTED ON: {today}
             </div>
           </div>
@@ -123,42 +123,42 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
           return (
             <div key={node._id} className="pdf-page" style={pageBase}>
-              <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '8px solid #171719', borderRadius: 24, boxShadow: '20px 20px 0px 0px #3FE0FF, 20px 20px 0px 8px #171719', padding: 40, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '8px solid #3E2723', borderRadius: 24, boxShadow: '20px 20px 15px 0px rgba(0,0,0,0.3)', padding: 40, display: 'flex', flexDirection: 'column' }}>
 
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '6px solid #171719', paddingBottom: 20, marginBottom: 40 }}>
-                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#FF3D81', textShadow: '3px 3px 0px #171719', WebkitTextStroke: '1px #171719' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '6px solid #3E2723', paddingBottom: 20, marginBottom: 40 }}>
+                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#632020', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
                     PANEL #{index + 1}
                   </div>
-                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#171719', background: '#FFD23F', padding: '8px 16px', border: '4px solid #171719', borderRadius: 12 }}>
+                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#3E2723', background: '#D4B895', padding: '8px 16px', border: '2px solid #3E2723', borderRadius: 12 }}>
                     {fullDate}
                   </div>
                 </div>
 
                 {/* Title */}
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                  <div style={{ fontSize: 60, fontFamily: popFont, color: '#FFD23F', textShadow: '6px 6px 0px #171719', WebkitTextStroke: '2px #171719', lineHeight: 1.1, textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 60, fontFamily: popFont, color: '#D4B895', textShadow: '6px 6px 0px #3E2723', WebkitTextStroke: '2px #3E2723', lineHeight: 1.1, textTransform: 'uppercase' }}>
                     {node.title}
                   </div>
                 </div>
 
                 {/* Image */}
                 {hasImage && (
-                  <div style={{ margin: '0 auto 40px', background: '#FF3D81', padding: 16, border: '6px solid #171719', boxShadow: '12px 12px 0px 0px #171719', transform: 'rotate(-2deg)' }}>
-                    <img src={node.mediaUrl} alt={node.title} crossOrigin="anonymous" style={{ maxWidth: 600, maxHeight: 400, objectFit: 'cover', display: 'block', border: '4px solid #171719' }} />
+                  <div style={{ margin: '0 auto 40px', background: '#632020', padding: 16, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
+                    <img src={node.mediaUrl} alt={node.title} crossOrigin="anonymous" style={{ maxWidth: 600, maxHeight: 400, objectFit: 'cover', display: 'block', border: '2px solid #3E2723' }} />
                   </div>
                 )}
 
                 {/* Content */}
-                <div style={{ flex: 1, background: '#F5F5F5', border: '4px dashed #171719', borderRadius: 16, padding: 24, position: 'relative' }}>
-                  <p style={{ fontSize: 24, lineHeight: 1.6, color: '#171719', fontFamily: bodyFont, fontWeight: 700, margin: 0, whiteSpace: 'pre-wrap' }}>
+                <div style={{ flex: 1, background: '#F5F5F5', border: '4px dashed #3E2723', borderRadius: 16, padding: 24, position: 'relative' }}>
+                  <p style={{ fontSize: 24, lineHeight: 1.6, color: '#3E2723', fontFamily: bodyFont, fontWeight: 700, margin: 0, whiteSpace: 'pre-wrap' }}>
                     {node.content}
                   </p>
                 </div>
 
                 {/* Footer */}
                 <div style={{ marginTop: 'auto', paddingTop: 20, textAlign: 'center' }}>
-                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#FFF', background: '#171719', display: 'inline-block', padding: '10px 24px', borderRadius: 12 }}>
+                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#FFF', background: '#3E2723', display: 'inline-block', padding: '10px 24px', borderRadius: 12 }}>
                     CAPTURED BY: {addedBy}
                   </div>
                 </div>

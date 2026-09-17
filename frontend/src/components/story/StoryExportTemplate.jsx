@@ -13,9 +13,9 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
 
       const loadingToast = toast.loading('PRINTING POSTER... 🖨️', {
         style: {
-          borderRadius: '12px', background: '#3FE0FF', color: '#171719',
-          border: '4px solid #171719', fontFamily: "'Luckiest Guy', cursive", fontSize: 16,
-          boxShadow: '4px 4px 0px 0px #171719'
+          borderRadius: '12px', background: '#8B5A2B', color: '#3E2723',
+          border: '2px solid #3E2723', fontFamily: "'Playfair Display', serif", fontSize: 16,
+          boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)'
         },
       });
 
@@ -24,7 +24,7 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
         element.style.display = 'flex';
 
         const canvas = await html2canvas(element, {
-          scale: 2, useCORS: true, logging: false, backgroundColor: '#FFD23F',
+          scale: 2, useCORS: true, logging: false, backgroundColor: '#D4B895',
         });
 
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -61,8 +61,8 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
         style={{
           display: 'none', position: 'absolute', left: '-9999px', top: 0,
           width: 800, minHeight: 800,
-          backgroundColor: '#FFD23F',
-          backgroundImage: 'radial-gradient(#171719 3px, transparent 4px)',
+          backgroundColor: '#D4B895',
+          backgroundImage: 'radial-gradient(#3E2723 3px, transparent 4px)',
           backgroundSize: '30px 30px',
           flexDirection: 'column',
           padding: '40px', boxSizing: 'border-box',
@@ -71,40 +71,40 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
       >
         {/* Main white cutout box */}
         <div style={{
-          background: '#FFF', border: '8px solid #171719', borderRadius: 24,
+          background: '#FFF', border: '8px solid #3E2723', borderRadius: 24,
           padding: '40px', display: 'flex', flexDirection: 'column',
-          boxShadow: '24px 24px 0px 0px #3FE0FF, 24px 24px 0px 8px #171719',
+          boxShadow: '24px 24px 15px 0px rgba(0,0,0,0.3)',
           position: 'relative'
         }}>
 
           {/* Comic Burst Decoration */}
-          <div style={{ position: 'absolute', top: -30, right: -30, background: '#FF3D81', color: '#FFF', border: '6px solid #171719', borderRadius: '50%', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 32, transform: 'rotate(15deg)', boxShadow: '8px 8px 0px 0px #171719', zIndex: 10 }}>
+          <div style={{ position: 'absolute', top: -30, right: -30, background: '#632020', color: '#FFF', border: '6px solid #3E2723', borderRadius: '50%', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 32, transform: 'rotate(15deg)', boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)', zIndex: 10 }}>
             POW!
           </div>
 
           {/* ── HEADER ── */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, borderBottom: '6px solid #171719', paddingBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, borderBottom: '6px solid #3E2723', paddingBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ width: 60, height: 60, borderRadius: '50%', border: '4px solid #171719', background: '#3FE0FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, color: '#171719', fontFamily: popFont }}>
+              <div style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid #3E2723', background: '#8B5A2B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, color: '#3E2723', fontFamily: popFont }}>
                 LT
               </div>
               <div>
-                <div style={{ fontSize: 24, color: '#171719', fontFamily: popFont, textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 24, color: '#3E2723', fontFamily: popFont, textTransform: 'uppercase' }}>
                   THE LEGACY TRUNK
                 </div>
-                <div style={{ fontSize: 14, color: '#FF3D81', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <div style={{ fontSize: 14, color: '#632020', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
                   Family Scrapbook
                 </div>
               </div>
             </div>
-            <div style={{ textAlign: 'right', background: '#171719', color: '#FFF', padding: '10px 20px', borderRadius: 12, fontFamily: popFont, fontSize: 18 }}>
+            <div style={{ textAlign: 'right', background: '#3E2723', color: '#FFF', padding: '10px 20px', borderRadius: 12, fontFamily: popFont, fontSize: 18 }}>
               {formattedDate}
             </div>
           </div>
 
           {/* ── TITLE ── */}
           <h1 style={{
-            fontSize: 56, color: '#FFD23F', WebkitTextStroke: '2px #171719', textShadow: '6px 6px 0px #171719',
+            fontSize: 56, color: '#D4B895', WebkitTextStroke: '2px #3E2723', textShadow: '6px 6px 0px #3E2723',
             margin: '0 0 30px', lineHeight: 1.1, textAlign: 'center', fontFamily: popFont, textTransform: 'uppercase'
           }}>
             {story?.title || 'UNTITLED MEMORY'}
@@ -112,21 +112,21 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
 
           {/* ── IMAGE ── */}
           {imageUrl && (story?.mediaType === 'photo' || story?.mediaType === 'image' || !story?.mediaType) && (
-            <div style={{ width: '100%', marginBottom: 40, padding: 16, background: '#FFF', border: '6px solid #171719', boxShadow: '12px 12px 0px 0px #FF3D81', transform: 'rotate(-2deg)' }}>
-              <img src={imageUrl} alt="Memory" crossOrigin="anonymous" style={{ width: '100%', maxHeight: 400, objectFit: 'cover', border: '4px solid #171719', display: 'block' }} />
+            <div style={{ width: '100%', marginBottom: 40, padding: 16, background: '#FFF', border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
+              <img src={imageUrl} alt="Memory" crossOrigin="anonymous" style={{ width: '100%', maxHeight: 400, objectFit: 'cover', border: '2px solid #3E2723', display: 'block' }} />
             </div>
           )}
 
           {/* ── CONTENT ── */}
-          <div style={{ flex: 1, background: '#F5F5F5', border: '4px dashed #171719', borderRadius: 16, padding: 24, marginBottom: 40 }}>
-            <p style={{ fontSize: 24, lineHeight: 1.6, color: '#171719', margin: 0, whiteSpace: 'pre-wrap', fontFamily: bodyFont, fontWeight: 700 }}>
+          <div style={{ flex: 1, background: '#F5F5F5', border: '4px dashed #3E2723', borderRadius: 16, padding: 24, marginBottom: 40 }}>
+            <p style={{ fontSize: 24, lineHeight: 1.6, color: '#3E2723', margin: 0, whiteSpace: 'pre-wrap', fontFamily: bodyFont, fontWeight: 700 }}>
               {story?.content}
             </p>
           </div>
 
           {/* ── SIGNATURE FOOTER ── */}
           <div style={{ textAlign: 'center', paddingTop: 20 }}>
-            <div style={{ fontSize: 24, color: '#171719', fontFamily: popFont, letterSpacing: 2, background: '#3FE0FF', display: 'inline-block', padding: '10px 24px', border: '4px solid #171719', borderRadius: 12, boxShadow: '6px 6px 0px 0px #171719', transform: 'rotate(2deg)' }}>
+            <div style={{ fontSize: 24, color: '#3E2723', fontFamily: popFont, letterSpacing: 2, background: '#8B5A2B', display: 'inline-block', padding: '10px 24px', border: '2px solid #3E2723', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(2deg)' }}>
               POSTED BY: {story?.user?.name || 'A FAMILY MEMBER'}
             </div>
           </div>

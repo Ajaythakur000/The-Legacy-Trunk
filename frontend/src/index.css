@@ -10,7 +10,7 @@
   --pop-black: #2C2A29; /* Softer vintage charcoal/brown instead of harsh black */
   
   /* Vintage Borders & Shadows */
-  --comic-border: 3px solid var(--pop-black); /* Slightly thinner border */
+  --comic-border: 1px solid var(--pop-black); /* Slightly thinner border */
   --comic-shadow: 4px 4px 0px 0px rgba(44, 42, 41, 0.4); /* Softer, slightly transparent shadow */
 }
 
@@ -28,11 +28,11 @@ html, body {
 body {
   margin: 0;
   font-family: 'Baloo 2', sans-serif;
-  background-color: var(--pop-bg);
+  background-color: #8C7053; /* Darker vintage wood/leather */
   /* Textured Paper Grid instead of Comic Dots */
   background-image: 
-    linear-gradient(rgba(44, 42, 41, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(44, 42, 41, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(44, 42, 41, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(44, 42, 41, 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
   background-attachment: fixed;
   color: var(--pop-black);
@@ -71,9 +71,10 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Luckiest Guy', cursive;
-  letter-spacing: 1.5px;
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 1px;
   margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
 a {
@@ -102,7 +103,7 @@ button {
 
 ::-webkit-scrollbar-thumb {
   background: var(--pop-pink);
-  border: 3px solid var(--pop-black);
+  border: 1px solid var(--pop-black);
   border-radius: 0px; 
 }
 
@@ -131,5 +132,5 @@ button {
 
 .sticker-cutout:hover {
   transform: rotate(0deg) scale(1.02);
-  box-shadow: 8px 8px 0px 0px var(--pop-black);
+  box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.3);
 }

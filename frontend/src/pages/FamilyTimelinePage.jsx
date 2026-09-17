@@ -9,9 +9,9 @@ import LegacyBookExporter from '../components/features/LegacyBookExporter';
 function ComicBackground() {
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-      <motion.div animate={{ rotate: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 4 }} style={{ position: 'absolute', top: '10%', left: '5%', fontSize: 60, filter: 'drop-shadow(4px 4px 0px #171719)' }}>🛤️</motion.div>
-      <motion.div animate={{ rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 5 }} style={{ position: 'absolute', top: '40%', right: '8%', fontSize: 50, filter: 'drop-shadow(4px 4px 0px #171719)' }}>📸</motion.div>
-      <motion.div animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 3 }} style={{ position: 'absolute', bottom: '15%', left: '10%', fontSize: 70, filter: 'drop-shadow(4px 4px 0px #171719)' }}>✂️</motion.div>
+      <motion.div animate={{ rotate: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 4 }} style={{ position: 'absolute', top: '10%', left: '5%', fontSize: 60, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>🛤️</motion.div>
+      <motion.div animate={{ rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 5 }} style={{ position: 'absolute', top: '40%', right: '8%', fontSize: 50, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>📸</motion.div>
+      <motion.div animate={{ rotate: [0, 15, 0], scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 3 }} style={{ position: 'absolute', bottom: '15%', left: '10%', fontSize: 70, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>✂️</motion.div>
     </div>
   );
 }
@@ -20,12 +20,12 @@ function ComicBackground() {
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#FFD23F', border: '4px solid #171719', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 0px 0px #171719', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
-        <div style={{ width: '120%', height: '120%', background: '#3FE0FF', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: '2px solid #3E2723', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
+        <div style={{ width: '120%', height: '120%', background: '#8B5A2B', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
-      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: '3px solid #171719', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: '1px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         <img src="/finall_logo.png" alt="LT" style={{ width: '110%', height: '110%', objectFit: 'cover', borderRadius: '50%' }} onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
-        <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 26 }}>LT</div>
+        <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 26 }}>LT</div>
       </div>
       <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
     </div>
@@ -35,7 +35,7 @@ function LogoBadge({ size = 90 }) {
 // ─── LOADING STATE ───────────────────────────────────────────────────────────
 function LoadingState() {
   return (
-    <div style={{ textAlign: 'center', padding: '60px 20px', fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#171719' }}>
+    <div style={{ textAlign: 'center', padding: '60px 20px', fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723' }}>
       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} style={{ display: 'inline-block', marginBottom: 10 }}>⏳</motion.div>
       <div>FLIPPING THROUGH TIME...</div>
     </div>
@@ -45,12 +45,12 @@ function LoadingState() {
 // ─── EMPTY STATE ─────────────────────────────────────────────────────────────
 function EmptyState() {
   return (
-    <div style={{ textAlign: 'center', padding: '60px', background: '#FFF', border: '6px solid #171719', borderRadius: 24, boxShadow: '12px 12px 0px 0px #171719', margin: '40px auto', maxWidth: 600 }}>
+    <div style={{ textAlign: 'center', padding: '60px', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', margin: '40px auto', maxWidth: 600 }}>
       <div style={{ fontSize: 80, marginBottom: 20 }}>👻</div>
-      <h3 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 36, color: '#FF3D81', margin: '0 0 10px', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719' }}>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#632020', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
         IT'S A GHOST TOWN!
       </h3>
-      <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#171719', margin: 0 }}>
+      <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', margin: 0 }}>
         Mark memories as "Family Milestone" to build this timeline!
       </p>
     </div>
@@ -67,21 +67,21 @@ function PopupCard({ node, isEven }) {
   return (
     <div className="popup-card" style={{ position: 'absolute', top: '50%', width: 380, background: '#FFF', border: 'var(--comic-border)', borderRadius: 20, padding: 20, boxShadow: 'var(--comic-shadow)', zIndex: 50, transform: 'translateY(-50%) scale(0.9)', opacity: 0, visibility: 'hidden', pointerEvents: 'none', transition: 'all 0.2s', ...cardSideStyle }}>
       {node.mediaUrl && (
-        <div className="scrapbook-tape" style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 16, border: '3px solid var(--pop-black)', background: 'var(--pop-black)' }}>
+        <div className="scrapbook-tape" style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 16, border: '1px solid var(--pop-black)', background: 'var(--pop-black)' }}>
           {node.mediaType === 'video' ? <video src={node.mediaUrl} controls style={{ width: '100%', maxHeight: 200, display: 'block', filter: vintageFilter }} /> : <img src={node.mediaUrl} alt={node.title} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block', filter: vintageFilter }} />}
         </div>
       )}
-      <div style={{ background: 'var(--pop-yellow)', display: 'inline-block', padding: '4px 12px', border: '2px solid var(--pop-black)', borderRadius: 8, fontFamily: "'Luckiest Guy',cursive", fontSize: 12, color: 'var(--pop-black)', marginBottom: 8, transform: 'rotate(-2deg)' }}>
+      <div style={{ background: 'var(--pop-yellow)', display: 'inline-block', padding: '4px 12px', border: '2px solid var(--pop-black)', borderRadius: 8, fontFamily: "'Playfair Display', serif", fontSize: 12, color: 'var(--pop-black)', marginBottom: 8, transform: 'rotate(-2deg)' }}>
         MILESTONE! ⭐
       </div>
-      <h3 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: 'var(--pop-pink)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', margin: '0 0 8px', lineHeight: 1.1 }}>{node.title}</h3>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: 'var(--pop-pink)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', margin: '0 0 8px', lineHeight: 1.1 }}>{node.title}</h3>
       <p className="handwriting" style={{ marginBottom: 16, maxHeight: 100, overflowY: 'auto' }}>{node.content}</p>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#F5F5F5', padding: '8px 12px', borderRadius: 12, border: '2px dashed var(--pop-black)' }}>
         <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid var(--pop-black)', background: 'var(--pop-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-          {node.user?.avatar ? <img src={node.user.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 16 }}>{node.user?.name?.charAt(0) || 'U'}</span>}
+          {node.user?.avatar ? <img src={node.user.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16 }}>{node.user?.name?.charAt(0) || 'U'}</span>}
         </div>
-        <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: 'var(--pop-black)' }}>By {node.user?.name?.split(' ')[0] || 'Unknown'}</span>
+        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: 'var(--pop-black)' }}>By {node.user?.name?.split(' ')[0] || 'Unknown'}</span>
       </div>
     </div>
   );
@@ -126,12 +126,12 @@ function SnakeRow({ node, index }) {
 
         {/* The Node (Sticker) */}
         <div className="node-outer" style={{ width: 64, height: 64, background: 'var(--pop-pink)', border: 'var(--comic-border)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--comic-shadow)', transition: 'all 0.2s', cursor: 'pointer', zIndex: 10 }}>
-          <div style={{ width: 32, height: 32, background: '#FFF', borderRadius: '50%', border: '3px solid var(--pop-black)' }} />
+          <div style={{ width: 32, height: 32, background: '#FFF', borderRadius: '50%', border: '1px solid var(--pop-black)' }} />
         </div>
 
         {/* Date Badge */}
         <div className="date-badge" style={{ position: 'absolute', background: '#FFF', border: 'var(--comic-border)', borderRadius: 12, padding: '8px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: 'var(--comic-shadow)', transition: 'all 0.2s', zIndex: 5, ...(isEven ? { left: '75px' } : { right: '75px', left: 'auto' }) }}>
-          <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 18, color: 'var(--pop-cyan)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', whiteSpace: 'nowrap' }}>{formattedDate}, {year}</span>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: 'var(--pop-cyan)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', whiteSpace: 'nowrap' }}>{formattedDate}, {year}</span>
           <span className="handwriting" style={{ fontSize: 16, marginTop: '-4px' }}>{formattedTime}</span>
         </div>
 
@@ -177,10 +177,10 @@ function FamilyTimelinePage() {
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
-            style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 'clamp(40px, 6vw, 64px)', color: '#FFD23F', textShadow: '4px 4px 0px #171719', WebkitTextStroke: '2px #171719', margin: '20px 0 10px', letterSpacing: 2 }}>
+            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', margin: '20px 0 10px', letterSpacing: 2 }}>
             MEMORY LANE 🛤️
           </motion.h1>
-          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#171719', margin: '0 auto', background: '#3FE0FF', display: 'inline-block', padding: '4px 16px', border: '3px solid #171719', borderRadius: 8, boxShadow: '4px 4px 0px 0px #171719', transform: 'rotate(-2deg)' }}>
+          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: '#8B5A2B', display: 'inline-block', padding: '4px 16px', border: '1px solid #3E2723', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
             Hover on the dots to unfold the story!
           </p>
         </div>
@@ -208,12 +208,12 @@ function FamilyTimelinePage() {
         <motion.button
           onClick={() => exporterRef.current?.generatePDF()}
           whileHover={{ scale: 1.05, rotate: -2 }}
-          whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 0px 0px #171719' }}
+          whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' }}
           style={{
             position: 'fixed', bottom: 40, right: 40, zIndex: 9999,
-            background: '#00C853', border: '4px solid #171719', borderRadius: 16,
-            padding: '16px 24px', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: '#FFF',
-            cursor: 'pointer', boxShadow: '8px 8px 0px 0px #171719', display: 'flex', alignItems: 'center', gap: 10,
+            background: '#00C853', border: '2px solid #3E2723', borderRadius: 16,
+            padding: '16px 24px', fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#FFF',
+            cursor: 'pointer', boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: 10,
             transition: 'box-shadow 0.1s, transform 0.1s'
           }}
         >
@@ -230,19 +230,19 @@ function FamilyTimelinePage() {
           position: absolute; top: 0; bottom: 0; left: 50%; width: 10px;
           transform: translateX(-50%);
           background: repeating-linear-gradient(-45deg, #D9B382 0 6px, #B8935F 6px 12px);
-          border-left: 3px solid #171719;
-          border-right: 3px solid #171719;
+          border-left: 3px solid #3E2723;
+          border-right: 3px solid #3E2723;
           border-radius: 4px;
           z-index: 1;
         }
 
         .hover-zone:hover { z-index: 100 !important; }
         .hover-zone:hover .node-outer {
-          background: #FFD23F !important;
+          background: #D4B895 !important;
           transform: scale(1.2) rotate(10deg);
         }
         .hover-zone:hover .date-badge {
-          background: #3FE0FF !important;
+          background: #8B5A2B !important;
           transform: scale(1.1) rotate(-5deg);
         }
         .hover-zone:hover .popup-card {

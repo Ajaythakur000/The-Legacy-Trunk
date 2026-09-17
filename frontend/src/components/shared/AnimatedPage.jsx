@@ -44,7 +44,7 @@ function ComicBurst() {
     const particles = Array.from({ length: 25 }, () => {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 15 + 5;
-      const colors = ['#FFD23F', '#FF3D81', '#3FE0FF', '#171719'];
+      const colors = ['#D4B895', '#632020', '#8B5A2B', '#3E2723'];
       return {
         x: canvas.width / 2, y: canvas.height / 2,
         vx: Math.cos(angle) * speed,
@@ -73,7 +73,7 @@ function ComicBurst() {
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rotation * Math.PI) / 180);
         ctx.fillStyle = p.color;
-        ctx.strokeStyle = '#171719';
+        ctx.strokeStyle = '#3E2723';
         ctx.lineWidth = 3;
         ctx.beginPath();
         // Draw a rough star/burst shape
@@ -117,16 +117,16 @@ function ComicWipe() {
       onAnimationComplete={() => setHidden(true)}
       style={{
         position: 'fixed', inset: 0,
-        background: '#FFD23F',
+        background: '#D4B895',
         transformOrigin: 'top',
         pointerEvents: 'none', zIndex: 9998,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        borderBottom: '8px solid #171719'
+        borderBottom: '8px solid #3E2723'
       }}
     >
       <motion.div
         initial={{ scale: 1, rotate: -10 }} animate={{ scale: 0, rotate: 10 }} transition={{ duration: 0.3 }}
-        style={{ fontFamily: "'Luckiest Guy', cursive", fontSize: 80, color: '#FF3D81', textShadow: '4px 4px 0px #171719', WebkitTextStroke: '2px #171719' }}
+        style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#632020', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723' }}
       >
         POW!
       </motion.div>

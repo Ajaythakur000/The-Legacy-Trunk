@@ -44,23 +44,23 @@ function UpcomingEventsWidget({ circleId }) {
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsModalOpen(true)}
         style={{
-          background: '#FFD23F', border: '6px solid #171719', borderRadius: 24, padding: '24px 32px',
-          cursor: 'pointer', position: 'relative', overflow: 'hidden', boxShadow: '12px 12px 0px 0px #171719',
+          background: '#D4B895', border: '6px solid #3E2723', borderRadius: 24, padding: '24px 32px',
+          cursor: 'pointer', position: 'relative', overflow: 'hidden', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', transform: 'rotate(-1deg)'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <motion.span animate={{ rotate: [0, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: 48, filter: 'drop-shadow(4px 4px 0px #171719)' }}>
+          <motion.span animate={{ rotate: [0, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }} style={{ fontSize: 48, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>
             📅
           </motion.span>
           <div>
-            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#171719', letterSpacing: 1 }}>FAMILY CALENDAR</div>
-            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 16, color: '#171719', marginTop: 4 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', letterSpacing: 1 }}>FAMILY CALENDAR</div>
+            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 16, color: '#3E2723', marginTop: 4 }}>
               {loading ? 'CHECKING DATES...' : `${events.length} UPCOMING EVENTS`}
             </div>
           </div>
         </div>
-        <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#171719' }}>→</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723' }}>→</div>
       </motion.div>
     );
   }
@@ -75,14 +75,14 @@ function UpcomingEventsWidget({ circleId }) {
       >
         <motion.div
           initial={{ scale: 0.8, y: 30, rotate: 2 }} animate={{ scale: 1, y: 0, rotate: -1 }} exit={{ scale: 0.8, y: 30, rotate: 2 }} transition={{ type: 'spring', bounce: 0.5 }}
-          style={{ background: '#FFF', border: '6px solid #171719', borderRadius: 24, width: '100%', maxWidth: 500, position: 'relative', boxShadow: '16px 16px 0px 0px #171719', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
+          style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, width: '100%', maxWidth: 500, position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
         >
           {/* Header */}
-          <div style={{ padding: '24px', borderBottom: '6px solid #171719', background: '#3FE0FF', borderTopLeftRadius: 18, borderTopRightRadius: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 28, color: '#171719', textShadow: '2px 2px 0px #FFF' }}>
+          <div style={{ padding: '24px', borderBottom: '6px solid #3E2723', background: '#8B5A2B', borderTopLeftRadius: 18, borderTopRightRadius: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', textShadow: '2px 2px 0px #FFF' }}>
               📅 CALENDAR
             </div>
-            <button onClick={() => setIsModalOpen(false)} style={{ width: 40, height: 40, borderRadius: '50%', border: '4px solid #171719', background: '#FF3D81', color: '#FFF', cursor: 'pointer', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, boxShadow: '4px 4px 0px 0px #171719' }}>
+            <button onClick={() => setIsModalOpen(false)} style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid #3E2723', background: '#632020', color: '#FFF', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
               ✕
             </button>
           </div>
@@ -90,13 +90,13 @@ function UpcomingEventsWidget({ circleId }) {
           {/* Body */}
           <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
             {loading ? (
-              <div style={{ textAlign: 'center', fontFamily: "'Luckiest Guy',cursive", fontSize: 24, padding: '40px 0' }}>LOADING DATES...</div>
+              <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, padding: '40px 0' }}>LOADING DATES...</div>
             ) : error ? (
-              <div style={{ textAlign: 'center', fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#FF3D81', padding: '40px 0' }}>⚠️ {error}</div>
+              <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#632020', padding: '40px 0' }}>⚠️ {error}</div>
             ) : events.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>🦗</div>
-                <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#171719' }}>NOTHING HAPPENING!</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723' }}>NOTHING HAPPENING!</div>
                 <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16 }}>Go make some plans.</p>
               </div>
             ) : (
@@ -107,14 +107,14 @@ function UpcomingEventsWidget({ circleId }) {
                   const isToday = daysLeftStr === 'TODAY!';
                   return (
                     <motion.div key={index} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }}
-                      style={{ display: 'flex', alignItems: 'center', padding: '16px', background: isToday ? '#FFD23F' : '#F5F5F5', border: '4px solid #171719', borderRadius: 16, boxShadow: '4px 4px 0px 0px #171719', transform: isToday ? 'scale(1.02)' : 'none' }}
+                      style={{ display: 'flex', alignItems: 'center', padding: '16px', background: isToday ? '#D4B895' : '#F5F5F5', border: '2px solid #3E2723', borderRadius: 16, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: isToday ? 'scale(1.02)' : 'none' }}
                     >
-                      <div style={{ fontSize: 40, marginRight: 16, filter: 'drop-shadow(2px 2px 0px #171719)' }}>
+                      <div style={{ fontSize: 40, marginRight: 16, filter: 'drop-shadow(2px 2px 0px #3E2723)' }}>
                         {isBirthday ? '🎂' : '⭐'}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: '#171719', marginBottom: 4 }}>{evt.title}</div>
-                        <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 14, color: isToday ? '#FFF' : '#171719', background: isToday ? '#FF3D81' : '#FFF', border: '2px solid #171719', padding: '4px 12px', borderRadius: 8, textTransform: 'uppercase' }}>
+                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#3E2723', marginBottom: 4 }}>{evt.title}</div>
+                        <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 14, color: isToday ? '#FFF' : '#3E2723', background: isToday ? '#632020' : '#FFF', border: '2px solid #3E2723', padding: '4px 12px', borderRadius: 8, textTransform: 'uppercase' }}>
                           {daysLeftStr}
                         </span>
                       </div>

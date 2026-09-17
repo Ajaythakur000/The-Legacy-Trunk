@@ -20,14 +20,14 @@ function FilterTabs({ filters, activeFilter, onFilterChange }) {
             whileTap={{ scale: 0.95 }}
             style={{
               padding: '12px 24px',
-              background: isActive ? '#3FE0FF' : '#FFF',
-              border: '4px solid #171719',
+              background: isActive ? '#8B5A2B' : '#FFF',
+              border: '2px solid #3E2723',
               borderRadius: 12,
-              fontFamily: "'Luckiest Guy', cursive",
+              fontFamily: "'Playfair Display', serif",
               fontSize: 16,
-              color: '#171719',
+              color: '#3E2723',
               cursor: 'pointer',
-              boxShadow: isActive ? '4px 4px 0px 0px #171719' : '2px 2px 0px 0px #171719',
+              boxShadow: isActive ? '4px 4px 0px 0px #3E2723' : '2px 2px 0px 0px #3E2723',
               transform: isActive ? 'translate(-2px, -2px)' : 'none',
               transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s'
             }}
@@ -50,9 +50,9 @@ function EmptyState({ hasStories }) {
       style={{
         textAlign: 'center', padding: '60px 20px',
         background: '#FFF',
-        border: '6px solid #171719',
+        border: '6px solid #3E2723',
         borderRadius: 24,
-        boxShadow: '16px 16px 0px 0px #171719',
+        boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)',
         margin: '20px 0'
       }}
     >
@@ -60,15 +60,15 @@ function EmptyState({ hasStories }) {
         {hasStories ? '🔍' : '📭'}
       </div>
       <h3 style={{
-        fontFamily: "'Luckiest Guy', cursive", color: '#FF3D81',
+        fontFamily: "'Playfair Display', serif", color: '#632020',
         fontSize: 32, margin: '0 0 12px', letterSpacing: 1,
-        textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719'
+        textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723'
       }}>
         {hasStories ? 'NOTHING IN THIS PILE!' : 'YOUR SCRAPBOOK IS EMPTY!'}
       </h3>
       <p style={{
         fontFamily: "'Baloo 2', sans-serif", fontWeight: 700,
-        fontSize: 18, color: '#171719', margin: 0
+        fontSize: 18, color: '#3E2723', margin: 0
       }}>
         {hasStories
           ? 'No memories found in this category. Try another filter.'
@@ -180,7 +180,7 @@ function MyStoriesPage() {
         <motion.div 
           animate={{ rotate: [0, -10, 0] }} 
           transition={{ repeat: Infinity, duration: 4 }}
-          style={{ fontSize: 80, display: 'inline-block', filter: 'drop-shadow(4px 4px 0px #171719)', marginBottom: 10 }}
+          style={{ fontSize: 80, display: 'inline-block', filter: 'drop-shadow(4px 4px 0px #3E2723)', marginBottom: 10 }}
         >
           🖼️
         </motion.div>
@@ -188,8 +188,8 @@ function MyStoriesPage() {
         <motion.h1
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
           style={{
-            fontFamily: "'Luckiest Guy', cursive", fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-            color: '#FFD23F', textShadow: '4px 4px 0px #171719', WebkitTextStroke: '2px #171719',
+            fontFamily: "'Playfair Display', serif", fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723',
             margin: '0 0 16px', letterSpacing: 2
           }}
         >
@@ -199,9 +199,9 @@ function MyStoriesPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
           style={{
-            display: 'inline-block', background: '#FF3D81', border: '4px solid #171719',
-            borderRadius: 12, padding: '8px 16px', fontFamily: "'Luckiest Guy', cursive",
-            fontSize: 16, color: '#FFF', boxShadow: '4px 4px 0px 0px #171719',
+            display: 'inline-block', background: '#632020', border: '2px solid #3E2723',
+            borderRadius: 12, padding: '8px 16px', fontFamily: "'Playfair Display', serif",
+            fontSize: 16, color: '#FFF', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)',
             transform: 'rotate(2deg)'
           }}
         >

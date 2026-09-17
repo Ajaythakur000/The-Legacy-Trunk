@@ -13,10 +13,10 @@ function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {
   };
 
   return (
-    <div style={{ marginTop: 24, background: '#FFD23F', border: '4px solid #171719', borderRadius: 16, padding: '24px', position: 'relative', boxShadow: 'inset 4px 4px 0px rgba(255,255,255,0.4)' }}>
+    <div style={{ marginTop: 24, background: '#D4B895', border: '2px solid #3E2723', borderRadius: 16, padding: '24px', position: 'relative', boxShadow: 'inset 4px 4px 0px rgba(255,255,255,0.4)' }}>
       
       {/* Title */}
-      <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: '#171719', marginBottom: 16, textTransform: 'uppercase' }}>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#3E2723', marginBottom: 16, textTransform: 'uppercase' }}>
         💬 FAMILY CHATTER
       </div>
 
@@ -30,19 +30,19 @@ function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {
                 <motion.div key={c._id || idx} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}
                   style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                   {/* Mini avatar */}
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #171719', background: '#3FE0FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '2px 2px 0px 0px #171719' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid #3E2723', background: '#8B5A2B', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>
                     {c?.user?.avatar ? (
                       <img src={c.user.avatar} alt={c?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                     ) : (
-                      <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 18, color: '#171719' }}>{initials}</span>
+                      <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#3E2723' }}>{initials}</span>
                     )}
                   </div>
                   {/* Comic Speech Bubble */}
-                  <div style={{ flex: 1, background: '#FFF', border: '3px solid #171719', borderRadius: 16, borderTopLeftRadius: 0, padding: '12px 16px', boxShadow: '4px 4px 0px 0px #171719', position: 'relative' }}>
-                    <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#FF3D81', marginBottom: 4 }}>
+                  <div style={{ flex: 1, background: '#FFF', border: '1px solid #3E2723', borderRadius: 16, borderTopLeftRadius: 0, padding: '12px 16px', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', position: 'relative' }}>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#632020', marginBottom: 4 }}>
                       {c?.user?.name || 'SOMEONE'}
                     </div>
-                    <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#171719', lineHeight: 1.4 }}>
+                    <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#3E2723', lineHeight: 1.4 }}>
                       {c.text}
                     </div>
                   </div>
@@ -62,9 +62,9 @@ function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             style={{ 
               width: '100%', padding: '14px 16px', background: '#FFF', 
-              border: '3px solid #171719', borderRadius: 12, outline: 'none', 
-              color: '#171719', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, 
-              boxSizing: 'border-box', boxShadow: focused ? '6px 6px 0px 0px #3FE0FF' : '4px 4px 0px 0px #171719',
+              border: '1px solid #3E2723', borderRadius: 12, outline: 'none', 
+              color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, 
+              boxSizing: 'border-box', boxShadow: focused ? '6px 6px 0px 0px #8B5A2B' : '4px 4px 0px 0px #3E2723',
               transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s'
             }}
           />
@@ -72,12 +72,12 @@ function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {
 
         <motion.button type="submit" disabled={!text.trim()}
           whileHover={text.trim() ? { scale: 1.05 } : {}}
-          whileTap={text.trim() ? { scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 0px 0px #171719' } : {}}
+          whileTap={text.trim() ? { scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
           style={{
             padding: '14px 20px', background: text.trim() ? '#00C853' : '#ccc',
-            border: '3px solid #171719', borderRadius: 12, color: text.trim() ? '#FFF' : '#171719',
-            fontFamily: "'Luckiest Guy',cursive", fontSize: 16, cursor: text.trim() ? 'pointer' : 'not-allowed',
-            boxShadow: text.trim() ? '4px 4px 0px 0px #171719' : 'none', transition: 'all 0.2s', whiteSpace: 'nowrap'
+            border: '1px solid #3E2723', borderRadius: 12, color: text.trim() ? '#FFF' : '#3E2723',
+            fontFamily: "'Playfair Display', serif", fontSize: 16, cursor: text.trim() ? 'pointer' : 'not-allowed',
+            boxShadow: text.trim() ? '4px 4px 0px 0px #3E2723' : 'none', transition: 'all 0.2s', whiteSpace: 'nowrap'
           }}>
           SEND
         </motion.button>

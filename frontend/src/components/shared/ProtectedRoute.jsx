@@ -9,8 +9,8 @@ function ProtectedRoute({ children }) {
   if (isInitializing) {
     return (
       <div style={{ 
-        background: '#FFF6E5', 
-        backgroundImage: 'radial-gradient(#171719 2px, transparent 2.5px)', 
+        background: '#FDFBF7', 
+        backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', 
         backgroundSize: '20px 20px', 
         height: '100vh', width: '100vw' 
       }} />

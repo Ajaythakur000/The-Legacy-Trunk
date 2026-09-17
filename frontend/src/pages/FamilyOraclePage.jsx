@@ -10,12 +10,12 @@ function ComicButton({ onClick, disabled, loading, children }) {
     <motion.button
       onClick={onClick} disabled={disabled}
       whileHover={!disabled ? { scale: 1.05 } : {}}
-      whileTap={!disabled ? { scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 0px 0px #171719' } : {}}
+      whileTap={!disabled ? { scale: 0.95, x: 2, y: 2, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
       style={{
-        background: disabled ? '#ccc' : '#FFD23F', border: '4px solid #171719',
-        color: '#171719', borderRadius: 12, padding: '12px 24px',
-        fontFamily: "'Luckiest Guy', cursive", fontSize: 18, cursor: disabled ? 'not-allowed' : 'pointer',
-        boxShadow: disabled ? 'none' : '4px 4px 0px 0px #171719', transition: 'box-shadow 0.1s, transform 0.1s'
+        background: disabled ? '#ccc' : '#D4B895', border: '2px solid #3E2723',
+        color: '#3E2723', borderRadius: 12, padding: '12px 24px',
+        fontFamily: "'Playfair Display', serif", fontSize: 18, cursor: disabled ? 'not-allowed' : 'pointer',
+        boxShadow: disabled ? 'none' : '4px 4px 0px 0px #3E2723', transition: 'box-shadow 0.1s, transform 0.1s'
       }}
     >
       {loading ? 'THINKING...' : children}
@@ -37,9 +37,9 @@ function ComicTextarea({ value, onChange, onKeyDown, disabled, maxLength }) {
 
   return (
     <div style={{
-      background: '#FFF', border: '4px solid #171719', borderRadius: 16, padding: '16px',
+      background: '#FFF', border: '2px solid #3E2723', borderRadius: 16, padding: '16px',
       marginBottom: 16, transition: 'all 0.2s',
-      boxShadow: focused ? '8px 8px 0px 0px #3FE0FF' : '6px 6px 0px 0px #171719',
+      boxShadow: focused ? '8px 8px 0px 0px #8B5A2B' : '6px 6px 0px 0px #3E2723',
       transform: focused ? 'translate(-2px, -2px)' : 'none'
     }}>
       <textarea
@@ -49,7 +49,7 @@ function ComicTextarea({ value, onChange, onKeyDown, disabled, maxLength }) {
         placeholder="E.g., What year did uncle Bob break the TV? (Press Enter)"
         style={{
           width: '100%', background: 'transparent', border: 'none', outline: 'none',
-          color: '#171719', fontFamily: "'Baloo 2', sans-serif", fontWeight: 700,
+          color: '#3E2723', fontFamily: "'Baloo 2', sans-serif", fontWeight: 700,
           fontSize: 18, lineHeight: 1.6, resize: 'none', minHeight: 80, maxHeight: 200,
         }}
       />
@@ -91,7 +91,7 @@ function FamilyOraclePage() {
   };
 
   const renderFormattedText = text => {
-    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#FF3D81;">$1</strong>').replace(/\n/g, '<br />');
+    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#632020;">$1</strong>').replace(/\n/g, '<br />');
     const clean = DOMPurify.sanitize(formatted, { ALLOWED_TAGS: ['strong', 'br', 'span'], ALLOWED_ATTR: ['style'] });
     return <span dangerouslySetInnerHTML={{ __html: clean }} />;
   };
@@ -109,30 +109,30 @@ function FamilyOraclePage() {
 
         {/* Title section */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ fontSize: 80, marginBottom: 10, filter: 'drop-shadow(4px 4px 0px #171719)' }}>🤖</div>
-          <h1 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 'clamp(40px, 6vw, 64px)', color: '#3FE0FF', WebkitTextStroke: '2px #171719', textShadow: '4px 4px 0px #171719', margin: '0 0 10px' }}>
+          <div style={{ fontSize: 80, marginBottom: 10, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>🤖</div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#8B5A2B', WebkitTextStroke: '2px #3E2723', textShadow: '4px 4px 0px #3E2723', margin: '0 0 10px' }}>
             AI GURU
           </h1>
-          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#171719', background: '#FFD23F', display: 'inline-block', padding: '4px 16px', border: '3px solid #171719', borderRadius: 8, boxShadow: '4px 4px 0px 0px #171719', transform: 'rotate(-2deg)' }}>
+          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', background: '#D4B895', display: 'inline-block', padding: '4px 16px', border: '1px solid #3E2723', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
             Ask anything about your family history!
           </p>
         </motion.div>
 
         {/* Input card */}
-        <div style={{ width: '100%', background: '#FF3D81', border: '6px solid #171719', borderRadius: 24, padding: 24, boxShadow: '12px 12px 0px 0px #171719', marginBottom: 40 }}>
+        <div style={{ width: '100%', background: '#632020', border: '6px solid #3E2723', borderRadius: 24, padding: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', marginBottom: 40 }}>
           <ComicTextarea value={question} onChange={e => setQuestion(e.target.value)} onKeyDown={handleKeyDown} disabled={loading} maxLength={300} />
 
           <AnimatePresence>
             {error && (
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                style={{ background: '#FFF', border: '3px solid #171719', borderRadius: 12, padding: '12px', marginBottom: 16, fontFamily: "'Luckiest Guy',cursive", color: '#FF3D81', textAlign: 'center', boxShadow: '4px 4px 0px 0px #171719' }}>
+                style={{ background: '#FFF', border: '1px solid #3E2723', borderRadius: 12, padding: '12px', marginBottom: 16, fontFamily: "'Playfair Display', serif", color: '#632020', textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
                 ⚠️ {error}
               </motion.div>
             )}
           </AnimatePresence>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 16, color: '#FFF' }}>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#FFF' }}>
               {question.length} / 300
             </span>
             <ComicButton onClick={askTheOracle} disabled={loading || !question.trim()} loading={loading}>
@@ -146,7 +146,7 @@ function FamilyOraclePage() {
           {loading && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 60, animation: 'spin 2s linear infinite' }}>🧠</div>
-              <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#171719', marginTop: 16 }}>SEARCHING THE NEURAL NET...</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', marginTop: 16 }}>SEARCHING THE NEURAL NET...</div>
               <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
             </motion.div>
           )}
@@ -154,12 +154,12 @@ function FamilyOraclePage() {
           {!loading && answer && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
-              style={{ width: '100%', background: '#FFF', border: '6px solid #171719', borderRadius: 24, padding: '32px', boxShadow: '12px 12px 0px 0px #171719', position: 'relative' }}
+              style={{ width: '100%', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '32px', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', position: 'relative' }}
             >
-              <div style={{ position: 'absolute', top: -20, left: -20, background: '#FFD23F', color: '#171719', padding: '8px 16px', border: '4px solid #171719', borderRadius: 12, fontFamily: "'Luckiest Guy',cursive", fontSize: 20, boxShadow: '4px 4px 0px 0px #171719', transform: 'rotate(-10deg)' }}>
+              <div style={{ position: 'absolute', top: -20, left: -20, background: '#D4B895', color: '#3E2723', padding: '8px 16px', border: '2px solid #3E2723', borderRadius: 12, fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-10deg)' }}>
                 THE GURU SAYS:
               </div>
-              <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 20, lineHeight: 1.6, color: '#171719', margin: '20px 0 0' }}>
+              <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 20, lineHeight: 1.6, color: '#3E2723', margin: '20px 0 0' }}>
                 {renderFormattedText(answer)}
               </p>
             </motion.div>

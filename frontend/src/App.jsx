@@ -50,7 +50,7 @@ function App() {
   const { isInitializing } = useAuth();
 
   if (isInitializing) {
-    return <div style={{ background: '#FFF6E5', minHeight: '100vh', backgroundImage: 'radial-gradient(#171719 2px, transparent 2.5px)', backgroundSize: '20px 20px' }} />;
+    return <div style={{ background: '#FDFBF7', minHeight: '100vh', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px' }} />;
   }
 
   return (
@@ -61,14 +61,14 @@ function App() {
         toastOptions={{
           style: {
             background: '#FFFFFF',
-            color: '#171719',
-            border: '4px solid #171719',
+            color: '#3E2723',
+            border: '2px solid #3E2723',
             borderRadius: '12px',
             padding: '16px 24px',
-            fontFamily: "'Luckiest Guy', cursive",
+            fontFamily: "'Playfair Display', serif",
             fontSize: '16px',
             letterSpacing: '1px',
-            boxShadow: '8px 8px 0px 0px #171719',
+            boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)',
           },
           success: {
             style: { background: '#00C853', color: '#FFF' },
@@ -76,13 +76,13 @@ function App() {
             icon: 'BAM! 💥',
           },
           error: {
-            style: { background: '#FF3D81', color: '#FFF' },
-            iconTheme: { primary: '#FFF', secondary: '#FF3D81' },
+            style: { background: '#632020', color: '#FFF' },
+            iconTheme: { primary: '#FFF', secondary: '#632020' },
             icon: 'OOPS! ⚠️',
           },
           loading: {
-            style: { background: '#3FE0FF', color: '#171719' },
-            iconTheme: { primary: '#171719', secondary: 'transparent' },
+            style: { background: '#8B5A2B', color: '#3E2723' },
+            iconTheme: { primary: '#3E2723', secondary: 'transparent' },
           },
         }}
       />

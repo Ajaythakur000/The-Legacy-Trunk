@@ -56,10 +56,10 @@ export default function StrangersMemoriesFeed() {
 
   if (stories.length === 0) {
     return (
-      <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} style={{ textAlign: 'center', padding: '80px 20px', background: '#FFF', borderRadius: 24, border: '6px solid #171719', boxShadow: '12px 12px 0px 0px #171719' }}>
+      <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} style={{ textAlign: 'center', padding: '80px 20px', background: '#FFF', borderRadius: 24, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)' }}>
         <span style={{ fontSize: 80, display: 'block', marginBottom: 20 }}>🌍</span>
-        <h3 style={{ fontFamily: "'Luckiest Guy',cursive", color: '#FF7B00', margin: '0 0 10px', fontSize: 32 }}>THE WORLD IS QUIET</h3>
-        <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, color: '#171719', margin: 0, fontSize: 18 }}>Nobody has shared a global memory yet.</p>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#A0522D', margin: '0 0 10px', fontSize: 32 }}>THE WORLD IS QUIET</h3>
+        <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, color: '#3E2723', margin: 0, fontSize: 18 }}>Nobody has shared a global memory yet.</p>
       </motion.div>
     );
   }

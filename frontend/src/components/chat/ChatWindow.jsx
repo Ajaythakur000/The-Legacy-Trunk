@@ -22,8 +22,8 @@ function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '20px 0' }}>
             {[1, 2, 3].map(i => (
               <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexDirection: i % 2 === 0 ? 'row-reverse' : 'row' }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#FFF', border: '3px solid #171719' }} />
-                <div style={{ width: `${150 + i * 60}px`, height: 60, borderRadius: 16, background: '#FFF', border: '4px solid #171719', boxShadow: '4px 4px 0px 0px #171719' }} />
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#FFF', border: '1px solid #3E2723' }} />
+                <div style={{ width: `${150 + i * 60}px`, height: 60, borderRadius: 16, background: '#FFF', border: '2px solid #3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }} />
               </div>
             ))}
           </div>
@@ -33,13 +33,13 @@ function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, 
         {!loading && messages.length === 0 && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}
-            style={{ textAlign: 'center', margin: '80px auto', background: '#FFF', border: '6px solid #171719', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 0px 0px #171719', maxWidth: 450 }}
+            style={{ textAlign: 'center', margin: '80px auto', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', maxWidth: 450 }}
           >
             <div style={{ fontSize: 60, marginBottom: 16 }}>🦗</div>
-            <h3 style={{ margin: '0 0 10px', fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#3FE0FF', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719' }}>
+            <h3 style={{ margin: '0 0 10px', fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#8B5A2B', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
               CRICKETS CHIRPING!
             </h3>
-            <p style={{ margin: 0, fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#171719' }}>
+            <p style={{ margin: 0, fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723' }}>
               No one has said anything yet. Be the first to start the gossip!
             </p>
           </motion.div>

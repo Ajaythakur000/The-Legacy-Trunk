@@ -10,7 +10,7 @@ function StorySkeleton() {
           position: relative;
           overflow: hidden;
           background: #E0E0E0;
-          border: 3px solid #171719;
+          border: 1px solid #3E2723;
         }
         .sk-bone::after {
           content: ''; position: absolute; inset: 0;
@@ -23,11 +23,11 @@ function StorySkeleton() {
       <div style={{
         position: 'relative',
         background: '#FFFFFF',
-        border: '4px solid #171719',
+        border: '2px solid #3E2723',
         borderRadius: 16,
         padding: 24,
         overflow: 'hidden',
-        boxShadow: '8px 8px 0px 0px #171719',
+        boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)',
         marginBottom: 24,
       }}>
         {/* ── Header row: avatar + name lines ── */}

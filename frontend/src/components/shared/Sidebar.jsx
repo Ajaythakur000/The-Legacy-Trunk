@@ -36,17 +36,17 @@ export function LogoRing({ size = 48 }) {
     <div style={{ position:'relative', width:size, height:size, flexShrink:0 }}>
       <div style={{
         position:'absolute', inset:0,
-        background:'#FFD23F', border:'3px solid #171719',
+        background:'#D4B895', border: '1px solid #3E2723',
         borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center',
-        boxShadow:'4px 4px 0px 0px #171719', overflow:'hidden',
+        boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', overflow:'hidden',
         animation:'ltComicSpin 10s linear infinite'
       }}>
         {/* Jagged sunburst overlay inside */}
-        <div style={{ width: '120%', height: '120%', background: '#3FE0FF', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
+        <div style={{ width: '120%', height: '120%', background: '#8B5A2B', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
       <div style={{
         position:'absolute', top:4, left:4, right:4, bottom:4, borderRadius:'50%',
-        background:'#FFF', border:'3px solid #171719', overflow:'hidden',
+        background:'#FFF', border: '1px solid #3E2723', overflow:'hidden',
         display:'flex', alignItems:'center', justifyContent:'center',
       }}>
         <img src="/finall_logo.png" alt="LT"
@@ -55,8 +55,8 @@ export function LogoRing({ size = 48 }) {
         />
         <div style={{
           display:'none', alignItems:'center', justifyContent:'center',
-          width:'100%', height:'100%', color:'#171719',
-          fontFamily:"'Luckiest Guy',cursive", fontSize:size*0.4,
+          width:'100%', height:'100%', color:'#3E2723',
+          fontFamily:"'Playfair Display', serif", fontSize:size*0.4,
         }}>LT</div>
       </div>
     </div>
@@ -140,7 +140,7 @@ export default function Sidebar({
         <div className="lt-sb-foot">
           <button className="lt-sb-logout" onClick={handleLogout}>
             <div className="lt-sb-icon-wrap" style={{ border: 'none', background: 'transparent' }}>🚪</div>
-            <span className="lt-sb-lbl" style={{ color: '#FF3D81' }}>
+            <span className="lt-sb-lbl" style={{ color: '#632020' }}>
               LEAVE THE VAULT
             </span>
           </button>
@@ -156,7 +156,7 @@ export default function Sidebar({
         /* ── Sidebar shell ── */
         .lt-sidebar {
           position: relative; height: 100%; width: 280px; flex-shrink: 0;
-          background: #FFF; border-right: 4px solid #171719;
+          background: #FFF; border-right: 4px solid #3E2723;
           display: flex; flex-direction: column; z-index: 50; overflow-x: hidden;
           transition: width 0.2s, transform 0.2s;
           box-shadow: 8px 0px 0px rgba(23,23,25,0.1);
@@ -179,92 +179,92 @@ export default function Sidebar({
         .lt-sb-overlay.lt-sb-vis { display: block; }
 
         /* ── Head: user card ── */
-        .lt-sb-head { padding: 20px 16px 16px; border-bottom: 4px solid #171719; background: #FFD23F; }
+        .lt-sb-head { padding: 20px 16px 16px; border-bottom: 4px solid #3E2723; background: #D4B895; }
 
         .lt-sb-user {
           display: flex; align-items: center; gap: 12px; padding: 12px 14px;
           border-radius: 12px; cursor: pointer; background: #FFF;
-          border: 3px solid #171719; box-shadow: 4px 4px 0px 0px #171719;
+          border: 1px solid #3E2723; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);
           transition: all 0.1s ease;
         }
-        .lt-sb-user:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px 0px #171719; }
-        .lt-sb-user:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px 0px #171719; }
+        .lt-sb-user:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.3); }
+        .lt-sb-user:active { transform: translate(2px, 2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.3); }
 
         .lt-sb-avatar {
           width: 42px; height: 42px; border-radius: 50%;
-          background: #3FE0FF; border: 3px solid #171719;
+          background: #8B5A2B; border: 1px solid #3E2723;
           display: flex; align-items: center; justify-content: center;
-          font-family: 'Luckiest Guy', cursive; font-size: 18px; color: #171719; flex-shrink: 0;
+          font-family: 'Playfair Display', serif; font-size: 18px; color: #3E2723; flex-shrink: 0;
         }
 
         .lt-sb-uname {
-          font-family: 'Luckiest Guy', cursive; font-size: 16px; color: #171719;
+          font-family: 'Playfair Display', serif; font-size: 16px; color: #3E2723;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .lt-sb-urole {
           font-family: 'Baloo 2', sans-serif; font-size: 11px; font-weight: 800;
-          color: #171719; margin-top: 2px;
+          color: #3E2723; margin-top: 2px;
         }
         .lt-sb-online {
           width: 14px; height: 14px; border-radius: 50%;
-          background: #00C853; border: 2px solid #171719; flex-shrink: 0;
+          background: #00C853; border: 2px solid #3E2723; flex-shrink: 0;
         }
 
         /* ── Section headers ── */
         .lt-sb-section { padding: 16px 16px 4px; }
         .lt-sec-label {
-          font-family: 'Luckiest Guy', cursive; font-size: 14px;
-          color: #171719; padding: 0 8px; margin-bottom: 12px;
+          font-family: 'Playfair Display', serif; font-size: 14px;
+          color: #3E2723; padding: 0 8px; margin-bottom: 12px;
         }
 
         /* ── Nav link ── */
         .lt-sb-link {
           display: flex; align-items: center; gap: 12px; padding: 10px 12px;
           border-radius: 12px; text-decoration: none; margin-bottom: 8px;
-          background: #FFF; border: 3px solid transparent; color: #171719;
+          background: #FFF; border: 1px solid transparent; color: #3E2723;
           transition: all 0.1s ease;
         }
         .lt-sb-link:hover {
-          background: #3FE0FF; border: 3px solid #171719;
-          box-shadow: 4px 4px 0px 0px #171719; transform: translate(-2px, -2px);
+          background: #8B5A2B; border: 1px solid #3E2723;
+          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3); transform: translate(-2px, -2px);
         }
         .lt-sb-link.lt-active {
-          background: #FFD23F; border: 3px solid #171719;
-          box-shadow: 4px 4px 0px 0px #171719; animation: ltActivePop 0.3s ease;
+          background: #D4B895; border: 1px solid #3E2723;
+          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3); animation: ltActivePop 0.3s ease;
         }
 
         /* ── Icon wrap ── */
         .lt-sb-icon-wrap {
           width: 38px; height: 38px; border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
-          background: #FFF; border: 3px solid #171719; flex-shrink: 0;
+          background: #FFF; border: 1px solid #3E2723; flex-shrink: 0;
         }
         .lt-sb-icon { font-size: 18px; line-height: 1; }
 
         /* ── Link labels ── */
-        .lt-sb-lbl { font-family: 'Luckiest Guy', cursive; font-size: 15px; color: #171719; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lt-sb-sublbl { font-family: 'Baloo 2', sans-serif; font-size: 11px; font-weight: 700; color: #171719; margin-top: 2px; }
+        .lt-sb-lbl { font-family: 'Playfair Display', serif; font-size: 15px; color: #3E2723; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lt-sb-sublbl { font-family: 'Baloo 2', sans-serif; font-size: 11px; font-weight: 700; color: #3E2723; margin-top: 2px; }
 
         /* ── Mobile search ── */
         .lt-mobile-search { display: none; padding: 16px 16px 4px; }
         @media (max-width: 768px) { .lt-mobile-search { display: block; } }
         .lt-mobile-search-form {
           display: flex; align-items: center; gap: 8px; background: #FFF;
-          border: 3px solid #171719; border-radius: 12px; padding: 10px 14px;
-          box-shadow: 4px 4px 0px 0px #171719;
+          border: 1px solid #3E2723; border-radius: 12px; padding: 10px 14px;
+          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);
         }
-        .lt-mobile-search-input { background: transparent; border: none; outline: none; color: #171719; font-family: 'Luckiest Guy', cursive; font-size: 14px; width: 100%; }
-        .lt-mobile-search-input::placeholder { color: rgba(23,23,25,0.4); font-family: 'Luckiest Guy', cursive; }
+        .lt-mobile-search-input { background: transparent; border: none; outline: none; color: #3E2723; font-family: 'Playfair Display', serif; font-size: 14px; width: 100%; }
+        .lt-mobile-search-input::placeholder { color: rgba(23,23,25,0.4); font-family: 'Playfair Display', serif; }
 
         /* ── Footer ── */
-        .lt-sb-foot { padding: 16px; border-top: 4px solid #171719; background: #3FE0FF; }
+        .lt-sb-foot { padding: 16px; border-top: 4px solid #3E2723; background: #8B5A2B; }
         .lt-sb-logout {
           display: flex; align-items: center; gap: 12px; width: 100%;
           padding: 10px 12px; border-radius: 12px; background: #FFF;
-          border: 3px solid #171719; cursor: pointer; transition: all 0.1s ease;
-          box-shadow: 4px 4px 0px 0px #171719;
+          border: 1px solid #3E2723; cursor: pointer; transition: all 0.1s ease;
+          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);
         }
-        .lt-sb-logout:hover { background: #FF3D81; transform: translate(-2px, -2px); box-shadow: 6px 6px 0px 0px #171719; }
+        .lt-sb-logout:hover { background: #632020; transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.3); }
         .lt-sb-logout:hover .lt-sb-lbl { color: #FFF !important; }
 
       `}</style>

@@ -18,9 +18,9 @@ const getSafeDateString = (dateStr) => {
 function ComicBackground() {
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-      <motion.div animate={{ rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 3 }} style={{ position: 'absolute', top: '15%', left: '10%', fontSize: 60, filter: 'drop-shadow(4px 4px 0px #171719)' }}>👤</motion.div>
-      <motion.div animate={{ rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 4 }} style={{ position: 'absolute', top: '50%', right: '5%', fontSize: 70, filter: 'drop-shadow(4px 4px 0px #171719)' }}>⭐</motion.div>
-      <motion.div animate={{ rotate: [0, 5, 0], scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 5 }} style={{ position: 'absolute', bottom: '20%', left: '8%', fontSize: 50, filter: 'drop-shadow(4px 4px 0px #171719)' }}>🔥</motion.div>
+      <motion.div animate={{ rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 3 }} style={{ position: 'absolute', top: '15%', left: '10%', fontSize: 60, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>👤</motion.div>
+      <motion.div animate={{ rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 4 }} style={{ position: 'absolute', top: '50%', right: '5%', fontSize: 70, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>⭐</motion.div>
+      <motion.div animate={{ rotate: [0, 5, 0], scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 5 }} style={{ position: 'absolute', bottom: '20%', left: '8%', fontSize: 50, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>🔥</motion.div>
     </div>
   );
 }
@@ -29,12 +29,12 @@ function ComicBackground() {
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#FFD23F', border: '4px solid #171719', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 0px 0px #171719', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
-        <div style={{ width: '120%', height: '120%', background: '#3FE0FF', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: '2px solid #3E2723', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
+        <div style={{ width: '120%', height: '120%', background: '#8B5A2B', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
-      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: '3px solid #171719', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: '1px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         <img src="/finall_logo.png" alt="LT" style={{ width: '110%', height: '110%', objectFit: 'cover', borderRadius: '50%' }} onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
-        <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 26 }}>LT</div>
+        <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 26 }}>LT</div>
       </div>
       <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
     </div>
@@ -46,7 +46,7 @@ function ComicInput({ label, type = 'text', name, value, onChange, placeholder, 
   const [focused, setFocused] = useState(false);
   return (
     <div style={{ marginBottom: 16 }}>
-      {label && <label style={{ display: 'block', fontFamily: "'Luckiest Guy', cursive", fontSize: 14, color: '#171719', marginBottom: 6 }}>{label}</label>}
+      {label && <label style={{ display: 'block', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', marginBottom: 6 }}>{label}</label>}
       <div style={{ position: 'relative' }}>
         {icon && (
           <div style={{ position: 'absolute', left: 16, top: Tag === 'input' ? '50%' : 20, transform: Tag === 'input' ? 'translateY(-50%)' : 'none', fontSize: 18, zIndex: 1 }}>
@@ -59,10 +59,10 @@ function ComicInput({ label, type = 'text', name, value, onChange, placeholder, 
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           style={{ 
             width: '100%', padding: icon ? '14px 16px 14px 44px' : '14px 16px', 
-            background: '#FFF', border: '3px solid #171719', borderRadius: 12, 
-            color: '#171719', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, 
+            background: '#FFF', border: '1px solid #3E2723', borderRadius: 12, 
+            color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, 
             outline: 'none', resize: 'vertical', boxSizing: 'border-box',
-            boxShadow: focused ? '6px 6px 0px 0px #3FE0FF' : '4px 4px 0px 0px #171719',
+            boxShadow: focused ? '6px 6px 0px 0px #8B5A2B' : '4px 4px 0px 0px #3E2723',
             transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all .2s'
           }}
         >
@@ -158,10 +158,10 @@ function ProfilePage() {
         <div style={{ textAlign: 'center', padding: '60px 20px 40px' }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
-            style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 'clamp(40px, 6vw, 64px)', color: '#FF3D81', textShadow: '4px 4px 0px #171719', WebkitTextStroke: '2px #171719', letterSpacing: 2, margin: '20px 0 10px' }}>
+            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#632020', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', letterSpacing: 2, margin: '20px 0 10px' }}>
             YOUR PROFILE
           </motion.h1>
-          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#171719', margin: '0 auto', background: '#3FE0FF', display: 'inline-block', padding: '4px 16px', border: '3px solid #171719', borderRadius: 8, boxShadow: '4px 4px 0px 0px #171719', transform: 'rotate(2deg)' }}>
+          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: '#8B5A2B', display: 'inline-block', padding: '4px 16px', border: '1px solid #3E2723', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(2deg)' }}>
             The legend behind the memories
           </p>
         </div>
@@ -169,18 +169,18 @@ function ProfilePage() {
         {/* ── Main Card ── */}
         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.4 }}>
           <div style={{
-              background: '#FFF', border: '6px solid #171719', borderRadius: 24,
+              background: '#FFF', border: '6px solid #3E2723', borderRadius: 24,
               display: 'flex', flexWrap: 'wrap', overflow: 'hidden', marginBottom: 32,
-              boxShadow: '16px 16px 0px 0px #171719',
+              boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)',
             }}
           >
             {/* ── LEFT: Profile ── */}
-            <div style={{ flex: '1 1 360px', padding: '40px', borderRight: '6px solid #171719', position: 'relative', background: '#FFD23F' }}>
+            <div style={{ flex: '1 1 360px', padding: '40px', borderRight: '6px solid #3E2723', position: 'relative', background: '#D4B895' }}>
               <button
                 onClick={() => setIsEditing(true)} title="Edit Profile"
-                style={{ position: 'absolute', top: 20, left: 20, width: 44, height: 44, borderRadius: 12, background: '#FFF', border: '3px solid #171719', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 20, boxShadow: '4px 4px 0px 0px #171719', transition: 'all 0.1s' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-2px,-2px)'; e.currentTarget.style.boxShadow = '6px 6px 0px 0px #171719'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0px 0px #171719'; }}
+                style={{ position: 'absolute', top: 20, left: 20, width: 44, height: 44, borderRadius: 12, background: '#FFF', border: '1px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transition: 'all 0.1s' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-2px,-2px)'; e.currentTarget.style.boxShadow = '6px 6px 0px 0px #3E2723'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '4px 4px 0px 0px #3E2723'; }}
               >
                 ✏️
               </button>
@@ -189,27 +189,27 @@ function ProfilePage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24, marginTop: 20 }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   {user?.avatar ? (
-                    <img src={user.avatar} alt={user.name} style={{ width: 120, height: 120, borderRadius: '50%', border: '4px solid #171719', objectFit: 'cover', boxShadow: '6px 6px 0px 0px #171719', background: '#FFF' }} />
+                    <img src={user.avatar} alt={user.name} style={{ width: 120, height: 120, borderRadius: '50%', border: '2px solid #3E2723', objectFit: 'cover', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', background: '#FFF' }} />
                   ) : (
-                    <div style={{ width: 120, height: 120, borderRadius: '50%', border: '4px solid #171719', background: '#FF3D81', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Luckiest Guy',cursive", fontSize: 48, color: '#FFF', boxShadow: '6px 6px 0px 0px #171719' }}>
+                    <div style={{ width: 120, height: 120, borderRadius: '50%', border: '2px solid #3E2723', background: '#632020', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Playfair Display', serif", fontSize: 48, color: '#FFF', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}>
                       {initials}
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <h2 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#171719', margin: '0 0 4px', letterSpacing: 1 }}>{user?.name}</h2>
-                  <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#171719', margin: '0 0 12px' }}>{user?.email}</p>
-                  <div style={{ display: 'inline-block', padding: '4px 12px', background: '#3FE0FF', border: '3px solid #171719', borderRadius: 8, fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719', boxShadow: '4px 4px 0px 0px #171719' }}>
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723', margin: '0 0 4px', letterSpacing: 1 }}>{user?.name}</h2>
+                  <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#3E2723', margin: '0 0 12px' }}>{user?.email}</p>
+                  <div style={{ display: 'inline-block', padding: '4px 12px', background: '#8B5A2B', border: '1px solid #3E2723', borderRadius: 8, fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
                     {formData.familyRole}
                   </div>
                 </div>
               </div>
 
               {/* Bio */}
-              <div style={{ background: '#FFF', border: '4px dashed #171719', borderRadius: 16, padding: 20, position: 'relative' }}>
+              <div style={{ background: '#FFF', border: '4px dashed #3E2723', borderRadius: 16, padding: 20, position: 'relative' }}>
                 <span style={{ position: 'absolute', top: -15, left: -10, fontSize: 32, transform: 'rotate(-10deg)' }}>💬</span>
-                <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#171719', lineHeight: 1.6 }}>
+                <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', lineHeight: 1.6 }}>
                   {user?.bio || 'Preserving our family legacy, one story at a time.'}
                 </span>
               </div>
@@ -239,15 +239,15 @@ function ProfilePage() {
             >
               <motion.div
                 initial={{ scale: 0.8, rotate: -2 }} animate={{ scale: 1, rotate: 2 }} exit={{ scale: 0.8, rotate: -2 }} transition={{ type: 'spring', bounce: 0.5 }}
-                style={{ background: '#FFD23F', border: '6px solid #171719', borderRadius: 24, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '16px 16px 0px 0px #171719', padding: '40px' }}
+                style={{ background: '#D4B895', border: '6px solid #3E2723', borderRadius: 24, width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', padding: '40px' }}
               >
                 <button
                   onClick={() => setIsEditing(false)}
-                  style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', border: '4px solid #171719', background: '#FF3D81', color: '#FFF', cursor: 'pointer', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, boxShadow: '4px 4px 0px 0px #171719' }}
+                  style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', border: '2px solid #3E2723', background: '#632020', color: '#FFF', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}
                 >✕</button>
 
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                  <h2 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#171719', margin: '0' }}>EDIT PROFILE ✏️</h2>
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723', margin: '0' }}>EDIT PROFILE ✏️</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -255,14 +255,14 @@ function ProfilePage() {
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
                     <div
                       onClick={() => fileInputRef.current.click()}
-                      style={{ width: 120, height: 120, borderRadius: '50%', border: '4px solid #171719', cursor: 'pointer', position: 'relative', overflow: 'hidden', background: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 0px 0px #171719' }}
+                      style={{ width: 120, height: 120, borderRadius: '50%', border: '2px solid #3E2723', cursor: 'pointer', position: 'relative', overflow: 'hidden', background: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}
                     >
                       {imagePreview ? (
                         <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
-                        <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 40, color: '#171719' }}>{initials}</span>
+                        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, color: '#3E2723' }}>{initials}</span>
                       )}
-                      <div style={{ position: 'absolute', bottom: 0, width: '100%', background: '#171719', color: '#FFF', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, textAlign: 'center', padding: '4px 0' }}>CHANGE</div>
+                      <div style={{ position: 'absolute', bottom: 0, width: '100%', background: '#3E2723', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, textAlign: 'center', padding: '4px 0' }}>CHANGE</div>
                     </div>
                     <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} style={{ display: 'none' }} />
                   </div>
@@ -280,10 +280,10 @@ function ProfilePage() {
                   <ComicInput label="BIO" name="bio" value={formData.bio} onChange={handleInputChange} as="textarea" rows={3} maxLength={150} placeholder="Who are you?" />
 
                   <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-                    <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '16px', background: '#FFF', border: '4px solid #171719', borderRadius: 12, color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+                    <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, padding: '16px', background: '#FFF', border: '2px solid #3E2723', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
                       CANCEL
                     </button>
-                    <button type="submit" disabled={loading} style={{ flex: 2, padding: '16px', background: '#00C853', border: '4px solid #171719', borderRadius: 12, color: '#FFF', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+                    <button type="submit" disabled={loading} style={{ flex: 2, padding: '16px', background: '#00C853', border: '2px solid #3E2723', borderRadius: 12, color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
                       {loading ? 'SAVING...' : 'SAVE CHANGES! 💥'}
                     </button>
                   </div>

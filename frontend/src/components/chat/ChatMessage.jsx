@@ -40,7 +40,7 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
   const timeStr = msg?.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
   // Comic colors for chat bubbles
-  const bubbleColor = isMe ? '#FFD23F' : '#FFF';
+  const bubbleColor = isMe ? '#D4B895' : '#FFF';
 
   return (
     <motion.div initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
@@ -51,7 +51,7 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
         
         {/* Avatar */}
         <div style={{ position: 'relative', flexShrink: 0 }}>
-          <img src={avatarUrl} alt="Avatar" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '3px solid #171719', boxShadow: '4px 4px 0px 0px #171719' }} />
+          <img src={avatarUrl} alt="Avatar" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '1px solid #3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }} />
         </div>
 
         {/* Message Column */}
@@ -59,7 +59,7 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
 
           {/* Name Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719' }}>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723' }}>
               {isMe ? 'YOU' : (msg?.senderName || 'FAMILY')}
             </span>
             <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 12, color: 'rgba(23,23,25,0.5)' }}>
@@ -74,7 +74,7 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
             <AnimatePresence>
               {showEmojiPicker && (
                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                  style={{ position: 'absolute', top: -50, [isMe ? 'right' : 'left']: 0, zIndex: 30, background: '#FFF', border: '4px solid #171719', padding: '8px 12px', borderRadius: 20, display: 'flex', gap: 8, boxShadow: '6px 6px 0px 0px #171719' }}>
+                  style={{ position: 'absolute', top: -50, [isMe ? 'right' : 'left']: 0, zIndex: 30, background: '#FFF', border: '2px solid #3E2723', padding: '8px 12px', borderRadius: 20, display: 'flex', gap: 8, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}>
                   {['❤️', '😂', '🔥', '👍', '😢', '✨'].map(emoji => (
                     <span key={emoji} onClick={() => handleReact(emoji)} style={{ cursor: 'pointer', fontSize: 24, transition: 'transform 0.1s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.3)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
                       {emoji}
@@ -89,15 +89,15 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
               style={{
                 padding: (msg?.imageUrl || msg?.audioUrl) ? 6 : '12px 16px',
                 borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                background: bubbleColor, border: '4px solid #171719',
-                color: '#171719', boxShadow: '6px 6px 0px 0px #171719',
+                background: bubbleColor, border: '2px solid #3E2723',
+                color: '#3E2723', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)',
                 fontSize: 18, lineHeight: 1.5, wordBreak: 'break-word', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700,
                 position: 'relative', overflow: 'hidden'
               }}>
               
               {/* Image */}
               {msg?.imageUrl && (
-                <div style={{ position: 'relative', overflow: 'hidden', borderRadius: isMe ? '12px 12px 0 12px' : '12px 12px 12px 0', border: '3px solid #171719' }}>
+                <div style={{ position: 'relative', overflow: 'hidden', borderRadius: isMe ? '12px 12px 0 12px' : '12px 12px 12px 0', border: '1px solid #3E2723' }}>
                   {!imgLoaded && <div style={{ width: 240, height: 160, background: '#F5F5F5' }} />}
                   <img src={msg.imageUrl} alt="Shared" onLoad={() => setImgLoaded(true)} style={{ width: '100%', maxWidth: 280, display: imgLoaded ? 'block' : 'none', objectFit: 'cover' }} />
                 </div>
@@ -105,8 +105,8 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
 
               {/* Audio player */}
               {msg?.audioUrl && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', background: '#FFF', border: '3px solid #171719', borderRadius: 12, margin: 4 }}>
-                  <button onClick={togglePlay} style={{ background: '#FF3D81', border: '3px solid #171719', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#FFF' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', background: '#FFF', border: '1px solid #3E2723', borderRadius: 12, margin: 4 }}>
+                  <button onClick={togglePlay} style={{ background: '#632020', border: '1px solid #3E2723', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#FFF' }}>
                     {isPlaying ? '⏸' : '▶'}
                   </button>
                   <audio ref={audioRef} src={msg.audioUrl} controlsList="nodownload noplaybackrate" style={{ display: 'none' }} />
@@ -121,8 +121,8 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
             <AnimatePresence>
               {showOptions && (
                 <motion.div initial={{ opacity: 0, x: isMe ? 8 : -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: isMe ? 8 : -8 }} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <button onClick={() => setShowEmojiPicker(p => !p)} style={{ width: 36, height: 36, borderRadius: '50%', background: '#FFF', border: '3px solid #171719', cursor: 'pointer', fontSize: 16, boxShadow: '2px 2px 0px 0px #171719' }}>😀</button>
-                  {isMe && <button onClick={executeDelete} style={{ width: 36, height: 36, borderRadius: '50%', background: '#FF3D81', border: '3px solid #171719', cursor: 'pointer', fontSize: 16, boxShadow: '2px 2px 0px 0px #171719', color: '#FFF' }}>🗑️</button>}
+                  <button onClick={() => setShowEmojiPicker(p => !p)} style={{ width: 36, height: 36, borderRadius: '50%', background: '#FFF', border: '1px solid #3E2723', cursor: 'pointer', fontSize: 16, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>😀</button>
+                  {isMe && <button onClick={executeDelete} style={{ width: 36, height: 36, borderRadius: '50%', background: '#632020', border: '1px solid #3E2723', cursor: 'pointer', fontSize: 16, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)', color: '#FFF' }}>🗑️</button>}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -132,12 +132,12 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
           {(Object.keys(reactionCounts).length > 0 || (isMe && msg?.seenBy?.length > 1)) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexDirection: isMe ? 'row-reverse' : 'row' }}>
               {Object.entries(reactionCounts).map(([emoji, count]) => (
-                <div key={emoji} onClick={() => handleReact(emoji)} style={{ cursor: 'pointer', background: '#FFF', border: '3px solid #171719', padding: '4px 10px', borderRadius: 16, fontSize: 14, fontWeight: 700, fontFamily: "'Baloo 2',sans-serif", color: '#171719', boxShadow: '2px 2px 0px 0px #171719' }}>
+                <div key={emoji} onClick={() => handleReact(emoji)} style={{ cursor: 'pointer', background: '#FFF', border: '1px solid #3E2723', padding: '4px 10px', borderRadius: 16, fontSize: 14, fontWeight: 700, fontFamily: "'Baloo 2',sans-serif", color: '#3E2723', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>
                   {emoji} {count > 1 && count}
                 </div>
               ))}
               {isMe && msg?.seenBy?.length > 1 && (
-                <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 12, color: '#00C853' }}>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 12, color: '#00C853' }}>
                   ✓✓ SEEN BY {msg.seenBy.length - 1}
                 </span>
               )}

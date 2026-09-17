@@ -73,7 +73,7 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
     <div style={{
       position: 'fixed', inset: 0,
       background: 'rgba(255, 246, 229, 0.9)',
-      backgroundImage: 'radial-gradient(#171719 2px, transparent 2.5px)',
+      backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)',
       backgroundSize: '20px 20px',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 1000, padding: 20,
@@ -84,11 +84,11 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
         transition={{ type: 'spring', bounce: 0.5 }}
         style={{
           background: '#FFFFFF',
-          border: '4px solid #171719',
+          border: '2px solid #3E2723',
           borderRadius: 16,
           padding: '40px',
           width: '100%', maxWidth: 440,
-          boxShadow: '16px 16px 0px 0px #171719',
+          boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)',
           position: 'relative'
         }}
       >
@@ -97,21 +97,21 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
           style={{
             position: 'absolute', top: -15, right: -15,
             width: 40, height: 40, borderRadius: '50%',
-            background: '#FFD23F', border: '4px solid #171719',
-            color: '#171719', cursor: 'pointer', fontFamily: "'Luckiest Guy',cursive", fontSize: 20,
-            boxShadow: '4px 4px 0px 0px #171719', zIndex: 10,
+            background: '#D4B895', border: '2px solid #3E2723',
+            color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20,
+            boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', zIndex: 10,
           }}
         >
           X
         </button>
 
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: success ? '#00C853' : '#171719', margin: '0 0 10px', textShadow: '2px 2px 0px #FFD23F' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: success ? '#00C853' : '#3E2723', margin: '0 0 10px', textShadow: '2px 2px 0px #D4B895' }}>
             {success ? 'VERIFIED!' : 'ENTER CODE'}
           </h2>
-          <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#171719' }}>
+          <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#3E2723' }}>
             We sent a secret code to <br/>
-            <span style={{ background: '#FF3D81', color: '#FFF', padding: '2px 8px', borderRadius: 4, display: 'inline-block', marginTop: 4 }}>{email}</span>
+            <span style={{ background: '#632020', color: '#FFF', padding: '2px 8px', borderRadius: 4, display: 'inline-block', marginTop: 4 }}>{email}</span>
           </p>
         </div>
 
@@ -119,7 +119,7 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              style={{ background: '#FF3D81', border: '3px solid #171719', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Luckiest Guy', cursive", fontSize: 14, marginBottom: 20, textAlign: 'center', boxShadow: '4px 4px 0px 0px #171719' }}
+              style={{ background: '#632020', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 20, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}
             >
               {error}
             </motion.div>
@@ -140,14 +140,14 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
           <motion.button
             type="submit" disabled={loading || isLocked || success}
             whileHover={!loading && !isLocked && !success ? { scale: 1.02 } : {}}
-            whileTap={!loading && !isLocked && !success ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 0px 0px #171719' } : {}}
+            whileTap={!loading && !isLocked && !success ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
             style={{
               width: '100%', padding: '16px',
-              background: success ? '#00C853' : isLocked ? '#FF3D81' : '#FFD23F',
-              border: '4px solid #171719', borderRadius: 12,
-              color: '#171719', fontFamily: "'Luckiest Guy',cursive", fontSize: 20, letterSpacing: 2,
+              background: success ? '#00C853' : isLocked ? '#632020' : '#D4B895',
+              border: '2px solid #3E2723', borderRadius: 12,
+              color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2,
               cursor: loading || isLocked || success ? 'not-allowed' : 'pointer',
-              boxShadow: '6px 6px 0px 0px #171719',
+              boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)',
             }}
           >
             {loading ? 'CHECKING...' : success ? 'AWESOME!' : isLocked ? 'LOCKED OUT' : 'CONFIRM!'}
@@ -168,11 +168,11 @@ function OtpBox({ index, value, isLocked, success, inputRef, onChange, onKeyDown
       onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
       style={{
         width: 48, height: 56, fontSize: 28, fontWeight: 700, textAlign: 'center',
-        fontFamily: "'Luckiest Guy',cursive",
+        fontFamily: "'Playfair Display', serif",
         background: '#FFF',
-        border: '3px solid #171719', borderRadius: 8,
-        color: success ? '#00C853' : '#171719', outline: 'none',
-        boxShadow: focused ? '4px 4px 0px 0px #3FE0FF' : '4px 4px 0px 0px #171719',
+        border: '1px solid #3E2723', borderRadius: 8,
+        color: success ? '#00C853' : '#3E2723', outline: 'none',
+        boxShadow: focused ? '4px 4px 0px 0px #8B5A2B' : '4px 4px 0px 0px #3E2723',
         transform: focused ? 'translate(-2px, -2px)' : 'none',
         transition: 'all 0.1s',
       }}
