@@ -67,10 +67,10 @@ function ComicBackground() {
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: '2px solid #3E2723', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
-        <div style={{ width: '120%', height: '120%', background: '#8B5A2B', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
+        <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
-      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: '1px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         <img src="/finall_logo.png" alt="LT" style={{ width: '110%', height: '110%', objectFit: 'cover', borderRadius: '50%' }} onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
         <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 26 }}>LT</div>
       </div>
@@ -87,7 +87,7 @@ export default function HomePage() {
 
   const comicTabs = [
     { id: 'family', label: 'FAMILY VAULT', color: '#D4B895' },
-    { id: 'global', label: 'EXPLORE WORLD', color: '#8B5A2B' },
+    { id: 'global', label: 'EXPLORE WORLD', color: '#C89B3C' },
   ];
 
   return (
@@ -106,10 +106,10 @@ export default function HomePage() {
 
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2 }} style={{ marginTop: 24 }}>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 56px)', color: '#632020', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', margin: '0 0 10px', letterSpacing: 2 }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 56px)', color: '#1E352F', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', margin: '0 0 10px', letterSpacing: 2 }}>
                 {activeTab === 'family' ? 'OUR SCRAPBOOK' : 'GLOBAL MEMORIES'}
               </h1>
-              <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: activeTab === 'family' ? '#D4B895' : '#8B5A2B', display: 'inline-block', padding: '4px 16px', border: '1px solid #3E2723', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
+              <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: activeTab === 'family' ? '#D4B895' : '#C89B3C', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
                 {activeTab === 'family' ? 'Inside jokes and embarrassing photos.' : 'See what other families are sharing.'}
               </p>
             </motion.div>
@@ -127,7 +127,7 @@ export default function HomePage() {
                 style={{
                   flex: 1, padding: '16px', borderRadius: 16, cursor: 'pointer',
                   background: isActive ? tab.color : '#FFF',
-                  border: '2px solid #3E2723',
+                  border: 'none',
                   color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20,
                   boxShadow: isActive ? '4px 4px 0px 0px #3E2723' : '2px 2px 0px 0px #3E2723',
                   transform: isActive ? 'translate(-2px, -2px)' : 'none',

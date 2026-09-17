@@ -44,7 +44,7 @@ function ComicBurst() {
     const particles = Array.from({ length: 25 }, () => {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 15 + 5;
-      const colors = ['#D4B895', '#632020', '#8B5A2B', '#3E2723'];
+      const colors = ['#D4B895', '#1E352F', '#C89B3C', '#3E2723'];
       return {
         x: canvas.width / 2, y: canvas.height / 2,
         vx: Math.cos(angle) * speed,
@@ -126,7 +126,7 @@ function ComicWipe() {
     >
       <motion.div
         initial={{ scale: 1, rotate: -10 }} animate={{ scale: 0, rotate: 10 }} transition={{ duration: 0.3 }}
-        style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#632020', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723' }}
+        style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#1E352F', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723' }}
       >
         POW!
       </motion.div>

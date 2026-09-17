@@ -98,9 +98,9 @@ export default function FamilyLedgerFeed() {
   // NEW COMIC UI FOR EMPTY/LOCKED STATES
   if (!activeCircleId) {
     return (
-      <div style={{ textAlign: 'center', background: '#FFF', padding: '40px', borderRadius: 24, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)' }}>
+      <div style={{ textAlign: 'center', background: '#FFF', padding: '40px', borderRadius: 24, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)' }}>
         <span style={{ fontSize: 60, display: 'block', marginBottom: 16 }}>🔐</span>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#632020', margin: '0 0 8px', fontSize: 32 }}>VAULT LOCKED!</h3>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#1E352F', margin: '0 0 8px', fontSize: 32 }}>VAULT LOCKED!</h3>
         <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, color: '#3E2723', margin: 0, fontSize: 18 }}>Select a Family Circle to see the scrapbook.</p>
       </div>
     );
@@ -111,7 +111,7 @@ export default function FamilyLedgerFeed() {
       <AnimatePresence>
         {error && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-            style={{ background: '#632020', padding: '16px', borderRadius: 16, border: '2px solid #3E2723', marginBottom: '24px', fontFamily: "'Playfair Display', serif", color: '#FFF', textAlign: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}>
+            style={{ background: '#1E352F', padding: '16px', borderRadius: 16, border: 'none', marginBottom: '24px', fontFamily: "'Playfair Display', serif", color: '#FFF', textAlign: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)' }}>
             ⚠️ {error}
           </motion.div>
         )}
@@ -122,7 +122,7 @@ export default function FamilyLedgerFeed() {
           <StorySkeleton /><StorySkeleton /><StorySkeleton />
         </div>
       ) : sortedStories.length === 0 ? (
-        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} style={{ textAlign: 'center', padding: '80px 20px', background: '#FFF', borderRadius: 24, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)' }}>
+        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} style={{ textAlign: 'center', padding: '80px 20px', background: '#FFF', borderRadius: 24, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)' }}>
           <span style={{ fontSize: 80, display: 'block', marginBottom: 20 }}>👻</span>
           <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#3E2723', margin: '0 0 10px', fontSize: 32 }}>NOTHING TO SEE HERE!</h3>
           <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, color: '#3E2723', margin: 0, fontSize: 18 }}>Be the first to paste a memory into the scrapbook!</p>

@@ -15,12 +15,12 @@ function FamilyLegacyCard({ familyPoints }) {
     };
     if (points < 5000) return {
       title: '🏛️ LEGENDS', next: 5000,
-      color: '#FFF', bg: '#632020',
+      color: '#FFF', bg: '#1E352F',
       msg: "A solid foundation. Everyone knows you.",
     };
     return {
       title: '👑 ROYALTY', next: 'MAX',
-      color: '#3E2723', bg: '#8B5A2B',
+      color: '#3E2723', bg: '#C89B3C',
       msg: 'The ultimate trendsetters. You made it!',
     };
   };
@@ -37,7 +37,7 @@ function FamilyLegacyCard({ familyPoints }) {
 
       {/* Points number */}
       <motion.div key={familyPoints} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#8B5A2B', lineHeight: 1, textShadow: '6px 6px 0px #3E2723', WebkitTextStroke: '2px #3E2723' }}>
+        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#C89B3C', lineHeight: 1, textShadow: '6px 6px 0px #3E2723', WebkitTextStroke: '2px #3E2723' }}>
           {familyPoints.toLocaleString()}
         </span>
         <span style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 24, fontWeight: 800, color: '#3E2723' }}>
@@ -49,9 +49,9 @@ function FamilyLegacyCard({ familyPoints }) {
       <motion.div whileHover={{ scale: 1.05, rotate: -2 }}
         style={{
           display: 'inline-block', padding: '8px 24px', borderRadius: 12, marginBottom: 24,
-          background: badge.bg, color: badge.color, border: '2px solid #3E2723',
+          background: badge.bg, color: badge.color, border: 'none',
           fontFamily: "'Playfair Display', serif", fontSize: 20,
-          boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', cursor: 'default', transform: 'rotate(2deg)'
+          boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', cursor: 'default', transform: 'rotate(2deg)'
         }}
       >
         {badge.title}
@@ -64,14 +64,14 @@ function FamilyLegacyCard({ familyPoints }) {
 
       {/* Progress section */}
       {badge.next !== 'MAX' ? (
-        <div style={{ background: '#FFF', border: '2px solid #3E2723', borderRadius: 16, padding: 24, boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)' }}>
+        <div style={{ background: '#FFF', border: 'none', borderRadius: 16, padding: 24, boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.45)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723' }}>
             <span>NEXT RANK</span>
             <span>{familyPoints.toLocaleString()} / {badge.next.toLocaleString()}</span>
           </div>
 
           {/* Comic Health Bar */}
-          <div style={{ height: 24, background: '#FFF', borderRadius: 12, border: '2px solid #3E2723', overflow: 'hidden', position: 'relative' }}>
+          <div style={{ height: 24, background: '#FFF', borderRadius: 12, border: 'none', overflow: 'hidden', position: 'relative' }}>
             <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} transition={{ duration: 1, type: 'spring' }}
               style={{ height: '100%', background: '#00C853', borderRight: '4px solid #3E2723' }}
             />
@@ -82,7 +82,7 @@ function FamilyLegacyCard({ familyPoints }) {
           </div>
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '24px', background: '#D4B895', borderRadius: 16, border: '2px solid #3E2723', fontFamily: "'Playfair Display', serif", color: '#3E2723', fontSize: 24, boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
+        <div style={{ textAlign: 'center', padding: '24px', background: '#D4B895', borderRadius: 16, border: 'none', fontFamily: "'Playfair Display', serif", color: '#3E2723', fontSize: 24, boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
           MAX RANK ACHIEVED! 👑
         </div>
       )}

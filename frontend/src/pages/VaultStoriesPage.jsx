@@ -46,7 +46,7 @@ function VaultStoriesPage() {
       {showConfetti && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 99999, pointerEvents: 'none' }}>
           <Confetti width={window.innerWidth} height={window.innerHeight} gravity={0.3} numberOfPieces={400}
-            colors={['#D4B895', '#632020', '#8B5A2B', '#3E2723', '#FFF']} />
+            colors={['#D4B895', '#1E352F', '#C89B3C', '#3E2723', '#FFF']} />
         </div>
       )}
 
@@ -56,20 +56,20 @@ function VaultStoriesPage() {
 
         {/* ── PAGE HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }} style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ width: 100, height: 100, margin: '0 auto 20px', background: '#8B5A2B', border: '2px solid #3E2723', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 50, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-5deg)' }}>
+          <div style={{ width: 100, height: 100, margin: '0 auto 20px', background: '#C89B3C', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 50, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-5deg)' }}>
             📖
           </div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 48, color: '#632020', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', letterSpacing: 2, margin: '0 0 10px' }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 48, color: '#1E352F', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', letterSpacing: 2, margin: '0 0 10px' }}>
             ADD A MEMORY
           </h1>
-          <p style={{ fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 0 20px', background: '#D4B895', display: 'inline-block', padding: '4px 12px', border: '1px solid #3E2723', borderRadius: 8, transform: 'rotate(2deg)', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+          <p style={{ fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 0 20px', background: '#D4B895', display: 'inline-block', padding: '4px 12px', border: 'none', borderRadius: 8, transform: 'rotate(2deg)', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
             Glue it down before you forget it!
           </p>
 
           {activeCircleId && (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', background: '#00C853', border: '1px solid #3E2723', borderRadius: 12, fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#FFF', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', background: '#00C853', border: 'none', borderRadius: 12, fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#FFF', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
                 <span style={{ fontSize: 20 }}>🎯</span> FAMILY SELECTED
               </motion.div>
             </div>
@@ -80,13 +80,13 @@ function VaultStoriesPage() {
         <AnimatePresence>
           {error && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-              style={{ background: '#632020', border: '2px solid #3E2723', borderRadius: 12, padding: '16px', marginBottom: 20, fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#FFF', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', textAlign: 'center' }}>
+              style={{ background: '#1E352F', border: 'none', borderRadius: 12, padding: '16px', marginBottom: 20, fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#FFF', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', textAlign: 'center' }}>
               ⚠️ {error}
             </motion.div>
           )}
           {success && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-              style={{ background: '#00C853', border: '2px solid #3E2723', borderRadius: 12, padding: '16px', marginBottom: 20, fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#FFF', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', textAlign: 'center' }}>
+              style={{ background: '#00C853', border: 'none', borderRadius: 12, padding: '16px', marginBottom: 20, fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#FFF', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', textAlign: 'center' }}>
               ✅ {success}
             </motion.div>
           )}
@@ -94,7 +94,7 @@ function VaultStoriesPage() {
 
         {/* ── NO VAULT ── */}
         {!activeCircleId ? (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '60px 40px', textAlign: 'center', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)' }}>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '60px 40px', textAlign: 'center', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)' }}>
             <div style={{ fontSize: 60, marginBottom: 16 }}>🤷‍♂️</div>
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#A0522D', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>NO FAMILY SELECTED!</h3>
             <p style={{ fontWeight: 700, color: '#3E2723', fontSize: 18, margin: 0 }}>Pick a family circle from the top menu so we know where to paste this.</p>

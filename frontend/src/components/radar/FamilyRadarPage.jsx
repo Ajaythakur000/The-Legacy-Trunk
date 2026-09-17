@@ -24,29 +24,29 @@ const CSS = `
 
   /* HEADER */
   .fr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
-  .fr-page-title { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 48px); color: #632020; margin: 0 0 6px; text-shadow: 4px 4px 0px #3E2723; -webkit-text-stroke: 2px #3E2723; letter-spacing: 2px; }
-  .fr-page-sub { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 18px; color: #3E2723; margin: 0; background: #D4B895; display: inline-block; padding: 4px 16px; border: 1px solid #3E2723; border-radius: 8px; transform: rotate(-2deg); box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3); }
+  .fr-page-title { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 48px); color: #1E352F; margin: 0 0 6px; text-shadow: 4px 4px 0px #3E2723; -webkit-text-stroke: 2px #3E2723; letter-spacing: 2px; }
+  .fr-page-sub { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 18px; color: #3E2723; margin: 0; background: #D4B895; display: inline-block; padding: 4px 16px; border: none; border-radius: 8px; transform: rotate(-2deg); box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
 
   /* GHOST BUTTON */
   .fr-ghost-btn {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 24px;
-    background: #FFF; border: 2px solid #3E2723; border-radius: 12px;
+    background: #FFF; border: none; border-radius: 12px;
     font-family: 'Playfair Display', serif; font-size: 18px;
     color: #3E2723; cursor: pointer; transition: all 0.1s;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);
+    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
-  .fr-ghost-btn.fr-ghost-on { background: #8B5A2B; }
-  .fr-ghost-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.3); }
-  .fr-ghost-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.3); }
+  .fr-ghost-btn.fr-ghost-on { background: #C89B3C; }
+  .fr-ghost-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .fr-ghost-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
 
   /* STATUS BAR */
-  .fr-status-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; padding: 16px 20px; background: #FFF; border: 2px solid #3E2723; border-radius: 16px; flex-wrap: wrap; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.3); }
+  .fr-status-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; padding: 16px 20px; background: #FFF; border: none; border-radius: 16px; flex-wrap: wrap; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); }
   .fr-status-item { display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif; font-size: 16px; color: #3E2723; }
-  .fr-status-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #3E2723; }
+  .fr-status-dot { width: 14px; height: 14px; border-radius: 50%; border: none; }
   .fr-status-dot.fr-sd-online  { background: #00C853; }
   .fr-status-dot.fr-sd-warning { background: #D4B895; }
-  .fr-status-dot.fr-sd-error   { background: #632020; }
+  .fr-status-dot.fr-sd-error   { background: #1E352F; }
 
   /* GRID */
   .fr-grid { display: grid; grid-template-columns: minmax(0,1.5fr) 400px; gap: 32px; margin-bottom: 40px; }
@@ -55,7 +55,7 @@ const CSS = `
   .fr-map-chamber {
     position: relative; border-radius: 24px; overflow: hidden;
     border: 6px solid #3E2723; background: #FFF;
-    box-shadow: 16px 16px 15px 0px rgba(0,0,0,0.3);
+    box-shadow: 16px 16px 15px 0px rgba(0,0,0,0.45);
   }
   .fr-map-inner { height: 600px; position: relative; }
   
@@ -69,25 +69,25 @@ const CSS = `
     position: absolute; top: 20px; left: 20px;
     z-index: 30; pointer-events: none;
     font-family: 'Playfair Display', serif; font-size: 24px; color: #FFF;
-    background: #632020; padding: 8px 16px; border: 2px solid #3E2723; border-radius: 12px;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3); transform: rotate(-3deg);
+    background: #1E352F; padding: 8px 16px; border: none; border-radius: 12px;
+    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); transform: rotate(-3deg);
   }
   .fr-coords-hud {
     position: absolute; bottom: 20px; left: 20px; z-index: 30; pointer-events: none;
     font-family: 'Playfair Display', serif; font-size: 14px; color: #3E2723;
-    background: #FFF; padding: 10px 16px; border: 2px solid #3E2723; border-radius: 12px;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);
+    background: #FFF; padding: 10px 16px; border: none; border-radius: 12px;
+    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
   .fr-member-hud {
     position: absolute; bottom: 20px; right: 20px; z-index: 30; pointer-events: none;
     display: flex; align-items: center; gap: 8px;
     font-family: 'Playfair Display', serif; font-size: 16px; color: #3E2723;
-    background: #D4B895; padding: 10px 16px; border: 2px solid #3E2723; border-radius: 12px;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);
+    background: #D4B895; padding: 10px 16px; border: none; border-radius: 12px;
+    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
 
   /* PANEL */
-  .fr-panel { display: flex; flex-direction: column; background: #8B5A2B; border: 6px solid #3E2723; border-radius: 24px; overflow: hidden; box-shadow: 16px 16px 15px 0px rgba(0,0,0,0.3); position: relative; }
+  .fr-panel { display: flex; flex-direction: column; background: #C89B3C; border: 6px solid #3E2723; border-radius: 24px; overflow: hidden; box-shadow: 16px 16px 15px 0px rgba(0,0,0,0.45); position: relative; }
   .fr-panel-header { padding: 24px; border-bottom: 6px solid #3E2723; display: flex; align-items: center; justify-content: space-between; background: #FFF; }
   .fr-panel-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #3E2723; }
   .fr-panel-body { flex: 1; overflow-y: auto; padding: 20px; max-height: 520px; }
@@ -96,11 +96,11 @@ const CSS = `
 
   /* MEMBER CARD */
   .fr-member-card {
-    padding: 16px; background: #FFF; border: 2px solid #3E2723;
+    padding: 16px; background: #FFF; border: none;
     border-radius: 16px; margin-bottom: 16px; transition: all 0.1s; position: relative;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);
+    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
-  .fr-member-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.3); }
+  .fr-member-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
   .fr-member-card.fr-me { background: #D4B895; }
   .fr-member-card.fr-ghost-card { opacity: 0.6; }
   .fr-member-card-top { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
@@ -111,8 +111,8 @@ const CSS = `
     width: 48px; height: 48px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Playfair Display', serif; font-size: 24px; color: #FFF;
-    background: #632020;
-    border: 1px solid #3E2723;
+    background: #1E352F;
+    border: none;
     overflow: hidden;
   }
   .fr-orb.fr-orb-ghost { background: #c084fc; }
@@ -122,16 +122,16 @@ const CSS = `
   .fr-member-name { font-family: 'Playfair Display', serif; font-size: 18px; color: #3E2723; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .fr-member-role { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 14px; color: rgba(23,23,25,0.7); }
   .fr-member-stats { display: flex; gap: 8px; flex-wrap: wrap; }
-  .fr-chip { display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #FFF; border: 1px solid #3E2723; border-radius: 8px; font-family: 'Playfair Display', serif; font-size: 12px; color: #3E2723; }
+  .fr-chip { display: flex; align-items: center; gap: 6px; padding: 4px 10px; background: #FFF; border: none; border-radius: 8px; font-family: 'Playfair Display', serif; font-size: 12px; color: #3E2723; }
   .fr-chip.fr-chip-on  { background: #00C853; color: #FFF; }
   .fr-chip.fr-chip-gh  { background: #c084fc; color: #FFF; }
 
   .fr-empty { padding: 40px; text-align: center; font-family: 'Playfair Display', serif; font-size: 24px; color: #3E2723; }
-  .fr-error-bar { padding: 16px; margin-bottom: 24px; background: #632020; border: 2px solid #3E2723; border-radius: 12px; color: #FFF; font-family: 'Playfair Display', serif; font-size: 18px; display: flex; alignItems: center; gap: 12px; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3); }
+  .fr-error-bar { padding: 16px; margin-bottom: 24px; background: #1E352F; border: none; border-radius: 12px; color: #FFF; font-family: 'Playfair Display', serif; font-size: 18px; display: flex; alignItems: center; gap: 12px; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
 
   /* LEAFLET POPUP OVERRIDE */
-  .fr-root .leaflet-popup-content-wrapper { background: #FFF !important; border: 2px solid #3E2723 !important; border-radius: 16px !important; padding: 0 !important; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.3); }
-  .fr-root .leaflet-popup-tip { background: #FFF !important; border: 2px solid #3E2723 !important; }
+  .fr-root .leaflet-popup-content-wrapper { background: #FFF !important; border: none !important; border-radius: 16px !important; padding: 0 !important; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); }
+  .fr-root .leaflet-popup-tip { background: #FFF !important; border: none !important; }
   .fr-root .leaflet-popup-content { margin: 0 !important; }
 
   @media (max-width: 900px) { .fr-grid{grid-template-columns: 1fr;} .fr-map-inner{height: 400px;} }
@@ -140,12 +140,12 @@ const CSS = `
 // ── Leaflet icons (Comic Style) ───────────────────────────────────────────────
 const myIcon = () => L.divIcon({
   className: '', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20],
-  html: `<div style="width:40px;height:40px;border-radius:50%;background:#D4B895;border: 2px solid #3E2723;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display', serif;font-size:18px;color:#3E2723;box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);transform:rotate(-5deg);">ME</div>`,
+  html: `<div style="width:40px;height:40px;border-radius:50%;background:#D4B895;border: none;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display', serif;font-size:18px;color:#3E2723;box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);transform:rotate(-5deg);">ME</div>`,
 });
 
 const otherIcon = (init='?', online=false) => L.divIcon({
   className: '', iconSize: [36, 36], iconAnchor: [18, 18], popupAnchor: [0, -18],
-  html: `<div style="width:36px;height:36px;border-radius:50%;background:${online ? '#8B5A2B' : '#FFF'};border: 2px solid #3E2723;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display', serif;font-size:16px;color:#3E2723;box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.3);">${init}</div>`,
+  html: `<div style="width:36px;height:36px;border-radius:50%;background:${online ? '#C89B3C' : '#FFF'};border: none;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display', serif;font-size:16px;color:#3E2723;box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);">${init}</div>`,
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -162,12 +162,12 @@ function TouchpadPanHandler() {
 function PopupContent({ name, isMe, isOnline, isGhost, distance, time }) {
   return (
     <div style={{ padding: '16px', minWidth: 180, textAlign: 'center' }}>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#632020', marginBottom: 8 }}>{name}{isMe ? ' (YOU)' : ''}</div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#1E352F', marginBottom: 8 }}>{name}{isMe ? ' (YOU)' : ''}</div>
       {isGhost ? (
         <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#3E2723' }}>👻 Ghost Mode</div>
       ) : (
         <>
-          <div style={{ display: 'inline-block', padding: '4px 10px', background: isOnline ? '#00C853' : '#F5F5F5', border: '1px solid #3E2723', borderRadius: 8, fontFamily: "'Playfair Display', serif", fontSize: 14, color: isOnline ? '#FFF' : '#3E2723', marginBottom: 8 }}>
+          <div style={{ display: 'inline-block', padding: '4px 10px', background: isOnline ? '#00C853' : '#F5F5F5', border: 'none', borderRadius: 8, fontFamily: "'Playfair Display', serif", fontSize: 14, color: isOnline ? '#FFF' : '#3E2723', marginBottom: 8 }}>
             {isOnline ? 'ACTIVE' : `SEEN: ${time}`}
           </div>
           {distance && distance !== '--' && <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 14, color: '#3E2723' }}>📍 {distance} AWAY</div>}
@@ -308,7 +308,7 @@ function FamilyRadarPage() {
                 {myLocation&&!isGhostModeOn&&(
                   <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
                   <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color:'#D4B895',fillColor:'#D4B895',fillOpacity:0.2,weight:2}}/>
-                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color:'#632020',fillColor:'#632020',fillOpacity:0.05,weight:1,dashArray:'4 8'}}/></>
+                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color:'#1E352F',fillColor:'#1E352F',fillOpacity:0.05,weight:1,dashArray:'4 8'}}/></>
                 )}
                 {visibleMembers.map(m=>(
                   <Marker key={m._id} icon={otherIcon(init(m.name),m.isOnline)} position={[m.latitude,m.longitude]}>
@@ -348,7 +348,7 @@ function FamilyRadarPage() {
                       <div className={`fr-orb${m.isGhostModeOn?' fr-orb-ghost':m.isOnline?'':''}`}>{init(m.name)}</div>
                     </div>
                     <div className="fr-member-info"><div className="fr-member-name">{m.name}</div><div className="fr-member-role">{m.isGhostModeOn?'Hiding':m.isOnline?'Active':`Last seen ${timeAgo(m.updatedAt)}`}</div></div>
-                    <div style={{fontFamily:"'Playfair Display', serif",fontSize:14,color:'#632020'}}>{getDist(m)}</div>
+                    <div style={{fontFamily:"'Playfair Display', serif",fontSize:14,color:'#1E352F'}}>{getDist(m)}</div>
                   </div>
                   <div className="fr-member-stats">
                     {m.isGhostModeOn?<span className="fr-chip fr-chip-gh">👻 Hidden</span>:m.isOnline?<span className="fr-chip fr-chip-on">Active</span>:<span className="fr-chip">Offline</span>}

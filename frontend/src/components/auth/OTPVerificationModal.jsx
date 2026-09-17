@@ -83,11 +83,11 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
         transition={{ type: 'spring', bounce: 0.5 }}
         style={{
           background: '#FFFFFF',
-          border: '2px solid #3E2723',
+          border: 'none',
           borderRadius: 16,
           padding: '40px',
           width: '100%', maxWidth: 440,
-          boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)',
+          boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)',
           position: 'relative'
         }}
       >
@@ -96,9 +96,9 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
           style={{
             position: 'absolute', top: -15, right: -15,
             width: 40, height: 40, borderRadius: '50%',
-            background: '#D4B895', border: '2px solid #3E2723',
+            background: '#D4B895', border: 'none',
             color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20,
-            boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', zIndex: 10,
+            boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', zIndex: 10,
           }}
         >
           X
@@ -110,7 +110,7 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
           </h2>
           <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#3E2723' }}>
             We sent a secret code to <br/>
-            <span style={{ background: '#632020', color: '#FFF', padding: '2px 8px', borderRadius: 4, display: 'inline-block', marginTop: 4 }}>{email}</span>
+            <span style={{ background: '#1E352F', color: '#FFF', padding: '2px 8px', borderRadius: 4, display: 'inline-block', marginTop: 4 }}>{email}</span>
           </p>
         </div>
 
@@ -118,7 +118,7 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              style={{ background: '#632020', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 20, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}
+              style={{ background: '#1E352F', border: 'none', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 20, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}
             >
               {error}
             </motion.div>
@@ -139,14 +139,14 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
           <motion.button
             type="submit" disabled={loading || isLocked || success}
             whileHover={!loading && !isLocked && !success ? { scale: 1.02 } : {}}
-            whileTap={!loading && !isLocked && !success ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
+            whileTap={!loading && !isLocked && !success ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
             style={{
               width: '100%', padding: '16px',
-              background: success ? '#00C853' : isLocked ? '#632020' : '#D4B895',
-              border: '2px solid #3E2723', borderRadius: 12,
+              background: success ? '#00C853' : isLocked ? '#1E352F' : '#D4B895',
+              border: 'none', borderRadius: 12,
               color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2,
               cursor: loading || isLocked || success ? 'not-allowed' : 'pointer',
-              boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)',
+              boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)',
             }}
           >
             {loading ? 'CHECKING...' : success ? 'AWESOME!' : isLocked ? 'LOCKED OUT' : 'CONFIRM!'}
@@ -169,9 +169,9 @@ function OtpBox({ index, value, isLocked, success, inputRef, onChange, onKeyDown
         width: 48, height: 56, fontSize: 28, fontWeight: 700, textAlign: 'center',
         fontFamily: "'Playfair Display', serif",
         background: '#FFF',
-        border: '1px solid #3E2723', borderRadius: 8,
+        border: 'none', borderRadius: 8,
         color: success ? '#00C853' : '#3E2723', outline: 'none',
-        boxShadow: focused ? '4px 4px 0px 0px #8B5A2B' : '4px 4px 0px 0px #3E2723',
+        boxShadow: focused ? '4px 4px 0px 0px #C89B3C' : '4px 4px 0px 0px #3E2723',
         transform: focused ? 'translate(-2px, -2px)' : 'none',
         transition: 'all 0.1s',
       }}

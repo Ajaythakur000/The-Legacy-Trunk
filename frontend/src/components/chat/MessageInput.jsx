@@ -68,7 +68,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
         style={{ 
           width: '100%', maxWidth: shouldExpand ? '860px' : '500px', display: 'flex', gap: 12, alignItems: 'center',
           background: '#FFF', border: '6px solid #3E2723', borderRadius: '40px', padding: '8px 12px 8px 24px',
-          boxShadow: shouldExpand ? '12px 12px 0px 0px #8B5A2B' : '8px 8px 0px 0px #3E2723', transition: 'box-shadow 0.2s'
+          boxShadow: shouldExpand ? '12px 12px 0px 0px #C89B3C' : '8px 8px 0px 0px #3E2723', transition: 'box-shadow 0.2s'
         }}
       >
         <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
@@ -76,7 +76,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
         {/* Attach */}
         <motion.button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUIDisabled}
           whileHover={!isUIDisabled ? { scale: 1.1 } : {}} whileTap={!isUIDisabled ? { scale: 0.9 } : {}}
-          style={{ background: '#D4B895', border: '1px solid #3E2723', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isUIDisabled ? 'not-allowed' : 'pointer', fontSize: 24, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)', flexShrink: 0 }}
+          style={{ background: '#D4B895', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isUIDisabled ? 'not-allowed' : 'pointer', fontSize: 24, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)', flexShrink: 0 }}
         >
           📎
         </motion.button>
@@ -95,7 +95,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
           {!text.trim() && (
             <motion.button type="button" onClick={isRecording ? stopRecording : startRecording} disabled={disabled || uploading}
               initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0 }}
-              style={{ background: isRecording ? '#632020' : '#FFF', border: '1px solid #3E2723', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (disabled || uploading) ? 'not-allowed' : 'pointer', fontSize: 20, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)', flexShrink: 0 }}
+              style={{ background: isRecording ? '#1E352F' : '#FFF', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (disabled || uploading) ? 'not-allowed' : 'pointer', fontSize: 20, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)', flexShrink: 0 }}
             >
               🎙️
             </motion.button>
@@ -104,8 +104,8 @@ function MessageInput({ onSend, onTyping, disabled }) {
 
         {/* Send */}
         <motion.button type="submit" disabled={!canSend}
-          whileHover={canSend ? { scale: 1.1 } : {}} whileTap={canSend ? { scale: 0.9, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
-          style={{ width: 56, height: 56, borderRadius: '50%', background: canSend ? '#00C853' : '#F5F5F5', border: '2px solid #3E2723', cursor: canSend ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: canSend ? '4px 4px 0px 0px #3E2723' : 'none', fontSize: 24, flexShrink: 0 }}
+          whileHover={canSend ? { scale: 1.1 } : {}} whileTap={canSend ? { scale: 0.9, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
+          style={{ width: 56, height: 56, borderRadius: '50%', background: canSend ? '#00C853' : '#F5F5F5', border: 'none', cursor: canSend ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: canSend ? '4px 4px 0px 0px #3E2723' : 'none', fontSize: 24, flexShrink: 0 }}
         >
           {uploading ? '⏳' : '🚀'}
         </motion.button>

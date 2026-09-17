@@ -13,7 +13,7 @@ function StickerLogo() {
         whileHover={{ rotate: -5, scale: 1.05 }}
         style={{
           width: '100%', height: '100%', borderRadius: '50%', background: '#D4B895',
-          border: '2px solid #3E2723', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)',
+          border: 'none', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
           transform: 'rotate(4deg)', transition: 'transform 0.2s ease',
         }}
@@ -23,9 +23,9 @@ function StickerLogo() {
         <div style={{ display: 'none', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 26 }}>LT</div>
       </motion.div>
       <div style={{
-        position: 'absolute', top: -10, left: -20, background: '#8B5A2B', color: '#3E2723',
-        border: '1px solid #3E2723', borderRadius: '8px', padding: '4px 8px',
-        fontFamily: "'Playfair Display', serif", fontSize: 14, transform: 'rotate(-12deg)', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)'
+        position: 'absolute', top: -10, left: -20, background: '#C89B3C', color: '#3E2723',
+        border: 'none', borderRadius: '8px', padding: '4px 8px',
+        fontFamily: "'Playfair Display', serif", fontSize: 14, transform: 'rotate(-12deg)', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)'
       }}>
         NEW!
       </div>
@@ -51,7 +51,7 @@ function ComicInput({ type = 'text', name, placeholder, value, onChange, require
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           style={{
             width: '100%', padding: `14px ${type === 'password' ? '45px' : '16px'} 14px ${icon ? '44px' : '16px'}`,
-            background: '#FFFFFF', border: '1px solid #3E2723', borderRadius: '12px',
+            background: '#FFFFFF', border: 'none', borderRadius: '12px',
             color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: 16, outline: 'none', boxSizing: 'border-box',
             boxShadow: focused ? '6px 6px 0px 0px #D4B895' : '4px 4px 0px 0px #3E2723',
             transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s ease',
@@ -79,7 +79,7 @@ function ComicSelect({ label, name, value, onChange, icon, options }) {
           name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           style={{
             width: '100%', padding: `14px 36px 14px ${icon ? '44px' : '16px'}`,
-            background: '#FFFFFF', border: '1px solid #3E2723', borderRadius: '12px',
+            background: '#FFFFFF', border: 'none', borderRadius: '12px',
             color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: 16, outline: 'none', boxSizing: 'border-box', appearance: 'none', cursor: 'pointer',
             boxShadow: focused ? '6px 6px 0px 0px #D4B895' : '4px 4px 0px 0px #3E2723',
             transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s ease',
@@ -157,7 +157,7 @@ function SignupPage() {
         style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: '480px' }}
         initial={{ scale: 0.8, y: 50, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5, duration: 0.8 }}
       >
-        <div style={{ background: '#FFFFFF', border: '2px solid #3E2723', borderRadius: '16px', padding: '30px 40px', position: 'relative', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)' }}>
+        <div style={{ background: '#FFFFFF', border: 'none', borderRadius: '16px', padding: '30px 40px', position: 'relative', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)' }}>
           
           <StickerLogo />
 
@@ -169,13 +169,13 @@ function SignupPage() {
           <AnimatePresence>
             {inviteToken && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                style={{ background: '#8B5A2B', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', marginBottom: 16, textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+                style={{ background: '#C89B3C', border: 'none', borderRadius: 8, padding: '10px', marginBottom: 16, textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
                 YOU HAVE A SECRET INVITE!
               </motion.div>
             )}
             {error && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                style={{ background: '#632020', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', marginBottom: 16, textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#FFF', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+                style={{ background: '#1E352F', border: 'none', borderRadius: 8, padding: '10px', marginBottom: 16, textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#FFF', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
                 ERROR: {error}
               </motion.div>
             )}
@@ -204,18 +204,18 @@ function SignupPage() {
             </AnimatePresence>
 
             <motion.button type="submit" disabled={isFormLoading}
-              whileHover={!isFormLoading ? { scale: 1.02 } : {}} whileTap={!isFormLoading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
+              whileHover={!isFormLoading ? { scale: 1.02 } : {}} whileTap={!isFormLoading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
               style={{
                 width: '100%', padding: '16px', marginTop: 10,
-                background: isFormLoading ? '#ccc' : '#A0522D', border: '2px solid #3E2723', borderRadius: 12,
+                background: isFormLoading ? '#ccc' : '#A0522D', border: 'none', borderRadius: 12,
                 color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2,
-                cursor: isFormLoading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', transition: 'box-shadow 0.1s, transform 0.1s'
+                cursor: isFormLoading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transition: 'box-shadow 0.1s, transform 0.1s'
               }}>
               {isFormLoading ? 'PACKING BAGS...' : 'JOIN THE FAMILY!'}
             </motion.button>
 
             <p style={{ margin: '20px 0 0', fontWeight: 700, fontSize: 15, color: '#3E2723', textAlign: 'center' }}>
-              Already a member? <Link to="/login" style={{ color: '#632020', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
+              Already a member? <Link to="/login" style={{ color: '#1E352F', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
             </p>
           </form>
         </div>

@@ -15,14 +15,14 @@ function ConfirmModal({ isOpen, onClose, onConfirm, message }) {
   return createPortal(
     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(23,23,25,0.85)', backdropFilter: 'blur(6px)', padding: 20 }}>
       <motion.div initial={{ scale: 0.8, rotate: -2 }} animate={{ scale: 1, rotate: 2 }} exit={{ scale: 0.8, rotate: -2 }} transition={{ type: 'spring', bounce: 0.5 }}
-        style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', maxWidth: '440px', width: '100%', textAlign: 'center', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', background: '#D4B895', border: '2px solid #3E2723', color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>✕</button>
+        style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', maxWidth: '440px', width: '100%', textAlign: 'center', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)' }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', background: '#D4B895', border: 'none', color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>✕</button>
         <div style={{ fontSize: 60, marginBottom: 16 }}>💣</div>
-        <h3 style={{ margin: '0 0 16px', fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#632020', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>ERASE VAULT?</h3>
+        <h3 style={{ margin: '0 0 16px', fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#1E352F', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>ERASE VAULT?</h3>
         <p style={{ margin: '0 0 32px', color: '#3E2723', fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: '18px' }}>{message}</p>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-          <motion.button onClick={onClose} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ flex: 1, background: '#FFF', border: '2px solid #3E2723', color: '#3E2723', padding: '14px 0', borderRadius: '12px', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>NOPE</motion.button>
-          <motion.button onClick={() => { onConfirm(); onClose(); }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ flex: 1, background: '#632020', border: '2px solid #3E2723', color: '#FFF', padding: '14px 0', borderRadius: '12px', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>ERASE IT!</motion.button>
+          <motion.button onClick={onClose} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ flex: 1, background: '#FFF', border: 'none', color: '#3E2723', padding: '14px 0', borderRadius: '12px', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>NOPE</motion.button>
+          <motion.button onClick={() => { onConfirm(); onClose(); }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ flex: 1, background: '#1E352F', border: 'none', color: '#FFF', padding: '14px 0', borderRadius: '12px', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>ERASE IT!</motion.button>
         </div>
       </motion.div>
     </div>,
@@ -144,17 +144,17 @@ function VaultRoomPage() {
       </AnimatePresence>
 
       {/* ── HEADER ── */}
-      <header style={{ position: 'relative', zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 36px', background: '#FFF', borderBottom: '6px solid #3E2723', boxShadow: '0px 8px 15px 0px rgba(0,0,0,0.3)' }}>
+      <header style={{ position: 'relative', zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 36px', background: '#FFF', borderBottom: '6px solid #3E2723', boxShadow: '0px 8px 15px 0px rgba(0,0,0,0.45)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 48, height: 48, borderRadius: '12px', background: '#D4B895', border: '1px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-5deg)' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '12px', background: '#D4B895', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-5deg)' }}>
             <span style={{ fontSize: 24 }}>💬</span>
           </div>
           <div>
-            <h1 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#632020', letterSpacing: 1, textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+            <h1 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#1E352F', letterSpacing: 1, textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
               FAMILY CHAT
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: isConnected ? '#00C853' : '#632020', border: '1px solid #3E2723' }} />
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: isConnected ? '#00C853' : '#1E352F', border: 'none' }} />
               <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723' }}>
                 {isConnected ? 'LIVE' : 'RECONNECTING...'}
               </span>
@@ -165,19 +165,19 @@ function VaultRoomPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           {user?.role === 'admin' && (
             <motion.button onClick={() => setShowClearModal(true)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              style={{ background: '#632020', color: '#FFF', border: '1px solid #3E2723', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+              style={{ background: '#1E352F', color: '#FFF', border: 'none', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
               🗑️ NUKE CHAT
             </motion.button>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#8B5A2B', padding: '6px 16px', border: '1px solid #3E2723', borderRadius: 12, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#C89B3C', padding: '6px 16px', border: 'none', borderRadius: 12, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723' }}>
               {onlineCount} ONLINE
             </span>
             <div style={{ display: 'flex' }}>
               {onlineUsers.slice(0, 4).map((ou, idx) => (
                 <img key={ou.userId} src={ou.avatar || `https://ui-avatars.com/api/?name=${ou.name}&background=FFD23F&color=171719&bold=true`} alt={ou.name} title={ou.name}
-                  style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #3E2723', marginLeft: idx === 0 ? 0 : -10, zIndex: 10 - idx, objectFit: 'cover' }} />
+                  style={{ width: 32, height: 32, borderRadius: '50%', border: 'none', marginLeft: idx === 0 ? 0 : -10, zIndex: 10 - idx, objectFit: 'cover' }} />
               ))}
             </div>
           </div>
@@ -187,7 +187,7 @@ function VaultRoomPage() {
       <AnimatePresence>
         {error && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            style={{ position: 'absolute', top: 80, left: '50%', transform: 'translateX(-50%)', zIndex: 15, background: '#632020', border: '2px solid #3E2723', borderRadius: 12, color: '#FFF', padding: '12px 24px', fontFamily: "'Playfair Display', serif", fontSize: 16, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}>
+            style={{ position: 'absolute', top: 80, left: '50%', transform: 'translateX(-50%)', zIndex: 15, background: '#1E352F', border: 'none', borderRadius: 12, color: '#FFF', padding: '12px 24px', fontFamily: "'Playfair Display', serif", fontSize: 16, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)' }}>
             ⚠️ {error}
           </motion.div>
         )}

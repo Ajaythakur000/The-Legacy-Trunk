@@ -13,9 +13,9 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
 
       const loadingToast = toast.loading('PRINTING POSTER... 🖨️', {
         style: {
-          borderRadius: '12px', background: '#8B5A2B', color: '#3E2723',
-          border: '2px solid #3E2723', fontFamily: "'Playfair Display', serif", fontSize: 16,
-          boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)'
+          borderRadius: '12px', background: '#C89B3C', color: '#3E2723',
+          border: 'none', fontFamily: "'Playfair Display', serif", fontSize: 16,
+          boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)'
         },
       });
 
@@ -73,26 +73,26 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
         <div style={{
           background: '#FFF', border: '8px solid #3E2723', borderRadius: 24,
           padding: '40px', display: 'flex', flexDirection: 'column',
-          boxShadow: '24px 24px 15px 0px rgba(0,0,0,0.3)',
+          boxShadow: '24px 24px 15px 0px rgba(0,0,0,0.45)',
           position: 'relative'
         }}>
 
           {/* Comic Burst Decoration */}
-          <div style={{ position: 'absolute', top: -30, right: -30, background: '#632020', color: '#FFF', border: '6px solid #3E2723', borderRadius: '50%', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 32, transform: 'rotate(15deg)', boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)', zIndex: 10 }}>
+          <div style={{ position: 'absolute', top: -30, right: -30, background: '#1E352F', color: '#FFF', border: '6px solid #3E2723', borderRadius: '50%', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 32, transform: 'rotate(15deg)', boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.45)', zIndex: 10 }}>
             POW!
           </div>
 
           {/* ── HEADER ── */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, borderBottom: '6px solid #3E2723', paddingBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ width: 60, height: 60, borderRadius: '50%', border: '2px solid #3E2723', background: '#8B5A2B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, color: '#3E2723', fontFamily: popFont }}>
+              <div style={{ width: 60, height: 60, borderRadius: '50%', border: 'none', background: '#C89B3C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, color: '#3E2723', fontFamily: popFont }}>
                 LT
               </div>
               <div>
                 <div style={{ fontSize: 24, color: '#3E2723', fontFamily: popFont, textTransform: 'uppercase' }}>
                   THE LEGACY TRUNK
                 </div>
-                <div style={{ fontSize: 14, color: '#632020', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <div style={{ fontSize: 14, color: '#1E352F', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
                   Family Scrapbook
                 </div>
               </div>
@@ -112,8 +112,8 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
 
           {/* ── IMAGE ── */}
           {imageUrl && (story?.mediaType === 'photo' || story?.mediaType === 'image' || !story?.mediaType) && (
-            <div style={{ width: '100%', marginBottom: 40, padding: 16, background: '#FFF', border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
-              <img src={imageUrl} alt="Memory" crossOrigin="anonymous" style={{ width: '100%', maxHeight: 400, objectFit: 'cover', border: '2px solid #3E2723', display: 'block' }} />
+            <div style={{ width: '100%', marginBottom: 40, padding: 16, background: '#FFF', border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
+              <img src={imageUrl} alt="Memory" crossOrigin="anonymous" style={{ width: '100%', maxHeight: 400, objectFit: 'cover', border: 'none', display: 'block' }} />
             </div>
           )}
 
@@ -126,7 +126,7 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
 
           {/* ── SIGNATURE FOOTER ── */}
           <div style={{ textAlign: 'center', paddingTop: 20 }}>
-            <div style={{ fontSize: 24, color: '#3E2723', fontFamily: popFont, letterSpacing: 2, background: '#8B5A2B', display: 'inline-block', padding: '10px 24px', border: '2px solid #3E2723', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(2deg)' }}>
+            <div style={{ fontSize: 24, color: '#3E2723', fontFamily: popFont, letterSpacing: 2, background: '#C89B3C', display: 'inline-block', padding: '10px 24px', border: 'none', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(2deg)' }}>
               POSTED BY: {story?.user?.name || 'A FAMILY MEMBER'}
             </div>
           </div>

@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 // ── NEW POP-ART FRAMES ──
 const FRAMES = [
   { id: 'none', label: 'None', sub: 'Raw cuts', swatch: { border: '3px dashed #3E2723', background: '#FFF' }, style: {} },
-  { id: 'comic', label: 'Heavy Ink', sub: 'Comic book', swatch: { border: '2px solid #3E2723', background: '#FFF' }, style: { border: '12px solid #3E2723', padding: '6px', background: '#FFF' } },
-  { id: 'polaroid', label: 'Polaroid', sub: 'Classic', swatch: { border: '2px solid #3E2723', background: '#FFF', paddingBottom: 8 }, style: { background: '#FFF', padding: '16px 16px 60px', border: '2px solid #3E2723' } },
-  { id: 'popyellow', label: 'Pop Yellow', sub: 'Loud', swatch: { border: '1px solid #3E2723', background: '#D4B895' }, style: { background: '#D4B895', padding: '16px', border: '8px solid #3E2723' } },
-  { id: 'poppink', label: 'Bubblegum', sub: 'Vivid pink', swatch: { border: '1px solid #3E2723', background: '#632020' }, style: { background: '#632020', padding: '16px', border: '8px solid #3E2723' } },
-  { id: 'cyan', label: 'Electric Blue', sub: 'Cyan blast', swatch: { border: '1px solid #3E2723', background: '#8B5A2B' }, style: { background: '#8B5A2B', padding: '16px', border: '8px solid #3E2723' } },
+  { id: 'comic', label: 'Heavy Ink', sub: 'Comic book', swatch: { border: 'none', background: '#FFF' }, style: { border: '12px solid #3E2723', padding: '6px', background: '#FFF' } },
+  { id: 'polaroid', label: 'Polaroid', sub: 'Classic', swatch: { border: 'none', background: '#FFF', paddingBottom: 8 }, style: { background: '#FFF', padding: '16px 16px 60px', border: 'none' } },
+  { id: 'popyellow', label: 'Pop Yellow', sub: 'Loud', swatch: { border: 'none', background: '#D4B895' }, style: { background: '#D4B895', padding: '16px', border: '8px solid #3E2723' } },
+  { id: 'poppink', label: 'Bubblegum', sub: 'Vivid pink', swatch: { border: 'none', background: '#1E352F' }, style: { background: '#1E352F', padding: '16px', border: '8px solid #3E2723' } },
+  { id: 'cyan', label: 'Electric Blue', sub: 'Cyan blast', swatch: { border: 'none', background: '#C89B3C' }, style: { background: '#C89B3C', padding: '16px', border: '8px solid #3E2723' } },
 ];
 
 const FILTERS = [
@@ -35,7 +35,7 @@ const SliderRow = ({ label, value, min, max, unit = '', onChange }) => (
       <span>{label}</span>
       <span>{value}{unit}</span>
     </div>
-    <input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))} style={{ width: '100%', accentColor: '#632020' }} />
+    <input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))} style={{ width: '100%', accentColor: '#1E352F' }} />
   </div>
 );
 
@@ -81,7 +81,7 @@ function ImageSlot({ src, onRemove, filterCss, borderRadius, frameActive }) {
     return () => container.removeEventListener('wheel', handleWheel);
   }, [clampTransform]);
 
-  const btnStyle = { background: '#FFF', border: '1px solid #3E2723', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#3E2723', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' };
+  const btnStyle = { background: '#FFF', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#3E2723', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)' };
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', borderRadius: frameActive ? 0 : borderRadius, cursor: 'grab', background: '#FFF' }} onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
@@ -93,7 +93,7 @@ function ImageSlot({ src, onRemove, filterCss, borderRadius, frameActive }) {
         <button onMouseDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); setTransform(t => { const s = Math.max(0.5, t.scale - 0.15); const c = clampTransform(t.x, t.y, s); return {x:c.x, y:c.y, scale:s} }); }} style={btnStyle}>-</button>
       </div>
 
-      <button className="hide-on-capture" onMouseDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, background: '#632020', color: '#FFF', border: '1px solid #3E2723', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontFamily: "'Playfair Display', serif", boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>✕</button>
+      <button className="hide-on-capture" onMouseDown={e => e.stopPropagation()} onClick={e => { e.stopPropagation(); onRemove(); }} style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, background: '#1E352F', color: '#FFF', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontFamily: "'Playfair Display', serif", boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)' }}>✕</button>
     </div>
   );
 }
@@ -153,7 +153,7 @@ function CollageMaker({ onClose, onSave }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '85vh', maxHeight: '750px', width: '100%', background: '#FFF', overflow: 'hidden' }}>
       
       {/* ── HEADER ── */}
-      <div style={{ padding: '24px', borderBottom: '6px solid #3E2723', background: '#8B5A2B', flexShrink: 0 }}>
+      <div style={{ padding: '24px', borderBottom: '6px solid #3E2723', background: '#C89B3C', flexShrink: 0 }}>
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723', textShadow: '2px 2px 0px #FFF' }}>COLLAGE MAKER ✂️</div>
       </div>
 
@@ -162,7 +162,7 @@ function CollageMaker({ onClose, onSave }) {
         
         {/* PREVIEW */}
         <div style={{ flex: '1.5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#FDFBF7', backgroundImage: 'none',  }}>
-          <div style={{ width: '100%', maxWidth: 400, aspectRatio: '1/1', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', border: '2px solid #3E2723', background: '#FFF' }}>
+          <div style={{ width: '100%', maxWidth: 400, aspectRatio: '1/1', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', border: 'none', background: '#FFF' }}>
             <div ref={collageRef} style={{ width: '100%', height: '100%', transition: 'all .2s ease', ...currentFrame.style }}>
               <div style={{ width: '100%', height: '100%', display: 'grid', gap: `${gridGap}px`, gridTemplateColumns: currentLayout.cols, gridTemplateRows: currentLayout.rows, borderRadius: activeFrame === 'none' ? borderRadius : 0, overflow: 'hidden', background: '#3E2723' }}>
                 {Array.from({ length: currentLayout.n }, (_, i) => (
@@ -200,7 +200,7 @@ function CollageMaker({ onClose, onSave }) {
                 {activeTab === 'layout' && (<>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 30 }}>
                     {LAYOUTS.map(l => (
-                      <button key={l.id} onClick={() => setLayout(l.id)} style={{ padding: '12px', borderRadius: 12, border: '1px solid #3E2723', background: layout === l.id ? '#D4B895' : '#FFF', color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 14, boxShadow: layout === l.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: layout === l.id ? 'translate(-2px,-2px)' : 'none' }}>
+                      <button key={l.id} onClick={() => setLayout(l.id)} style={{ padding: '12px', borderRadius: 12, border: 'none', background: layout === l.id ? '#D4B895' : '#FFF', color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 14, boxShadow: layout === l.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: layout === l.id ? 'translate(-2px,-2px)' : 'none' }}>
                         {l.label}
                       </button>
                     ))}
@@ -212,7 +212,7 @@ function CollageMaker({ onClose, onSave }) {
                 {activeTab === 'filters' && (<>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     {FILTERS.map(f => (
-                      <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{ padding: '16px', borderRadius: 12, border: '1px solid #3E2723', background: activeFilter === f.id ? '#8B5A2B' : '#FFF', cursor: 'pointer', boxShadow: activeFilter === f.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: activeFilter === f.id ? 'translate(-2px,-2px)' : 'none' }}>
+                      <button key={f.id} onClick={() => setActiveFilter(f.id)} style={{ padding: '16px', borderRadius: 12, border: 'none', background: activeFilter === f.id ? '#C89B3C' : '#FFF', cursor: 'pointer', boxShadow: activeFilter === f.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: activeFilter === f.id ? 'translate(-2px,-2px)' : 'none' }}>
                         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723' }}>{f.label}</div>
                       </button>
                     ))}
@@ -222,7 +222,7 @@ function CollageMaker({ onClose, onSave }) {
                 {activeTab === 'frames' && (<>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {FRAMES.map(f => (
-                      <button key={f.id} onClick={() => setActiveFrame(f.id)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px', borderRadius: 12, border: '1px solid #3E2723', background: activeFrame === f.id ? '#632020' : '#FFF', cursor: 'pointer', boxShadow: activeFrame === f.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: activeFrame === f.id ? 'translate(-2px,-2px)' : 'none' }}>
+                      <button key={f.id} onClick={() => setActiveFrame(f.id)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px', borderRadius: 12, border: 'none', background: activeFrame === f.id ? '#1E352F' : '#FFF', cursor: 'pointer', boxShadow: activeFrame === f.id ? '4px 4px 0px 0px #3E2723' : 'none', transform: activeFrame === f.id ? 'translate(-2px,-2px)' : 'none' }}>
                         <div style={{ width: 40, height: 40, borderRadius: 8, ...f.swatch }} />
                         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: activeFrame === f.id ? '#FFF' : '#3E2723' }}>{f.label}</div>
                       </button>
@@ -242,8 +242,8 @@ function CollageMaker({ onClose, onSave }) {
 
           {/* ACTIONS */}
           <div style={{ padding: 24, borderTop: '6px solid #3E2723', display: 'flex', gap: 16, background: '#D4B895', flexShrink: 0 }}>
-            <button onClick={onClose} style={{ flex: 1, padding: '16px', background: '#FFF', border: '2px solid #3E2723', borderRadius: 12, fontFamily: "'Playfair Display', serif", fontSize: 18, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>CANCEL</button>
-            <button onClick={handleSaveCollage} disabled={isProcessing} style={{ flex: 2, padding: '16px', background: '#00C853', color: '#FFF', border: '2px solid #3E2723', borderRadius: 12, fontFamily: "'Playfair Display', serif", fontSize: 18, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>{isProcessing ? 'SAVING...' : 'DONE! 💥'}</button>
+            <button onClick={onClose} style={{ flex: 1, padding: '16px', background: '#FFF', border: 'none', borderRadius: 12, fontFamily: "'Playfair Display', serif", fontSize: 18, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>CANCEL</button>
+            <button onClick={handleSaveCollage} disabled={isProcessing} style={{ flex: 2, padding: '16px', background: '#00C853', color: '#FFF', border: 'none', borderRadius: 12, fontFamily: "'Playfair Display', serif", fontSize: 18, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>{isProcessing ? 'SAVING...' : 'DONE! 💥'}</button>
           </div>
         </div>
       </div>

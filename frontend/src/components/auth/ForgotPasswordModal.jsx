@@ -12,9 +12,9 @@ function ComicRuneBox({ index, value, inputRef, onChange, onKeyDown, onPaste }) 
       onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
       style={{
         width: 48, height: 56, fontSize: 28, fontWeight: 700, textAlign: 'center',
-        fontFamily: "'Playfair Display', serif", background: '#FFF', border: '1px solid #3E2723', borderRadius: 8,
+        fontFamily: "'Playfair Display', serif", background: '#FFF', border: 'none', borderRadius: 8,
         color: '#3E2723', outline: 'none',
-        boxShadow: focused ? '4px 4px 0px 0px #632020' : '4px 4px 0px 0px #3E2723',
+        boxShadow: focused ? '4px 4px 0px 0px #1E352F' : '4px 4px 0px 0px #3E2723',
         transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.1s', cursor: 'text',
       }}
     />
@@ -33,9 +33,9 @@ function ComicDarkInput({ type = 'text', placeholder, value, onChange, required,
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         style={{
           width: '100%', padding: `14px ${type === 'password' ? '45px' : '16px'} 14px ${icon ? '44px' : '16px'}`,
-          background: '#FFF', border: '1px solid #3E2723', borderRadius: '12px', color: '#3E2723',
+          background: '#FFF', border: 'none', borderRadius: '12px', color: '#3E2723',
           fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: 16, outline: 'none', boxSizing: 'border-box',
-          boxShadow: focused ? '4px 4px 0px 0px #8B5A2B' : '4px 4px 0px 0px #3E2723', transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s ease',
+          boxShadow: focused ? '4px 4px 0px 0px #C89B3C' : '4px 4px 0px 0px #3E2723', transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s ease',
         }}
       />
       {type === 'password' && (
@@ -106,12 +106,12 @@ function ForgotPasswordModal({ onClose }) {
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(255, 246, 229, 0.9)', backgroundImage: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 }}>
       
       <motion.div initial={{ opacity: 0, scale: 0.8, rotate: 2 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
-        style={{ background: '#FFFFFF', border: '2px solid #3E2723', borderRadius: 16, padding: '40px', width: '100%', maxWidth: 440, boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', position: 'relative' }}>
+        style={{ background: '#FFFFFF', border: 'none', borderRadius: 16, padding: '40px', width: '100%', maxWidth: 440, boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', position: 'relative' }}>
         
-        <button onClick={onClose} style={{ position: 'absolute', top: -15, right: -15, width: 40, height: 40, borderRadius: '50%', background: '#632020', border: '2px solid #3E2723', color: '#FFF', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', zIndex: 10 }}>X</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: -15, right: -15, width: 40, height: 40, borderRadius: '50%', background: '#1E352F', border: 'none', color: '#FFF', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', zIndex: 10 }}>X</button>
 
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ width: 60, height: 60, margin: '0 auto 10px', borderRadius: '50%', background: '#D4B895', border: '2px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-10deg)' }}>
+          <div style={{ width: 60, height: 60, margin: '0 auto 10px', borderRadius: '50%', background: '#D4B895', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-10deg)' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#3E2723" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 26, height: 26 }}><circle cx="7.5" cy="15.5" r="5.5" /><path d="M21 2l-9.6 9.6M15.5 7.5l3 3M18 5l2 2" /></svg>
           </div>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#A0522D', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
@@ -121,16 +121,16 @@ function ForgotPasswordModal({ onClose }) {
         </div>
 
         <AnimatePresence mode="wait">
-          {error && <motion.div key="err" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#632020', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>ERROR: {error}</motion.div>}
-          {success && <motion.div key="ok" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#00C853', border: '1px solid #3E2723', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>SUCCESS: {success}</motion.div>}
+          {error && <motion.div key="err" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#1E352F', border: 'none', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>ERROR: {error}</motion.div>}
+          {success && <motion.div key="ok" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ background: '#00C853', border: 'none', borderRadius: 8, padding: '10px', color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 14, marginBottom: 16, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>SUCCESS: {success}</motion.div>}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
             <motion.form key="step1" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.3 }} onSubmit={handleRequestOtp}>
               <ComicDarkInput type="email" placeholder="name@family.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={iconEmail} />
-              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
-                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#8B5A2B', border: '2px solid #3E2723', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}>
+              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
+                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#C89B3C', border: 'none', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)' }}>
                 {loading ? 'SENDING...' : 'SEND THE CODE!'}
               </motion.button>
             </motion.form>
@@ -141,12 +141,12 @@ function ForgotPasswordModal({ onClose }) {
                 {otpArr.map((val, i) => <ComicRuneBox key={i} index={i} value={val} inputRef={el => (inputRefs.current[i] = el)} onChange={handleOtpChange} onKeyDown={handleOtpKeyDown} onPaste={handleOtpPaste} />)}
               </div>
               <ComicDarkInput type="password" placeholder="New Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required icon={iconLock} />
-              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' } : {}}
-                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#D4B895', border: '2px solid #3E2723', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', marginBottom: 16 }}>
+              <motion.button type="submit" disabled={loading} whileHover={!loading ? { scale: 1.02 } : {}} whileTap={!loading ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
+                style={{ width: '100%', padding: '16px', background: loading ? '#ccc' : '#D4B895', border: 'none', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 2, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', marginBottom: 16 }}>
                 {loading ? 'SAVING...' : 'CHANGE PASSWORD!'}
               </motion.button>
               <div style={{ textAlign: 'center' }}>
-                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#632020', cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
+                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#1E352F', cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
               </div>
             </motion.form>
           )}

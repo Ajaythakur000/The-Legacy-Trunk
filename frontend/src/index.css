@@ -28,7 +28,7 @@ html, body {
 body {
   margin: 0;
   font-family: 'Baloo 2', sans-serif;
-  background-color: #8C7053; /* Darker vintage wood/leather */
+  background-color: #261914; /* Deep Espresso Walnut */
   /* Textured Paper Grid instead of Comic Dots */
   background-image: 
     linear-gradient(rgba(44, 42, 41, 0.1) 1px, transparent 1px),
@@ -132,5 +132,5 @@ button {
 
 .sticker-cutout:hover {
   transform: rotate(0deg) scale(1.02);
-  box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.3);
+  box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45);
 }

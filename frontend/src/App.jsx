@@ -62,13 +62,13 @@ function App() {
           style: {
             background: '#FFFFFF',
             color: '#3E2723',
-            border: '2px solid #3E2723',
+            border: 'none',
             borderRadius: '12px',
             padding: '16px 24px',
             fontFamily: "'Playfair Display', serif",
             fontSize: '16px',
             letterSpacing: '1px',
-            boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)',
+            boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.45)',
           },
           success: {
             style: { background: '#00C853', color: '#FFF' },
@@ -76,12 +76,12 @@ function App() {
             icon: 'BAM! 💥',
           },
           error: {
-            style: { background: '#632020', color: '#FFF' },
-            iconTheme: { primary: '#FFF', secondary: '#632020' },
+            style: { background: '#1E352F', color: '#FFF' },
+            iconTheme: { primary: '#FFF', secondary: '#1E352F' },
             icon: 'OOPS! ⚠️',
           },
           loading: {
-            style: { background: '#8B5A2B', color: '#3E2723' },
+            style: { background: '#C89B3C', color: '#3E2723' },
             iconTheme: { primary: '#3E2723', secondary: 'transparent' },
           },
         }}

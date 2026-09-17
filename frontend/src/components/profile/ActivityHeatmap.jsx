@@ -64,12 +64,12 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
   // Comic Color Palette for pixels
   const getColor = (level, isFuture) => {
     if (isFuture) return '#F5F5F5'; // Future days have the same background as the board
-    const colors = ['#F5F5F5', '#D4B895', '#A0522D', '#632020', '#8B5A2B'];
+    const colors = ['#F5F5F5', '#D4B895', '#A0522D', '#1E352F', '#C89B3C'];
     return colors[level];
   };
 
   return (
-    <div style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', position: 'relative' }}>
+    <div style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', position: 'relative' }}>
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24, marginBottom: 32 }}>
@@ -86,10 +86,10 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
           {/* Stat cards */}
           {[
             { val: totalPoints.toLocaleString(), lbl: 'TOTAL PTS', color: '#D4B895' },
-            { val: activeDays, lbl: 'ACTIVE DAYS', color: '#8B5A2B' },
+            { val: activeDays, lbl: 'ACTIVE DAYS', color: '#C89B3C' },
             { val: maxStreak, lbl: 'MAX STREAK', color: '#00C853' },
           ].map((s, i) => (
-            <div key={i} style={{ background: s.color, border: '2px solid #3E2723', borderRadius: 12, padding: '12px 20px', textAlign: 'center', minWidth: 100, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)' }}>
+            <div key={i} style={{ background: s.color, border: 'none', borderRadius: 12, padding: '12px 20px', textAlign: 'center', minWidth: 100, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)' }}>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', lineHeight: 1 }}>{s.val}</div>
               <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 12, color: '#3E2723', marginTop: 4 }}>{s.lbl}</div>
             </div>
@@ -97,12 +97,12 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
 
           {/* Period dropdown */}
           <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} style={{ background: '#FFF', border: '2px solid #3E2723', padding: '12px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transition: 'transform 0.1s' }}>
+            <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} style={{ background: '#FFF', border: 'none', padding: '12px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transition: 'transform 0.1s' }}>
               CURRENT 📅
             </button>
             {isDropdownOpen && (
-              <div style={{ position: 'absolute', top: '110%', right: 0, background: '#FFF', border: '2px solid #3E2723', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', zIndex: 100, minWidth: 150, overflow: 'hidden' }}>
-                <div style={{ padding: '16px', fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#632020', borderBottom: '3px solid #3E2723', background: '#F5F5F5' }}>CURRENT ✓</div>
+              <div style={{ position: 'absolute', top: '110%', right: 0, background: '#FFF', border: 'none', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', zIndex: 100, minWidth: 150, overflow: 'hidden' }}>
+                <div style={{ padding: '16px', fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#1E352F', borderBottom: '3px solid #3E2723', background: '#F5F5F5' }}>CURRENT ✓</div>
                 {currentYear === 2026 && <div style={{ padding: '16px', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: '#3E2723', cursor: 'not-allowed' }}>No past years</div>}
               </div>
             )}
@@ -151,8 +151,8 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
       {/* Legend */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
         <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723' }}>LAZY</span>
-        {['#F5F5F5', '#D4B895', '#A0522D', '#632020', '#8B5A2B'].map((c, i) => (
-          <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: c, border: '1px solid #3E2723' }} />
+        {['#F5F5F5', '#D4B895', '#A0522D', '#1E352F', '#C89B3C'].map((c, i) => (
+          <div key={i} style={{ width: 18, height: 18, borderRadius: 4, background: c, border: 'none' }} />
         ))}
         <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723' }}>ACTIVE!</span>
       </div>

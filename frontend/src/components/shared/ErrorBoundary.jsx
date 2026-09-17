@@ -26,7 +26,7 @@ class ErrorBoundary extends React.Component {
         <div style={{
           height: '100vh', width: '100vw',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: '#632020',
+          background: '#1E352F',
           backgroundImage: 'none',
           backgroundSize: '24px 24px',
           fontFamily: "'Baloo 2', sans-serif",
@@ -41,7 +41,7 @@ class ErrorBoundary extends React.Component {
             padding: '40px 30px',
             maxWidth: 500, width: '100%',
             textAlign: 'center',
-            boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)',
+            boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)',
             animation: 'powShake 0.5s ease-in-out infinite alternate',
           }}>
             
@@ -66,9 +66,9 @@ class ErrorBoundary extends React.Component {
               onMouseDown={e  => { e.currentTarget.style.transform = 'translate(4px, 4px)'; e.currentTarget.style.boxShadow = '0px 0px 0px 0px #3E2723'; }}
               onMouseUp={e    => { e.currentTarget.style.transform = 'translate(-2px, -2px)'; e.currentTarget.style.boxShadow = '6px 6px 0px 0px #3E2723'; }}
               style={{
-                background: '#8B5A2B', border: '2px solid #3E2723', borderRadius: 12, padding: '16px 32px',
+                background: '#C89B3C', border: 'none', borderRadius: 12, padding: '16px 32px',
                 fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723',
-                cursor: 'pointer', transition: 'all 0.1s', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)',
+                cursor: 'pointer', transition: 'all 0.1s', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)',
               }}
             >
               BACK TO BASE 🚀

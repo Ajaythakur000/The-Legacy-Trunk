@@ -20,8 +20,8 @@ function FilterTabs({ filters, activeFilter, onFilterChange }) {
             whileTap={{ scale: 0.95 }}
             style={{
               padding: '12px 24px',
-              background: isActive ? '#8B5A2B' : '#FFF',
-              border: '2px solid #3E2723',
+              background: isActive ? '#C89B3C' : '#FFF',
+              border: 'none',
               borderRadius: 12,
               fontFamily: "'Playfair Display', serif",
               fontSize: 16,
@@ -52,7 +52,7 @@ function EmptyState({ hasStories }) {
         background: '#FFF',
         border: '6px solid #3E2723',
         borderRadius: 24,
-        boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)',
+        boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)',
         margin: '20px 0'
       }}
     >
@@ -60,7 +60,7 @@ function EmptyState({ hasStories }) {
         {hasStories ? '🔍' : '📭'}
       </div>
       <h3 style={{
-        fontFamily: "'Playfair Display', serif", color: '#632020',
+        fontFamily: "'Playfair Display', serif", color: '#1E352F',
         fontSize: 32, margin: '0 0 12px', letterSpacing: 1,
         textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723'
       }}>
@@ -199,9 +199,9 @@ function MyStoriesPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
           style={{
-            display: 'inline-block', background: '#632020', border: '2px solid #3E2723',
+            display: 'inline-block', background: '#1E352F', border: 'none',
             borderRadius: 12, padding: '8px 16px', fontFamily: "'Playfair Display', serif",
-            fontSize: 16, color: '#FFF', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)',
+            fontSize: 16, color: '#FFF', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)',
             transform: 'rotate(2deg)'
           }}
         >

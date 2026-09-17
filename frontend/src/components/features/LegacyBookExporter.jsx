@@ -22,7 +22,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
       setIsExporting(true);
       
       const loadingToastId = toast.loading("PRINTING THE COMIC BOOK! 🖨️", {
-        style: { borderRadius: '12px', background: '#8B5A2B', color: '#3E2723', border: '2px solid #3E2723', fontFamily: "'Playfair Display', serif", fontSize: 16, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' },
+        style: { borderRadius: '12px', background: '#C89B3C', color: '#3E2723', border: 'none', fontFamily: "'Playfair Display', serif", fontSize: 16, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' },
       });
       
       const prevPosition = printRef.current.style.position;
@@ -88,13 +88,13 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
             PAGE 1 — COVER (POP ART)
         ══════════════════════════════════════════════ */}
         <div className="pdf-page" style={pageBase}>
-          <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '12px solid #3E2723', borderRadius: 24, boxShadow: '24px 24px 15px 0px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, textAlign: 'center' }}>
+          <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '12px solid #3E2723', borderRadius: 24, boxShadow: '24px 24px 15px 0px rgba(0,0,0,0.45)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, textAlign: 'center' }}>
             
-            <div style={{ position: 'absolute', top: -40, left: -40, background: '#8B5A2B', color: '#3E2723', border: '8px solid #3E2723', borderRadius: '50%', width: 150, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 36, transform: 'rotate(-15deg)', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', zIndex: 10 }}>
+            <div style={{ position: 'absolute', top: -40, left: -40, background: '#C89B3C', color: '#3E2723', border: '8px solid #3E2723', borderRadius: '50%', width: 150, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 36, transform: 'rotate(-15deg)', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', zIndex: 10 }}>
               VOL. 1
             </div>
 
-            <div style={{ fontSize: 24, fontFamily: popFont, color: '#632020', borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 24, fontFamily: popFont, color: '#1E352F', borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
               THE OFFICIAL ARCHIVE OF
             </div>
 
@@ -102,7 +102,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
               {circleName || 'OUR FAMILY'}
             </div>
             
-            <div style={{ fontSize: 60, color: '#8B5A2B', WebkitTextStroke: '3px #3E2723', textShadow: '8px 8px 0px #3E2723', fontFamily: popFont, lineHeight: 1, marginBottom: 80, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 60, color: '#C89B3C', WebkitTextStroke: '3px #3E2723', textShadow: '8px 8px 0px #3E2723', fontFamily: popFont, lineHeight: 1, marginBottom: 80, textTransform: 'uppercase' }}>
               COMIC BOOK
             </div>
 
@@ -123,14 +123,14 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
           return (
             <div key={node._id} className="pdf-page" style={pageBase}>
-              <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '8px solid #3E2723', borderRadius: 24, boxShadow: '20px 20px 15px 0px rgba(0,0,0,0.3)', padding: 40, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '8px solid #3E2723', borderRadius: 24, boxShadow: '20px 20px 15px 0px rgba(0,0,0,0.45)', padding: 40, display: 'flex', flexDirection: 'column' }}>
 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '6px solid #3E2723', paddingBottom: 20, marginBottom: 40 }}>
-                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#632020', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#1E352F', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
                     PANEL #{index + 1}
                   </div>
-                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#3E2723', background: '#D4B895', padding: '8px 16px', border: '2px solid #3E2723', borderRadius: 12 }}>
+                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#3E2723', background: '#D4B895', padding: '8px 16px', border: 'none', borderRadius: 12 }}>
                     {fullDate}
                   </div>
                 </div>
@@ -144,8 +144,8 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
                 {/* Image */}
                 {hasImage && (
-                  <div style={{ margin: '0 auto 40px', background: '#632020', padding: 16, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
-                    <img src={node.mediaUrl} alt={node.title} crossOrigin="anonymous" style={{ maxWidth: 600, maxHeight: 400, objectFit: 'cover', display: 'block', border: '2px solid #3E2723' }} />
+                  <div style={{ margin: '0 auto 40px', background: '#1E352F', padding: 16, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
+                    <img src={node.mediaUrl} alt={node.title} crossOrigin="anonymous" style={{ maxWidth: 600, maxHeight: 400, objectFit: 'cover', display: 'block', border: 'none' }} />
                   </div>
                 )}
 

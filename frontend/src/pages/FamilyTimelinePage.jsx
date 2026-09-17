@@ -20,10 +20,10 @@ function ComicBackground() {
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: '2px solid #3E2723', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
-        <div style={{ width: '120%', height: '120%', background: '#8B5A2B', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden', animation: 'spin 10s linear infinite' }}>
+        <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
-      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: '1px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         <img src="/finall_logo.png" alt="LT" style={{ width: '110%', height: '110%', objectFit: 'cover', borderRadius: '50%' }} onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
         <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 26 }}>LT</div>
       </div>
@@ -45,9 +45,9 @@ function LoadingState() {
 // ─── EMPTY STATE ─────────────────────────────────────────────────────────────
 function EmptyState() {
   return (
-    <div style={{ textAlign: 'center', padding: '60px', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', margin: '40px auto', maxWidth: 600 }}>
+    <div style={{ textAlign: 'center', padding: '60px', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', margin: '40px auto', maxWidth: 600 }}>
       <div style={{ fontSize: 80, marginBottom: 20 }}>👻</div>
-      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#632020', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#1E352F', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
         IT'S A GHOST TOWN!
       </h3>
       <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', margin: 0 }}>
@@ -93,7 +93,7 @@ function ClothesPin({ index }) {
   const color = PIN_COLORS[index % PIN_COLORS.length];
   const tilt = index % 2 === 0 ? -10 : 10;
   return (
-    <svg width="34" height="46" viewBox="0 0 40 54" style={{ position: 'absolute', top: '50%', left: '50%', transform: `translate(-50%, -50%) rotate(${tilt}deg)`, zIndex: 15, filter: 'drop-shadow(2px 2px 0px rgba(0,0,0,0.3))' }}>
+    <svg width="34" height="46" viewBox="0 0 40 54" style={{ position: 'absolute', top: '50%', left: '50%', transform: `translate(-50%, -50%) rotate(${tilt}deg)`, zIndex: 15, filter: 'drop-shadow(2px 2px 0px rgba(0,0,0,0.45))' }}>
       <rect x="4" y="2" width="14" height="50" rx="6" fill={color} stroke="var(--pop-black)" strokeWidth="3" />
       <rect x="22" y="2" width="14" height="50" rx="6" fill={color} stroke="var(--pop-black)" strokeWidth="3" />
       <circle cx="20" cy="15" r="7" fill="var(--pop-black)" />
@@ -180,7 +180,7 @@ function FamilyTimelinePage() {
             style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', margin: '20px 0 10px', letterSpacing: 2 }}>
             MEMORY LANE 🛤️
           </motion.h1>
-          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: '#8B5A2B', display: 'inline-block', padding: '4px 16px', border: '1px solid #3E2723', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)' }}>
+          <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: '#C89B3C', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
             Hover on the dots to unfold the story!
           </p>
         </div>
@@ -208,12 +208,12 @@ function FamilyTimelinePage() {
         <motion.button
           onClick={() => exporterRef.current?.generatePDF()}
           whileHover={{ scale: 1.05, rotate: -2 }}
-          whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' }}
+          whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' }}
           style={{
             position: 'fixed', bottom: 40, right: 40, zIndex: 9999,
-            background: '#00C853', border: '2px solid #3E2723', borderRadius: 16,
+            background: '#00C853', border: 'none', borderRadius: 16,
             padding: '16px 24px', fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#FFF',
-            cursor: 'pointer', boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: 10,
+            cursor: 'pointer', boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', gap: 10,
             transition: 'box-shadow 0.1s, transform 0.1s'
           }}
         >
@@ -242,7 +242,7 @@ function FamilyTimelinePage() {
           transform: scale(1.2) rotate(10deg);
         }
         .hover-zone:hover .date-badge {
-          background: #8B5A2B !important;
+          background: #C89B3C !important;
           transform: scale(1.1) rotate(-5deg);
         }
         .hover-zone:hover .popup-card {

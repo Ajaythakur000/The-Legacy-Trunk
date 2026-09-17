@@ -15,7 +15,7 @@ const SLIDES = [
           { label: 'MEMORIES', icon: '🖼️' },
           { label: 'BONDING', icon: '🤝' },
         ].map((f, i) => (
-          <div key={i} style={{ flex: 1, padding: '12px 8px', background: '#FFFFFF', border: '1px solid #3E2723', borderRadius: 12, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+          <div key={i} style={{ flex: 1, padding: '12px 8px', background: '#FFFFFF', border: 'none', borderRadius: 12, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
             <div style={{ fontSize: 24, marginBottom: 4 }}>{f.icon}</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 12, letterSpacing: 1, color: '#3E2723' }}>{f.label}</div>
           </div>
@@ -29,7 +29,7 @@ const SLIDES = [
     title: 'TOP SECRET & PRIVATE',
     text: 'No ads. No weird tracking. Your family inside jokes and photos stay strictly between the people you actually like.',
     extra: (
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 24, margin: '16px 0', padding: 16, background: '#8B5A2B', border: '2px solid #3E2723', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 24, margin: '16px 0', padding: 16, background: '#C89B3C', border: 'none', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)' }}>
         {[['0', 'ADS EVER'], ['100%', 'ENCRYPTED'], ['∞', 'MEMORIES']].map(([num, lbl], i) => (
           <div key={i} style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', lineHeight: 1, textShadow: '2px 2px 0px #FFF' }}>{num}</div>
@@ -38,7 +38,7 @@ const SLIDES = [
         ))}
       </div>
     ),
-    color: '#8B5A2B',
+    color: '#C89B3C',
   },
   {
     icon: '🏆',
@@ -51,14 +51,14 @@ const SLIDES = [
           { label: 'RANK UP', icon: '🚀' },
           { label: 'CROWN', icon: '👑' },
         ].map((f, i) => (
-          <div key={i} style={{ flex: 1, padding: '12px 8px', background: '#632020', border: '1px solid #3E2723', borderRadius: 12, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}>
+          <div key={i} style={{ flex: 1, padding: '12px 8px', background: '#1E352F', border: 'none', borderRadius: 12, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
             <div style={{ fontSize: 24, marginBottom: 4 }}>{f.icon}</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 12, letterSpacing: 1, color: '#FFF' }}>{f.label}</div>
           </div>
         ))}
       </div>
     ),
-    color: '#632020',
+    color: '#1E352F',
   },
 ];
 
@@ -117,10 +117,10 @@ function VaultGateway({ onClose }) {
           position: 'relative', zIndex: 10,
           width: '100%', maxWidth: 480,
           background: '#FFFFFF',
-          border: '2px solid #3E2723',
+          border: 'none',
           borderRadius: 24,
           padding: '40px',
-          boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)',
+          boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)',
         }}
       >
         <div style={{ position: 'relative', zIndex: 2 }}>
@@ -141,7 +141,7 @@ function VaultGateway({ onClose }) {
               <div style={{ width: 80, height: 80, margin: '0 auto 20px', position: 'relative' }}>
                 <motion.div
                   key={step} initial={{ scale: 0.5, opacity: 0, rotate: -20 }} animate={{ scale: 1, opacity: 1, rotate: Math.random() * 10 - 5 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                  style={{ width: '100%', height: '100%', borderRadius: '50%', background: SLIDES[step].color, border: '2px solid #3E2723', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)' }}
+                  style={{ width: '100%', height: '100%', borderRadius: '50%', background: SLIDES[step].color, border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)' }}
                 >
                   {SLIDES[step].icon}
                 </motion.div>
@@ -161,7 +161,7 @@ function VaultGateway({ onClose }) {
               </AnimatePresence>
 
               {/* Comic Progress Bar */}
-              <div style={{ width: '100%', height: 12, background: '#FFF', border: '1px solid #3E2723', borderRadius: 6, margin: '24px 0 20px', position: 'relative', overflow: 'hidden', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.3)' }}>
+              <div style={{ width: '100%', height: 12, background: '#FFF', border: 'none', borderRadius: 6, margin: '24px 0 20px', position: 'relative', overflow: 'hidden', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)' }}>
                 <motion.div
                   animate={{ width: `${((step + 1) / SLIDES.length) * 100}%`, background: SLIDES[step].color }}
                   transition={{ duration: 0.4, type: 'spring' }}
@@ -174,20 +174,20 @@ function VaultGateway({ onClose }) {
                 {!isLast ? (
                   <motion.div key="step-btns" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', gap: 16 }}>
                     <motion.button onClick={handleFinish} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      style={{ flex: 1, padding: '14px', borderRadius: 12, background: '#FFF', border: '2px solid #3E2723', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 16, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.3)' }}
+                      style={{ flex: 1, padding: '14px', borderRadius: 12, background: '#FFF', border: 'none', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 16, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}
                     >
                       SKIP
                     </motion.button>
-                    <motion.button onClick={handleNext} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' }}
-                      style={{ flex: 2, padding: '14px', borderRadius: 12, background: SLIDES[step].color, border: '2px solid #3E2723', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', transition: 'box-shadow 0.1s' }}
+                    <motion.button onClick={handleNext} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' }}
+                      style={{ flex: 2, padding: '14px', borderRadius: 12, background: SLIDES[step].color, border: 'none', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transition: 'box-shadow 0.1s' }}
                     >
                       NEXT!
                     </motion.button>
                   </motion.div>
                 ) : (
                   <motion.div key="enter-btn" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }}>
-                    <motion.button onClick={handleFinish} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.3)' }}
-                      style={{ width: '100%', padding: '18px', borderRadius: 12, background: '#D4B895', border: '2px solid #3E2723', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 24, letterSpacing: 1, cursor: 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.3)', transition: 'box-shadow 0.1s' }}
+                    <motion.button onClick={handleFinish} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' }}
+                      style={{ width: '100%', padding: '18px', borderRadius: 12, background: '#D4B895', border: 'none', color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 24, letterSpacing: 1, cursor: 'pointer', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transition: 'box-shadow 0.1s' }}
                     >
                       LET'S GO! 🚀
                     </motion.button>
