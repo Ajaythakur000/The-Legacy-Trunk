@@ -11,7 +11,7 @@ function VintageActionBtn({ onClick, active, icon: Icon, label, color }) {
   return (
     <motion.button
       onClick={onClick}
-      whileHover={{ y: -2, opacity: 1 }}
+      whileHover={{ scale: 1.05, opacity: 1 }}
       whileTap={{ scale: 0.95 }}
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
@@ -217,15 +217,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
         <h3 style={{ margin: '0 0 16px', fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', fontWeight: 400 }}>
           {story.title}
         </h3>
-
-        {/* Tone badge */}
-        {story.tone && story.tone !== 'Original' && (
-          <div style={{ marginBottom: 20 }}>
-            <span style={{ display: 'inline-block', padding: '4px 0', borderBottom: '1px solid #D4B895', fontFamily: "'Courier Prime', monospace", fontSize: 12, color: '#8C7B6B', textTransform: 'uppercase' }}>
-              Written in {story.tone.replace(/[^\w\s-]/gi, '').trim()} ink
-            </span>
-          </div>
-        )}
 
         {/* Content - Handwriting Font for Nostalgia */}
         <p style={{ margin: 0, fontFamily: "'Caveat', cursive", fontSize: 28, lineHeight: 1.6, color: '#3E2723', whiteSpace: 'pre-wrap', transform: 'rotate(-0.5deg)' }}>
