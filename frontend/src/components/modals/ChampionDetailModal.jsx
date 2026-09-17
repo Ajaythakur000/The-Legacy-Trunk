@@ -135,7 +135,7 @@ function ChampionDetailModal({ onClose, champion }) {
               </h2>
               
               <div style={{ display: 'inline-block', background: '#1E352F', color: '#FFF', border: 'none', padding: '4px 16px', borderRadius: 8, fontFamily: "'Playfair Display', serif", fontSize: 14, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(2deg)' }}>
-                TOP HISTORIAN
+                KEEPER OF MEMORIES
               </div>
             </div>
 

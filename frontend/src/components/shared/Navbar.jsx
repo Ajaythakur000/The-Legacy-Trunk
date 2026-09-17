@@ -462,7 +462,7 @@ function Navbar({ children }) {
                       </div>
                     </div>
                     <div className="lt-profile-links">
-                      <button onClick={() => setShowChampionModal(true)} className="lt-profile-link"><span style={{display:'flex', alignItems:'center', gap: 8}}><Crown size={16} strokeWidth={1.5} /> TOP DOG</span></button>
+                      <button onClick={() => setShowChampionModal(true)} className="lt-profile-link"><span style={{display:'flex', alignItems:'center', gap: 8}}><Crown size={16} strokeWidth={1.5} /> KEEPER OF MEMORIES</span></button>
                       <Link to="/profile?edit=true" className="lt-profile-link"><span style={{display:'flex', alignItems:'center', gap: 8}}><PenSquare size={16} strokeWidth={1.5} /> EDIT INFO</span></Link>
                       <Link to="/profile" className="lt-profile-link"><span style={{display:'flex', alignItems:'center', gap: 8}}><BookImage size={16} strokeWidth={1.5} /> MY SCRAPBOOK</span></Link>
                       <button onClick={handleLogout} className="lt-profile-link lt-danger"><span style={{display:'flex', alignItems:'center', gap: 8}}><LogOut size={16} strokeWidth={1.5} /> SIGN OUT</span></button>

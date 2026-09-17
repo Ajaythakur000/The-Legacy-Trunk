@@ -11,7 +11,6 @@ function VintageActionBtn({ onClick, active, icon: Icon, label, color }) {
   return (
     <motion.button
       onClick={onClick}
-      whileHover={{ scale: 1.05, opacity: 1 }}
       whileTap={{ scale: 0.95 }}
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
