@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom'; 
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -6,8 +6,7 @@ import { updateUserProfileApi } from '../../api/authApi';
 import FamilyLegacyCard from './FamilyLegacyCard';
 import ActivityHeatmap from './ActivityHeatmap';
 import toast from 'react-hot-toast';
-import { AnimatePresence } from 'framer-motion';
-
+import { motion, AnimatePresence } from 'framer-motion';
 
 const getSafeDateString = (dateStr) => {
   if (!dateStr) return '';

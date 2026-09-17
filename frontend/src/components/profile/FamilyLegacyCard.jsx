@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { motion } from 'framer-motion';
 
 function FamilyLegacyCard({ familyPoints }) {
   const getFamilyBadge = (points) => {

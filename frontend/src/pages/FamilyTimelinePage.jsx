@@ -1,6 +1,6 @@
-/* eslint-disable react-hooks/purity */
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 import { Printer } from 'lucide-react';
 import api from '../api/axios';
 import LegacyBookExporter from '../components/features/LegacyBookExporter';
@@ -51,7 +51,7 @@ function PolaroidCard({ node, index }) {
   const isEven = index % 2 === 0;
   
   // Randomize rotation slightly for organic feel
-  const tilt = useMemo(() => isEven ? -(Math.random() * 3 + 2) : (Math.random() * 3 + 2), [isEven]); 
+  const tilt = isEven ? -(Math.random() * 3 + 2) : (Math.random() * 3 + 2); 
   const align = isEven ? 'flex-start' : 'flex-end';
   
   const dateObj = new Date(node.milestoneDate);

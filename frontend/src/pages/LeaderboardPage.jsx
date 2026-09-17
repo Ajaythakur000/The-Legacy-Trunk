@@ -1,7 +1,6 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { getLeaderboardApi } from '../api/circleApi';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Medal, Award, Crown, ChevronLeft, ChevronRight, Landmark } from 'lucide-react';
 
 const getFamilyBadge = (points) => {

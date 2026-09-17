@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { joinViaInviteApi } from '../api/circleApi';
-
+import { motion } from 'framer-motion';
 
 function InvitePage() {
   const { token } = useParams(); 

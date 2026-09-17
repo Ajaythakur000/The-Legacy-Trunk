@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-
+import { motion } from 'framer-motion';
 
 function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-
+import { motion } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 
 // ─── Comic page transition variants ──────────────────────────────────────────

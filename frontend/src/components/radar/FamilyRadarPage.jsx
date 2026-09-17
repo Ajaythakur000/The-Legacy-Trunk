@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,8 +9,7 @@ import {
   updateMyLocationApi,
 } from '../../api/locationApi';
 import { getSocket } from '../../services/socket';
-import { AnimatePresence } from 'framer-motion';
-
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap');

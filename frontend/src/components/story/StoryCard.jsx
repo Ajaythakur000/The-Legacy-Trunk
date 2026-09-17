@@ -1,10 +1,9 @@
-/* eslint-disable no-unused-vars */
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import StoryCommentBox from './StoryCommentBox';
 import StoryExportTemplate from './StoryExportTemplate';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Flower2, MessageCircle, Share, Printer, Trash2, Stamp } from 'lucide-react';
 
 // ── Vintage Action Button ───────────────────────────────────────────────────────
