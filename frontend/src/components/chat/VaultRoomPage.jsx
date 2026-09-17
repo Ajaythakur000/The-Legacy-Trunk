@@ -144,9 +144,9 @@ function VaultRoomPage() {
       </AnimatePresence>
 
       {/* ── HEADER ── */}
-      <header style={{ position: 'relative', zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 36px', background: '#FFF', borderBottom: '6px solid #3E2723', boxShadow: '0px 8px 15px 0px rgba(0,0,0,0.45)' }}>
+      <header style={{ position: 'relative', zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 36px', background: '#261914', borderBottom: '1px solid rgba(253,251,247,0.1)', boxShadow: '0px 4px 20px rgba(0,0,0,0.3)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 48, height: 48, borderRadius: '12px', background: '#D4B895', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-5deg)' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '12px', background: '#D4B895', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 8px rgba(0,0,0,0.2)', transform: 'rotate(-2deg)' }}>
             <span style={{ fontSize: 24 }}>💬</span>
           </div>
           <div>
@@ -154,9 +154,8 @@ function VaultRoomPage() {
               FAMILY CHAT
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-              <span style={{ width: 12, height: 12, borderRadius: '50%', background: isConnected ? '#00C853' : '#1E352F', border: 'none' }} />
-              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723' }}>
-                {isConnected ? 'LIVE' : 'RECONNECTING...'}
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: isConnected ? '#C89B3C' : '#3E2723', border: 'none' }} />
+              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#D4B895', fontFamily: "'Courier Prime', monospace", letterSpacing: 1 }}>{isConnected ? 'SECURE LINE OPEN' : 'RECONNECTING...'}
               </span>
             </div>
           </div>
@@ -165,19 +164,19 @@ function VaultRoomPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           {user?.role === 'admin' && (
             <motion.button onClick={() => setShowClearModal(true)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              style={{ background: '#1E352F', color: '#FFF', border: 'none', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
+              style={{ background: 'transparent', color: '#FDFBF7', border: '1px solid rgba(253,251,247,0.3)', border: 'none', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 14, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
               🗑️ NUKE CHAT
             </motion.button>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#C89B3C', padding: '6px 16px', border: 'none', borderRadius: 12, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.05)', padding: '6px 16px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12 }}>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#FDFBF7' }}>
               {onlineCount} ONLINE
             </span>
             <div style={{ display: 'flex' }}>
               {onlineUsers.slice(0, 4).map((ou, idx) => (
                 <img key={ou.userId} src={ou.avatar || `https://ui-avatars.com/api/?name=${ou.name}&background=FFD23F&color=171719&bold=true`} alt={ou.name} title={ou.name}
-                  style={{ width: 32, height: 32, borderRadius: '50%', border: 'none', marginLeft: idx === 0 ? 0 : -10, zIndex: 10 - idx, objectFit: 'cover' }} />
+                  style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #261914', marginLeft: idx === 0 ? 0 : -10, zIndex: 10 - idx, objectFit: 'cover' }} />
               ))}
             </div>
           </div>

@@ -67,8 +67,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
       <motion.form layout onSubmit={handleSubmit} 
         style={{ 
           width: '100%', maxWidth: shouldExpand ? '860px' : '500px', display: 'flex', gap: 12, alignItems: 'center',
-          background: '#FFF', border: '6px solid #3E2723', borderRadius: '40px', padding: '8px 12px 8px 24px',
-          boxShadow: shouldExpand ? '12px 12px 0px 0px #C89B3C' : '8px 8px 0px 0px #3E2723', transition: 'box-shadow 0.2s'
+          background: '#FFF', border: '1px solid #D4B895', borderRadius: '16px', padding: '8px 12px 8px 24px', boxShadow: '4px 8px 24px rgba(0,0,0,0.08)', transition: 'box-shadow 0.2s'
         }}
       >
         <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
@@ -87,7 +86,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
           onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}
           onChange={(e) => { const v = e.target.value; setText(v); if (v.trim()) onTyping(v); else onTyping(''); }}
           disabled={isUIDisabled} autoComplete="off"
-          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 20, color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700 }}
+          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 20, color: '#3E2723', fontFamily: "'Courier Prime', monospace", fontWeight: 400 }}
         />
 
         {/* Mic */}
@@ -105,7 +104,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
         {/* Send */}
         <motion.button type="submit" disabled={!canSend}
           whileHover={canSend ? { scale: 1.1 } : {}} whileTap={canSend ? { scale: 0.9, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
-          style={{ width: 56, height: 56, borderRadius: '50%', background: canSend ? '#00C853' : '#F5F5F5', border: 'none', cursor: canSend ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: canSend ? '4px 4px 0px 0px #3E2723' : 'none', fontSize: 24, flexShrink: 0 }}
+          style={{ width: 56, height: 56, borderRadius: '50%', background: canSend ? '#C89B3C' : '#F5F5F5', border: 'none', cursor: canSend ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: canSend ? '2px 4px 12px rgba(0,0,0,0.2)' : 'none', fontSize: 24, flexShrink: 0 }}
         >
           {uploading ? '⏳' : '🚀'}
         </motion.button>

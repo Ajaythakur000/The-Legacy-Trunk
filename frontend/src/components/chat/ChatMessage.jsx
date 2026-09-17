@@ -40,7 +40,7 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
   const timeStr = msg?.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
   // Comic colors for chat bubbles
-  const bubbleColor = isMe ? '#D4B895' : '#FFF';
+  const bubbleColor = isMe ? '#1E352F' : '#FFF';
 
   return (
     <motion.div initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
@@ -59,7 +59,7 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
 
           {/* Name Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723' }}>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: isMe ? '#FDFBF7' : '#3E2723' }}>
               {isMe ? 'YOU' : (msg?.senderName || 'FAMILY')}
             </span>
             <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 12, color: 'rgba(23,23,25,0.5)' }}>
@@ -74,7 +74,7 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
             <AnimatePresence>
               {showEmojiPicker && (
                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                  style={{ position: 'absolute', top: -50, [isMe ? 'right' : 'left']: 0, zIndex: 30, background: '#FFF', border: 'none', padding: '8px 12px', borderRadius: 20, display: 'flex', gap: 8, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)' }}>
+                  style={{ position: 'absolute', top: -50, [isMe ? 'right' : 'left']: 0, zIndex: 30, background: '#FFF', border: 'none', padding: '8px 12px', borderRadius: 20, display: 'flex', gap: 8, boxShadow: '2px 4px 12px rgba(0,0,0,0.08)' }}>
                   {['❤️', '😂', '🔥', '👍', '😢', '✨'].map(emoji => (
                     <span key={emoji} onClick={() => handleReact(emoji)} style={{ cursor: 'pointer', fontSize: 24, transition: 'transform 0.1s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.3)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
                       {emoji}
@@ -88,10 +88,10 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
             <div onMouseEnter={() => !isMe && setShowEmojiPicker(true)}
               style={{
                 padding: (msg?.imageUrl || msg?.audioUrl) ? 6 : '12px 16px',
-                borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                 background: bubbleColor, border: 'none',
                 color: '#3E2723', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)',
-                fontSize: 18, lineHeight: 1.5, wordBreak: 'break-word', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700,
+                fontSize: 18, lineHeight: 1.5, wordBreak: 'break-word', fontFamily: "'Courier Prime', monospace", fontWeight: 400,
                 position: 'relative', overflow: 'hidden'
               }}>
               
