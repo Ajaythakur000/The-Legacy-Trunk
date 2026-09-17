@@ -21,8 +21,8 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
       if (!printRef.current || isExporting) return;
       setIsExporting(true);
       
-      const loadingToastId = toast.loading("PRINTING THE COMIC BOOK! 🖨️", {
-        style: { borderRadius: '12px', background: '#C89B3C', color: '#3E2723', border: 'none', fontFamily: "'Playfair Display', serif", fontSize: 16, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' },
+      const loadingToastId = toast.loading("PREPARING SCRAPBOOK... 📜", {
+        style: { borderRadius: '8px', background: '#FDFBF7', color: '#3E2723', border: '1px solid #D4B895', fontFamily: "'Courier Prime', monospace", fontSize: 14, boxShadow: '2px 4px 12px rgba(0,0,0,0.08)' },
       });
       
       const prevPosition = printRef.current.style.position;
@@ -51,12 +51,12 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
           if (i > 0) pdf.addPage();
           pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
         }
-        pdf.save(`${circleName ? circleName.replace(/\s+/g, '_') : 'Family'}_Comic_Book.pdf`);
-        toast.success("COMIC PRINTED! 💥", { id: loadingToastId });
+        pdf.save(`${circleName ? circleName.replace(/\s+/g, '_') : 'Family'}_Scrapbook.pdf`);
+        toast.success("SCRAPBOOK READY! 🕊️", { id: loadingToastId });
         
       } catch (err) {
         console.error('PDF generation failed:', err);
-        toast.error("PRINTER JAMMED! ⚠️", { id: loadingToastId });
+        toast.error("BINDING FAILED! ⚠️", { id: loadingToastId });
       } finally {
         if (printRef.current) {
           printRef.current.style.position = prevPosition;
@@ -69,15 +69,15 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
   }));
 
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const popFont = "Impact, 'Arial Black', sans-serif";
-  const bodyFont = "Arial, sans-serif";
+  const serifFont = "'Playfair Display', serif";
+  const typewriterFont = "'Courier Prime', monospace";
+  const cursiveFont = "'Caveat', cursive";
 
   const pageBase = {
     width: 794, height: 1123,
-    backgroundColor: '#D4B895', 
-    backgroundImage: 'none',
-    backgroundSize: '30px 30px',
+    backgroundColor: '#FDFBF7', 
     color: '#3E2723', position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
+    border: '1px solid #EEDEC1'
   };
 
   return (
@@ -85,29 +85,29 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
       <div ref={printRef}>
 
         {/* ══════════════════════════════════════════════
-            PAGE 1 — COVER (POP ART)
+            PAGE 1 — COVER (VINTAGE)
         ══════════════════════════════════════════════ */}
         <div className="pdf-page" style={pageBase}>
-          <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '12px solid #3E2723', borderRadius: 24, boxShadow: '24px 24px 15px 0px rgba(0,0,0,0.45)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, textAlign: 'center' }}>
+          <div style={{ position: 'absolute', inset: 40, border: '2px solid #D4B895', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, textAlign: 'center' }}>
             
-            <div style={{ position: 'absolute', top: -40, left: -40, background: '#C89B3C', color: '#3E2723', border: '8px solid #3E2723', borderRadius: '50%', width: 150, height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: popFont, fontSize: 36, transform: 'rotate(-15deg)', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', zIndex: 10 }}>
-              VOL. 1
+            <div style={{ position: 'absolute', top: 60, borderBottom: '1px solid #D4B895', paddingBottom: 10, width: '50%', margin: '0 auto', fontSize: 14, fontFamily: typewriterFont, letterSpacing: 2, color: '#8C7B6B', textTransform: 'uppercase' }}>
+              The Official Archive of
             </div>
 
-            <div style={{ fontSize: 24, fontFamily: popFont, color: '#FDFBF7', borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
-              THE OFFICIAL ARCHIVE OF
-            </div>
-
-            <div style={{ fontSize: 90, color: '#FDFBF7', fontFamily: popFont, lineHeight: 1, marginBottom: 20, textTransform: 'uppercase' }}>
-              {circleName || 'OUR FAMILY'}
+            <div style={{ fontSize: 72, color: '#3E2723', fontFamily: serifFont, lineHeight: 1.2, marginTop: 100, marginBottom: 20, fontWeight: 400 }}>
+              {circleName || 'Our Family'}
             </div>
             
-            <div style={{ fontSize: 60, color: '#C89B3C', fontFamily: popFont, lineHeight: 1, marginBottom: 80, textTransform: 'uppercase' }}>
-              COMIC BOOK
+            <div style={{ fontSize: 48, color: '#C89B3C', fontFamily: cursiveFont, lineHeight: 1, marginBottom: 80, fontWeight: 400 }}>
+              Memory Scrapbook
             </div>
 
-            <div style={{ marginTop: 'auto', background: '#3E2723', color: '#FFF', padding: '16px 32px', borderRadius: 16, fontFamily: popFont, fontSize: 24 }}>
-              PRINTED ON: {today}
+            <div style={{ width: 120, height: 120, borderRadius: '50%', border: '1px solid #D4B895', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, marginBottom: 40 }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: '1px dashed #3E2723' }}></div>
+            </div>
+
+            <div style={{ marginTop: 'auto', color: '#8C7B6B', fontFamily: typewriterFont, fontSize: 14 }}>
+              Compiled on {today}
             </div>
           </div>
         </div>
@@ -123,43 +123,43 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
           return (
             <div key={node._id} className="pdf-page" style={pageBase}>
-              <div style={{ position: 'absolute', inset: 40, background: '#FFF', border: '8px solid #3E2723', borderRadius: 24, boxShadow: '20px 20px 15px 0px rgba(0,0,0,0.45)', padding: 40, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ position: 'absolute', inset: 40, padding: 40, display: 'flex', flexDirection: 'column' }}>
 
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '6px solid #3E2723', paddingBottom: 20, marginBottom: 40 }}>
-                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#FDFBF7' }}>
-                    PANEL #{index + 1}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #EEDEC1', paddingBottom: 20, marginBottom: 40 }}>
+                  <div style={{ fontSize: 14, fontFamily: typewriterFont, color: '#8C7B6B', letterSpacing: 1 }}>
+                    Entry No. {index + 1}
                   </div>
-                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#3E2723', background: '#D4B895', padding: '8px 16px', border: 'none', borderRadius: 12 }}>
+                  <div style={{ fontSize: 20, fontFamily: cursiveFont, color: '#3E2723' }}>
                     {fullDate}
                   </div>
                 </div>
 
                 {/* Title */}
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                  <div style={{ fontSize: 60, fontFamily: popFont, color: '#FDFBF7', lineHeight: 1.1, textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 36, fontFamily: serifFont, color: '#3E2723', lineHeight: 1.2, fontWeight: 700 }}>
                     {node.title}
                   </div>
                 </div>
 
-                {/* Image */}
+                {/* Image (Polaroid Style) */}
                 {hasImage && (
-                  <div style={{ margin: '0 auto 40px', background: '#1E352F', padding: 16, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
-                    <img src={node.mediaUrl} alt={node.title} crossOrigin="anonymous" style={{ maxWidth: 600, maxHeight: 400, objectFit: 'cover', display: 'block', border: 'none' }} />
+                  <div style={{ margin: '0 auto 40px', background: '#FFF', padding: '16px 16px 40px 16px', boxShadow: '2px 4px 12px rgba(0,0,0,0.08)', transform: 'rotate(-1deg)', width: '80%' }}>
+                    <img src={node.mediaUrl} alt={node.title} crossOrigin="anonymous" style={{ width: '100%', height: 'auto', maxHeight: 400, objectFit: 'cover', display: 'block', filter: 'sepia(0.2) contrast(1.1)' }} />
                   </div>
                 )}
 
                 {/* Content */}
-                <div style={{ flex: 1, background: '#F5F5F5', border: '4px dashed #3E2723', borderRadius: 16, padding: 24, position: 'relative' }}>
-                  <p style={{ fontSize: 24, lineHeight: 1.6, color: '#3E2723', fontFamily: bodyFont, fontWeight: 700, margin: 0, whiteSpace: 'pre-wrap' }}>
+                <div style={{ flex: 1, padding: 24, position: 'relative' }}>
+                  <p style={{ fontSize: 24, lineHeight: 1.8, color: '#3E2723', fontFamily: cursiveFont, margin: 0, whiteSpace: 'pre-wrap' }}>
                     {node.content}
                   </p>
                 </div>
 
                 {/* Footer */}
-                <div style={{ marginTop: 'auto', paddingTop: 20, textAlign: 'center' }}>
-                  <div style={{ fontSize: 20, fontFamily: popFont, color: '#FFF', background: '#3E2723', display: 'inline-block', padding: '10px 24px', borderRadius: 12 }}>
-                    CAPTURED BY: {addedBy}
+                <div style={{ marginTop: 'auto', paddingTop: 20, textAlign: 'right', borderTop: '1px solid #EEDEC1' }}>
+                  <div style={{ fontSize: 14, fontFamily: typewriterFont, color: '#8C7B6B' }}>
+                    Penned by {addedBy}
                   </div>
                 </div>
 

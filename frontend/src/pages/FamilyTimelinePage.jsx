@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
+import { Printer } from 'lucide-react';
 import api from '../api/axios';
 import LegacyBookExporter from '../components/features/LegacyBookExporter';
 
@@ -272,7 +273,7 @@ function FamilyTimelinePage() {
           }}
           title="Print Scrapbook"
         >
-          <span style={{ fontSize: 32 }}>🖨️</span>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center" }}><Printer size={28} strokeWidth={1.5} color="#3E2723" /></span>
         </motion.button>
       )}
 
