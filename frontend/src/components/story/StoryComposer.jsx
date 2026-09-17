@@ -26,7 +26,7 @@ const GLOBAL_STYLES = `
     box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
   .vault-dp-wrap .react-datepicker__input-container input:focus {
-    transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45);
+     box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45);
   }
   .react-datepicker { background: #FFF !important; border: none !important; font-family: 'Baloo 2', sans-serif !important; font-weight: 700 !important; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); border-radius: 12px !important; overflow: hidden; }
   .react-datepicker__header { background: #D4B895 !important; border-bottom: 3px solid #3E2723 !important; }

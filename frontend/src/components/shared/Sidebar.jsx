@@ -188,8 +188,8 @@ export default function Sidebar({
           border: none; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
           transition: all 0.1s ease;
         }
-        .lt-sb-user:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
-        .lt-sb-user:active { transform: translate(2px, 2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
+        .lt-sb-user:hover {  box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+        .lt-sb-user:active {  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
 
         .lt-sb-avatar {
           width: 42px; height: 42px; border-radius: 50%;
@@ -227,7 +227,7 @@ export default function Sidebar({
         }
         .lt-sb-link:hover {
           background: #C89B3C; border: none;
-          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); transform: translate(-2px, -2px);
+          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); 
         }
         .lt-sb-link.lt-active {
           background: #D4B895; border: none;
@@ -264,8 +264,8 @@ export default function Sidebar({
   padding: 10px 12px; border-radius: 8px; background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s ease;
 }
-.lt-sb-logout:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
-        .lt-sb-logout:hover { background: #1E352F; transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+.lt-sb-logout:hover { background: rgba(255,255,255,0.2);  }
+        .lt-sb-logout:hover { background: #1E352F;  box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
         .lt-sb-logout:hover .lt-sb-lbl { color: #FFF !important; }
 
       `}</style>

@@ -37,8 +37,8 @@ const CSS = `
     box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
   .fr-ghost-btn.fr-ghost-on { background: #C89B3C; }
-  .fr-ghost-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
-  .fr-ghost-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
+  .fr-ghost-btn:hover {  box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .fr-ghost-btn:active {  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
 
   /* STATUS BAR */
   .fr-status-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; padding: 16px 20px; background: #FFF; border: none; border-radius: 16px; flex-wrap: wrap; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); }
@@ -100,7 +100,7 @@ const CSS = `
     border-radius: 16px; margin-bottom: 16px; transition: all 0.1s; position: relative;
     box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
-  .fr-member-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .fr-member-card:hover {  box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
   .fr-member-card.fr-me { background: #D4B895; }
   .fr-member-card.fr-ghost-card { opacity: 0.6; }
   .fr-member-card-top { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
