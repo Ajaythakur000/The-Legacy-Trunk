@@ -86,7 +86,7 @@ export default function HomePage() {
   useStars(canvasRef);
 
   const comicTabs = [
-    { id: 'family', label: 'FAMILY VAULT', color: #FDFBF7 },
+    { id: 'family', label: 'FAMILY VAULT', color: '#FDFBF7' },
     { id: 'global', label: 'EXPLORE WORLD', color: '#C89B3C' },
   ];
 
@@ -106,7 +106,7 @@ export default function HomePage() {
 
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2 }} style={{ marginTop: 24 }}>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 56px)', color: #FDFBF7, margin: '0 0 10px', letterSpacing: 2 }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 56px)', color: '#FDFBF7', margin: '0 0 10px', letterSpacing: 2 }}>
                 {activeTab === 'family' ? 'OUR SCRAPBOOK' : 'GLOBAL MEMORIES'}
               </h1>
               <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: activeTab === 'family' ? '#D4B895' : '#C89B3C', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>

@@ -60,7 +60,7 @@ function EmptyState({ hasStories }) {
         {hasStories ? '🔍' : '📭'}
       </div>
       <h3 style={{
-        fontFamily: "'Playfair Display', serif", color: #FDFBF7,
+        fontFamily: "'Playfair Display', serif", color: '#FDFBF7',
         fontSize: 32, margin: '0 0 12px', letterSpacing: 1
       }}>
         {hasStories ? 'NOTHING IN THIS PILE!' : 'YOUR SCRAPBOOK IS EMPTY!'}
@@ -188,7 +188,7 @@ function MyStoriesPage() {
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
           style={{
             fontFamily: "'Playfair Display', serif", fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-            color: #FDFBF7,
+            color: '#FDFBF7',
             margin: '0 0 16px', letterSpacing: 2
           }}
         >

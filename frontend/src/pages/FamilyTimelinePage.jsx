@@ -47,7 +47,7 @@ function EmptyState() {
   return (
     <div style={{ textAlign: 'center', padding: '60px', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', margin: '40px auto', maxWidth: 600 }}>
       <div style={{ fontSize: 80, marginBottom: 20 }}>👻</div>
-      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: #FDFBF7, margin: '0 0 10px' }}>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#FDFBF7', margin: '0 0 10px' }}>
         IT'S A GHOST TOWN!
       </h3>
       <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', margin: 0 }}>
@@ -177,7 +177,7 @@ function FamilyTimelinePage() {
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
-            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: #FDFBF7, margin: '20px 0 10px', letterSpacing: 2 }}>
+            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#FDFBF7', margin: '20px 0 10px', letterSpacing: 2 }}>
             MEMORY LANE 🛤️
           </motion.h1>
           <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: '#C89B3C', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>

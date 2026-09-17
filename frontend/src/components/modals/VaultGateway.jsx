@@ -22,7 +22,7 @@ const SLIDES = [
         ))}
       </div>
     ),
-    color: #FDFBF7,
+    color: '#FDFBF7',
   },
   {
     icon: '🔒',
@@ -58,7 +58,7 @@ const SLIDES = [
         ))}
       </div>
     ),
-    color: #FDFBF7,
+    color: '#FDFBF7',
   },
 ];
 

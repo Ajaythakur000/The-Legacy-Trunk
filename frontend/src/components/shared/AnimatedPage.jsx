@@ -126,7 +126,7 @@ function ComicWipe() {
     >
       <motion.div
         initial={{ scale: 1, rotate: -10 }} animate={{ scale: 0, rotate: 10 }} transition={{ duration: 0.3 }}
-        style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: #FDFBF7 }}
+        style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#FDFBF7' }}
       >
         POW!
       </motion.div>

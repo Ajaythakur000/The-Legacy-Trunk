@@ -237,7 +237,7 @@ function DashboardPage() {
   const familyName = selectedCircle?.circleName || selectedCircle?.name || 'Your Family';
 
   const roomCards = [
-    { to: '/vault-stories', icon: '📸', title: 'VAULT STORIES', desc: 'Share your favorite messy family photos here.', color: #FDFBF7, delay: 0.1 },
+    { to: '/vault-stories', icon: '📸', title: 'VAULT STORIES', desc: 'Share your favorite messy family photos here.', color: '#FDFBF7', delay: 0.1 },
     { to: '/vault', icon: '💬', title: 'FAMILY CHAT', desc: 'Secure real-time gossip and event planning.', color: '#C89B3C', delay: 0.2 },
     { to: '/radar', icon: '📡', title: 'LIVE RADAR', desc: 'See who is where on the live family map.', color: '#00C853', delay: 0.3 },
   ];
@@ -252,7 +252,7 @@ function DashboardPage() {
         <div style={{ textAlign: 'center', padding: '60px 20px 40px' }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
-            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(32px, 5vw, 56px)', color: #FDFBF7, letterSpacing: 2, margin: '20px 0 10px' }}>
+            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(32px, 5vw, 56px)', color: '#FDFBF7', letterSpacing: 2, margin: '20px 0 10px' }}>
             {loadingCircleDetails ? 'WAKING UP...' : `${familyName.toUpperCase()} HUB`}
           </motion.h1>
           <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto 20px', background: '#D4B895', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
@@ -369,7 +369,7 @@ function DashboardPage() {
                     <motion.div key="code" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                       <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#3E2723', marginBottom: 16 }}>Share this code for manual entry.</p>
                       <div style={{ background: '#FFF', border: '4px dashed #3E2723', borderRadius: 16, padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'inset 4px 4px 0px rgba(0,0,0,0.1)' }}>
-                        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: #FDFBF7, letterSpacing: 2 }}>
+                        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#FDFBF7', letterSpacing: 2 }}>
                           {selectedCircle?.familyCode || user?.familyCode || '———'}
                         </span>
                         <motion.button onClick={handleCopyCode} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
@@ -412,7 +412,7 @@ function DashboardPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'fixed', inset: 0, background: 'rgba(23,23,25,0.9)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, padding: 20 }}>
               <motion.div initial={{ scale: 0.8, rotate: -5 }} animate={{ scale: 1, rotate: 2 }} exit={{ scale: 0.8, rotate: 5 }} transition={{ type: 'spring', bounce: 0.6 }} style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, width: '100%', maxWidth: 420, padding: '40px', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', textAlign: 'center' }}>
                 <button onClick={() => setShowDeleteModal(false)} style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', border: 'none', background: '#D4B895', color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>✕</button>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: #FDFBF7, marginBottom: 16 }}>NUKING VAULT? 💣</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#FDFBF7', marginBottom: 16 }}>NUKING VAULT? 💣</div>
                 <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', marginBottom: 24 }}>Type <strong>{selectedCircle?.circleName}</strong> to confirm.</p>
                 <div style={{ marginBottom: 24 }}><ComicInput value={deleteConfirmText} onChange={(e) => setDeleteConfirmText(e.target.value)} placeholder="Type name here..." /></div>
                 <motion.button onClick={confirmDeleteCircle} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ width: '100%', padding: '16px', background: '#1E352F', border: 'none', borderRadius: 12, color: '#FFF', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>NUKE IT!</motion.button>
@@ -431,7 +431,7 @@ function DashboardPage() {
               <motion.div initial={{ scale: 0.8, rotate: 5 }} animate={{ scale: 1, rotate: -2 }} exit={{ scale: 0.8, rotate: -5 }} transition={{ type: 'spring', bounce: 0.6 }} style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, width: '100%', maxWidth: 420, padding: '40px', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', textAlign: 'center' }}>
                 <button onClick={() => setMemberToRemove(null)} style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', border: 'none', background: '#D4B895', color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>✕</button>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>🥾</div>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: #FDFBF7, marginBottom: 16 }}>KICK OUT?</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#FDFBF7', marginBottom: 16 }}>KICK OUT?</div>
                 <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', marginBottom: 32 }}>Are you sure you want to boot <strong>{memberToRemove.name}</strong> out of the family?</p>
                 <div style={{ display: 'flex', gap: 16 }}>
                   <motion.button onClick={() => setMemberToRemove(null)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ flex: 1, padding: '14px', background: '#FFF', border: 'none', borderRadius: 12, color: '#3E2723', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>NOPE</motion.button>

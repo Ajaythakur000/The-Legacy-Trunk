@@ -162,7 +162,7 @@ function TouchpadPanHandler() {
 function PopupContent({ name, isMe, isOnline, isGhost, distance, time }) {
   return (
     <div style={{ padding: '16px', minWidth: 180, textAlign: 'center' }}>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: #FDFBF7, marginBottom: 8 }}>{name}{isMe ? ' (YOU)' : ''}</div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#FDFBF7', marginBottom: 8 }}>{name}{isMe ? ' (YOU)' : ''}</div>
       {isGhost ? (
         <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#3E2723' }}>👻 Ghost Mode</div>
       ) : (
@@ -315,8 +315,8 @@ function FamilyRadarPage() {
                 />
                 {myLocation&&!isGhostModeOn&&(
                   <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
-                  <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color: #FDFBF7,fillColor:'#D4B895',fillOpacity:0.2,weight:2}}/>
-                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color: #FDFBF7,fillColor:'#1E352F',fillOpacity:0.05,weight:1,dashArray:'4 8'}}/></>
+                  <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color: '#FDFBF7',fillColor:'#D4B895',fillOpacity:0.2,weight:2}}/>
+                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color: '#FDFBF7',fillColor:'#1E352F',fillOpacity:0.05,weight:1,dashArray:'4 8'}}/></>
                 )}
                 {visibleMembers.map(m=>(
                   <Marker key={m._id} icon={otherIcon(init(m.name),m.isOnline)} position={[m.latitude,m.longitude]}>
@@ -356,7 +356,7 @@ function FamilyRadarPage() {
                       <div className={`fr-orb${m.isGhostModeOn?' fr-orb-ghost':m.isOnline?'':''}`}>{init(m.name)}</div>
                     </div>
                     <div className="fr-member-info"><div className="fr-member-name">{m.name}</div><div className="fr-member-role">{m.isGhostModeOn?'Hiding':m.isOnline?'Active':`Last seen ${timeAgo(m.updatedAt)}`}</div></div>
-                    <div style={{fontFamily:"'Playfair Display', serif",fontSize:14,color: #FDFBF7}}>{getDist(m)}</div>
+                    <div style={{fontFamily:"'Playfair Display', serif",fontSize:14,color: '#FDFBF7'}}>{getDist(m)}</div>
                   </div>
                   <div className="fr-member-stats">
                     {m.isGhostModeOn?<span className="fr-chip fr-chip-gh">👻 Hidden</span>:m.isOnline?<span className="fr-chip fr-chip-on">Active</span>:<span className="fr-chip">Offline</span>}

@@ -85,7 +85,7 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Stat cards */}
           {[
-            { val: totalPoints.toLocaleString(), lbl: 'TOTAL PTS', color: #FDFBF7 },
+            { val: totalPoints.toLocaleString(), lbl: 'TOTAL PTS', color: '#FDFBF7' },
             { val: activeDays, lbl: 'ACTIVE DAYS', color: '#C89B3C' },
             { val: maxStreak, lbl: 'MAX STREAK', color: '#00C853' },
           ].map((s, i) => (
@@ -102,7 +102,7 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
             </button>
             {isDropdownOpen && (
               <div style={{ position: 'absolute', top: '110%', right: 0, background: '#FFF', border: 'none', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', zIndex: 100, minWidth: 150, overflow: 'hidden' }}>
-                <div style={{ padding: '16px', fontFamily: "'Playfair Display', serif", fontSize: 16, color: #FDFBF7, borderBottom: '3px solid #3E2723', background: '#F5F5F5' }}>CURRENT ✓</div>
+                <div style={{ padding: '16px', fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#FDFBF7', borderBottom: '3px solid #3E2723', background: '#F5F5F5' }}>CURRENT ✓</div>
                 {currentYear === 2026 && <div style={{ padding: '16px', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: '#3E2723', cursor: 'not-allowed' }}>No past years</div>}
               </div>
             )}

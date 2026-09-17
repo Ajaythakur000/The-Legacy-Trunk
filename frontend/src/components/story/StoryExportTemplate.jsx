@@ -92,7 +92,7 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
                 <div style={{ fontSize: 24, color: '#3E2723', fontFamily: popFont, textTransform: 'uppercase' }}>
                   THE LEGACY TRUNK
                 </div>
-                <div style={{ fontSize: 14, color: #FDFBF7, fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <div style={{ fontSize: 14, color: '#FDFBF7', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
                   Family Scrapbook
                 </div>
               </div>
@@ -104,7 +104,7 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
 
           {/* ── TITLE ── */}
           <h1 style={{
-            fontSize: 56, color: #FDFBF7,
+            fontSize: 56, color: '#FDFBF7',
             margin: '0 0 30px', lineHeight: 1.1, textAlign: 'center', fontFamily: popFont, textTransform: 'uppercase'
           }}>
             {story?.title || 'UNTITLED MEMORY'}

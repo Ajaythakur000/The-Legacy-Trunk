@@ -49,7 +49,7 @@ class ErrorBoundary extends React.Component {
 
             <h1 style={{
               fontFamily: "'Playfair Display', serif", fontSize: 48,
-              color: #FDFBF7, margin: '0 0 10px',
+              color: '#FDFBF7', margin: '0 0 10px',
             }}>
               APP CRASHED!
             </h1>

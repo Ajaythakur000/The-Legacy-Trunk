@@ -140,7 +140,7 @@ export default function Sidebar({
         <div className="lt-sb-foot">
           <button className="lt-sb-logout" onClick={handleLogout}>
             <div className="lt-sb-icon-wrap" style={{ border: 'none', background: 'transparent' }}>🚪</div>
-            <span className="lt-sb-lbl" style={{ color: #FDFBF7 }}>
+            <span className="lt-sb-lbl" style={{ color: '#FDFBF7' }}>
               LEAVE THE VAULT
             </span>
           </button>
