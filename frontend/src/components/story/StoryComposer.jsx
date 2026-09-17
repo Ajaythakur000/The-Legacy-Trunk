@@ -7,67 +7,69 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import imageCompression from 'browser-image-compression';
+import { Sparkles, PenTool, Image as ImageIcon, Wand2, Tags, Type, X, Camera, Scissors, Plus, Trophy, Globe, Pin } from 'lucide-react';
 
-// ─── Global Neo-Brutalist Styles ─────────────────────────────────────────────
 const GLOBAL_STYLES = `
-  .sc-textarea { scrollbar-width: thin; scrollbar-color: #3E2723 transparent; }
+  .sc-textarea { scrollbar-width: thin; scrollbar-color: rgba(62,39,35,0.3) transparent; }
   .sc-textarea::-webkit-scrollbar { width: 8px; }
-  .sc-textarea::-webkit-scrollbar-thumb { background: #3E2723; border-radius: 4px; }
-  .sc-textarea::placeholder, .sc-input::placeholder { color: rgba(23,23,25,0.4); font-family: 'Playfair Display', serif; }
+  .sc-textarea::-webkit-scrollbar-thumb { background: rgba(62,39,35,0.3); border-radius: 4px; }
+  .sc-textarea::placeholder, .sc-input::placeholder { color: rgba(140, 123, 107, 0.6); font-family: 'Courier Prime', monospace; font-style: italic; }
 
-  /* DatePicker pop-art override */
+  /* DatePicker vintage override */
   .vault-dp-wrap .react-datepicker-wrapper, .vault-dp-wrap .react-datepicker__input-container { width: 100%; }
   .vault-dp-wrap .react-datepicker__input-container input {
-    width: 100%; padding: 14px 16px 14px 44px;
-    background: #FFF; border: none;
-    borderRadius: 12px; color: #3E2723;
-    font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 16px; outline: none;
+    width: 100%; padding: 12px 16px;
+    background: transparent; border: 1px dashed rgba(62,39,35,0.3);
+    border-radius: 4px; color: #3E2723;
+    font-family: 'Courier Prime', monospace; font-size: 14px; outline: none;
     transition: all .2s; box-sizing: border-box;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
   .vault-dp-wrap .react-datepicker__input-container input:focus {
-     box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45);
+     border-color: #3E2723;
   }
-  .react-datepicker { background: #FFF !important; border: none !important; font-family: 'Baloo 2', sans-serif !important; font-weight: 700 !important; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); border-radius: 12px !important; overflow: hidden; }
-  .react-datepicker__header { background: #D4B895 !important; border-bottom: 3px solid #3E2723 !important; }
-  .react-datepicker__current-month, .react-datepicker__day-name, .react-datepicker-time__header { color: #3E2723 !important; font-family: 'Playfair Display', serif !important; font-size: 14px !important; letter-spacing: 1px !important; }
-  .react-datepicker__day { color: #3E2723 !important; border-radius: 6px !important; font-size: 14px !important; font-weight: 700; }
-  .react-datepicker__day:hover { background: #C89B3C !important; color: #3E2723 !important; border: none; }
-  .react-datepicker__day--selected { background: #1E352F !important; color: #FFF !important; border: none; }
+  .react-datepicker { background: #FDFBF7 !important; border: 1px solid #3E2723 !important; font-family: 'Courier Prime', monospace !important; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); border-radius: 4px !important; }
+  .react-datepicker__header { background: #EEDEC1 !important; border-bottom: 1px solid #3E2723 !important; }
+  .react-datepicker__current-month, .react-datepicker__day-name, .react-datepicker-time__header { color: #3E2723 !important; font-family: 'Playfair Display', serif !important; font-size: 14px !important; }
+  .react-datepicker__day { color: #3E2723 !important; border-radius: 2px !important; font-size: 14px !important; }
+  .react-datepicker__day:hover { background: rgba(62,39,35,0.1) !important; color: #3E2723 !important; }
+  .react-datepicker__day--selected { background: #3E2723 !important; color: #FFF !important; }
   .react-datepicker__triangle { display: none !important; }
-  .react-datepicker__time-container { border-left: 3px solid #3E2723 !important; }
-  .react-datepicker__time { background: #FFF !important; }
-  .react-datepicker__time-list-item { color: #3E2723 !important; font-weight: 700 !important; }
-  .react-datepicker__time-list-item:hover { background: #D4B895 !important; }
-  .react-datepicker__time-list-item--selected { background: #1E352F !important; color: #FFF !important; }
-
-  .sc-select option { background: #FFF; color: #3E2723; padding: 10px; font-weight: 700; }
+  .react-datepicker__time-container { border-left: 1px solid #3E2723 !important; }
+  .react-datepicker__time { background: #FDFBF7 !important; }
+  .react-datepicker__time-list-item { color: #3E2723 !important; }
+  .react-datepicker__time-list-item:hover { background: rgba(62,39,35,0.1) !important; }
+  .react-datepicker__time-list-item--selected { background: #3E2723 !important; color: #FFF !important; }
 `;
 
-// ─── Input wrapper ────────────────────────────────────────────────────────────
-function ComicInput({ label, type = 'text', name, value, onChange, placeholder, icon, disabled, as: Tag = 'input', rows, maxLength, style: extraStyle }) {
+function TypewriterInput({ label, type = 'text', name, value, onChange, placeholder, icon: Icon, disabled, as: Tag = 'input', rows, maxLength, style: extraStyle }) {
   const [focused, setFocused] = useState(false);
+  
   return (
-    <div style={{ marginBottom: 16 }}>
-      {label && <label style={{ display: 'block', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', marginBottom: 6 }}>{label}</label>}
+    <div style={{ marginBottom: 20 }}>
+      {label && <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'Courier Prime', monospace", fontSize: 12, color: '#8C7B6B', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+        {Icon && <Icon size={14} />} {label}
+      </label>}
       <div style={{ position: 'relative' }}>
-        {icon && (
-          <div style={{ position: 'absolute', left: 16, top: Tag === 'input' ? '50%' : 20, transform: Tag === 'input' ? 'translateY(-50%)' : 'none', fontSize: 18, zIndex: 1 }}>
-            {icon}
-          </div>
-        )}
         <Tag
           type={type} name={name} value={value} onChange={onChange}
           placeholder={placeholder} rows={rows} maxLength={maxLength} disabled={disabled}
           className={Tag === 'textarea' ? 'sc-textarea' : 'sc-input'}
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           style={{ 
-            width: '100%', padding: icon ? '14px 16px 14px 44px' : '14px 16px', 
-            background: '#FFF', border: 'none', borderRadius: 12, 
-            color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, 
+            width: '100%', padding: '12px 16px', 
+            background: Tag === 'textarea' ? 'transparent' : 'rgba(255,255,255,0.5)', 
+            border: 'none',
+            borderBottom: focused ? '1px solid #3E2723' : '1px solid rgba(62,39,35,0.2)',
+            borderRadius: 0, 
+            color: '#3E2723', fontFamily: "'Courier Prime', monospace", fontSize: 16, lineHeight: 1.6,
             outline: 'none', resize: 'vertical', boxSizing: 'border-box',
-            boxShadow: focused ? '6px 6px 0px 0px #C89B3C' : '4px 4px 0px 0px #3E2723',
-            transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all .2s',
+            transition: 'border-bottom 0.2s',
+            ...(Tag === 'textarea' && {
+              backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, rgba(62,39,35,0.05) 31px, rgba(62,39,35,0.05) 32px)',
+              backgroundAttachment: 'local',
+              lineHeight: '32px',
+              paddingTop: '6px'
+            }),
             ...extraStyle 
           }}
         />
@@ -76,20 +78,21 @@ function ComicInput({ label, type = 'text', name, value, onChange, placeholder, 
   );
 }
 
-// ─── Comic Button ──────────────────────────────────────────────────────────────
-function ComicButton({ children, onClick, type = 'button', disabled, fullWidth, color = '#C89B3C' }) {
+function VintageButton({ children, onClick, type = 'button', disabled, fullWidth, primary }) {
   return (
     <motion.button
       type={type} onClick={onClick} disabled={disabled}
-      whileHover={!disabled ? { scale: 1.02 } : {}}
-      whileTap={!disabled ? { scale: 0.95, x: 4, y: 4, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
+      whileHover={!disabled ? { opacity: 0.85 } : {}}
+      whileTap={!disabled ? { scale: 0.98 } : {}}
       style={{
         width: fullWidth ? '100%' : 'auto',
-        padding: '14px 24px', background: disabled ? '#ccc' : color,
-        border: 'none', borderRadius: 12, color: '#3E2723',
-        fontFamily: "'Playfair Display', serif", fontSize: 20, letterSpacing: 1,
+        padding: '10px 20px', background: disabled ? 'transparent' : (primary ? '#3E2723' : 'transparent'),
+        border: primary ? '1px solid #3E2723' : '1px solid rgba(62,39,35,0.3)', 
+        borderRadius: 4, 
+        color: disabled ? 'rgba(62,39,35,0.3)' : (primary ? '#FDFBF7' : '#3E2723'),
+        fontFamily: "'Courier Prime', monospace", fontSize: 13, textTransform: 'uppercase', letterSpacing: 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transition: 'box-shadow 0.1s, transform 0.1s',
+        transition: 'all 0.2s',
         display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center'
       }}
     >
@@ -98,32 +101,31 @@ function ComicButton({ children, onClick, type = 'button', disabled, fullWidth, 
   );
 }
 
-// ─── Toggle checkbox ──────────────────────────────────────────────────────────
-function ComicToggle({ checked, onChange, label, icon, color = '#D4B895' }) {
+function VintageToggle({ checked, onChange, label, icon: Icon }) {
   return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', userSelect: 'none' }}>
+    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
       <div onClick={onChange} style={{ 
-        width: 28, height: 28, borderRadius: 8, border: 'none', 
-        background: checked ? color : '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-        boxShadow: checked ? '2px 2px 0px 0px #3E2723' : '4px 4px 0px 0px #3E2723',
-        transform: checked ? 'translate(2px, 2px)' : 'none', transition: 'all .1s' 
+        width: 18, height: 18, borderRadius: 2, 
+        border: checked ? '1px solid #3E2723' : '1px solid rgba(62,39,35,0.3)', 
+        background: checked ? '#3E2723' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+        transition: 'all .1s' 
       }}>
-        {checked && <span style={{ fontSize: 18, color: '#3E2723' }}>✓</span>}
+        {checked && <span style={{ fontSize: 12, color: '#FDFBF7' }}>✓</span>}
       </div>
-      <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723' }}>
-        {icon} {label}
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'Courier Prime', monospace", fontSize: 13, color: '#3E2723', textTransform: 'uppercase' }}>
+        {Icon && <Icon size={14} />} {label}
       </span>
     </label>
   );
 }
 
 const TONES = [
-  { value: 'Correct Grammar & Improve Flow', label: 'Correct Grammar', icon: '✍️' },
-  { value: 'Expand and add more details',    label: 'Expand Details',  icon: '✨' },
-  { value: '😂 Very Funny',                  label: 'Funny',           icon: '😂' },
-  { value: '🥺 Emotional',                   label: 'Emotional',       icon: '🥺' },
-  { value: '😎 Gen-Z Slang',                 label: 'Gen-Z Slang',     icon: '😎' },
-  { value: '🧐 Sarcastic & Witty',           label: 'Sarcastic',       icon: '🧐' },
+  { value: 'Correct Grammar & Improve Flow', label: 'Correct Grammar' },
+  { value: 'Expand and add more details',    label: 'Expand Details' },
+  { value: 'Very Funny',                     label: 'Funny' },
+  { value: 'Emotional',                      label: 'Emotional' },
+  { value: 'Gen-Z Slang',                    label: 'Gen-Z Slang' },
+  { value: 'Sarcastic & Witty',              label: 'Sarcastic' },
 ];
 
 export default function StoryComposer({ activeCircleId, onPostStory, uploading }) {
@@ -154,7 +156,7 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
 
     setCompressing(true);
     let tid;
-    if (selected.some(f => f.size > 2 * 1024 * 1024)) tid = toast.loading("Squishing photos...");
+    if (selected.some(f => f.size > 2 * 1024 * 1024)) tid = toast.loading("Processing images...");
 
     const compressedFiles = [];
     const options = { maxSizeMB: 8, maxWidthOrHeight: 1920, useWebWorker: true, initialQuality: 0.85 };
@@ -174,7 +176,7 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
     }
 
     if (compressedFiles.length > 0) setMediaFiles(prev => [...prev, ...compressedFiles]);
-    if (tid) toast.success("Photos squished!", { id: tid });
+    if (tid) toast.success("Images ready!", { id: tid });
     setCompressing(false);
     e.target.value = null;
   };
@@ -188,34 +190,34 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
   };
 
   const handleAutoTitle = async () => {
-    if (!content.trim()) return toast.error('Write something first!');
+    if (!content.trim()) return toast.error('Draft something first!');
     setAiLoading(true);
-    const tid = toast.loading('Thinking of a title...');
+    const tid = toast.loading('Typing title...');
     try {
       const res = await api.post('/ai/generate-title', { storyText: content });
       setTitle(res.data.title);
-      toast.success('Boom! Title ready. 💥', { id: tid });
-    } catch { toast.error('AI is tired. Do it yourself!', { id: tid }); }
+      toast.success('Title drafted.', { id: tid });
+    } catch { toast.error('Typewriter jammed.', { id: tid }); }
     finally { setAiLoading(false); }
   };
 
   const handleEnhanceStory = async () => {
-    if (!content.trim()) return toast.error('Write something first!');
-    if (!tone) return toast.error('Pick a tone!');
+    if (!content.trim()) return toast.error('Draft something first!');
+    if (!tone) return toast.error('Select an ink flavor.');
     setAiLoading(true);
-    const tid = toast.loading('Adding flavor...');
+    const tid = toast.loading('Rewriting draft...');
     try {
       const res = await api.post('/ai/enhance-story', { text: content, tone });
       setContent(res.data.enhancedText);
-      toast.success('Text souped up! 🪄', { id: tid });
-    } catch { toast.error('Magic failed!', { id: tid }); }
+      toast.success('Draft revised.', { id: tid });
+    } catch { toast.error('Ink dried up.', { id: tid }); }
     finally { setAiLoading(false); }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!activeCircleId) return toast.error('Select a Family');
-    if (!title.trim() || !content.trim()) return toast.error('Title and content are required');
+    if (!activeCircleId) return toast.error('Select an Archive');
+    if (!title.trim() || !content.trim()) return toast.error('Title and entry are required');
     if (isMilestone && !milestoneDate) return toast.error('Select a date');
 
     const fd = new FormData();
@@ -228,67 +230,88 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
     fd.append('tone', tone || 'Original');
     mediaFiles.forEach(f => fd.append('media', f));
 
-    const tid = toast.loading('Pasting into scrapbook...');
+    const tid = toast.loading('Filing entry...');
     try {
       await onPostStory(fd);
-      toast.success('Memory Pasted! 📌', { id: tid });
+      toast.success('Entry Archived.', { id: tid });
       setTitle(''); setContent(''); setTags(''); setIsGlobalPublic(false); setMediaFiles([]); setMediaPreviews([]); setIsMilestone(false); setMilestoneDate(null); setTone('');
-    } catch (err) { toast.error(err?.message || 'Failed to paste', { id: tid }); }
+    } catch (err) { toast.error(err?.message || 'Filing failed', { id: tid }); }
   };
 
   return (
     <>
       <style>{GLOBAL_STYLES}</style>
 
-      <div style={{ background: '#FDFBF7', border: '1px solid rgba(62,39,35,0.1)', borderRadius: 4, padding: '40px', boxShadow: '2px 2px 8px rgba(0,0,0,0.05), inset 0 0 40px rgba(140, 123, 107, 0.1)', position: 'relative' }}>
+      {/* Typewriter Paper Effect */}
+      <div style={{ 
+        background: '#FDFBF7', 
+        border: '1px solid rgba(62,39,35,0.1)', 
+        padding: '40px 40px 60px', 
+        boxShadow: '0 10px 30px -10px rgba(0,0,0,0.1), inset 0 0 60px rgba(140, 123, 107, 0.05)', 
+        position: 'relative',
+        maxWidth: 800,
+        margin: '0 auto',
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.03\'/%3E%3C/svg%3E")'
+      }}>
         
-        {/* Masking tape piece at top center */}
-        <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%) rotate(-1deg)', width: 120, height: 26, background: 'rgba(220, 210, 190, 0.8)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), inset 0 0 10px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '2px 3px 2px 4px', zIndex: 10 }}></div>
-        
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* Metal paper clip graphic */}
+        <div style={{ position: 'absolute', top: -15, right: 60, width: 20, height: 50, border: '3px solid rgba(140,123,107,0.6)', borderRadius: 10, borderBottom: 'none', zIndex: 10, transform: 'rotate(12deg)' }}></div>
+        <div style={{ position: 'absolute', top: -5, right: 64, width: 12, height: 35, border: '3px solid rgba(140,123,107,0.6)', borderRadius: 6, borderTop: 'none', zIndex: 11, transform: 'rotate(12deg)' }}></div>
+
+        <div style={{ textAlign: 'center', marginBottom: 30 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', fontStyle: 'italic', margin: 0 }}>New Entry</h2>
+          <div style={{ width: 40, height: 1, background: '#D4B895', margin: '12px auto' }}></div>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
           {/* ── TITLE ── */}
-          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 250 }}>
-              <ComicInput label="MEMORY TITLE" name="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="E.g. The Great Pie Disaster of '24" maxLength={150} disabled={!activeCircleId || uploading || aiLoading || compressing} icon="✍️" />
+              <TypewriterInput label="Header Title" name="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Type a title..." maxLength={150} disabled={!activeCircleId || uploading || aiLoading || compressing} icon={Type} />
             </div>
-            <div style={{ marginTop: 26 }}>
-              <ComicButton onClick={handleAutoTitle} disabled={aiLoading || compressing || !content.trim() || !activeCircleId} color="#D4B895">
-                🤖 AI TITLE
-              </ComicButton>
+            <div style={{ marginBottom: 20 }}>
+              <VintageButton onClick={handleAutoTitle} disabled={aiLoading || compressing || !content.trim() || !activeCircleId}>
+                <Wand2 size={14} /> Auto-Title
+              </VintageButton>
             </div>
           </div>
 
           {/* ── CONTENT ── */}
           <div>
-            <ComicInput label="THE STORY" as="textarea" value={content} onChange={e => setContent(e.target.value)} placeholder="So, here's what actually happened..." rows={6} maxLength={2000} disabled={!activeCircleId || uploading || aiLoading || compressing} icon="💭" />
+            <TypewriterInput label="Draft Body" as="textarea" value={content} onChange={e => setContent(e.target.value)} placeholder="Begin typing..." rows={8} maxLength={2000} disabled={!activeCircleId || uploading || aiLoading || compressing} icon={PenTool} />
             
-            {/* AI Toolbar */}
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', background: '#F5F5F5', padding: 12, border: '3px dashed #3E2723', borderRadius: 12, marginTop: -8 }}>
-              <select value={tone} onChange={e => setTone(e.target.value)} disabled={aiLoading || compressing || !activeCircleId} style={{ padding: '10px', borderRadius: 8, border: 'none', fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 14, outline: 'none', cursor: 'pointer', background: '#FFF', flex: 1, minWidth: 180 }}>
-                <option value="" disabled>✨ Pick an AI Flavor...</option>
-                {TONES.map(t => <option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
+            {/* AI Toolbar (Vintage style) */}
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', padding: '12px 0', borderTop: '1px dashed rgba(62,39,35,0.1)' }}>
+              <span style={{ fontFamily: "'Courier Prime', monospace", fontSize: 12, color: '#8C7B6B', textTransform: 'uppercase' }}><Sparkles size={14} style={{ verticalAlign: 'text-bottom' }}/> Edit with Ink:</span>
+              <select value={tone} onChange={e => setTone(e.target.value)} disabled={aiLoading || compressing || !activeCircleId} style={{ padding: '6px 10px', borderRadius: 2, border: '1px solid rgba(62,39,35,0.2)', fontFamily: "'Courier Prime', monospace", fontSize: 13, outline: 'none', cursor: 'pointer', background: 'transparent', flex: 1, minWidth: 150, color: '#3E2723' }}>
+                <option value="" disabled>Select flavor...</option>
+                {TONES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
-              <motion.button type="button" onClick={handleEnhanceStory} disabled={aiLoading || compressing || !content.trim() || !activeCircleId || !tone} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ padding: '10px 16px', background: '#C89B3C', border: 'none', borderRadius: 8, fontFamily: "'Playfair Display', serif", color: '#3E2723', cursor: 'pointer', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)' }}>
-                {aiLoading ? 'MIXING...' : 'SPICE IT UP! 🌶️'}
-              </motion.button>
+              <VintageButton type="button" onClick={handleEnhanceStory} disabled={aiLoading || compressing || !content.trim() || !activeCircleId || !tone}>
+                {aiLoading ? 'Drafting...' : 'Rewrite'}
+              </VintageButton>
             </div>
           </div>
 
           {/* ── TAGS ── */}
-          <ComicInput label="TAGS" name="tags" value={tags} onChange={e => setTags(e.target.value)} placeholder="funny, vacation, uncle-bob" disabled={!activeCircleId || uploading || aiLoading || compressing} icon="🏷️" />
+          <TypewriterInput label="Index Tags" name="tags" value={tags} onChange={e => setTags(e.target.value)} placeholder="e.g. vacation, 1999" disabled={!activeCircleId || uploading || aiLoading || compressing} icon={Tags} />
 
           {/* ── MEDIA UPLOAD ── */}
-          <div style={{ border: '4px dashed #3E2723', borderRadius: 16, padding: '24px', background: '#D4B895' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#3E2723' }}>📸 PHOTOS (MAX 5)</div>
+          <div style={{ border: '1px solid rgba(62,39,35,0.2)', padding: '24px', background: 'rgba(255,255,255,0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px dashed rgba(62,39,35,0.2)', paddingBottom: 12 }}>
+              <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 13, color: '#3E2723', textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Camera size={16} /> Attachments (Max 5)
+              </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button type="button" onClick={() => setShowCollageMaker(true)} disabled={!activeCircleId || uploading || aiLoading || compressing} style={{ padding: '8px 16px', background: '#1E352F', border: 'none', borderRadius: 8, fontFamily: "'Playfair Display', serif", color: '#FFF', cursor: 'pointer', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)' }}>
-                  ✂️ COLLAGE
-                </button>
-                <label style={{ padding: '8px 16px', background: '#FFF', border: 'none', borderRadius: 8, fontFamily: "'Playfair Display', serif", color: '#3E2723', cursor: 'pointer', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)' }}>
+                <VintageButton type="button" onClick={() => setShowCollageMaker(true)} disabled={!activeCircleId || uploading || aiLoading || compressing}>
+                  <Scissors size={14} /> Collage
+                </VintageButton>
+                <label style={{ display: 'inline-block' }}>
                   <input type="file" multiple accept="image/*,video/*" onChange={handleFileSelect} disabled={compressing || uploading} style={{ display: 'none' }} />
-                  ➕ BROWSE
+                  <div style={{ padding: '10px 20px', border: '1px solid rgba(62,39,35,0.3)', borderRadius: 4, color: '#3E2723', fontFamily: "'Courier Prime', monospace", fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Plus size={14} /> Browse
+                  </div>
                 </label>
               </div>
             </div>
@@ -296,12 +319,14 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
             {/* Polaroid Previews */}
             <AnimatePresence>
               {mediaPreviews.length > 0 && (
-                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', paddingTop: 10 }}>
                   {mediaPreviews.map((url, idx) => (
-                    <motion.div key={idx} initial={{ scale: 0, rotate: -20 }} animate={{ scale: 1, rotate: idx % 2 === 0 ? 4 : -4 }} exit={{ scale: 0 }}
-                      style={{ position: 'relative', width: 100, height: 110, background: '#FFF', padding: '6px 6px 20px', border: 'none', borderRadius: 4, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
-                      <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', border: 'none' }} />
-                      <button type="button" onClick={() => removeFile(idx)} style={{ position: 'absolute', top: -10, right: -10, width: 24, height: 24, borderRadius: '50%', background: '#1E352F', border: 'none', color: '#FFF', cursor: 'pointer', fontFamily: "'Playfair Display', serif" }}>X</button>
+                    <motion.div key={idx} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                      style={{ position: 'relative', width: 90, height: 100, background: '#FFF', padding: '4px 4px 16px', border: '1px solid rgba(0,0,0,0.1)', boxShadow: '2px 4px 10px rgba(0,0,0,0.1)' }}>
+                      <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'sepia(0.3)' }} />
+                      <button type="button" onClick={() => removeFile(idx)} style={{ position: 'absolute', top: -8, right: -8, width: 20, height: 20, borderRadius: '50%', background: '#3E2723', border: 'none', color: '#FFF', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <X size={12} />
+                      </button>
                     </motion.div>
                   ))}
                 </div>
@@ -310,9 +335,9 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
           </div>
 
           {/* ── SETTINGS ── */}
-          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 250, padding: 16, border: 'none', borderRadius: 12, background: isMilestone ? '#C89B3C' : '#F5F5F5', transition: 'background .3s' }}>
-              <ComicToggle checked={isMilestone} onChange={() => setIsMilestone(v => !v)} label="MARK AS MILESTONE" icon="🏆" color="#D4B895" />
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', borderTop: '1px solid rgba(62,39,35,0.1)', paddingTop: 20 }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <VintageToggle checked={isMilestone} onChange={() => setIsMilestone(v => !v)} label="Mark as Milestone" icon={Trophy} />
               <AnimatePresence>
                 {isMilestone && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden', marginTop: 12 }}>
@@ -324,15 +349,17 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
               </AnimatePresence>
             </div>
             
-            <div style={{ flex: 1, minWidth: 250, padding: 16, border: 'none', borderRadius: 12, background: isGlobalPublic ? '#D4B895' : '#F5F5F5', display: 'flex', alignItems: 'center' }}>
-              <ComicToggle checked={isGlobalPublic} onChange={() => setIsGlobalPublic(v => !v)} label="PUBLIC TO WORLD" icon="🌍" color="#C89B3C" />
+            <div style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'flex-start' }}>
+              <VintageToggle checked={isGlobalPublic} onChange={() => setIsGlobalPublic(v => !v)} label="Public to World" icon={Globe} />
             </div>
           </div>
 
           {/* ── SUBMIT ── */}
-          <ComicButton type="submit" fullWidth disabled={uploading || aiLoading || compressing || !activeCircleId} color="#00C853">
-            {uploading ? 'GLUING IT DOWN...' : 'PASTE INTO SCRAPBOOK 📌'}
-          </ComicButton>
+          <div style={{ marginTop: 10 }}>
+            <VintageButton type="submit" fullWidth primary disabled={uploading || aiLoading || compressing || !activeCircleId}>
+              <Pin size={16} /> {uploading ? 'Filing...' : 'File Entry'}
+            </VintageButton>
+          </div>
         </form>
       </div>
 
@@ -343,8 +370,10 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               style={{ position: 'fixed', inset: 0, background: 'rgba(23,23,25,0.9)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
               <motion.div initial={{ scale: .9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: .9, y: 20 }} transition={{ type: 'spring', bounce: 0.5 }}
-                style={{ position: 'relative', width: '100%', maxWidth: 900, maxHeight: '90vh', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <button onClick={() => setShowCollageMaker(false)} style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, background: '#1E352F', border: 'none', color: '#FFF', width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>✕</button>
+                style={{ position: 'relative', width: '100%', maxWidth: 900, maxHeight: '90vh', background: '#FDFBF7', border: '1px solid #3E2723', borderRadius: 4, boxShadow: '0 20px 40px rgba(0,0,0,0.3)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <button onClick={() => setShowCollageMaker(false)} style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, background: 'transparent', border: '1px solid #3E2723', color: '#3E2723', width: 32, height: 32, borderRadius: 2, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <X size={16} />
+                </button>
                 <CollageMaker onClose={() => setShowCollageMaker(false)} onSave={handleCollageSave} />
               </motion.div>
             </motion.div>
