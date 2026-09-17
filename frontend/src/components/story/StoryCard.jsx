@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import StoryCommentBox from './StoryCommentBox';
 import StoryExportTemplate from './StoryExportTemplate';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, MessageCircle, Share, Printer, Trash2, Stamp } from 'lucide-react';
+import { Heart, Flower2, MessageCircle, Share, Printer, Trash2, Stamp } from 'lucide-react';
 
 // ── Vintage Action Button ───────────────────────────────────────────────────────
 function VintageActionBtn({ onClick, active, icon: Icon, label, color }) {
@@ -27,7 +27,7 @@ function VintageActionBtn({ onClick, active, icon: Icon, label, color }) {
       onMouseEnter={(e) => { e.currentTarget.style.color = color; e.currentTarget.style.opacity = 1; }}
       onMouseLeave={(e) => { e.currentTarget.style.color = active ? color : 'rgba(62, 39, 35, 0.6)'; e.currentTarget.style.opacity = active ? 1 : 0.7; }}
     >
-      <Icon size={18} strokeWidth={1.5} color="currentColor" /> {label}
+      <Icon size={20} strokeWidth={1.5} color="currentColor" style={{ fill: active ? color : 'transparent', transition: 'fill 0.3s ease' }} /> {label}
     </motion.button>
   );
 }
@@ -120,8 +120,8 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
     
     const count = images.length;
     const PopAnim = () => showPopAnim ? (
-      <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', color: '#B22222', zIndex: 10 }}>
-        <Heart size={80} fill="#B22222" strokeWidth={1} />
+      <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', color: '#D81B60', zIndex: 10 }}>
+        <Flower2 size={80} fill="#D81B60" color="#D81B60" strokeWidth={1} />
       </motion.div>
     ) : null;
 
@@ -154,11 +154,11 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
       style={{
         background: '#FDFBF7',
         border: '1px solid rgba(62,39,35,0.1)',
-        borderRadius: 4, // Sharp paper edges
-        padding: '32px',
+        borderRadius: 2, 
+        padding: '32px 32px 40px 32px',
         position: 'relative',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.04)',
-        marginBottom: 40,
+        boxShadow: '2px 2px 4px rgba(0,0,0,0.05), 4px 4px 0 -1px #FDFBF7, 4px 4px 0 0 rgba(62,39,35,0.1), 8px 8px 0 -2px #FDFBF7, 8px 8px 0 -1px rgba(62,39,35,0.1)',
+        marginBottom: 50,
       }}
     >
       {/* Masking Tape */}
@@ -166,14 +166,14 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
         position: 'absolute',
         top: -12,
         left: '50%',
-        transform: 'translateX(-50%) rotate(-1deg)',
-        width: 100,
-        height: 25,
-        background: 'rgba(238, 225, 200, 0.7)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        transform: 'translateX(-50%) rotate(-2deg)',
+        width: 120,
+        height: 30,
+        background: 'rgba(245, 235, 215, 0.85)',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.1), inset 0 0 10px rgba(0,0,0,0.02)',
         zIndex: 10,
-        borderLeft: '2px dashed rgba(0,0,0,0.05)',
-        borderRight: '2px dashed rgba(0,0,0,0.05)'
+        borderLeft: '3px dashed rgba(62,39,35,0.1)',
+        borderRight: '3px dashed rgba(62,39,35,0.1)'
       }} />
 
       {/* Milestone stamp */}
@@ -228,7 +228,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
         )}
 
         {/* Content - Handwriting Font for Nostalgia */}
-        <p style={{ margin: 0, fontFamily: "'Caveat', cursive", fontSize: 24, lineHeight: 1.6, color: '#3E2723', whiteSpace: 'pre-wrap', transform: 'rotate(-0.5deg)' }}>
+        <p style={{ margin: 0, fontFamily: "'Caveat', cursive", fontSize: 28, lineHeight: 1.6, color: '#3E2723', whiteSpace: 'pre-wrap', transform: 'rotate(-0.5deg)' }}>
           {story.content}
         </p>
       </div>
@@ -238,7 +238,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
       {/* ── ACTION BAR (STAMPS) ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 40, borderTop: '1px solid rgba(62,39,35,0.1)', paddingTop: 16, flexWrap: 'wrap' }}>
-        <VintageActionBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe} icon={Heart} label={story?.likes?.length || 0} color="#B22222" />
+        <VintageActionBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe} icon={Flower2} label={story?.likes?.length || 0} color="#D81B60" />
         <VintageActionBtn onClick={() => setShowComments(!showComments)} active={showComments} icon={MessageCircle} label={story?.comments?.length || 0} color="#3E2723" />
         <VintageActionBtn onClick={handleShare} active={isShared} icon={Share} label="Share" color="#3E2723" />
         {images.length > 0 && (
