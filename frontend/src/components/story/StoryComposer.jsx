@@ -240,7 +240,10 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
     <>
       <style>{GLOBAL_STYLES}</style>
 
-      <div style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', position: 'relative' }}>
+      <div style={{ background: '#FDFBF7', border: '1px solid rgba(62,39,35,0.1)', borderRadius: 4, padding: '40px', boxShadow: '2px 2px 8px rgba(0,0,0,0.05), inset 0 0 40px rgba(140, 123, 107, 0.1)', position: 'relative' }}>
+        
+        {/* Masking tape piece at top center */}
+        <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%) rotate(-1deg)', width: 120, height: 26, background: 'rgba(220, 210, 190, 0.8)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), inset 0 0 10px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '2px 3px 2px 4px', zIndex: 10 }}></div>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 

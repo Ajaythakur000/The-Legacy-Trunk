@@ -154,13 +154,15 @@ export default function Sidebar({
         @keyframes ltComicSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         @keyframes ltActivePop  { 0% { transform: scale(0.95); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-        /* ── Sidebar shell ── */
+        /* ── Sidebar shell (Leather Spine) ── */
         .lt-sidebar {
           position: relative; height: 100%; width: 280px; flex-shrink: 0;
-          background: #FFF; border-right: 4px solid #3E2723;
+          background: #2a1610; /* Dark Leather */
+          border-right: 8px solid #1a0d09;
+          box-shadow: inset -10px 0 20px rgba(0,0,0,0.5), 8px 0px 15px 0px rgba(0,0,0,0.45);
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
           display: flex; flex-direction: column; z-index: 50; overflow-x: hidden;
           transition: width 0.2s, transform 0.2s;
-          box-shadow: 8px 0px 0px rgba(23,23,25,0.1);
         }
 
         /* Desktop close logic */
@@ -180,13 +182,13 @@ export default function Sidebar({
         .lt-sb-overlay.lt-sb-vis { display: block; }
 
         /* ── Head: user card ── */
-        .lt-sb-head { padding: 20px 16px 16px; border-bottom: 4px solid #3E2723; background: #D4B895; }
+        .lt-sb-head { padding: 20px 16px 16px; border-bottom: 2px solid rgba(212, 184, 149, 0.2); background: transparent; }
 
         .lt-sb-user {
           display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-          border-radius: 12px; cursor: pointer; background: #FFF;
-          border: none; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
-          transition: all 0.1s ease;
+          border-radius: 12px; cursor: pointer; background: rgba(0,0,0,0.2);
+          border: 1px solid rgba(212, 184, 149, 0.1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+          transition: all 0.2s ease;
         }
         .lt-sb-user:hover {  box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
         .lt-sb-user:active {  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
@@ -195,16 +197,16 @@ export default function Sidebar({
           width: 42px; height: 42px; border-radius: 50%;
           background: #C89B3C; border: none;
           display: flex; align-items: center; justify-content: center;
-          font-family: 'Playfair Display', serif; font-size: 18px; color: #3E2723; flex-shrink: 0;
+          font-family: 'Playfair Display', serif; font-size: 18px; color: #D4B895; flex-shrink: 0;
         }
 
         .lt-sb-uname {
-          font-family: 'Playfair Display', serif; font-size: 16px; color: #3E2723;
+          font-family: 'Playfair Display', serif; font-size: 16px; color: #D4B895;
           white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .lt-sb-urole {
           font-family: 'Baloo 2', sans-serif; font-size: 11px; font-weight: 800;
-          color: #3E2723; margin-top: 2px;
+          color: #D4B895; margin-top: 2px;
         }
         .lt-sb-online {
           width: 14px; height: 14px; border-radius: 50%;
@@ -215,34 +217,30 @@ export default function Sidebar({
         .lt-sb-section { padding: 16px 16px 4px; }
         .lt-sec-label {
           font-family: 'Playfair Display', serif; font-size: 14px;
-          color: #3E2723; padding: 0 8px; margin-bottom: 12px;
+          color: #D4B895; padding: 0 8px; margin-bottom: 12px;
         }
 
         /* ── Nav link ── */
         .lt-sb-link {
           display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-          border-radius: 12px; text-decoration: none; margin-bottom: 8px;
-          background: #FFF; border: 1px solid transparent; color: #3E2723;
-          transition: all 0.1s ease;
+          border-radius: 8px; text-decoration: none; margin-bottom: 8px;
+          background: transparent; border: 1px solid transparent; color: #D4B895;
+          transition: all 0.2s ease;
         }
-        .lt-sb-link:hover { background: #C89B3C; border: 1px solid #C89B3C;
-          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); 
-        }
-        .lt-sb-link.lt-active { background: #D4B895; border: 1px solid #D4B895;
-          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); animation: ltActivePop 0.3s ease;
-        }
+        .lt-sb-link:hover { background: rgba(212,184,149,0.1); border: 1px solid rgba(212,184,149,0.2); }
+        .lt-sb-link.lt-active { background: rgba(212,184,149,0.15); border: 1px solid rgba(212,184,149,0.3); box-shadow: inset 0 2px 8px rgba(0,0,0,0.2); }
 
         /* ── Icon wrap ── */
         .lt-sb-icon-wrap {
-          width: 38px; height: 38px; border-radius: 10px;
+          width: 38px; height: 38px; border-radius: 8px;
           display: flex; align-items: center; justify-content: center;
-          background: #FFF; border: none; flex-shrink: 0;
+          background: rgba(0,0,0,0.2); border: 1px solid rgba(212,184,149,0.1); flex-shrink: 0;
         }
         .lt-sb-icon { font-size: 18px; line-height: 1; }
 
         /* ── Link labels ── */
-        .lt-sb-lbl { font-family: 'Playfair Display', serif; font-size: 15px; color: #3E2723; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lt-sb-sublbl { font-family: 'Baloo 2', sans-serif; font-size: 11px; font-weight: 700; color: #3E2723; margin-top: 2px; }
+        .lt-sb-lbl { font-family: 'Playfair Display', serif; font-size: 15px; color: #D4B895; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lt-sb-sublbl { font-family: 'Baloo 2', sans-serif; font-size: 11px; font-weight: 700; color: #D4B895; margin-top: 2px; }
 
         /* ── Mobile search ── */
         .lt-mobile-search { display: none; padding: 16px 16px 4px; }
@@ -252,17 +250,17 @@ export default function Sidebar({
           border: none; border-radius: 12px; padding: 10px 14px;
           box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
         }
-        .lt-mobile-search-input { background: transparent; border: none; outline: none; color: #3E2723; font-family: 'Playfair Display', serif; font-size: 14px; width: 100%; }
+        .lt-mobile-search-input { background: transparent; border: none; outline: none; color: #D4B895; font-family: 'Playfair Display', serif; font-size: 14px; width: 100%; }
         .lt-mobile-search-input::placeholder { color: rgba(23,23,25,0.4); font-family: 'Playfair Display', serif; }
 
         /* ── Footer ── */
         .lt-sb-foot { padding: 16px; border-top: 1px dashed rgba(62,39,35,0.2); background: #3E2723; }
         .lt-sb-logout {
-  display: flex; align-items: center; gap: 12px; width: 100%;
-  padding: 10px 12px; border-radius: 8px; background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s ease;
-}
-.lt-sb-logout:hover { background: rgba(255,255,255,0.2);  }
+          display: flex; align-items: center; gap: 12px; padding: 12px; width: 100%;
+          border-radius: 8px; background: rgba(0,0,0,0.2); color: #D4B895;
+          border: 1px solid rgba(212,184,149,0.1); cursor: pointer; transition: all 0.2s ease;
+        }
+.lt-sb-logout:hover { background: rgba(212,184,149,0.1); border: 1px solid rgba(212,184,149,0.3); }
         .lt-sb-logout:hover { background: #1E352F;  box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
         .lt-sb-logout:hover .lt-sb-lbl { color: #FFF !important; }
 
