@@ -250,7 +250,7 @@ function LoginPage() {
 
             <p style={{ margin: '20px 0 0', fontWeight: 700, fontSize: 15, color: '#3E2723' }}>
               New here?{' '}
-              <Link to="/signup" style={{ color: '#FDFBF7', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>
+              <Link to="/signup" style={{ color: '#A0522D', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>
                 JOIN NOW
               </Link>
             </p>

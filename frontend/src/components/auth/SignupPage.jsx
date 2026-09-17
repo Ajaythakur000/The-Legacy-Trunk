@@ -67,27 +67,38 @@ function ComicInput({ type = 'text', name, placeholder, value, onChange, require
   );
 }
 
-// ─── Comic Select Field ──────────────────────────────────────────────────────
-function ComicSelect({ label, name, value, onChange, icon, options }) {
-  const [focused, setFocused] = useState(false);
+// ─── Vintage Role Toggle ──────────────────────────────────────────────────────
+function VintageRoleToggle({ label, name, value, onChange, options }) {
   return (
-    <div style={{ textAlign: 'left', marginBottom: '12px' }}>
-      {label && <label style={{ display: 'block', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', marginBottom: 4, letterSpacing: '1px' }}>{label}</label>}
-      <div style={{ position: 'relative' }}>
-        {icon && <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, zIndex: 2 }}>{icon}</div>}
-        <select
-          name={name} value={value} onChange={onChange} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
-          style={{
-            width: '100%', padding: `14px 36px 14px ${icon ? '44px' : '16px'}`,
-            background: '#FFFFFF', border: 'none', borderRadius: '12px',
-            color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: 16, outline: 'none', boxSizing: 'border-box', appearance: 'none', cursor: 'pointer',
-            boxShadow: focused ? '6px 6px 0px 0px #D4B895' : '4px 4px 0px 0px #3E2723',
-            transform: focused ? 'translate(-2px, -2px)' : 'none', transition: 'all 0.2s ease',
-          }}
-        >
-          {options.map(o => ( <option key={o.value} value={o.value}>{o.label}</option> ))}
-        </select>
-        <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#3E2723', fontSize: 14, fontWeight: 'bold' }}>▼</div>
+    <div style={{ textAlign: 'left', marginBottom: '16px' }}>
+      {label && <label style={{ display: 'block', fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723', marginBottom: 8, letterSpacing: '1px' }}>{label}</label>}
+      <div style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
+        {options.map(o => {
+          const isSelected = value === o.value;
+          return (
+            <div 
+              key={o.value}
+              onClick={() => onChange({ target: { name, value: o.value } })}
+              style={{
+                width: '100%', padding: '14px 16px',
+                background: isSelected ? '#D4B895' : '#FFFFFF', 
+                border: isSelected ? '2px solid #3E2723' : '2px dashed #D4B895', 
+                borderRadius: '12px',
+                color: '#3E2723', fontFamily: "'Baloo 2',sans-serif", fontWeight: 600, fontSize: 16, 
+                boxSizing: 'border-box', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 12,
+                transition: 'all 0.2s ease',
+                boxShadow: isSelected ? '4px 4px 0px 0px #3E2723' : 'none',
+                transform: isSelected ? 'translate(-2px, -2px)' : 'none',
+              }}
+            >
+              <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #3E2723', background: isSelected ? '#A0522D' : '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {isSelected && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#FDFBF7' }} />}
+              </div>
+              {o.label}
+            </div>
+          )
+        })}
       </div>
     </div>
   );
@@ -187,7 +198,7 @@ function SignupPage() {
             <ComicInput label="PASSWORD" type="password" name="password" placeholder="••••••••" value={form.password} onChange={handleChange} required icon={iconLock} />
 
             {!inviteToken && (
-              <ComicSelect label="WHAT'S THE PLAN?" name="role" value={form.role} onChange={handleChange} icon={iconRole}
+              <VintageRoleToggle label="WHAT'S THE PLAN?" name="role" value={form.role} onChange={handleChange}
                 options={[{ value: 'admin', label: 'Start a New Family (Admin)' }, { value: 'member', label: 'Join Existing Family (Member)' }]} />
             )}
 
@@ -215,7 +226,7 @@ function SignupPage() {
             </motion.button>
 
             <p style={{ margin: '20px 0 0', fontWeight: 700, fontSize: 15, color: '#3E2723', textAlign: 'center' }}>
-              Already a member? <Link to="/login" style={{ color: '#FDFBF7', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
+              Already a member? <Link to="/login" style={{ color: '#A0522D', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
             </p>
           </form>
         </div>
