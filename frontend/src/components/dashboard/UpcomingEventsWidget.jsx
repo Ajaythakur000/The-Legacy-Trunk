@@ -79,7 +79,7 @@ function UpcomingEventsWidget({ circleId }) {
         >
           {/* Header */}
           <div style={{ padding: '24px', borderBottom: '6px solid #3E2723', background: '#C89B3C', borderTopLeftRadius: 18, borderTopRightRadius: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', textShadow: '2px 2px 0px #FFF' }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723' }}>
               📅 CALENDAR
             </div>
             <button onClick={() => setIsModalOpen(false)} style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: '#1E352F', color: '#FFF', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
@@ -92,7 +92,7 @@ function UpcomingEventsWidget({ circleId }) {
             {loading ? (
               <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, padding: '40px 0' }}>LOADING DATES...</div>
             ) : error ? (
-              <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#D4B895', padding: '40px 0' }}>⚠️ {error}</div>
+              <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, color: #FDFBF7, padding: '40px 0' }}>⚠️ {error}</div>
             ) : events.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>🦗</div>

@@ -162,7 +162,7 @@ function SignupPage() {
           <StickerLogo />
 
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <h2 style={{ margin: '0 0 4px', fontSize: 32, fontFamily: "'Playfair Display', serif", color: '#A0522D', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>START A SCRAPBOOK</h2>
+            <h2 style={{ margin: '0 0 4px', fontSize: 32, fontFamily: "'Playfair Display', serif", color: '#A0522D' }}>START A SCRAPBOOK</h2>
             <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#3E2723' }}>Gather the family. Post the memories.</p>
           </div>
 
@@ -215,7 +215,7 @@ function SignupPage() {
             </motion.button>
 
             <p style={{ margin: '20px 0 0', fontWeight: 700, fontSize: 15, color: '#3E2723', textAlign: 'center' }}>
-              Already a member? <Link to="/login" style={{ color: '#D4B895', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
+              Already a member? <Link to="/login" style={{ color: #FDFBF7, textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
             </p>
           </form>
         </div>

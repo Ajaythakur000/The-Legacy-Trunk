@@ -18,7 +18,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, message }) {
         style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', maxWidth: '440px', width: '100%', textAlign: 'center', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)' }}>
         <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: '50%', background: '#D4B895', border: 'none', color: '#3E2723', cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 20, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>✕</button>
         <div style={{ fontSize: 60, marginBottom: 16 }}>💣</div>
-        <h3 style={{ margin: '0 0 16px', fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#D4B895', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>ERASE VAULT?</h3>
+        <h3 style={{ margin: '0 0 16px', fontFamily: "'Playfair Display', serif", fontSize: '32px', color: #FDFBF7 }}>ERASE VAULT?</h3>
         <p style={{ margin: '0 0 32px', color: '#3E2723', fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: '18px' }}>{message}</p>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
           <motion.button onClick={onClose} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ flex: 1, background: '#FFF', border: 'none', color: '#3E2723', padding: '14px 0', borderRadius: '12px', fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>NOPE</motion.button>
@@ -150,7 +150,7 @@ function VaultRoomPage() {
             <span style={{ fontSize: 24 }}>💬</span>
           </div>
           <div>
-            <h1 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#D4B895', letterSpacing: 1, textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+            <h1 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 24, color: #FDFBF7, letterSpacing: 1 }}>
               FAMILY CHAT
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>

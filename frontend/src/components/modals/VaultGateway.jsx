@@ -22,7 +22,7 @@ const SLIDES = [
         ))}
       </div>
     ),
-    color: '#D4B895',
+    color: #FDFBF7,
   },
   {
     icon: '🔒',
@@ -32,7 +32,7 @@ const SLIDES = [
       <div style={{ display: 'flex', justifyContent: 'center', gap: 24, margin: '16px 0', padding: 16, background: '#C89B3C', border: 'none', borderRadius: 12, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)' }}>
         {[['0', 'ADS EVER'], ['100%', 'ENCRYPTED'], ['∞', 'MEMORIES']].map(([num, lbl], i) => (
           <div key={i} style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', lineHeight: 1, textShadow: '2px 2px 0px #FFF' }}>{num}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', lineHeight: 1 }}>{num}</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 12, letterSpacing: 1, color: '#3E2723', marginTop: 4 }}>{lbl}</div>
           </div>
         ))}
@@ -58,7 +58,7 @@ const SLIDES = [
         ))}
       </div>
     ),
-    color: '#D4B895',
+    color: #FDFBF7,
   },
 ];
 
@@ -129,7 +129,7 @@ function VaultGateway({ onClose }) {
             {done && (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center', padding: '20px 0' }}>
                 <div style={{ fontSize: 80, marginBottom: 10 }}>🎉</div>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#A0522D', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723', marginBottom: 8 }}>YOU'RE IN!</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#A0522D', marginBottom: 8 }}>YOU'RE IN!</div>
                 <div style={{ fontWeight: 700, fontSize: 18, color: '#3E2723' }}>Let the fun begin!</div>
               </motion.div>
             )}

@@ -158,7 +158,7 @@ function ProfilePage() {
         <div style={{ textAlign: 'center', padding: '60px 20px 40px' }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
-            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', letterSpacing: 2, margin: '20px 0 10px' }}>
+            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: #FDFBF7, letterSpacing: 2, margin: '20px 0 10px' }}>
             YOUR PROFILE
           </motion.h1>
           <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: '#C89B3C', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(2deg)' }}>

@@ -47,7 +47,7 @@ function EmptyState() {
   return (
     <div style={{ textAlign: 'center', padding: '60px', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', margin: '40px auto', maxWidth: 600 }}>
       <div style={{ fontSize: 80, marginBottom: 20 }}>👻</div>
-      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#D4B895', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: #FDFBF7, margin: '0 0 10px' }}>
         IT'S A GHOST TOWN!
       </h3>
       <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', margin: 0 }}>
@@ -74,7 +74,7 @@ function PopupCard({ node, isEven }) {
       <div style={{ background: 'var(--pop-yellow)', display: 'inline-block', padding: '4px 12px', border: '2px solid var(--pop-black)', borderRadius: 8, fontFamily: "'Playfair Display', serif", fontSize: 12, color: 'var(--pop-black)', marginBottom: 8, transform: 'rotate(-2deg)' }}>
         MILESTONE! ⭐
       </div>
-      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: 'var(--pop-pink)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', margin: '0 0 8px', lineHeight: 1.1 }}>{node.title}</h3>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: 'var(--pop-pink)', margin: '0 0 8px', lineHeight: 1.1 }}>{node.title}</h3>
       <p className="handwriting" style={{ marginBottom: 16, maxHeight: 100, overflowY: 'auto' }}>{node.content}</p>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#F5F5F5', padding: '8px 12px', borderRadius: 12, border: '2px dashed var(--pop-black)' }}>
@@ -131,7 +131,7 @@ function SnakeRow({ node, index }) {
 
         {/* Date Badge */}
         <div className="date-badge" style={{ position: 'absolute', background: '#FFF', border: 'var(--comic-border)', borderRadius: 12, padding: '8px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: 'var(--comic-shadow)', transition: 'all 0.2s', zIndex: 5, ...(isEven ? { left: '75px' } : { right: '75px', left: 'auto' }) }}>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: 'var(--pop-cyan)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', whiteSpace: 'nowrap' }}>{formattedDate}, {year}</span>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: 'var(--pop-cyan)', whiteSpace: 'nowrap' }}>{formattedDate}, {year}</span>
           <span className="handwriting" style={{ fontSize: 16, marginTop: '-4px' }}>{formattedTime}</span>
         </div>
 
@@ -177,7 +177,7 @@ function FamilyTimelinePage() {
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
-            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', margin: '20px 0 10px', letterSpacing: 2 }}>
+            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: #FDFBF7, margin: '20px 0 10px', letterSpacing: 2 }}>
             MEMORY LANE 🛤️
           </motion.h1>
           <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 auto', background: '#C89B3C', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>

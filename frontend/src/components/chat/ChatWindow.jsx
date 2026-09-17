@@ -36,7 +36,7 @@ function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, 
             style={{ textAlign: 'center', margin: '80px auto', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', maxWidth: 450 }}
           >
             <div style={{ fontSize: 60, marginBottom: 16 }}>🦗</div>
-            <h3 style={{ margin: '0 0 10px', fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#C89B3C', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+            <h3 style={{ margin: '0 0 10px', fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#C89B3C' }}>
               CRICKETS CHIRPING!
             </h3>
             <p style={{ margin: 0, fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723' }}>

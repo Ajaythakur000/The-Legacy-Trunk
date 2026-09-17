@@ -37,7 +37,7 @@ function FamilyLegacyCard({ familyPoints }) {
 
       {/* Points number */}
       <motion.div key={familyPoints} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#C89B3C', lineHeight: 1, textShadow: '6px 6px 0px #3E2723', WebkitTextStroke: '2px #3E2723' }}>
+        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#C89B3C', lineHeight: 1 }}>
           {familyPoints.toLocaleString()}
         </span>
         <span style={{ fontFamily: "'Baloo 2',sans-serif", fontSize: 24, fontWeight: 800, color: '#3E2723' }}>

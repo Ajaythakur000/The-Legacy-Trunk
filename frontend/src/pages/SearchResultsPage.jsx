@@ -35,11 +35,11 @@ function SearchResultsPage() {
       
       {/* ── HEADER ── */}
       <div style={{ marginBottom: '40px', paddingBottom: '20px', borderBottom: '6px solid #3E2723' }}>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '48px', color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', margin: '0 0 12px 0', letterSpacing: '2px' }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '48px', color: #FDFBF7, margin: '0 0 12px 0', letterSpacing: '2px' }}>
           SEARCH RESULTS
         </h1>
         <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: '18px', color: '#3E2723', margin: 0, background: '#D4B895', display: 'inline-block', padding: '4px 12px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
-          HUNTING FOR: <span style={{ color: '#D4B895' }}>"{query}"</span>
+          HUNTING FOR: <span style={{ color: #FDFBF7 }}>"{query}"</span>
         </p>
       </div>
 

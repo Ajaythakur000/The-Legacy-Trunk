@@ -105,7 +105,7 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
         </button>
 
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: success ? '#00C853' : '#3E2723', margin: '0 0 10px', textShadow: '2px 2px 0px #D4B895' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: success ? '#00C853' : '#3E2723', margin: '0 0 10px' }}>
             {success ? 'VERIFIED!' : 'ENTER CODE'}
           </h2>
           <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#3E2723' }}>

@@ -154,7 +154,7 @@ function CollageMaker({ onClose, onSave }) {
       
       {/* ── HEADER ── */}
       <div style={{ padding: '24px', borderBottom: '6px solid #3E2723', background: '#C89B3C', flexShrink: 0 }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723', textShadow: '2px 2px 0px #FFF' }}>COLLAGE MAKER ✂️</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723' }}>COLLAGE MAKER ✂️</div>
       </div>
 
       {/* ── BODY ── */}

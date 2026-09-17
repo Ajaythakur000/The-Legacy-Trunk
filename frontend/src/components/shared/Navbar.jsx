@@ -43,7 +43,7 @@ const GLOBAL_CSS = `
   .lt-sb-head { padding: 20px 16px 16px; border-bottom: 4px solid #3E2723; flex-shrink: 0; background: #D4B895; }
   .lt-sb-brand { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
   .lt-sb-brand-sub { display:block; font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; margin-bottom:2px; }
-  .lt-sb-brand-name { display:block; font-family:'Playfair Display', serif; font-size:18px; color: '#D4B895'; text-shadow: 2px 2px 0px #3E2723; WebkitTextStroke: 1px #3E2723; }
+  .lt-sb-brand-name { display:block; font-family:'Playfair Display', serif; font-size:18px; color: #FDFBF7;  WebkitTextStroke: 1px #3E2723; }
   .lt-sb-user { display:flex; align-items:center; gap:10px; padding:8px 10px; background:#FFF; border: none; border-radius:12px; cursor:pointer; transition:all 0.2s; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
   .lt-sb-user:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
   .lt-sb-avatar { width:36px; height:36px; border-radius:50%; flex-shrink:0; background:#C89B3C; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display', serif; font-size:16px; color:#3E2723; border: none; }
@@ -99,8 +99,8 @@ const GLOBAL_CSS = `
   .lt-header-brand-sub { display:block; font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; line-height:1; margin-bottom:2px; }
   .lt-header-brand-name {
     display:block; font-family:'Playfair Display', serif; font-size:20px;
-    color: '#D4B895'; letter-spacing:1px; text-shadow: 2px 2px 0px #3E2723;
-    -webkit-text-stroke: 1px #3E2723;
+    color: #FDFBF7; letter-spacing:1px; 
+    
   }
 
   /* ── Search bar ── */
@@ -177,7 +177,7 @@ const GLOBAL_CSS = `
   }
   .lt-streak-wrap.lt-streak-lit { background:#A0522D; }
   .lt-streak-num { font-family:'Playfair Display', serif; font-size:18px; color:#3E2723; }
-  .lt-streak-wrap.lt-streak-lit .lt-streak-num { color:#FFF; text-shadow: 2px 2px 0px #3E2723; }
+  .lt-streak-wrap.lt-streak-lit .lt-streak-num { color:#FFF;  }
   .lt-streak-label { font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; }
 
   /* ── Avatar button ── */

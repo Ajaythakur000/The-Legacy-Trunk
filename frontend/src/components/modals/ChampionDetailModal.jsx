@@ -130,7 +130,7 @@ function ChampionDetailModal({ onClose, champion }) {
                 )}
               </div>
 
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723', margin: '0 0 4px', textShadow: '2px 2px 0px #FFF' }}>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723', margin: '0 0 4px' }}>
                 {name}
               </h2>
               
@@ -144,8 +144,8 @@ function ChampionDetailModal({ onClose, champion }) {
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
                 {[
-                  { label: 'STORIES', value: stories, color: '#D4B895', icon: '📜' },
-                  { label: 'LIKES', value: likes, color: '#D4B895', icon: '❤️' },
+                  { label: 'STORIES', value: stories, color: #FDFBF7, icon: '📜' },
+                  { label: 'LIKES', value: likes, color: #FDFBF7, icon: '❤️' },
                   { label: 'STREAK', value: streak, color: '#C89B3C', icon: '⚡' },
                 ].map((s, i) => (
                   <div key={i} style={{ background: s.color, border: 'none', borderRadius: 12, padding: '12px 8px', textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
@@ -172,7 +172,7 @@ function ChampionDetailModal({ onClose, champion }) {
                     width: '100%', padding: '16px', background: '#00C853',
                     border: 'none', borderRadius: 12, color: '#FFF',
                     fontFamily: "'Playfair Display', serif", fontSize: 20, cursor: 'pointer',
-                    boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', textShadow: '2px 2px 0px #3E2723'
+                    boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)'
                   }}
                 >
                   AWESOME! 💥

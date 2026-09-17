@@ -91,7 +91,7 @@ function FamilyOraclePage() {
   };
 
   const renderFormattedText = text => {
-    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: '#D4B895';">$1</strong>').replace(/\n/g, '<br />');
+    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #FDFBF7;">$1</strong>').replace(/\n/g, '<br />');
     const clean = DOMPurify.sanitize(formatted, { ALLOWED_TAGS: ['strong', 'br', 'span'], ALLOWED_ATTR: ['style'] });
     return <span dangerouslySetInnerHTML={{ __html: clean }} />;
   };
@@ -110,7 +110,7 @@ function FamilyOraclePage() {
         {/* Title section */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ fontSize: 80, marginBottom: 10, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>🤖</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#C89B3C', WebkitTextStroke: '2px #3E2723', textShadow: '4px 4px 0px #3E2723', margin: '0 0 10px' }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#C89B3C', margin: '0 0 10px' }}>
             AI GURU
           </h1>
           <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', background: '#D4B895', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-2deg)' }}>
@@ -125,7 +125,7 @@ function FamilyOraclePage() {
           <AnimatePresence>
             {error && (
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                style={{ background: '#FFF', border: 'none', borderRadius: 12, padding: '12px', marginBottom: 16, fontFamily: "'Playfair Display', serif", color: '#D4B895', textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
+                style={{ background: '#FFF', border: 'none', borderRadius: 12, padding: '12px', marginBottom: 16, fontFamily: "'Playfair Display', serif", color: #FDFBF7, textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
                 ⚠️ {error}
               </motion.div>
             )}

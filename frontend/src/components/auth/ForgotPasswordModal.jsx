@@ -114,7 +114,7 @@ function ForgotPasswordModal({ onClose }) {
           <div style={{ width: 60, height: 60, margin: '0 auto 10px', borderRadius: '50%', background: '#D4B895', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-10deg)' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#3E2723" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 26, height: 26 }}><circle cx="7.5" cy="15.5" r="5.5" /><path d="M21 2l-9.6 9.6M15.5 7.5l3 3M18 5l2 2" /></svg>
           </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#A0522D', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#A0522D', margin: '0 0 10px' }}>
             {step === 1 ? 'LOST YOUR KEY?' : 'NEW PASSWORD'}
           </h2>
           <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#3E2723' }}>{step === 1 ? 'Enter your email to get a reset code.' : 'Enter the code & pick a new password.'}</p>
@@ -146,7 +146,7 @@ function ForgotPasswordModal({ onClose }) {
                 {loading ? 'SAVING...' : 'CHANGE PASSWORD!'}
               </motion.button>
               <div style={{ textAlign: 'center' }}>
-                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#D4B895', cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
+                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: #FDFBF7, cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
               </div>
             </motion.form>
           )}

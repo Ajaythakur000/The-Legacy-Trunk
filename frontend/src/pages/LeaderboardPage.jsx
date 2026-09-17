@@ -25,7 +25,7 @@ function PodiumCard({ family, rank, delay }) {
   const badge = getFamilyBadge(family.familyBondPoints);
 
   const rankConfig = {
-    1: { pillarH: 260, scale: 1, color: '#D4B895', medal: '🏆', label: '1ST PLACE' },
+    1: { pillarH: 260, scale: 1, color: #FDFBF7, medal: '🏆', label: '1ST PLACE' },
     2: { pillarH: 210, scale: 0.9, color: '#C89B3C', medal: '🥈', label: '2ND PLACE' },
     3: { pillarH: 170, scale: 0.8, color: '#A0522D', medal: '🥉', label: '3RD PLACE' },
   };
@@ -85,7 +85,7 @@ function PodiumCard({ family, rank, delay }) {
           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#FFF', lineHeight: 1 }}>
             {family.familyBondPoints.toLocaleString()}
           </div>
-          <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 12, color: '#D4B895', marginTop: 2 }}>
+          <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 12, color: #FDFBF7, marginTop: 2 }}>
             PTS
           </div>
         </div>
@@ -125,7 +125,7 @@ function RankRow({ family, rank, index }) {
       </div>
 
       <div style={{ textAlign: 'right', background: '#F5F5F5', border: 'none', borderRadius: 8, padding: '6px 12px' }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: '#D4B895', lineHeight: 1 }}>{family.familyBondPoints.toLocaleString()}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: #FDFBF7, lineHeight: 1 }}>{family.familyBondPoints.toLocaleString()}</div>
         <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 10, color: '#3E2723', marginTop: 2 }}>PTS</div>
       </div>
     </motion.div>
@@ -173,7 +173,7 @@ function LeaderboardPage() {
 
         {/* ── PAGE HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }} style={{ textAlign: 'center', marginBottom: 60 }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', margin: '0 0 10px', letterSpacing: 2 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: #FDFBF7, margin: '0 0 10px', letterSpacing: 2 }}>
             HALL OF FAME 🏆
           </h1>
           <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 18, color: '#3E2723', margin: 0, background: '#C89B3C', display: 'inline-block', padding: '4px 16px', border: 'none', borderRadius: 8, transform: 'rotate(-2deg)', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>

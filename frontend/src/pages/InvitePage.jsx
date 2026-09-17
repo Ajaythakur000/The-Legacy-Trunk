@@ -44,11 +44,11 @@ function InvitePage() {
         <motion.div 
           animate={{ rotate: [0, -5, 5, -5, 0], scale: [1, 1.1, 1] }}
           transition={{ repeat: Infinity, duration: 1 }}
-          style={{ fontSize: '80px', textShadow: '4px 4px 0px #3E2723' }}
+          style={{ fontSize: '80px' }}
         >
           🎟️
         </motion.div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#FFF', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', marginTop: '24px', textAlign: 'center' }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#FFF', marginTop: '24px', textAlign: 'center' }}>
           CHECKING TICKET...
         </h2>
       </div>
@@ -70,7 +70,7 @@ function InvitePage() {
         }}
       >
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>💥</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#D4B895', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723', margin: '0 0 12px 0' }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: #FDFBF7, margin: '0 0 12px 0' }}>
           OH SNAP!
         </h2>
         <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, color: '#3E2723', fontSize: '18px', lineHeight: '1.5', marginBottom: '30px' }}>

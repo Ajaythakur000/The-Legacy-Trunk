@@ -94,15 +94,15 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
               VOL. 1
             </div>
 
-            <div style={{ fontSize: 24, fontFamily: popFont, color: '#D4B895', borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 24, fontFamily: popFont, color: #FDFBF7, borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
               THE OFFICIAL ARCHIVE OF
             </div>
 
-            <div style={{ fontSize: 90, color: '#D4B895', WebkitTextStroke: '4px #3E2723', textShadow: '12px 12px 0px #3E2723', fontFamily: popFont, lineHeight: 1, marginBottom: 20, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 90, color: #FDFBF7, fontFamily: popFont, lineHeight: 1, marginBottom: 20, textTransform: 'uppercase' }}>
               {circleName || 'OUR FAMILY'}
             </div>
             
-            <div style={{ fontSize: 60, color: '#C89B3C', WebkitTextStroke: '3px #3E2723', textShadow: '8px 8px 0px #3E2723', fontFamily: popFont, lineHeight: 1, marginBottom: 80, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 60, color: '#C89B3C', fontFamily: popFont, lineHeight: 1, marginBottom: 80, textTransform: 'uppercase' }}>
               COMIC BOOK
             </div>
 
@@ -127,7 +127,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '6px solid #3E2723', paddingBottom: 20, marginBottom: 40 }}>
-                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#D4B895', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+                  <div style={{ fontSize: 32, fontFamily: popFont, color: #FDFBF7 }}>
                     PANEL #{index + 1}
                   </div>
                   <div style={{ fontSize: 20, fontFamily: popFont, color: '#3E2723', background: '#D4B895', padding: '8px 16px', border: 'none', borderRadius: 12 }}>
@@ -137,7 +137,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
                 {/* Title */}
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                  <div style={{ fontSize: 60, fontFamily: popFont, color: '#D4B895', textShadow: '6px 6px 0px #3E2723', WebkitTextStroke: '2px #3E2723', lineHeight: 1.1, textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 60, fontFamily: popFont, color: #FDFBF7, lineHeight: 1.1, textTransform: 'uppercase' }}>
                     {node.title}
                   </div>
                 </div>
