@@ -261,7 +261,7 @@ const getCircleFeed = async (req, res) => {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    const stories = await Story.find({ originCircleId: circleId, isDeleted: false })
+    const stories = await Story.find({ originCircleId: circleId, isDeleted: { $ne: true } })
       .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name avatar')
@@ -287,7 +287,7 @@ const getMyFamilyStories = async (req, res) => {
     }
 
     const stories = await Story.find({
-      isDeleted: false,
+      isDeleted: { $ne: true },
       $or: [
         { originCircleId: req.user.activeCircleId },
         { sharedWith: req.user.activeCircleId },
@@ -311,7 +311,7 @@ const getGlobalStories = async (req, res) => {
     const limit = parseInt(req.query.limit) || 50;
     const skip = (page - 1) * limit;
 
-    const stories = await Story.find({ isGlobalPublic: true, isDeleted: false })
+    const stories = await Story.find({ isGlobalPublic: true, isDeleted: { $ne: true } })
       .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
       .sort({ createdAt: -1 })
@@ -385,7 +385,7 @@ const getMyStories = async (req, res) => {
     const limit = parseInt(req.query.limit) || 15;
     const skip = (page - 1) * limit;
 
-    const stories = await Story.find({ user: req.user._id, isDeleted: false })
+    const stories = await Story.find({ user: req.user._id, isDeleted: { $ne: true } })
       .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name avatar')
