@@ -145,7 +145,7 @@ function FamilyOraclePage() {
         <AnimatePresence>
           {loading && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 60, animation: 'spin 2s linear infinite' }}>🧠</div>
+              <div style={{ fontSize: 60, /* removed spin */ }}>🧠</div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', marginTop: 16 }}>SEARCHING THE NEURAL NET...</div>
               <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
             </motion.div>

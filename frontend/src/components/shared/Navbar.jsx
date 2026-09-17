@@ -6,6 +6,7 @@ import api from '../../api/axios';
 import { connectSocket, getSocket } from '../../services/socket';
 import ChampionDetailModal from '../modals/ChampionDetailModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, Search, Sparkles, Home, Bell, Flame, Snowflake, Crown, PenSquare, BookImage, LogOut, Heart, MessageSquare, Mail, Pin } from 'lucide-react';
 import Sidebar, { LogoRing } from './Sidebar';
 
 // ─── GLOBAL NEO-BRUTALIST STYLES ──────────────────────────────────────────────
@@ -40,28 +41,28 @@ const GLOBAL_CSS = `
     transition: width 0.32s cubic-bezier(0.4,0,0.2,1), transform 0.32s cubic-bezier(0.4,0,0.2,1);
     box-shadow: 8px 0px 15px 0px rgba(0,0,0,0.45);
   }
-  .lt-sb-head { padding: 20px 16px 16px; border-bottom: 4px solid #3E2723; flex-shrink: 0; background: #D4B895; }
+  .lt-sb-head { padding: 20px 16px 16px; border-bottom: 1px dashed rgba(62,39,35,0.2); flex-shrink: 0; background: #D4B895; }
   .lt-sb-brand { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
   .lt-sb-brand-sub { display:block; font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; margin-bottom:2px; }
-  .lt-sb-brand-name { display:block; font-family:'Playfair Display', serif; font-size:18px; color: #FDFBF7;  WebkitTextStroke: 1px #3E2723; }
-  .lt-sb-user { display:flex; align-items:center; gap:10px; padding:8px 10px; background:#FFF; border: none; border-radius:12px; cursor:pointer; transition:all 0.2s; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
-  .lt-sb-user:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .lt-sb-brand-name { display:block; font-family:'Playfair Display', serif; font-size:18px; color: #FDFBF7;   }
+  .lt-sb-user { display:flex; align-items:center; gap:10px; padding:8px 10px; background:#FFF; border: none; border-radius:8px; cursor:pointer; transition:all 0.2s; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
+  .lt-sb-user:hover { transform: translate(-2px, -2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
   .lt-sb-avatar { width:36px; height:36px; border-radius:50%; flex-shrink:0; background:#C89B3C; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display', serif; font-size:16px; color:#3E2723; border: none; }
   .lt-sb-uname { font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; overflow:hidden; text-overflow:ellipsis; }
-  .lt-sb-urole { font-family:'Space Mono',monospace; font-size:10px; color:#3E2723; font-weight:bold; }
+  .lt-sb-urole { font-family:'Courier Prime', monospace; font-size:10px; color:#3E2723; font-weight:bold; }
   .lt-sb-online { width:12px; height:12px; border-radius:50%; background:#00C853; border: none; flex-shrink:0; margin-left:auto; }
   .lt-sb-section { padding:0 12px; margin-top:16px; }
   .lt-sec-label { font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; padding:0 6px; margin-bottom:8px; }
-  .lt-sb-link { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; margin-bottom:8px; text-decoration:none; cursor:pointer; border: 1px solid transparent; transition:all 0.2s; color: #3E2723; }
-  .lt-sb-link:hover { background:#C89B3C; border: none; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); transform: translate(-2px, -2px); }
-  .lt-sb-link.lt-active { background:#D4B895; border: none; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
+  .lt-sb-link { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; margin-bottom:8px; text-decoration:none; cursor:pointer; border: 1px solid transparent; transition:all 0.2s; color: #3E2723; }
+  .lt-sb-link:hover { background:#C89B3C; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); transform: translate(-2px, -2px); }
+  .lt-sb-link.lt-active { background:#D4B895; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
   .lt-sb-icon { width:32px; height:32px; border-radius:8px; flex-shrink:0; background:#FFF; border: none; display:flex; align-items:center; justify-content:center; font-size:16px; }
   .lt-sb-lbl { font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; }
-  .lt-sb-sublbl { font-family:'Baloo 2',sans-serif; font-size:11px; font-weight:bold; color:#3E2723; }
+  .lt-sb-sublbl { font-family:'Courier Prime', monospace; font-size:11px; font-weight:bold; color:#3E2723; }
   .lt-sb-badge { font-family:'Playfair Display', serif; font-size:12px; background:#1E352F; border: none; color:#FFF; border-radius:8px; padding:2px 8px; margin-left:auto; flex-shrink:0; }
   .lt-sb-foot { margin-top:auto; padding:16px; border-top:4px solid #3E2723; background: #C89B3C; }
-  .lt-sb-logout { display:flex; align-items:center; gap:10px; padding:10px; border-radius:12px; cursor:pointer; background:#FFF; width:100%; border: none; transition:all 0.2s; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
-  .lt-sb-logout:hover { background:#1E352F; color:#FFF; transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .lt-sb-logout { display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; cursor:pointer; background:#FFF; width:100%; border: none; transition:all 0.2s; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
+  .lt-sb-logout:hover { background:#1E352F; color:#FFF; transform: translate(-2px, -2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
 
   /* ═══════════════════════════════════════
      MAIN COLUMN
@@ -74,10 +75,10 @@ const GLOBAL_CSS = `
   .lt-top-header {
     height: 76px; flex-shrink: 0;
     background: #FFF;
-    border-bottom: 4px solid #3E2723;
+    border-bottom: 1px dashed rgba(62,39,35,0.2);
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 24px; position: relative; z-index: 40;
-    box-shadow: 0 4px 0px 0px #3E2723;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.05);
   }
 
   .lt-nb-left  { display:flex; align-items:center; gap:16px; }
@@ -85,13 +86,13 @@ const GLOBAL_CSS = `
 
   /* ── Hamburger ── */
   .lt-ham-btn {
-    width:44px; height:44px; border-radius:12px;
+    width:44px; height:44px; border-radius:8px;
     background:#D4B895; border: none;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; transition:all 0.1s;
-    color:#3E2723; flex-shrink:0; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
+    color:#3E2723; flex-shrink:0; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
   }
-  .lt-ham-btn:hover { transform:translate(-2px,-2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .lt-ham-btn:hover { transform:translate(-2px,-2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
   .lt-ham-btn:active { transform:translate(2px,2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
 
   /* ── Header brand ── */
@@ -107,11 +108,11 @@ const GLOBAL_CSS = `
   .lt-search-form {
     display:flex; align-items:center; gap:9px;
     background:#FFF; border: none;
-    border-radius:12px; padding:10px 18px; transition:all 0.2s; width:260px;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); position:relative;
+    border-radius:8px; padding:10px 18px; transition:all 0.2s; width:260px;
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.08); position:relative;
   }
-  .lt-search-form:focus-within { transform:translate(-2px,-2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); width: 300px; }
-  .lt-search-input { border:none; background:transparent; outline:none; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#3E2723; width:100%; }
+  .lt-search-form:focus-within { transform:translate(-2px,-2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); width: 300px; }
+  .lt-search-input { border:none; background:transparent; outline:none; font-family:'Courier Prime', monospace; font-weight:700; font-size:14px; color:#3E2723; width:100%; }
   .lt-search-input::placeholder { color:rgba(23,23,25,0.4); font-family:'Playfair Display', serif; font-size:12px; }
   .lt-search-icon { color:#3E2723; flex-shrink:0; display:flex; align-items:center; font-size:16px; }
 
@@ -119,11 +120,11 @@ const GLOBAL_CSS = `
   .lt-oracle-btn {
     display:flex; align-items:center;
     background:#C89B3C; border: none;
-    border-radius:12px; padding:5px; height:44px; width:44px;
+    border-radius:8px; padding:5px; height:44px; width:44px;
     cursor:pointer; transition:all 0.2s ease; overflow:hidden; position:relative;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
   }
-  .lt-oracle-btn:hover { width:150px; padding:5px 14px 5px 5px; transform:translate(-2px,-2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .lt-oracle-btn:hover { width:150px; padding:5px 14px 5px 5px; transform:translate(-2px,-2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
   .lt-oracle-btn:active { transform:translate(2px,2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
   .lt-oracle-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; background:#FFF; border: none; }
   .lt-oracle-text { max-width:0; opacity:0; font-size:14px; color:#3E2723; white-space:nowrap; overflow:hidden; transition:all 0.2s; font-family:'Playfair Display', serif; }
@@ -132,11 +133,11 @@ const GLOBAL_CSS = `
   /* ── Hub (circle switcher) ── */
   .lt-hub-btn {
     display:flex; align-items:center; gap:10px; padding:8px 16px;
-    background:#D4B895; border: none; border-radius:12px;
+    background:#D4B895; border: none; border-radius:8px;
     cursor:pointer; transition:all 0.1s; height:44px;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
   }
-  .lt-hub-btn:hover, .lt-hub-btn.lt-open { transform:translate(-2px,-2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .lt-hub-btn:hover, .lt-hub-btn.lt-open { transform:translate(-2px,-2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
   .lt-hub-btn:active { transform:translate(2px,2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
   .lt-hub-name { max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; }
   .lt-hub-arrow { font-size:10px; transition:transform 0.2s; color:#3E2723; }
@@ -144,36 +145,36 @@ const GLOBAL_CSS = `
 
   /* ── Dropdowns ── */
   .lt-dark-dropdown {
-    background:#FFF; border: none; border-radius:16px;
-    box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); overflow:hidden; min-width:240px; padding:12px; position:relative;
+    background:#FFF; border: none; border-radius:12px;
+    box-shadow: 4px 12px 30px rgba(0,0,0,0.15); overflow:hidden; min-width:240px; padding:12px; position:relative;
   }
   .lt-dd-header { font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; padding:8px 12px; border-bottom:3px solid #3E2723; margin-bottom:8px; }
   .lt-dd-item {
     display:flex; justify-content:space-between; align-items:center;
     padding:12px 14px; border-radius:8px; cursor:pointer;
-    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:14px; color:#3E2723;
+    font-family:'Courier Prime', monospace; font-weight:700; font-size:14px; color:#3E2723;
     transition:all 0.1s; border: 1px solid transparent;
   }
-  .lt-dd-item:hover { background:#C89B3C; border: none; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); transform:translate(-2px,-2px); }
-  .lt-dd-item.lt-dd-active { background:#D4B895; border: none; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
+  .lt-dd-item:hover { background:#C89B3C; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); transform:translate(-2px,-2px); }
+  .lt-dd-item.lt-dd-active { background:#D4B895; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
 
   /* ── Icon button (bell etc.) ── */
   .lt-icon-btn {
-    width:44px; height:44px; border-radius:12px;
+    width:44px; height:44px; border-radius:8px;
     background:#FFF; border: none;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; font-size:20px; transition:all 0.1s;
-    position:relative; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
+    position:relative; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
   }
-  .lt-icon-btn:hover { background:#1E352F; transform:translate(-2px,-2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .lt-icon-btn:hover { background:#1E352F; transform:translate(-2px,-2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
   .lt-icon-btn:active { transform:translate(2px,2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
   .lt-notif-badge { position:absolute; top:-6px; right:-6px; background:#D4B895; color:#3E2723; font-family:'Playfair Display', serif; font-size:12px; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; border: none; }
 
   /* ── Streak wrap ── */
   .lt-streak-wrap {
     display:flex; align-items:center; gap:8px; padding:6px 14px;
-    background:#FFF; border: none; border-radius:12px;
-    height:44px; cursor:default; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
+    background:#FFF; border: none; border-radius:8px;
+    height:44px; cursor:default; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
   }
   .lt-streak-wrap.lt-streak-lit { background:#A0522D; }
   .lt-streak-num { font-family:'Playfair Display', serif; font-size:18px; color:#3E2723; }
@@ -182,12 +183,12 @@ const GLOBAL_CSS = `
 
   /* ── Avatar button ── */
   .lt-avatar-btn {
-    width:44px; height:44px; border-radius:12px; padding:0;
+    width:44px; height:44px; border-radius:8px; padding:0;
     background:#C89B3C; border: none; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
-    box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); transition:all 0.1s; overflow: hidden;
+    box-shadow: 2px 4px 12px rgba(0,0,0,0.08); transition:all 0.1s; overflow: hidden;
   }
-  .lt-avatar-btn:hover { transform:translate(-2px,-2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
+  .lt-avatar-btn:hover { transform:translate(-2px,-2px); box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
   .lt-avatar-btn:active { transform:translate(2px,2px); box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
   .lt-avatar-inner { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display', serif; font-size:18px; color:#3E2723; }
 
@@ -195,14 +196,14 @@ const GLOBAL_CSS = `
   .lt-profile-wrap { position:relative; }
   .lt-profile-dd { visibility:hidden; opacity:0; transform:translateY(-10px); transition:all 0.2s; position:absolute; top:calc(100% + 14px); right:0; z-index:100; }
   .lt-profile-wrap:hover .lt-profile-dd { visibility:visible; opacity:1; transform:translateY(0); }
-  .lt-profile-box { min-width:260px; background:#FFF; border: none; border-radius:16px; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); overflow:hidden; }
+  .lt-profile-box { min-width:260px; background:#FFF; border: none; border-radius:12px; box-shadow: 4px 12px 30px rgba(0,0,0,0.15); overflow:hidden; }
   .lt-profile-head { padding:16px; border-bottom:4px solid #3E2723; display:flex; align-items:center; gap:12px; background: #C89B3C; }
-  .lt-profile-avatar { width:46px; height:46px; border-radius:12px; flex-shrink:0; background:#FFF; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display', serif; font-size:18px; color:#3E2723; border: none; overflow:hidden; }
+  .lt-profile-avatar { width:46px; height:46px; border-radius:8px; flex-shrink:0; background:#FFF; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display', serif; font-size:18px; color:#3E2723; border: none; overflow:hidden; }
   .lt-profile-name { font-family:'Playfair Display', serif; font-size:16px; color:#3E2723; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .lt-profile-email { font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px; color:#3E2723; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lt-profile-email { font-family:'Courier Prime', monospace; font-weight:700; font-size:12px; color:#3E2723; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .lt-profile-links { padding:12px; }
-  .lt-profile-link { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:12px; background:#FFF; border: 1px solid transparent; font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; border-radius:12px; cursor:pointer; text-decoration:none; transition:all 0.1s; margin-bottom:8px; }
-  .lt-profile-link:hover { background:#D4B895; border: none; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); transform:translate(-2px,-2px); }
+  .lt-profile-link { display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:12px; background:#FFF; border: 1px solid transparent; font-family:'Playfair Display', serif; font-size:14px; color:#3E2723; border-radius:8px; cursor:pointer; text-decoration:none; transition:all 0.1s; margin-bottom:8px; }
+  .lt-profile-link:hover { background:#D4B895; border: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); transform:translate(-2px,-2px); }
   .lt-profile-link.lt-danger:hover { background:#1E352F; color:#FFF; }
 
   .lt-page-wrap { flex:1; overflow-y:auto; position:relative; background:transparent; padding: 20px; }
@@ -344,9 +345,7 @@ function Navbar({ children }) {
 
             <div className="lt-nb-left">
               <button className="lt-ham-btn" onClick={() => setIsSidebarOpen(p=>!p)}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                  <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
+                <Menu size={24} strokeWidth={1.5} />
               </button>
 
               <div className="lt-header-brand lt-desktop-only">
@@ -361,7 +360,7 @@ function Navbar({ children }) {
               </div>
 
               <form onSubmit={handleSearch} className="lt-search-form lt-desktop-only">
-                <span className="lt-search-icon">🔍</span>
+                <span className="lt-search-icon"><Search size={16} strokeWidth={1.5} /></span>
                 <input type="text" value={searchQuery} onChange={e=>setSearchQuery(e.target.value)}
                   placeholder="Find memories..." className="lt-search-input"/>
               </form>
@@ -369,14 +368,14 @@ function Navbar({ children }) {
 
             <div className="lt-nb-right">
               <button onClick={() => navigate('/oracle')} className="lt-oracle-btn" title="Ask Oracle AI">
-                <div className="lt-oracle-icon">🔮</div>
+                <div className="lt-oracle-icon"><Sparkles size={18} strokeWidth={1.5} /></div>
                 <span className="lt-oracle-text">ORACLE AI</span>
               </button>
 
               <div ref={hubRef} style={{position:'relative'}}>
                 <button onClick={() => setIsHubOpen(p=>!p)}
                   className={`lt-hub-btn lt-desktop-only${isHubOpen?' lt-open':''}`}>
-                  <span style={{fontSize:18}}>🏠</span>
+                  <span style={{display: "flex"}}><Home size={18} strokeWidth={1.5} /></span>
                   <span className="lt-hub-name">{activeCircleName}</span>
                   <span className="lt-hub-arrow">▼</span>
                 </button>
@@ -390,7 +389,7 @@ function Navbar({ children }) {
                           <div key={c._id} onClick={() => { switchActiveCircle(c._id); setIsHubOpen(false); }}
                             className={`lt-dd-item${user?.activeCircleId===c._id?' lt-dd-active':''}`}>
                             {c.circleName}
-                            {user?.activeCircleId===c._id && <span>⭐</span>}
+                            {user?.activeCircleId===c._id && <span style={{display: "flex"}}><Sparkles size={14} strokeWidth={1.5} /></span>}
                           </div>
                         ))}
                       </div>
@@ -401,7 +400,7 @@ function Navbar({ children }) {
 
               <div ref={notifRef} style={{position:'relative'}}>
                 <button onClick={() => setIsNotifOpen(p=>!p)} className="lt-icon-btn">
-                  🔔
+                  <Bell size={20} strokeWidth={1.5} />
                   {unreadCount>0 && <span className="lt-notif-badge">{unreadCount}</span>}
                 </button>
                 {/* Note: Full notif dropdown logic left intact, CSS updated above */}
@@ -413,10 +412,10 @@ function Navbar({ children }) {
                         <div className="lt-dd-header" style={{background:'#C89B3C', margin: 0, padding: '16px'}}>ALERTS!</div>
                         <div style={{maxHeight:370,overflowY:'auto'}}>
                           {notifications.length===0 ? (
-                            <div style={{padding: '40px', textAlign: 'center', fontFamily: "'Playfair Display', serif", color: '#3E2723'}}>📭 NO NEWS!</div>
+                            <div style={{padding: '40px', textAlign: 'center', fontFamily: "'Playfair Display', serif", color: '#3E2723'}}>NO NEWS YET...</div>
                           ) : notifications.slice(0, 15).map(notif => {
                             const isInvite = notif.type==='invite';
-                            const icon = notif.type==='like'?'❤️':notif.type==='comment'?'💬':isInvite?'✉️':'📌';
+                            const icon = notif.type==='like' ? <Heart size={20} strokeWidth={1.5}/> : notif.type==='comment' ? <MessageSquare size={20} strokeWidth={1.5}/> : isInvite ? <Mail size={20} strokeWidth={1.5}/> : <Pin size={20} strokeWidth={1.5}/>;
                             return (
                               <div key={notif._id} onClick={() => !isInvite && markAsRead(notif._id)}
                                 style={{padding: '16px', borderBottom: '3px solid #3E2723', display: 'flex', gap: '12px', background: notif.isRead ? '#FFF' : '#D4B895', cursor: 'pointer'}}>
@@ -463,10 +462,10 @@ function Navbar({ children }) {
                       </div>
                     </div>
                     <div className="lt-profile-links">
-                      <button onClick={() => setShowChampionModal(true)} className="lt-profile-link">👑 &nbsp; TOP DOG</button>
-                      <Link to="/profile?edit=true" className="lt-profile-link">✏️ &nbsp; EDIT INFO</Link>
-                      <Link to="/profile" className="lt-profile-link">🖼️ &nbsp; MY SCRAPBOOK</Link>
-                      <button onClick={handleLogout} className="lt-profile-link lt-danger">🚪 &nbsp; SIGN OUT</button>
+                      <button onClick={() => setShowChampionModal(true)} className="lt-profile-link"><span style={{display:'flex', alignItems:'center', gap: 8}}><Crown size={16} strokeWidth={1.5} /> TOP DOG</span></button>
+                      <Link to="/profile?edit=true" className="lt-profile-link"><span style={{display:'flex', alignItems:'center', gap: 8}}><PenSquare size={16} strokeWidth={1.5} /> EDIT INFO</span></Link>
+                      <Link to="/profile" className="lt-profile-link"><span style={{display:'flex', alignItems:'center', gap: 8}}><BookImage size={16} strokeWidth={1.5} /> MY SCRAPBOOK</span></Link>
+                      <button onClick={handleLogout} className="lt-profile-link lt-danger"><span style={{display:'flex', alignItems:'center', gap: 8}}><LogOut size={16} strokeWidth={1.5} /> SIGN OUT</span></button>
                     </div>
                   </div>
                 </div>

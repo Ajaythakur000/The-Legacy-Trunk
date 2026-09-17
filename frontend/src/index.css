@@ -1,17 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Caveat:wght@400;700&display=swap');
 
 :root {
-  /* Vintage Scrapbook & Pastel Pop Palette */
-  --pop-yellow: #FFD966; /* Softer yellow */
-  --pop-cyan: #7CE0F9; /* Pastel cyan */
-  --pop-pink: #FF6B9E; /* Softer pink */
-  --pop-orange: #FFA040; /* Warm orange */
-  --pop-bg: #FDFBF7; /* Warm cream/paper background */
-  --pop-black: #2C2A29; /* Softer vintage charcoal/brown instead of harsh black */
+  /* Vintage Scrapbook Palette */
+  --bg-espresso: #261914; /* Deep rich brown background */
+  --bg-paper: #FDFBF7; /* Cream/parchment paper */
+  --bg-parchment: #EEDEC1; /* Darker aged paper */
   
-  /* Vintage Borders & Shadows */
-  --comic-border: 1px solid var(--pop-black); /* Slightly thinner border */
-  --comic-shadow: 4px 4px 0px 0px rgba(44, 42, 41, 0.4); /* Softer, slightly transparent shadow */
+  --ink-dark: #1E352F; /* Deep forest green/black ink */
+  --ink-brown: #3E2723; /* Dark brown ink */
+  --ink-faded: #8C7B6B; /* Faded sepia ink */
+  
+  --gold-foil: #C89B3C; /* Vintage gold */
+  --gold-light: #D4B895; /* Lighter gold */
 }
 
 * {
@@ -27,15 +27,12 @@ html, body {
 
 body {
   margin: 0;
-  font-family: 'Baloo 2', sans-serif;
-  background-color: #261914; /* Deep Espresso Walnut */
-  /* Textured Paper Grid instead of Comic Dots */
-  background-image: 
-    linear-gradient(rgba(44, 42, 41, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(44, 42, 41, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
+  font-family: 'Courier Prime', monospace;
+  background-color: var(--bg-espresso);
+  /* Rich Noise/Paper Texture Overlay */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
   background-attachment: fixed;
-  color: var(--pop-black);
+  color: var(--ink-brown);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -47,27 +44,7 @@ body {
   font-size: 1.5rem;
   letter-spacing: 0.5px;
   line-height: 1.4;
-  color: #3E2723; /* Dark brown ink */
-}
-
-/* Scrapbook Tape Effect */
-.scrapbook-tape {
-  position: relative;
-}
-.scrapbook-tape::before {
-  content: '';
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 80px;
-  height: 25px;
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border-left: 2px dashed rgba(0,0,0,0.1);
-  border-right: 2px dashed rgba(0,0,0,0.1);
-  z-index: 5;
-  pointer-events: none;
+  color: var(--ink-brown);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -91,46 +68,22 @@ button {
   cursor: pointer;
 }
 
-/* Comic Style Scrollbar */
+/* Vintage Scrollbar */
 ::-webkit-scrollbar {
   width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--pop-bg);
-  border-left: 3px solid var(--pop-black);
+  background: var(--bg-paper);
+  border-left: 1px solid rgba(62,39,35,0.1);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--pop-pink);
-  border: 1px solid var(--pop-black);
-  border-radius: 0px; 
+  background: var(--gold-light);
+  border: 2px solid var(--bg-paper);
+  border-radius: 6px; 
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--pop-yellow);
-}
-
-/* --- REUSABLE UTILITY CLASSES --- */
-
-/* 1. Heavy offset shadow for main containers */
-.neo-container {
-  background-color: #fff;
-  border: var(--comic-border);
-  box-shadow: var(--comic-shadow);
-}
-
-/* 2. Polaroid/Sticker photo effect */
-.sticker-cutout {
-  background: white;
-  padding: 12px;
-  border: var(--comic-border);
-  box-shadow: var(--comic-shadow);
-  transform: rotate(-2deg);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.sticker-cutout:hover {
-  transform: rotate(0deg) scale(1.02);
-  box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45);
+  background: var(--gold-foil);
 }

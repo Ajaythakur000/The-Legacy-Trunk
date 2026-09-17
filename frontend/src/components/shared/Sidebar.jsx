@@ -1,26 +1,27 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Home, Zap, ScrollText, Image as ImageIcon, Trophy, MessageSquare, Route, Radar, LogOut } from 'lucide-react';
 
 // ─── NAV DATA ─────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
-  { to:'/home',          icon:'🏠', label:'HOME',          sub:null },
-  { to:'/dashboard',     icon:'⚡', label:'DASHBOARD',     sub:'MEMORY UNIVERSE' },
-  { to:'/my-stories',    icon:'📜', label:'MY STORIES',    sub:null },
-  { to:'/vault-stories', icon:'📸', label:'VAULT STORIES', sub:null },
-  { to:'/leaderboard',   icon:'🏆', label:'LEADERBOARD',   sub:'FAMILY CHAMPIONS' },
+  { to:'/home',          icon: <Home size={18} strokeWidth={1.5} />, label:'HOME',          sub:null },
+  { to:'/dashboard',     icon: <Zap size={18} strokeWidth={1.5} />, label:'DASHBOARD',     sub:'MEMORY UNIVERSE' },
+  { to:'/my-stories',    icon: <ScrollText size={18} strokeWidth={1.5} />, label:'MY STORIES',    sub:null },
+  { to:'/vault-stories', icon: <ImageIcon size={18} strokeWidth={1.5} />, label:'VAULT STORIES', sub:null },
+  { to:'/leaderboard',   icon: <Trophy size={18} strokeWidth={1.5} />, label:'LEADERBOARD',   sub:'FAMILY CHAMPIONS' },
 ];
 
 const TOOL_LINKS = [
-  { to:'/vault',       icon:'💬', label:'FAMILY CHAT',  sub:null },
-  { to:'/memory-lane', icon:'🛤️', label:'MEMORY LANE',  sub:'TIMELINE OF SOULS' },
-  { to:'/radar',       icon:'📡', label:'FAMILY RADAR', sub:'LIVE LOCATIONS' },
+  { to:'/vault',       icon: <MessageSquare size={18} strokeWidth={1.5} />, label:'FAMILY CHAT',  sub:null },
+  { to:'/memory-lane', icon: <Route size={18} strokeWidth={1.5} />, label:'MEMORY LANE',  sub:'TIMELINE OF SOULS' },
+  { to:'/radar',       icon: <Radar size={18} strokeWidth={1.5} />, label:'FAMILY RADAR', sub:'LIVE LOCATIONS' },
 ];
 
 // ─── SIDEBAR LINK ─────────────────────────────────────────────────────────────
 function SbLink({ to, icon, label, sub, active, onClick }) {
   return (
     <Link to={to} onClick={onClick} className={`lt-sb-link${active ? ' lt-active' : ''}`}>
-      <div className="lt-sb-icon-wrap">
-        <span className="lt-sb-icon">{icon}</span>
+      <div className="lt-sb-icon-wrap" style={{ color: "#3E2723" }}>
+        <span className="lt-sb-icon" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</span>
       </div>
       <div style={{ flex:1, minWidth:0 }}>
         <div className="lt-sb-lbl">{label}</div>
@@ -39,7 +40,7 @@ export function LogoRing({ size = 48 }) {
         background:'#D4B895', border: 'none',
         borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center',
         boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', overflow:'hidden',
-        animation:'ltComicSpin 10s linear infinite'
+        /* animation removed */
       }}>
         {/* Jagged sunburst overlay inside */}
         <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
@@ -139,7 +140,7 @@ export default function Sidebar({
         {/* ── FOOTER ── */}
         <div className="lt-sb-foot">
           <button className="lt-sb-logout" onClick={handleLogout}>
-            <div className="lt-sb-icon-wrap" style={{ border: 'none', background: 'transparent' }}>🚪</div>
+            <div className="lt-sb-icon-wrap" style={{ border: "none", background: "transparent", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center" }}><LogOut size={20} strokeWidth={1.5} /></div>
             <span className="lt-sb-lbl" style={{ color: '#FDFBF7' }}>
               LEAVE THE VAULT
             </span>
@@ -257,13 +258,13 @@ export default function Sidebar({
         .lt-mobile-search-input::placeholder { color: rgba(23,23,25,0.4); font-family: 'Playfair Display', serif; }
 
         /* ── Footer ── */
-        .lt-sb-foot { padding: 16px; border-top: 4px solid #3E2723; background: #C89B3C; }
+        .lt-sb-foot { padding: 16px; border-top: 1px dashed rgba(62,39,35,0.2); background: #3E2723; }
         .lt-sb-logout {
-          display: flex; align-items: center; gap: 12px; width: 100%;
-          padding: 10px 12px; border-radius: 12px; background: #FFF;
-          border: none; cursor: pointer; transition: all 0.1s ease;
-          box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
-        }
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 10px 12px; border-radius: 8px; background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s ease;
+}
+.lt-sb-logout:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
         .lt-sb-logout:hover { background: #1E352F; transform: translate(-2px, -2px); box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
         .lt-sb-logout:hover .lt-sb-lbl { color: #FFF !important; }
 
