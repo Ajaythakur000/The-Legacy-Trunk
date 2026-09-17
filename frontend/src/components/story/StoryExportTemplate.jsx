@@ -92,7 +92,7 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
                 <div style={{ fontSize: 24, color: '#3E2723', fontFamily: popFont, textTransform: 'uppercase' }}>
                   THE LEGACY TRUNK
                 </div>
-                <div style={{ fontSize: 14, color: '#1E352F', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
+                <div style={{ fontSize: 14, color: '#D4B895', fontWeight: 900, fontFamily: bodyFont, textTransform: 'uppercase', letterSpacing: 1 }}>
                   Family Scrapbook
                 </div>
               </div>

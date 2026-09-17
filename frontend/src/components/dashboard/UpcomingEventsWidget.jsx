@@ -92,7 +92,7 @@ function UpcomingEventsWidget({ circleId }) {
             {loading ? (
               <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, padding: '40px 0' }}>LOADING DATES...</div>
             ) : error ? (
-              <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#1E352F', padding: '40px 0' }}>⚠️ {error}</div>
+              <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#D4B895', padding: '40px 0' }}>⚠️ {error}</div>
             ) : events.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>🦗</div>

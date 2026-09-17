@@ -91,7 +91,7 @@ function FamilyOraclePage() {
   };
 
   const renderFormattedText = text => {
-    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#1E352F;">$1</strong>').replace(/\n/g, '<br />');
+    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color: '#D4B895';">$1</strong>').replace(/\n/g, '<br />');
     const clean = DOMPurify.sanitize(formatted, { ALLOWED_TAGS: ['strong', 'br', 'span'], ALLOWED_ATTR: ['style'] });
     return <span dangerouslySetInnerHTML={{ __html: clean }} />;
   };
@@ -125,7 +125,7 @@ function FamilyOraclePage() {
           <AnimatePresence>
             {error && (
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                style={{ background: '#FFF', border: 'none', borderRadius: 12, padding: '12px', marginBottom: 16, fontFamily: "'Playfair Display', serif", color: '#1E352F', textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
+                style={{ background: '#FFF', border: 'none', borderRadius: 12, padding: '12px', marginBottom: 16, fontFamily: "'Playfair Display', serif", color: '#D4B895', textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
                 ⚠️ {error}
               </motion.div>
             )}

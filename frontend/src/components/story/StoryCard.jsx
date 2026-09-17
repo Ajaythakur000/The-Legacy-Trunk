@@ -248,7 +248,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
                 style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, width: '100%', maxWidth: 400, padding: '40px', position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', textAlign: 'center' }}
               >
                 <div style={{ fontSize: 60, marginBottom: 16 }}>💣</div>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#1E352F', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723', marginBottom: 16 }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#D4B895', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723', marginBottom: 16 }}>
                   TRASH IT?
                 </div>
                 <p style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', marginBottom: 32 }}>

@@ -24,7 +24,7 @@ const CSS = `
 
   /* HEADER */
   .fr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
-  .fr-page-title { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 48px); color: #1E352F; margin: 0 0 6px; text-shadow: 4px 4px 0px #3E2723; -webkit-text-stroke: 2px #3E2723; letter-spacing: 2px; }
+  .fr-page-title { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 48px); color: '#D4B895'; margin: 0 0 6px; text-shadow: 4px 4px 0px #3E2723; -webkit-text-stroke: 2px #3E2723; letter-spacing: 2px; }
   .fr-page-sub { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 18px; color: #3E2723; margin: 0; background: #D4B895; display: inline-block; padding: 4px 16px; border: none; border-radius: 8px; transform: rotate(-2deg); box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
 
   /* GHOST BUTTON */
@@ -162,7 +162,7 @@ function TouchpadPanHandler() {
 function PopupContent({ name, isMe, isOnline, isGhost, distance, time }) {
   return (
     <div style={{ padding: '16px', minWidth: 180, textAlign: 'center' }}>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#1E352F', marginBottom: 8 }}>{name}{isMe ? ' (YOU)' : ''}</div>
+      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#D4B895', marginBottom: 8 }}>{name}{isMe ? ' (YOU)' : ''}</div>
       {isGhost ? (
         <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#3E2723' }}>👻 Ghost Mode</div>
       ) : (
@@ -316,7 +316,7 @@ function FamilyRadarPage() {
                 {myLocation&&!isGhostModeOn&&(
                   <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
                   <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color:'#D4B895',fillColor:'#D4B895',fillOpacity:0.2,weight:2}}/>
-                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color:'#1E352F',fillColor:'#1E352F',fillOpacity:0.05,weight:1,dashArray:'4 8'}}/></>
+                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color: '#D4B895',fillColor:'#1E352F',fillOpacity:0.05,weight:1,dashArray:'4 8'}}/></>
                 )}
                 {visibleMembers.map(m=>(
                   <Marker key={m._id} icon={otherIcon(init(m.name),m.isOnline)} position={[m.latitude,m.longitude]}>
@@ -356,7 +356,7 @@ function FamilyRadarPage() {
                       <div className={`fr-orb${m.isGhostModeOn?' fr-orb-ghost':m.isOnline?'':''}`}>{init(m.name)}</div>
                     </div>
                     <div className="fr-member-info"><div className="fr-member-name">{m.name}</div><div className="fr-member-role">{m.isGhostModeOn?'Hiding':m.isOnline?'Active':`Last seen ${timeAgo(m.updatedAt)}`}</div></div>
-                    <div style={{fontFamily:"'Playfair Display', serif",fontSize:14,color:'#1E352F'}}>{getDist(m)}</div>
+                    <div style={{fontFamily:"'Playfair Display', serif",fontSize:14,color: '#D4B895'}}>{getDist(m)}</div>
                   </div>
                   <div className="fr-member-stats">
                     {m.isGhostModeOn?<span className="fr-chip fr-chip-gh">👻 Hidden</span>:m.isOnline?<span className="fr-chip fr-chip-on">Active</span>:<span className="fr-chip">Offline</span>}

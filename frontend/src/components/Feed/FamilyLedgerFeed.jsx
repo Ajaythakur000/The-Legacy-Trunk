@@ -100,7 +100,7 @@ export default function FamilyLedgerFeed() {
     return (
       <div style={{ textAlign: 'center', background: '#FFF', padding: '40px', borderRadius: 24, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)' }}>
         <span style={{ fontSize: 60, display: 'block', marginBottom: 16 }}>🔐</span>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#1E352F', margin: '0 0 8px', fontSize: 32 }}>VAULT LOCKED!</h3>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#D4B895', margin: '0 0 8px', fontSize: 32 }}>VAULT LOCKED!</h3>
         <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, color: '#3E2723', margin: 0, fontSize: 18 }}>Select a Family Circle to see the scrapbook.</p>
       </div>
     );

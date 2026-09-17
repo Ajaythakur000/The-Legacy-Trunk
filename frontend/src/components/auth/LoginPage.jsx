@@ -191,7 +191,7 @@ function LoginPage() {
           <StickerLogo />
 
           <div style={{ marginBottom: 24, position: 'relative', zIndex: 2 }}>
-            <h2 style={{ margin: '0 0 4px', fontSize: 32, color: '#1E352F', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+            <h2 style={{ margin: '0 0 4px', fontSize: 32, color: '#D4B895', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
               WELCOME BACK!
             </h2>
             <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#3E2723' }}>
@@ -250,7 +250,7 @@ function LoginPage() {
 
             <p style={{ margin: '20px 0 0', fontWeight: 700, fontSize: 15, color: '#3E2723' }}>
               New here?{' '}
-              <Link to="/signup" style={{ color: '#1E352F', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>
+              <Link to="/signup" style={{ color: '#D4B895', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>
                 JOIN NOW
               </Link>
             </p>

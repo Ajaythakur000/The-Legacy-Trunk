@@ -47,7 +47,7 @@ function EmptyState() {
   return (
     <div style={{ textAlign: 'center', padding: '60px', background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', margin: '40px auto', maxWidth: 600 }}>
       <div style={{ fontSize: 80, marginBottom: 20 }}>👻</div>
-      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#1E352F', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, color: '#D4B895', margin: '0 0 10px', textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
         IT'S A GHOST TOWN!
       </h3>
       <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', margin: 0 }}>

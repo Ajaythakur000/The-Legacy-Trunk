@@ -58,7 +58,7 @@ const SLIDES = [
         ))}
       </div>
     ),
-    color: '#1E352F',
+    color: '#D4B895',
   },
 ];
 

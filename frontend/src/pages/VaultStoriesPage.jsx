@@ -59,7 +59,7 @@ function VaultStoriesPage() {
           <div style={{ width: 100, height: 100, margin: '0 auto 20px', background: '#C89B3C', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 50, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-5deg)' }}>
             📖
           </div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 48, color: '#1E352F', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', letterSpacing: 2, margin: '0 0 10px' }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 48, color: '#D4B895', textShadow: '4px 4px 0px #3E2723', WebkitTextStroke: '2px #3E2723', letterSpacing: 2, margin: '0 0 10px' }}>
             ADD A MEMORY
           </h1>
           <p style={{ fontWeight: 800, fontSize: 18, color: '#3E2723', margin: '0 0 20px', background: '#D4B895', display: 'inline-block', padding: '4px 12px', border: 'none', borderRadius: 8, transform: 'rotate(2deg)', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>

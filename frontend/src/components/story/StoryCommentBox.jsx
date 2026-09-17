@@ -39,7 +39,7 @@ function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {
                   </div>
                   {/* Comic Speech Bubble */}
                   <div style={{ flex: 1, background: '#FFF', border: 'none', borderRadius: 16, borderTopLeftRadius: 0, padding: '12px 16px', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', position: 'relative' }}>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#1E352F', marginBottom: 4 }}>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#D4B895', marginBottom: 4 }}>
                       {c?.user?.name || 'SOMEONE'}
                     </div>
                     <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 16, color: '#3E2723', lineHeight: 1.4 }}>

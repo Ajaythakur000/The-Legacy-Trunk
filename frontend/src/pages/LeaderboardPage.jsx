@@ -125,7 +125,7 @@ function RankRow({ family, rank, index }) {
       </div>
 
       <div style={{ textAlign: 'right', background: '#F5F5F5', border: 'none', borderRadius: 8, padding: '6px 12px' }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: '#1E352F', lineHeight: 1 }}>{family.familyBondPoints.toLocaleString()}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: '#D4B895', lineHeight: 1 }}>{family.familyBondPoints.toLocaleString()}</div>
         <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 10, color: '#3E2723', marginTop: 2 }}>PTS</div>
       </div>
     </motion.div>

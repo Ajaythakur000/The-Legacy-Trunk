@@ -215,7 +215,7 @@ function SignupPage() {
             </motion.button>
 
             <p style={{ margin: '20px 0 0', fontWeight: 700, fontSize: 15, color: '#3E2723', textAlign: 'center' }}>
-              Already a member? <Link to="/login" style={{ color: '#1E352F', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
+              Already a member? <Link to="/login" style={{ color: '#D4B895', textDecoration: 'underline', fontFamily: "'Playfair Display', serif", fontSize: 18 }}>LOG IN HERE</Link>
             </p>
           </form>
         </div>

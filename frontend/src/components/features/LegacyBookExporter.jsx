@@ -94,7 +94,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
               VOL. 1
             </div>
 
-            <div style={{ fontSize: 24, fontFamily: popFont, color: '#1E352F', borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 24, fontFamily: popFont, color: '#D4B895', borderBottom: '6px solid #3E2723', paddingBottom: 10, marginBottom: 40, width: '100%', textTransform: 'uppercase' }}>
               THE OFFICIAL ARCHIVE OF
             </div>
 
@@ -127,7 +127,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '6px solid #3E2723', paddingBottom: 20, marginBottom: 40 }}>
-                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#1E352F', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
+                  <div style={{ fontSize: 32, fontFamily: popFont, color: '#D4B895', textShadow: '3px 3px 0px #3E2723', WebkitTextStroke: '1px #3E2723' }}>
                     PANEL #{index + 1}
                   </div>
                   <div style={{ fontSize: 20, fontFamily: popFont, color: '#3E2723', background: '#D4B895', padding: '8px 16px', border: 'none', borderRadius: 12 }}>

@@ -146,7 +146,7 @@ function ForgotPasswordModal({ onClose }) {
                 {loading ? 'SAVING...' : 'CHANGE PASSWORD!'}
               </motion.button>
               <div style={{ textAlign: 'center' }}>
-                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#1E352F', cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
+                <span onClick={() => { setStep(1); setError(''); setOtpArr(new Array(6).fill('')); }} style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#D4B895', cursor: 'pointer', textDecoration: 'underline' }}>← BACK TO EMAIL</span>
               </div>
             </motion.form>
           )}

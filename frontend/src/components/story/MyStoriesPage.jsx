@@ -60,7 +60,7 @@ function EmptyState({ hasStories }) {
         {hasStories ? '🔍' : '📭'}
       </div>
       <h3 style={{
-        fontFamily: "'Playfair Display', serif", color: '#1E352F',
+        fontFamily: "'Playfair Display', serif", color: '#D4B895',
         fontSize: 32, margin: '0 0 12px', letterSpacing: 1,
         textShadow: '2px 2px 0px #3E2723', WebkitTextStroke: '1px #3E2723'
       }}>

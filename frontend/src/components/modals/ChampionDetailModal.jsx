@@ -145,7 +145,7 @@ function ChampionDetailModal({ onClose, champion }) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
                 {[
                   { label: 'STORIES', value: stories, color: '#D4B895', icon: '📜' },
-                  { label: 'LIKES', value: likes, color: '#1E352F', icon: '❤️' },
+                  { label: 'LIKES', value: likes, color: '#D4B895', icon: '❤️' },
                   { label: 'STREAK', value: streak, color: '#C89B3C', icon: '⚡' },
                 ].map((s, i) => (
                   <div key={i} style={{ background: s.color, border: 'none', borderRadius: 12, padding: '12px 8px', textAlign: 'center', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
