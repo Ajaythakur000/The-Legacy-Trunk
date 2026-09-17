@@ -66,7 +66,10 @@ export const handleDailyLogin = async (userId, familyCircleId) => {
  */
 export const handleStoryPostStreak = async (userId, session = null) => {
   try {
-    const user = await FamilyMember.findById(userId).session(session);
+    let query = FamilyMember.findById(userId);
+    if (session) query = query.session(session);
+    const user = await query;
+    
     if (!user) return;
 
     const todayStr = getISTDateStr();
@@ -100,7 +103,8 @@ export const handleStoryPostStreak = async (userId, session = null) => {
     
     // Save today as the last post date
     user.lastPostDate = todayStr;
-    await user.save({ session });
+    const saveOptions = session ? { session } : {};
+    await user.save(saveOptions);
   } catch (error) {
     console.error("Streak Error:", error);
   }
@@ -114,7 +118,10 @@ export const awardPoints = async (userId, familyCircleId, points, session = null
     if (!userId || !familyCircleId || !points) return;
 
     const todayStr = getISTDateStr();
-    const user = await FamilyMember.findById(userId).session(session);
+    
+    let query = FamilyMember.findById(userId);
+    if (session) query = query.session(session);
+    const user = await query;
 
     if (user) {
       user.totalContributionPoints = (Number(user.totalContributionPoints) || 0) + points;
@@ -125,10 +132,14 @@ export const awardPoints = async (userId, familyCircleId, points, session = null
       if (currentMapScore < 0) currentMapScore = 0;
 
       user.activityMap.set(todayStr, currentMapScore);
-      await user.save({ session });
+      
+      const saveOptions = session ? { session } : {};
+      await user.save(saveOptions);
     }
 
     // ✅ floor familyBondPoints at 0 (prevents negative values)
+    const updateOptions = session ? { session } : {};
+    
     await FamilyCircle.findByIdAndUpdate(
       familyCircleId,
       [
@@ -140,7 +151,7 @@ export const awardPoints = async (userId, familyCircleId, points, session = null
           },
         },
       ],
-      { session } // Note: for aggregation pipeline updates, some older mongoose versions might have quirks, but usually session works here if passed as options object. Wait, findByIdAndUpdate options is the third arg.
+      updateOptions
     );
   } catch (error) {
     console.error('Gamification Award Error:', error);
