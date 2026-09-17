@@ -1,17 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
-  /* Comic Pop-Art Color Palette */
-  --pop-yellow: #FFD23F;
-  --pop-cyan: #3FE0FF;
-  --pop-pink: #FF3D81;
-  --pop-orange: #FF7B00;
-  --pop-bg: #FFF6E5;
-  --pop-black: #171719;
+  /* Vintage Scrapbook & Pastel Pop Palette */
+  --pop-yellow: #FFD966; /* Softer yellow */
+  --pop-cyan: #7CE0F9; /* Pastel cyan */
+  --pop-pink: #FF6B9E; /* Softer pink */
+  --pop-orange: #FFA040; /* Warm orange */
+  --pop-bg: #FDFBF7; /* Warm cream/paper background */
+  --pop-black: #2C2A29; /* Softer vintage charcoal/brown instead of harsh black */
   
-  /* Global Neo-Brutalist Borders & Shadows */
-  --comic-border: 4px solid var(--pop-black);
-  --comic-shadow: 6px 6px 0px 0px var(--pop-black);
+  /* Vintage Borders & Shadows */
+  --comic-border: 3px solid var(--pop-black); /* Slightly thinner border */
+  --comic-shadow: 4px 4px 0px 0px rgba(44, 42, 41, 0.4); /* Softer, slightly transparent shadow */
 }
 
 * {
@@ -29,15 +29,45 @@ body {
   margin: 0;
   font-family: 'Baloo 2', sans-serif;
   background-color: var(--pop-bg);
-  /* Comic Halftone Dot Grid */
-  background-image: radial-gradient(var(--pop-black) 2px, transparent 2.5px);
+  /* Textured Paper Grid instead of Comic Dots */
+  background-image: 
+    linear-gradient(rgba(44, 42, 41, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(44, 42, 41, 0.03) 1px, transparent 1px);
   background-size: 20px 20px;
-  background-position: -10px -10px;
   background-attachment: fixed;
   color: var(--pop-black);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+/* Scrapbook Typography */
+.handwriting {
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  color: #3E2723; /* Dark brown ink */
+}
+
+/* Scrapbook Tape Effect */
+.scrapbook-tape {
+  position: relative;
+}
+.scrapbook-tape::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 80px;
+  height: 25px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-left: 2px dashed rgba(0,0,0,0.1);
+  border-right: 2px dashed rgba(0,0,0,0.1);
+  z-index: 5;
+  pointer-events: none;
 }
 
 h1, h2, h3, h4, h5, h6 {

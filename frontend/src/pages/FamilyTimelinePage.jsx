@@ -60,39 +60,43 @@ function EmptyState() {
 // ─── POPUP CARD (COMIC PANEL) ────────────────────────────────────────────────
 function PopupCard({ node, isEven }) {
   const cardSideStyle = isEven ? { left: '70px', right: 'auto' } : { right: '70px', left: 'auto' };
+  
+  const isOldStory = node?.milestoneDate && new Date() - new Date(node.milestoneDate) > 1000 * 60 * 60 * 24 * 365;
+  const vintageFilter = isOldStory ? 'sepia(0.5) contrast(0.9) brightness(1.05)' : 'none';
+
   return (
-    <div className="popup-card" style={{ position: 'absolute', top: '50%', width: 380, background: '#FFF', border: '4px solid #171719', borderRadius: 20, padding: 20, boxShadow: '8px 8px 0px 0px #171719', zIndex: 50, transform: 'translateY(-50%) scale(0.9)', opacity: 0, visibility: 'hidden', pointerEvents: 'none', transition: 'all 0.2s', ...cardSideStyle }}>
+    <div className="popup-card" style={{ position: 'absolute', top: '50%', width: 380, background: '#FFF', border: 'var(--comic-border)', borderRadius: 20, padding: 20, boxShadow: 'var(--comic-shadow)', zIndex: 50, transform: 'translateY(-50%) scale(0.9)', opacity: 0, visibility: 'hidden', pointerEvents: 'none', transition: 'all 0.2s', ...cardSideStyle }}>
       {node.mediaUrl && (
-        <div style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 16, border: '3px solid #171719', background: '#171719' }}>
-          {node.mediaType === 'video' ? <video src={node.mediaUrl} controls style={{ width: '100%', maxHeight: 200, display: 'block' }} /> : <img src={node.mediaUrl} alt={node.title} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />}
+        <div className="scrapbook-tape" style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 16, border: '3px solid var(--pop-black)', background: 'var(--pop-black)' }}>
+          {node.mediaType === 'video' ? <video src={node.mediaUrl} controls style={{ width: '100%', maxHeight: 200, display: 'block', filter: vintageFilter }} /> : <img src={node.mediaUrl} alt={node.title} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block', filter: vintageFilter }} />}
         </div>
       )}
-      <div style={{ background: '#FFD23F', display: 'inline-block', padding: '4px 12px', border: '2px solid #171719', borderRadius: 8, fontFamily: "'Luckiest Guy',cursive", fontSize: 12, color: '#171719', marginBottom: 8, transform: 'rotate(-2deg)' }}>
+      <div style={{ background: 'var(--pop-yellow)', display: 'inline-block', padding: '4px 12px', border: '2px solid var(--pop-black)', borderRadius: 8, fontFamily: "'Luckiest Guy',cursive", fontSize: 12, color: 'var(--pop-black)', marginBottom: 8, transform: 'rotate(-2deg)' }}>
         MILESTONE! ⭐
       </div>
-      <h3 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: '#FF3D81', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719', margin: '0 0 8px', lineHeight: 1.1 }}>{node.title}</h3>
-      <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: '#171719', lineHeight: 1.5, marginBottom: 16, maxHeight: 100, overflowY: 'auto' }}>{node.content}</p>
+      <h3 style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 24, color: 'var(--pop-pink)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', margin: '0 0 8px', lineHeight: 1.1 }}>{node.title}</h3>
+      <p className="handwriting" style={{ marginBottom: 16, maxHeight: 100, overflowY: 'auto' }}>{node.content}</p>
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#F5F5F5', padding: '8px 12px', borderRadius: 12, border: '2px dashed #171719' }}>
-        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #171719', background: '#3FE0FF', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#F5F5F5', padding: '8px 12px', borderRadius: 12, border: '2px dashed var(--pop-black)' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid var(--pop-black)', background: 'var(--pop-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
           {node.user?.avatar ? <img src={node.user.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 16 }}>{node.user?.name?.charAt(0) || 'U'}</span>}
         </div>
-        <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719' }}>By {node.user?.name?.split(' ')[0] || 'Unknown'}</span>
+        <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: 'var(--pop-black)' }}>By {node.user?.name?.split(' ')[0] || 'Unknown'}</span>
       </div>
     </div>
   );
 }
 
 // ─── CLOTHESPIN (pins the memory to the line) ────────────────────────────────
-const PIN_COLORS = ['#FFD23F', '#3FE0FF', '#FF3D81', '#00C853'];
+const PIN_COLORS = ['var(--pop-yellow)', 'var(--pop-cyan)', 'var(--pop-pink)', 'var(--pop-orange)'];
 function ClothesPin({ index }) {
   const color = PIN_COLORS[index % PIN_COLORS.length];
   const tilt = index % 2 === 0 ? -10 : 10;
   return (
-    <svg width="34" height="46" viewBox="0 0 40 54" style={{ position: 'absolute', top: '50%', left: '50%', transform: `translate(-50%, -50%) rotate(${tilt}deg)`, zIndex: 15, filter: 'drop-shadow(3px 3px 0px #171719)' }}>
-      <rect x="4" y="2" width="14" height="50" rx="6" fill={color} stroke="#171719" strokeWidth="3" />
-      <rect x="22" y="2" width="14" height="50" rx="6" fill={color} stroke="#171719" strokeWidth="3" />
-      <circle cx="20" cy="15" r="7" fill="#171719" />
+    <svg width="34" height="46" viewBox="0 0 40 54" style={{ position: 'absolute', top: '50%', left: '50%', transform: `translate(-50%, -50%) rotate(${tilt}deg)`, zIndex: 15, filter: 'drop-shadow(2px 2px 0px rgba(0,0,0,0.3))' }}>
+      <rect x="4" y="2" width="14" height="50" rx="6" fill={color} stroke="var(--pop-black)" strokeWidth="3" />
+      <rect x="22" y="2" width="14" height="50" rx="6" fill={color} stroke="var(--pop-black)" strokeWidth="3" />
+      <circle cx="20" cy="15" r="7" fill="var(--pop-black)" />
       <circle cx="20" cy="15" r="3.5" fill="#FFF" />
     </svg>
   );
@@ -121,14 +125,14 @@ function SnakeRow({ node, index }) {
       <div className="hover-zone" style={{ position: 'absolute', top: '50%', left: isEven ? '20%' : '80%', transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20 }}>
 
         {/* The Node (Sticker) */}
-        <div className="node-outer" style={{ width: 64, height: 64, background: '#FF3D81', border: '4px solid #171719', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 0px 0px #171719', transition: 'all 0.2s', cursor: 'pointer', zIndex: 10 }}>
-          <div style={{ width: 32, height: 32, background: '#FFF', borderRadius: '50%', border: '3px solid #171719' }} />
+        <div className="node-outer" style={{ width: 64, height: 64, background: 'var(--pop-pink)', border: 'var(--comic-border)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--comic-shadow)', transition: 'all 0.2s', cursor: 'pointer', zIndex: 10 }}>
+          <div style={{ width: 32, height: 32, background: '#FFF', borderRadius: '50%', border: '3px solid var(--pop-black)' }} />
         </div>
 
         {/* Date Badge */}
-        <div className="date-badge" style={{ position: 'absolute', background: '#FFF', border: '3px solid #171719', borderRadius: 12, padding: '8px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '4px 4px 0px 0px #171719', transition: 'all 0.2s', zIndex: 5, ...(isEven ? { left: '75px' } : { right: '75px', left: 'auto' }) }}>
-          <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 18, color: '#3FE0FF', textShadow: '2px 2px 0px #171719', WebkitTextStroke: '1px #171719', whiteSpace: 'nowrap' }}>{formattedDate}, {year}</span>
-          <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 12, color: '#171719' }}>{formattedTime}</span>
+        <div className="date-badge" style={{ position: 'absolute', background: '#FFF', border: 'var(--comic-border)', borderRadius: 12, padding: '8px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: 'var(--comic-shadow)', transition: 'all 0.2s', zIndex: 5, ...(isEven ? { left: '75px' } : { right: '75px', left: 'auto' }) }}>
+          <span style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 18, color: 'var(--pop-cyan)', textShadow: '2px 2px 0px var(--pop-black)', WebkitTextStroke: '1px var(--pop-black)', whiteSpace: 'nowrap' }}>{formattedDate}, {year}</span>
+          <span className="handwriting" style={{ fontSize: 16, marginTop: '-4px' }}>{formattedTime}</span>
         </div>
 
         <PopupCard node={node} isEven={isEven}/>

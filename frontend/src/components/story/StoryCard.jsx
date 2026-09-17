@@ -97,12 +97,18 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
     return url.replace('/upload/', '/upload/q_auto,f_auto/');
   };
 
+  const isOldStory = story?.createdAt && new Date() - new Date(story.createdAt) > 1000 * 60 * 60 * 24 * 365; // > 1 year
+  
   const renderMediaGrid = () => {
     if (images.length === 0) return null;
+    
+    // Determine filter for vintage feel
+    const vintageFilter = isOldStory ? 'sepia(0.4) contrast(0.9) brightness(1.05)' : 'none';
+
     if (story?.mediaType === 'video') {
       return (
-        <div style={{ marginTop: 24, border: '4px solid #171719', borderRadius: 16, overflow: 'hidden', boxShadow: '8px 8px 0px 0px #171719', background: '#FFD23F', padding: 8 }}>
-          <video controls preload="metadata" style={{ width: '100%', maxHeight: 500, background: '#000', display: 'block', borderRadius: 8, border: '3px solid #171719' }}>
+        <div className="scrapbook-tape" style={{ marginTop: 24, border: '4px solid var(--pop-black)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--comic-shadow)', background: 'var(--pop-yellow)', padding: 8 }}>
+          <video controls preload="metadata" style={{ width: '100%', maxHeight: 500, background: '#000', display: 'block', borderRadius: 8, border: '3px solid var(--pop-black)', filter: vintageFilter }}>
             <source src={images[0]} />
           </video>
         </div>
@@ -111,23 +117,23 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
     
     const count = images.length;
     const PopAnim = () => showPopAnim ? (
-      <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 10 }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', fontSize: 100, filter: 'drop-shadow(4px 4px 0px #171719)', zIndex: 10 }}>
+      <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 10 }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', fontSize: 100, filter: 'drop-shadow(4px 4px 0px var(--pop-black))', zIndex: 10 }}>
         💥
       </motion.div>
     ) : null;
 
     if (count === 1) {
       return (
-        <div onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, background: '#FFF', padding: '12px 12px 40px', border: '4px solid #171719', borderRadius: 8, boxShadow: '8px 8px 0px 0px #171719', cursor: 'pointer', userSelect: 'none', transform: 'rotate(-1deg)' }}>
-          <img src={getOptimizedUrl(images[0])} alt={story?.title} style={{ width: '100%', maxHeight: 580, objectFit: 'cover', display: 'block', border: '3px solid #171719' }} />
+        <div className="scrapbook-tape" onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, background: '#FFF', padding: '12px 12px 40px', border: '4px solid var(--pop-black)', borderRadius: 8, boxShadow: 'var(--comic-shadow)', cursor: 'pointer', userSelect: 'none', transform: 'rotate(-1deg)' }}>
+          <img src={getOptimizedUrl(images[0])} alt={story?.title} style={{ width: '100%', maxHeight: 580, objectFit: 'cover', display: 'block', border: '3px solid var(--pop-black)', filter: vintageFilter }} />
           <PopAnim />
         </div>
       );
     }
     return (
-      <div onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, display: 'grid', gridTemplateColumns: count === 2 ? '1fr 1fr' : '1fr 1fr', gap: 12, background: '#3FE0FF', padding: 12, borderRadius: 16, border: '4px solid #171719', boxShadow: '8px 8px 0px 0px #171719', cursor: 'pointer' }}>
+      <div className="scrapbook-tape" onDoubleClick={handleDoubleTap} style={{ position: 'relative', marginTop: 24, display: 'grid', gridTemplateColumns: count === 2 ? '1fr 1fr' : '1fr 1fr', gap: 12, background: 'var(--pop-cyan)', padding: 12, borderRadius: 16, border: '4px solid var(--pop-black)', boxShadow: 'var(--comic-shadow)', cursor: 'pointer' }}>
         {images.slice(0, count === 2 ? 2 : 1).map((img, i) => (
-          <img key={i} src={getOptimizedUrl(img)} alt={`media-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: count > 2 && i === 0 ? 'span 2' : 'auto', border: '3px solid #171719', borderRadius: 8 }} />
+          <img key={i} src={getOptimizedUrl(img)} alt={`media-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', gridColumn: count > 2 && i === 0 ? 'span 2' : 'auto', border: '3px solid var(--pop-black)', borderRadius: 8, filter: vintageFilter }} />
         ))}
         <PopAnim />
       </div>
@@ -141,14 +147,14 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
       style={{
-        background: '#FFFFFF', border: '4px solid #171719', borderRadius: 24,
-        padding: '32px', position: 'relative', boxShadow: '12px 12px 0px 0px #171719',
+        background: '#FFFFFF', border: 'var(--comic-border)', borderRadius: 24,
+        padding: '32px', position: 'relative', boxShadow: 'var(--comic-shadow)',
         marginBottom: 24,
       }}
     >
       {/* Milestone ribbon */}
       {story.isMilestone && (
-        <div style={{ position: 'absolute', top: -4, right: 30, background: '#FFD23F', color: '#171719', padding: '8px 16px', border: '4px solid #171719', borderTop: 'none', borderRadius: '0 0 12px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 16, boxShadow: '4px 4px 0px 0px #171719', zIndex: 10 }}>
+        <div style={{ position: 'absolute', top: -3, right: 30, background: 'var(--pop-yellow)', color: 'var(--pop-black)', padding: '8px 16px', border: 'var(--comic-border)', borderTop: 'none', borderRadius: '0 0 12px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 16, boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)', zIndex: 10 }}>
           ⭐ MILESTONE
         </div>
       )}
@@ -157,7 +163,7 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, marginTop: story.isMilestone ? 24 : 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* Avatar */}
-          <div style={{ width: 56, height: 56, borderRadius: '50%', border: '4px solid #171719', background: '#FF3D81', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 0px 0px #171719' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', border: 'var(--comic-border)', background: 'var(--pop-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)' }}>
             {story?.user?.avatar ? (
               <img src={story.user.avatar} alt={story?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
             ) : (
@@ -165,18 +171,18 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
             )}
           </div>
           <div>
-            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: '#171719', letterSpacing: 1 }}>
+            <div style={{ fontFamily: "'Luckiest Guy',cursive", fontSize: 20, color: 'var(--pop-black)', letterSpacing: 1 }}>
               {story?.user?.name || 'UNKNOWN'}
             </div>
-            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: '#171719' }}>
-              {displayDate} {eventBadge && <span style={{ background: '#3FE0FF', padding: '2px 6px', borderRadius: 4, border: '2px solid #171719' }}>{eventBadge}</span>}
+            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 14, color: 'var(--pop-black)' }}>
+              {displayDate} {eventBadge && <span style={{ background: 'var(--pop-cyan)', padding: '2px 6px', borderRadius: 4, border: '2px solid var(--pop-black)' }}>{eventBadge}</span>}
             </div>
           </div>
         </div>
 
         {/* Delete */}
         {canManage && (
-          <button onClick={() => setShowDeleteModal(true)} style={{ background: '#FF3D81', border: '3px solid #171719', borderRadius: 10, padding: '8px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#FFF', cursor: 'pointer', boxShadow: '4px 4px 0px 0px #171719' }}>
+          <button onClick={() => setShowDeleteModal(true)} style={{ background: 'var(--pop-pink)', border: 'var(--comic-border)', borderRadius: 10, padding: '8px 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#FFF', cursor: 'pointer', boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)' }}>
             TRASH 🗑️
           </button>
         )}
@@ -184,21 +190,21 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
       <div>
         {/* Title */}
-        <h3 style={{ margin: '0 0 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: '#FF7B00', WebkitTextStroke: '1px #171719', textShadow: '2px 2px 0px #171719' }}>
+        <h3 style={{ margin: '0 0 12px', fontFamily: "'Luckiest Guy',cursive", fontSize: 32, color: 'var(--pop-orange)', WebkitTextStroke: '1px var(--pop-black)', textShadow: '2px 2px 0px var(--pop-black)' }}>
           {story.title}
         </h3>
 
         {/* Tone badge */}
         {story.tone && story.tone !== 'Original' && (
           <div style={{ marginBottom: 16 }}>
-            <span style={{ display: 'inline-block', padding: '4px 12px', border: '3px solid #171719', borderRadius: 8, background: '#FFD23F', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: '#171719', boxShadow: '2px 2px 0px 0px #171719' }}>
+            <span style={{ display: 'inline-block', padding: '4px 12px', border: 'var(--comic-border)', borderRadius: 8, background: 'var(--pop-yellow)', fontFamily: "'Luckiest Guy',cursive", fontSize: 14, color: 'var(--pop-black)', boxShadow: '2px 2px 0px 0px rgba(0,0,0,0.2)' }}>
               {story.tone.replace(/[^\w\s-]/gi, '').trim()} FLAVOR
             </span>
           </div>
         )}
 
-        {/* Content */}
-        <p style={{ margin: 0, fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#171719', lineHeight: 1.6, whiteSpace: 'pre-wrap', background: '#F5F5F5', padding: 16, border: '3px dashed #171719', borderRadius: 12 }}>
+        {/* Content - Handwriting Font for Nostalgia */}
+        <p className="handwriting" style={{ margin: 0, background: '#F5F5F5', padding: 16, border: '2px dashed var(--pop-black)', borderRadius: 12, whiteSpace: 'pre-wrap' }}>
           {story.content}
         </p>
       </div>
