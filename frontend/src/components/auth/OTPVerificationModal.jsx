@@ -73,8 +73,7 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
     <div style={{
       position: 'fixed', inset: 0,
       background: 'rgba(255, 246, 229, 0.9)',
-      backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)',
-      backgroundSize: '20px 20px',
+      backgroundImage: 'none',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       zIndex: 1000, padding: 20,
     }}>

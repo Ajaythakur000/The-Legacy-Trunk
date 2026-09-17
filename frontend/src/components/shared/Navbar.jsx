@@ -21,7 +21,7 @@ const GLOBAL_CSS = `
 
   .lt-app-layout {
     display: flex; height: 100vh; overflow: hidden;
-    background: #FDFBF7; background-image: radial-gradient(#3E2723 2px, transparent 2.5px); background-size: 20px 20px;
+    background: transparent;
     font-family: 'Baloo 2', sans-serif; position: relative;
   }
 

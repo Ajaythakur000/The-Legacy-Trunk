@@ -50,7 +50,7 @@ function App() {
   const { isInitializing } = useAuth();
 
   if (isInitializing) {
-    return <div style={{ background: '#FDFBF7', minHeight: '100vh', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px' }} />;
+    return <div style={{ background: '#FDFBF7', minHeight: '100vh', backgroundImage: 'none',  }} />;
   }
 
   return (

@@ -137,7 +137,7 @@ function VaultRoomPage() {
   };
 
   return (
-    <div style={{ height: 'calc(100vh - 76px)', display: 'flex', flexDirection: 'column', background: '#FDFBF7', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px', fontFamily: "'Baloo 2', sans-serif", position: 'relative', overflow: 'hidden' }}>
+    <div style={{ height: 'calc(100vh - 76px)', display: 'flex', flexDirection: 'column', background: '#FDFBF7', backgroundImage: 'none', fontFamily: "'Baloo 2', sans-serif", position: 'relative', overflow: 'hidden' }}>
       
       <AnimatePresence>
         {showClearModal && <ConfirmModal isOpen={showClearModal} onClose={() => setShowClearModal(false)} onConfirm={executeClearChat} message="This will permanently erase ALL vault transmissions for everyone. Proceed?" />}

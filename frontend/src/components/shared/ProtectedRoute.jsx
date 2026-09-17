@@ -10,8 +10,7 @@ function ProtectedRoute({ children }) {
     return (
       <div style={{ 
         background: '#FDFBF7', 
-        backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', 
-        backgroundSize: '20px 20px', 
+        backgroundImage: 'none', 
         height: '100vh', width: '100vw' 
       }} />
     );

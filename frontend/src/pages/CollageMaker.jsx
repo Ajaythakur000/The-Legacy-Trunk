@@ -161,7 +161,7 @@ function CollageMaker({ onClose, onSave }) {
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         
         {/* PREVIEW */}
-        <div style={{ flex: '1.5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#FDFBF7', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px' }}>
+        <div style={{ flex: '1.5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#FDFBF7', backgroundImage: 'none',  }}>
           <div style={{ width: '100%', maxWidth: 400, aspectRatio: '1/1', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.3)', border: '2px solid #3E2723', background: '#FFF' }}>
             <div ref={collageRef} style={{ width: '100%', height: '100%', transition: 'all .2s ease', ...currentFrame.style }}>
               <div style={{ width: '100%', height: '100%', display: 'grid', gap: `${gridGap}px`, gridTemplateColumns: currentLayout.cols, gridTemplateRows: currentLayout.rows, borderRadius: activeFrame === 'none' ? borderRadius : 0, overflow: 'hidden', background: '#3E2723' }}>

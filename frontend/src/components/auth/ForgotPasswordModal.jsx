@@ -103,7 +103,7 @@ function ForgotPasswordModal({ onClose }) {
   const iconLock  = <svg viewBox="0 0 24 24" fill="none" stroke="#3E2723" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(255, 246, 229, 0.9)', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(255, 246, 229, 0.9)', backgroundImage: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 }}>
       
       <motion.div initial={{ opacity: 0, scale: 0.8, rotate: 2 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
         style={{ background: '#FFFFFF', border: '2px solid #3E2723', borderRadius: 16, padding: '40px', width: '100%', maxWidth: 440, boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.3)', position: 'relative' }}>

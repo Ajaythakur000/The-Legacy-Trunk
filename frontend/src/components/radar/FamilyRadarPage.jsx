@@ -16,9 +16,7 @@ const CSS = `
 
   .fr-root *, .fr-root *::before, .fr-root *::after { box-sizing: border-box; }
   .fr-root {
-    min-height: 100vh; background: #FDFBF7;
-    background-image: radial-gradient(#3E2723 2px, transparent 2.5px);
-    background-size: 20px 20px;
+    min-height: 100vh; background: transparent;
     padding: 0 0 60px; position: relative; overflow-x: hidden;
     font-family: 'Baloo 2', sans-serif;
   }

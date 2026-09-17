@@ -75,7 +75,7 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
   const pageBase = {
     width: 794, height: 1123,
     backgroundColor: '#D4B895', 
-    backgroundImage: 'radial-gradient(#3E2723 3px, transparent 4px)',
+    backgroundImage: 'none',
     backgroundSize: '30px 30px',
     color: '#3E2723', position: 'relative', overflow: 'hidden', boxSizing: 'border-box',
   };

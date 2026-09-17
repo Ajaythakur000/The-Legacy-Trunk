@@ -62,7 +62,7 @@ const StoryExportTemplate = forwardRef(({ story }, ref) => {
           display: 'none', position: 'absolute', left: '-9999px', top: 0,
           width: 800, minHeight: 800,
           backgroundColor: '#D4B895',
-          backgroundImage: 'radial-gradient(#3E2723 3px, transparent 4px)',
+          backgroundImage: 'none',
           backgroundSize: '30px 30px',
           flexDirection: 'column',
           padding: '40px', boxSizing: 'border-box',

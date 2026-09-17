@@ -27,7 +27,7 @@ class ErrorBoundary extends React.Component {
           height: '100vh', width: '100vw',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: '#632020',
-          backgroundImage: 'radial-gradient(#3E2723 3px, transparent 3.5px)',
+          backgroundImage: 'none',
           backgroundSize: '24px 24px',
           fontFamily: "'Baloo 2', sans-serif",
           position: 'relative', overflow: 'hidden', padding: '20px',

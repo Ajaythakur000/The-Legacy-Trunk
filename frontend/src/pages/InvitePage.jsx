@@ -38,7 +38,7 @@ function InvitePage() {
     return (
       <div style={{ 
         minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-        background: '#D4B895', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px',
+        background: '#D4B895', backgroundImage: 'none',
         padding: 20 
       }}>
         <motion.div 
@@ -59,7 +59,7 @@ function InvitePage() {
   return (
     <div style={{ 
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-      background: '#FDFBF7', backgroundImage: 'radial-gradient(#3E2723 2px, transparent 2.5px)', backgroundSize: '20px 20px',
+      background: '#FDFBF7', backgroundImage: 'none',
       padding: '20px' 
     }}>
       <motion.div 
