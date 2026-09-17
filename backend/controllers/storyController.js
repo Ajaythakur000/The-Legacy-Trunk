@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
@@ -16,6 +17,9 @@ const hasStoryAccess = (story, user) => {
 };
 
 const createStory = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { title, content, tags, isGlobalPublic, circleId, isMilestone, milestoneDate, tone } = req.body;
     
@@ -59,13 +63,16 @@ const createStory = async (req, res) => {
       milestoneDate: milestoneDate ? new Date(milestoneDate) : new Date()
     });
 
-    const createdStory = await story.save();
+    const [createdStory] = await story.save({ session }).then(doc => [doc]); // save with session array or just wait
 
     if (targetCircleId) {
-      await awardPoints(req.user._id, targetCircleId, 10);
+      await awardPoints(req.user._id, targetCircleId, 10, session);
     }
 
-    await handleStoryPostStreak(req.user._id);
+    await handleStoryPostStreak(req.user._id, session);
+
+    await session.commitTransaction();
+    session.endSession();
 
     const populated = await Story.findById(createdStory._id)
       .populate('user', 'name email relationToAdmin avatar')
@@ -79,6 +86,8 @@ const createStory = async (req, res) => {
     return res.status(201).json(populated);
     
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Story Creation Error:", error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
@@ -103,7 +112,7 @@ const deleteStory = async (req, res) => {
       await awardPoints(story.user, story.originCircleId, -10);
     }
 
-    await Story.deleteOne({ _id: req.params.id });
+    await Story.findByIdAndUpdate(req.params.id, { isDeleted: true });
     return res.status(200).json({ message: 'Story removed successfully' });
   } catch (error) {
     console.error("Delete Story Error:", error.message);
@@ -244,17 +253,21 @@ const addCommentToStory = async (req, res) => {
 const getCircleFeed = async (req, res) => {
   try {
     const circleId = req.query.circleId || req.user?.activeCircleId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
 
     if (!circleId) {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    const stories = await Story.find({ originCircleId: circleId })
+    const stories = await Story.find({ originCircleId: circleId, isDeleted: false })
       .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name avatar')
       .sort({ createdAt: -1 })
-      .limit(15); 
+      .skip(skip)
+      .limit(limit); 
 
     return res.status(200).json(stories);
   } catch (error) {
@@ -265,11 +278,16 @@ const getCircleFeed = async (req, res) => {
 
 const getMyFamilyStories = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
     if (!req.user?.activeCircleId) {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
     const stories = await Story.find({
+      isDeleted: false,
       $or: [
         { originCircleId: req.user.activeCircleId },
         { sharedWith: req.user.activeCircleId },
@@ -277,7 +295,8 @@ const getMyFamilyStories = async (req, res) => {
     })
       .populate('user', 'name relationToAdmin avatar')
       .sort({ createdAt: -1 })
-      .limit(15); 
+      .skip(skip)
+      .limit(limit); 
 
     return res.status(200).json(stories);
   } catch (error) {
@@ -288,11 +307,16 @@ const getMyFamilyStories = async (req, res) => {
 
 const getGlobalStories = async (req, res) => {
   try {
-    const stories = await Story.find({ isGlobalPublic: true })
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    const stories = await Story.find({ isGlobalPublic: true, isDeleted: false })
       .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
       .sort({ createdAt: -1 })
-      .limit(50); 
+      .skip(skip)
+      .limit(limit); 
 
     return res.status(200).json(stories);
   } catch (error) {
@@ -357,11 +381,17 @@ const updateStory = async (req, res) => {
 
 const getMyStories = async (req, res) => {
   try {
-    const stories = await Story.find({ user: req.user._id })
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
+    const stories = await Story.find({ user: req.user._id, isDeleted: false })
       .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name avatar')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     return res.status(200).json(stories);
   } catch (error) {

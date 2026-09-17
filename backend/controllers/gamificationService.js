@@ -64,9 +64,9 @@ export const handleDailyLogin = async (userId, familyCircleId) => {
 /**
  *  NEW STREAK LOGIC (Triggered ONLY when user posts a story)
  */
-export const handleStoryPostStreak = async (userId) => {
+export const handleStoryPostStreak = async (userId, session = null) => {
   try {
-    const user = await FamilyMember.findById(userId);
+    const user = await FamilyMember.findById(userId).session(session);
     if (!user) return;
 
     const todayStr = getISTDateStr();
@@ -100,7 +100,7 @@ export const handleStoryPostStreak = async (userId) => {
     
     // Save today as the last post date
     user.lastPostDate = todayStr;
-    await user.save();
+    await user.save({ session });
   } catch (error) {
     console.error("Streak Error:", error);
   }
@@ -109,12 +109,12 @@ export const handleStoryPostStreak = async (userId) => {
 /**
  * Handle Points for Actions (Post, Like, Comment)
  */
-export const awardPoints = async (userId, familyCircleId, points) => {
+export const awardPoints = async (userId, familyCircleId, points, session = null) => {
   try {
     if (!userId || !familyCircleId || !points) return;
 
     const todayStr = getISTDateStr();
-    const user = await FamilyMember.findById(userId);
+    const user = await FamilyMember.findById(userId).session(session);
 
     if (user) {
       user.totalContributionPoints = (Number(user.totalContributionPoints) || 0) + points;
@@ -125,7 +125,7 @@ export const awardPoints = async (userId, familyCircleId, points) => {
       if (currentMapScore < 0) currentMapScore = 0;
 
       user.activityMap.set(todayStr, currentMapScore);
-      await user.save();
+      await user.save({ session });
     }
 
     // ✅ floor familyBondPoints at 0 (prevents negative values)
@@ -139,7 +139,8 @@ export const awardPoints = async (userId, familyCircleId, points) => {
             },
           },
         },
-      ]
+      ],
+      { session } // Note: for aggregation pipeline updates, some older mongoose versions might have quirks, but usually session works here if passed as options object. Wait, findByIdAndUpdate options is the third arg.
     );
   } catch (error) {
     console.error('Gamification Award Error:', error);

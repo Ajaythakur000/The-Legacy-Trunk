@@ -13,7 +13,6 @@ import api from './axios';
  * Create Story (multipart/form-data)
  */
 export const createStoryApi = async (formData) => {
-  //  Bas seedha formData pass kar de, Axios baaki khud sambhal lega
   const response = await api.post('/stories', formData);
   return response.data;
 };

@@ -96,6 +96,10 @@ const storySchema = new Schema(
         ref: 'FamilyCircle',
       },
     ],
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

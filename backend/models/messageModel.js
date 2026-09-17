@@ -20,7 +20,7 @@ const messageSchema = new Schema(
     },
     senderAvatar: {
       type: String,
-      default: '', // 🔥 Ab refresh karne pe photo gayab nahi hogi
+      default: '', //  Ab refresh karne pe photo gayab nahi hogi
     },
     text: {
       type: String,
@@ -36,7 +36,7 @@ const messageSchema = new Schema(
       type: String,
       default: '',
     },
-    // 🔥 NEW: REACTIONS & VIEWS SYSTEM
+
     reactions: [
       {
         emoji: { type: String, required: true },
