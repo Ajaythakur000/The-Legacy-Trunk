@@ -5,7 +5,8 @@ import { getMyCirclesApi } from '../../api/circleApi';
 import api from '../../api/axios';
 import { connectSocket, getSocket } from '../../services/socket';
 import ChampionDetailModal from '../modals/ChampionDetailModal';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+
 import { Menu, Search, Sparkles, Home, Bell, Flame, Snowflake, Crown, PenSquare, BookImage, LogOut, Heart, MessageSquare, Mail, Pin } from 'lucide-react';
 import Sidebar, { LogoRing } from './Sidebar';
 

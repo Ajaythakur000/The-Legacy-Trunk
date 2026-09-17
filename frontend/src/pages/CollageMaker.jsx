@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { useState, useRef, useCallback, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Camera, X, Plus, Scissors, Check, Settings2, Image as ImageIcon, LayoutGrid } from 'lucide-react';
 
 const FRAMES = [

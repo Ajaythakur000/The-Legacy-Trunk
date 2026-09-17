@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { PenTool, MessageSquareQuote } from 'lucide-react';
 
 function StoryCommentBox({ storyId, comments = [], onCommentSubmit }) {

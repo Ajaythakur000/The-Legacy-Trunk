@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { searchContentApi } from '../api/searchApi';
 import StoryCard from '../components/story/StoryCard';
 import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
+
 
 function SearchResultsPage() {
   const { user } = useAuth();

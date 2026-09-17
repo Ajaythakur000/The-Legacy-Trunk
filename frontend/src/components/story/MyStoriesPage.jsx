@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState, useMemo } from 'react';
 import { getMyStoriesApi, deleteStoryApi, toggleLikeStoryApi, addCommentToStoryApi, updateStoryApi } from '../../api/storyApi';
 import StoryCard from './StoryCard';
 import StorySkeleton from '../shared/StorySkeleton';
 import { useAuth } from '../../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import toast from 'react-hot-toast';
 import { BookOpen, FolderOpen, Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
 

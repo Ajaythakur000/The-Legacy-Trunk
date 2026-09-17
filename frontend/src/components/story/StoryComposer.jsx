@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+/* eslint-disable no-unused-vars */
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
 import CollageMaker from '../../pages/CollageMaker';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import imageCompression from 'browser-image-compression';

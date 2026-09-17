@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
+
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import DOMPurify from 'dompurify';
