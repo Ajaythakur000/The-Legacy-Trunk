@@ -3,6 +3,7 @@ import { redisConnection } from '../config/bullmq.js';
 import { launch } from 'puppeteer';
 import nodemailer from 'nodemailer';
 import Story from '../models/storyModel.js';
+import Timeline from '../models/timelineModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 import dotenv from 'dotenv';
@@ -27,10 +28,18 @@ export const pdfWorker = new Worker('pdf-generation', async (job) => {
         const userCircles = await FamilyCircle.find({ members: userId });
         const circleIds = userCircles.map(c => c._id);
 
-        const stories = await Story.find({
-            '_id': { $in: storyIds },
-            '$or': [{ user: userId }, { sharedWith: { $in: circleIds } }]
-        }).populate('user', 'name');
+        let stories = [];
+        if (job.data.type === 'timeline') {
+            stories = await Timeline.find({
+                '_id': { $in: storyIds },
+                originCircleId: { $in: circleIds }
+            }).populate('user', 'name');
+        } else {
+            stories = await Story.find({
+                '_id': { $in: storyIds },
+                '$or': [{ user: userId }, { sharedWith: { $in: circleIds } }]
+            }).populate('user', 'name');
+        }
 
         if (stories.length === 0) throw new Error("No authorized stories found.");
 
@@ -52,7 +61,7 @@ export const pdfWorker = new Worker('pdf-generation', async (job) => {
         stories.forEach(story => {
             const safeTitle = escapeHTML(story.title);
             const safeAuthor = escapeHTML(story.user?.name || 'Unknown');
-            const safeContent = escapeHTML(story.content).replace(/\n/g, '<br>');
+            const safeContent = escapeHTML(story.content || story.description || '').replace(/\n/g, '<br>');
             let safeImageHtml = '';
             if (story.mediaUrl && story.mediaUrl.startsWith('http')) {
                 safeImageHtml = `<img class="story-image" src="${escapeHTML(story.mediaUrl)}" alt="${safeTitle}">`;

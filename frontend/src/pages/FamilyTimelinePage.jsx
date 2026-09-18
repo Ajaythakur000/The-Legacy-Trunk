@@ -202,7 +202,7 @@ function FamilyTimelinePage() {
       toast.loading("Starting background export... 🚀", { id: 'pdf-export' });
       const storyIds = milestones.map(m => m._id);
       
-      const res = await api.post('/export/pdf', { storyIds });
+      const res = await api.post('/export/pdf', { storyIds, type: 'timeline' });
       
       toast.success(res.data.message || "PDF will be emailed shortly!", { 
         id: 'pdf-export',
