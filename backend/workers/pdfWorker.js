@@ -28,7 +28,7 @@ export const pdfWorker = new Worker('pdf-generation', async (job) => {
         const userCircles = await FamilyCircle.find({ members: userId });
         const circleIds = userCircles.map(c => c._id);
 
-                let stories = [];
+        let stories = [];
         if (job.data.items && job.data.items.length > 0) {
             stories = job.data.items;
         } else if (job.data.type === 'timeline') {
@@ -41,18 +41,9 @@ export const pdfWorker = new Worker('pdf-generation', async (job) => {
                 '_id': { $in: storyIds },
                 '$or': [{ user: userId }, { sharedWith: { $in: circleIds } }]
             }).populate('user', 'name');
-        } else {
-            stories = await Story.find({
-                '_id': { $in: storyIds },
-                '$or': [{ user: userId }, { sharedWith: { $in: circleIds } }]
-            }).populate('user', 'name');
         }
-
-        console.log('[Worker Debug] User ID:', userId);
-console.log('[Worker Debug] Circle IDs:', circleIds);
-console.log('[Worker Debug] Type:', job.data.type);
-console.log('[Worker Debug] Story IDs:', storyIds);
-if (stories.length === 0) throw new Error("No authorized stories found.");
+        
+        if (stories.length === 0) throw new Error("No authorized stories found.");
 
         let htmlContent = `
             <html><head>
