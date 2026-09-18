@@ -212,7 +212,7 @@ const getLeaderboard = async (req, res) => {
 
     if (redisClient) {
       try {
-        await redisClient.setex(CACHE_KEY, 3600, JSON.stringify(familiesWithChampions));
+        await redisClient.set(CACHE_KEY, familiesWithChampions, { ex: 3600 });
       } catch(err) {
         console.error('Redis Set Error:', err);
       }
