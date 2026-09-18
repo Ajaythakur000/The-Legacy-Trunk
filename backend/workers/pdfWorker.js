@@ -4,7 +4,7 @@ import { launch } from 'puppeteer';
 import nodemailer from 'nodemailer';
 import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
-import User from '../models/userModel.js';
+import FamilyMember from '../models/familyMember.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -23,7 +23,7 @@ export const pdfWorker = new Worker('pdf-generation', async (job) => {
     const { userId, storyIds } = job.data;
 
     try {
-        const user = await User.findById(userId);
+        const user = await FamilyMember.findById(userId);
         const userCircles = await FamilyCircle.find({ members: userId });
         const circleIds = userCircles.map(c => c._id);
 
