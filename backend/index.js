@@ -24,6 +24,9 @@ import { initializeSocket } from './socket/socketHandler.js';
 
 const app = express();
 
+// dY" Fix rate limiting behind Render Proxy
+app.set('trust proxy', 1);
+
 // 🟢 FIX 1: Strict Allowed Origins (Sirf inhi links se request aayegi)
 const allowedOrigins = [
   'http://localhost:5173',               //  local frontend
