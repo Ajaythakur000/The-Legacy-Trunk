@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import './workers/pdfWorker.js'; // Start BullMQ Worker
+
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
