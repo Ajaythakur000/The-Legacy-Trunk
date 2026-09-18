@@ -84,6 +84,13 @@ const createStory = async (req, res) => {
       io.to(String(targetCircleId)).emit('new_story_added', populated || createdStory);
     }
 
+    if (redisClient) {
+      try {
+        await redisClient.del(`feed:${targetCircleId}:1:15`);
+        await redisClient.del('global_leaderboard');
+      } catch(err) { console.error('Redis Del Error:', err); }
+    }
+
     return res.status(201).json(populated);
     
   } catch (error) {
@@ -180,6 +187,13 @@ const toggleLikeStory = async (req, res) => {
       }
     }
 
+    if (redisClient && story.originCircleId) {
+      try {
+        await redisClient.del(`feed:${story.originCircleId}:1:15`);
+        await redisClient.del('global_leaderboard');
+      } catch(err) { console.error('Redis Del Error:', err); }
+    }
+    
     return res.status(200).json({
       message: alreadyLiked ? 'Story unliked' : 'Story liked',
       likesCount: updatedStory.likes.length,
@@ -261,6 +275,18 @@ const getCircleFeed = async (req, res) => {
     if (!circleId) {
       return res.status(400).json({ message: 'No active circle selected' });
     }
+
+    const CACHE_KEY = `feed:${circleId}:${page}:${limit}`;
+    if (redisClient) {
+      try {
+        const cachedData = await redisClient.get(CACHE_KEY);
+        if (cachedData) {
+          console.log('🟢 CACHE HIT: getCircleFeed', CACHE_KEY);
+          return res.status(200).json(cachedData);
+        }
+      } catch (err) { console.error('Redis Get Error:', err); }
+    }
+    console.log('🔴 CACHE MISS: getCircleFeed', CACHE_KEY);
 
     const stories = await Story.find({ originCircleId: circleId, isDeleted: { $ne: true } })
       .populate('user', 'name email relationToAdmin avatar')

@@ -172,6 +172,19 @@ const removeMemberFromCircle = async (req, res) => {
 //  FIX: Calculate and attach the top contributor (champion) avatar for each family
 const getLeaderboard = async (req, res) => {
   try {
+    const CACHE_KEY = 'global_leaderboard';
+    if (redisClient) {
+      try {
+        const cachedData = await redisClient.get(CACHE_KEY);
+        if (cachedData) {
+          console.log('🟢 CACHE HIT: getLeaderboard');
+          return res.status(200).json(cachedData);
+        }
+      } catch(err) {
+        console.error('Redis Get Error:', err);
+      }
+    }
+    console.log('🔴 CACHE MISS: getLeaderboard');
     const topFamilies = await FamilyCircle.find({})
       .sort({ familyBondPoints: -1 }) 
       .limit(10)
