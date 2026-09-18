@@ -1,3 +1,4 @@
+import redisClient from '../config/redis.js';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import FamilyCircle from '../models/familyCircleModel.js';
@@ -209,6 +210,13 @@ const getLeaderboard = async (req, res) => {
       })
     );
 
+    if (redisClient) {
+      try {
+        await redisClient.setex(CACHE_KEY, 3600, JSON.stringify(familiesWithChampions));
+      } catch(err) {
+        console.error('Redis Set Error:', err);
+      }
+    }
     return res.status(200).json(familiesWithChampions);
   } catch (error) {
     return res.status(500).json({ message: error.message || 'Failed to fetch leaderboard' });
