@@ -196,6 +196,22 @@ function FamilyTimelinePage() {
   const { user }    = useAuth();
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading]       = useState(true);
+  const handleBackgroundExport = async () => {
+    try {
+      toast.loading("Starting background export... 🚀", { id: 'pdf-export' });
+      const storyIds = milestones.map(m => m._id);
+      
+      const res = await api.post('/export/pdf', { storyIds });
+      
+      toast.success(res.data.message || "PDF will be emailed shortly!", { 
+        id: 'pdf-export',
+        duration: 5000 
+      });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to trigger export", { id: 'pdf-export' });
+    }
+  };
+
   const exporterRef = useRef();
 
   // Pagination State
@@ -291,7 +307,7 @@ function FamilyTimelinePage() {
       {/* FAB: Download Memories */}
       {milestones.length > 0 && (
         <motion.button
-          onClick={() => exporterRef.current?.generatePDF()}
+          onClick={handleBackgroundExport}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           style={{
