@@ -199,18 +199,10 @@ function FamilyTimelinePage() {
   const [loading, setLoading]       = useState(true);
   const handleBackgroundExport = async () => {
     try {
+      // Direct client-side generation
       exporterRef.current?.generatePDF();
-      
-      toast.loading("Dispatching automated email via BullMQ Queue...", { id: 'pdf-export' });
-      const storyIds = milestones.map(m => m._id);
-      await api.post('/export/pdf', { storyIds, type: 'timeline' });
-      
-      toast.success("Background email dispatched successfully!", { 
-        id: 'pdf-export',
-        duration: 5000 
-      });
     } catch (err) {
-      toast.error("Failed to trigger email", { id: 'pdf-export' });
+      console.error(err);
     }
   };
 

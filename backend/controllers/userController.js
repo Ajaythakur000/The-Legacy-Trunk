@@ -3,6 +3,7 @@ import FamilyCircle from '../models/familyCircleModel.js';
 import jwt from 'jsonwebtoken';
 import { handleDailyLogin } from './gamificationService.js';
 import bcrypt from 'bcryptjs';
+import { otpQueue } from '../config/bullmq.js';
 import path from 'path';
 
 // Import templates from your new file

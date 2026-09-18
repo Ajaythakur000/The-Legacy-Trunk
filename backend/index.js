@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import './workers/pdfWorker.js'; // Start BullMQ Worker
+import './workers/pdfWorker.js';
+import './workers/otpWorker.js'; // Start BullMQ Worker
 
 import express from 'express';
 import cors from 'cors';

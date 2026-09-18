@@ -21,3 +21,12 @@ export const pdfQueue = new Queue('pdf-generation', {
 });
 
 export { redisConnection };
+
+
+export const otpQueue = new Queue('otp-email-dispatch', { 
+    connection: redisConnection,
+    defaultJobOptions: {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 2000 }
+    }
+});
