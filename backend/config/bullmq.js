@@ -5,7 +5,7 @@ dotenv.config();
 
 const redisConnection = new Redis(process.env.REDIS_URL, {
     maxRetriesPerRequest: null,
-    tls: { rejectUnauthorized: false }
+    // tls: { rejectUnauthorized: false } // Removed for Redis Cloud (Free Tier doesn't use SSL)
 });
 
 redisConnection.on('error', (err) => {
