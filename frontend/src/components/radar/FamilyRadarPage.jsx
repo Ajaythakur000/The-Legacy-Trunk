@@ -59,10 +59,15 @@ const CSS = `
   }
   .fr-map-inner { height: 600px; position: relative; }
   
-  /* CARTO Light Map CSS Filter for Pop-Art Look */
+  /* Dark Map CSS Filter using Standard OSM */
   .fr-map-inner .leaflet-container { 
-    height: 100%; width: 100%; background: #FFF !important; 
-    filter: brightness(1.05) contrast(1.1) saturate(1.2);
+    height: 100%; width: 100%; background: #111 !important; 
+  }
+  .leaflet-layer,
+  .leaflet-control-zoom-in,
+  .leaflet-control-zoom-out,
+  .leaflet-control-attribution {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
   }
 
   .fr-map-label {
@@ -137,15 +142,17 @@ const CSS = `
   @media (max-width: 900px) { .fr-grid{grid-template-columns: 1fr;} .fr-map-inner{height: 400px;} }
 `;
 
-// ── Leaflet icons (Comic Style) ───────────────────────────────────────────────
-const myIcon = () => L.divIcon({
-  className: '', iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -20],
-  html: `<div style="width:40px;height:40px;border-radius:50%;background:#D4B895;border: none;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display', serif;font-size:18px;color:#3E2723;box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);transform:rotate(-5deg);">ME</div>`,
-});
-
-const otherIcon = (init='?', online=false) => L.divIcon({
-  className: '', iconSize: [36, 36], iconAnchor: [18, 18], popupAnchor: [0, -18],
-  html: `<div style="width:36px;height:36px;border-radius:50%;background:${online ? '#C89B3C' : '#FFF'};border: none;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display', serif;font-size:16px;color:#3E2723;box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);">${init}</div>`,
+// ── Leaflet icons (Sleek Radar Style) ─────────────────────────────────────────
+const radarIcon = (name, isMe, isOnline, isGhost) => L.divIcon({
+  className: '', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15],
+  html: `
+    <div style="position: relative; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center;">
+      <div style="width: 20px; height: 20px; background: ${isGhost ? 'rgba(255,255,255,0.5)' : (isOnline || isMe ? '#00C853' : '#888')}; border-radius: 50%; box-shadow: 0 0 20px ${isGhost ? 'rgba(255,255,255,0.3)' : (isOnline || isMe ? '#00C853' : '#888')};"></div>
+      <div style="position: absolute; top: -35px; background: #333; padding: 4px 10px; border-radius: 6px; font-family: 'Baloo 2', sans-serif; font-size: 14px; color: white; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+        ${name.split(' ')[0]} ${isGhost ? '👻' : '📍'}
+      </div>
+    </div>
+  `
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -246,12 +253,49 @@ function FamilyRadarPage() {
   useEffect(()=>{
     const socket=getSocket();if(!socket||!familyCircleId)return;
     socket.emit('join_vault',{familyCircleId});
-    const onLoc=payload=>{
-      const uid=String(payload?.userId||payload?.memberId||'');if(!uid||uid===myUserId)return;
-      const lat=Number(payload?.latitude),lng=Number(payload?.longitude);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
-      setMembers(prev=>{const idx=prev.findIndex(m=>String(m._id)===uid);if(idx===-1)return prev;const copy=[...prev];copy[idx]={...copy[idx],latitude:lat,longitude:lng,updatedAt:payload?.updatedAt||new Date().toISOString(),isOnline:true};return copy;});
+    
+    const onLoc = payload => {
+      const uid = String(payload?.userId || payload?.memberId || '');
+      if (!uid || uid === myUserId) return;
+      const lat = Number(payload?.latitude), lng = Number(payload?.longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      
+      setMembers(prev => {
+        const idx = prev.findIndex(m => String(m._id) === uid);
+        const newTime = payload?.updatedAt || payload?.lastLocationUpdatedAt || new Date().toISOString();
+        if (idx === -1) {
+          return [...prev, {
+            _id: uid,
+            name: payload?.name || payload?.memberName || 'Family Member',
+            latitude: lat,
+            longitude: lng,
+            updatedAt: newTime,
+            isOnline: true,
+            isGhostModeOn: Boolean(payload?.isGhostModeOn)
+          }];
+        }
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], latitude: lat, longitude: lng, updatedAt: newTime, isOnline: true };
+        return copy;
+      });
     };
-    socket.on('member_location_changed',onLoc);return()=>socket.off('member_location_changed',onLoc);
+
+    const onOnlineUsers = data => {
+      if (!data?.users) return;
+      const onlineIds = data.users.map(u => String(u.userId));
+      setMembers(prev => prev.map(m => ({
+        ...m,
+        isOnline: onlineIds.includes(String(m._id))
+      })));
+    };
+
+    socket.on('member_location_changed', onLoc);
+    socket.on('vault_online_users', onOnlineUsers);
+    
+    return () => {
+      socket.off('member_location_changed', onLoc);
+      socket.off('vault_online_users', onOnlineUsers);
+    };
   },[familyCircleId,myUserId]);
 
   const handleToggleGhostMode=async()=>{
@@ -314,12 +358,12 @@ function FamilyRadarPage() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {myLocation&&!isGhostModeOn&&(
-                  <><Marker icon={myIcon()} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
-                  <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color: '#FDFBF7',fillColor:'#D4B895',fillOpacity:0.2,weight:2}}/>
-                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color: '#FDFBF7',fillColor:'#1E352F',fillOpacity:0.05,weight:1,dashArray:'4 8'}}/></>
+                  <><Marker icon={radarIcon('You', true, true, false)} position={[myLocation.lat,myLocation.lng]}><Popup><PopupContent name={user?.name||'You'} isMe isOnline/></Popup></Marker>
+                  <Circle center={[myLocation.lat,myLocation.lng]} radius={120} pathOptions={{color: '#00C853',fillColor:'#00C853',fillOpacity:0.1,weight:1}}/>
+                  <Circle center={[myLocation.lat,myLocation.lng]} radius={300} pathOptions={{color: '#00C853',fillColor:'#00C853',fillOpacity:0.02,weight:1,dashArray:'4 8'}}/></>
                 )}
                 {visibleMembers.map(m=>(
-                  <Marker key={m._id} icon={otherIcon(init(m.name),m.isOnline)} position={[m.latitude,m.longitude]}>
+                  <Marker key={m._id} icon={radarIcon(m.name, false, m.isOnline, m.isGhostModeOn)} position={[m.latitude,m.longitude]}>
                     <Popup><PopupContent name={m.name} isOnline={m.isOnline} distance={getDist(m)} time={timeAgo(m.updatedAt)}/></Popup>
                   </Marker>
                 ))}

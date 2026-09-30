@@ -47,9 +47,10 @@ function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, 
 
         {/* Messages */}
         {!loading && messages.map((msg, index) => {
-          let sId = String(msg?.senderId?._id || msg?.senderId || msg?.sender?._id || msg?.userId || '');
+          let sId = String(msg?.senderId?._id || msg?.senderId || msg?.sender?._id || msg?.sender || msg?.userId || '');
           let sName = String(msg?.senderName || msg?.sender?.name || '').toLowerCase().trim();
-          const isMe = (meId && sId === meId) || (meName && sName === meName);
+          // Strictly match by ID first to avoid same-name bugs. Only fallback to name if ID is somehow completely missing
+          const isMe = sId ? (sId === meId) : (meName && sName === meName);
           return (
             <ChatMessage key={msg?._id || msg?.clientMsgId || index} msg={msg} isMe={isMe} currentUserId={meId} familyCircleId={familyCircleId} />
           );
