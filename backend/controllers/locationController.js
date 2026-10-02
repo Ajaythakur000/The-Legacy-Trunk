@@ -1,13 +1,7 @@
 import FamilyMember from '../models/familyMember.js';
 import { io } from '../index.js';
 
-/**
- * Helper: compute activity status from timestamp
- * Rules:
- * - online: <= 5 min
- * - recently_active: > 5 min and <= 60 min
- * - offline: > 60 min or null
- */
+// Determines if a user is online, recently active, or offline based on their last location update time
 const getActivityStatus = (lastLocationUpdatedAt) => {
   if (!lastLocationUpdatedAt) return 'offline';
 
@@ -20,11 +14,7 @@ const getActivityStatus = (lastLocationUpdatedAt) => {
   return 'offline';
 };
 
-/**
- * @desc    Update current user's live location
- * @route   PUT /api/location/update
- * @access  Private
- */
+// Updates the currently logged-in user's GPS coordinates and broadcasts them to their active circle
 const updateMyLocation = async (req, res) => {
   try {
     const { latitude, longitude } = req.body;
@@ -53,13 +43,12 @@ const updateMyLocation = async (req, res) => {
 
     user.currentLocation = {
       type: 'Point',
-      coordinates: [lng, lat], // GeoJSON format: [longitude, latitude]
+      coordinates: [lng, lat],
     };
     user.lastLocationUpdatedAt = new Date();
 
     await user.save();
 
-    // Real-time location broadcast to same family room
     if (user.activeCircleId) {
       io.to(String(user.activeCircleId)).emit('member_location_changed', {
         userId: user._id,
@@ -83,11 +72,7 @@ const updateMyLocation = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get current user's location details
- * @route   GET /api/location/me
- * @access  Private
- */
+// Retrieves the current user's last known location and ghost mode status
 const getMyLocation = async (req, res) => {
   try {
     const user = await FamilyMember.findById(req.user._id).select(
@@ -109,11 +94,7 @@ const getMyLocation = async (req, res) => {
   }
 };
 
-/**
- * @desc    Toggle ghost mode (privacy)
- * @route   PUT /api/location/ghost-mode
- * @access  Private
- */
+// Toggles the user's ghost mode on or off to hide or share their location with family
 const toggleGhostMode = async (req, res) => {
   try {
     const { isGhostModeOn } = req.body;
@@ -128,8 +109,6 @@ const toggleGhostMode = async (req, res) => {
     user.isGhostModeOn = isGhostModeOn;
     await user.save();
 
-    //  Real-time privacy state sync
-    // Frontend can instantly hide/show user on map/list
     if (user.activeCircleId) {
       io.to(String(user.activeCircleId)).emit('member_privacy_changed', {
         userId: user._id,
@@ -148,11 +127,7 @@ const toggleGhostMode = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get family radar members (same activeCircleId)
- * @route   GET /api/location/family-radar
- * @access  Private
- */
+// Returns a list of visible family members and their locations for the radar view
 const getFamilyRadar = async (req, res) => {
   try {
     if (!req.user.activeCircleId) {
@@ -165,9 +140,6 @@ const getFamilyRadar = async (req, res) => {
       'name role relationToAdmin currentLocation lastLocationUpdatedAt isGhostModeOn activeCircleId'
     );
 
-    // Privacy rule:
-    // - self always visible
-    // - others visible only when ghost mode OFF
     const radarMembers = members
       .filter((m) => {
         const isSelf = m._id.toString() === req.user._id.toString();

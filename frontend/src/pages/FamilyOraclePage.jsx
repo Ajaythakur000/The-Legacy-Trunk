@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import DOMPurify from 'dompurify';
 
-// ── Comic Action Button ───────────────────────────────────────────────────────
+// Animated button for the comic interface
 function ComicButton({ onClick, disabled, loading, children }) {
   return (
     <motion.button
@@ -23,7 +23,7 @@ function ComicButton({ onClick, disabled, loading, children }) {
   );
 }
 
-// ── Dark Input ────────────────────────────────────────────────────────────────
+// Auto-resizing textarea with comic styling
 function ComicTextarea({ value, onChange, onKeyDown, disabled, maxLength }) {
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef(null);
@@ -57,7 +57,7 @@ function ComicTextarea({ value, onChange, onKeyDown, disabled, maxLength }) {
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────────────────────
+// Main page for querying the AI family oracle
 function FamilyOraclePage() {
   const { user } = useAuth();
   const [question, setQuestion]   = useState('');
@@ -99,7 +99,6 @@ function FamilyOraclePage() {
   return (
     <div style={{ minHeight: '100vh', paddingBottom: 100, position: 'relative' }}>
       
-      {/* Background Decor */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 20, ease: "linear" }} style={{ position: 'absolute', top: '10%', left: '5%', fontSize: 80 }}>⚙️</motion.div>
         <motion.div animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 3 }} style={{ position: 'absolute', top: '30%', right: '10%', fontSize: 60 }}>💡</motion.div>
@@ -107,7 +106,6 @@ function FamilyOraclePage() {
 
       <div style={{ maxWidth: 750, margin: '0 auto', padding: '60px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 2 }}>
 
-        {/* Title section */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ fontSize: 80, marginBottom: 10, filter: 'drop-shadow(4px 4px 0px #3E2723)' }}>🤖</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#C89B3C', margin: '0 0 10px' }}>
@@ -118,7 +116,6 @@ function FamilyOraclePage() {
           </p>
         </motion.div>
 
-        {/* Input card */}
         <div style={{ width: '100%', background: '#1E352F', border: '6px solid #3E2723', borderRadius: 24, padding: 24, boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', marginBottom: 40 }}>
           <ComicTextarea value={question} onChange={e => setQuestion(e.target.value)} onKeyDown={handleKeyDown} disabled={loading} maxLength={300} />
 
@@ -141,11 +138,10 @@ function FamilyOraclePage() {
           </div>
         </div>
 
-        {/* Answer section */}
         <AnimatePresence>
           {loading && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 60, /* removed spin */ }}>🧠</div>
+              <div style={{ fontSize: 60 }}>🧠</div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', marginTop: 16 }}>SEARCHING THE NEURAL NET...</div>
               <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
             </motion.div>

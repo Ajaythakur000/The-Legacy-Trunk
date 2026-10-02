@@ -31,10 +31,6 @@ const familyCircleSchema = new Schema(
         ref: 'Story',
       },
     ],
-    
-    // ==============================
-    // 💎 GAMIFICATION: FAMILY COLLECTIVE
-    // ==============================
     familyBondPoints: {
       type: Number,
       default: 0,

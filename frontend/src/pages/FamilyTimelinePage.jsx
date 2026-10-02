@@ -6,11 +6,11 @@ import { Printer } from 'lucide-react';
 import api from '../api/axios';
 import LegacyBookExporter from '../components/features/LegacyBookExporter';
 
-// ─── Logo Badge ────────────────────────────────────────────────────────────────
+// Renders the legacy trunk logo badge
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden', /* removed spin */ }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden' }}>
         <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
       <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -22,7 +22,7 @@ function LogoBadge({ size = 90 }) {
   );
 }
 
-// ─── LOADING STATE ───────────────────────────────────────────────────────────
+// Displays the loading state while fetching memories
 function LoadingState() {
   return (
     <div style={{ textAlign: 'center', padding: '60px 20px', fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#D4B895' }}>
@@ -32,7 +32,7 @@ function LoadingState() {
   );
 }
 
-// ─── EMPTY STATE ─────────────────────────────────────────────────────────────
+// Shows a message when there are no memories
 function EmptyState() {
   return (
     <div style={{ textAlign: 'center', padding: '60px', background: '#FDFBF7', borderRadius: 12, boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.45)', margin: '40px auto', maxWidth: 600 }}>
@@ -47,11 +47,10 @@ function EmptyState() {
   );
 }
 
-// ─── SCATTERED POLAROID CARD ─────────────────────────────────────────────────
+// Displays a single memory formatted as a polaroid
 function PolaroidCard({ node, index }) {
   const isEven = index % 2 === 0;
   
-  // Randomize rotation slightly for organic feel
   const tilt = isEven ? -(Math.random() * 3 + 2) : (Math.random() * 3 + 2); 
   const align = isEven ? 'flex-start' : 'flex-end';
   
@@ -77,7 +76,6 @@ function PolaroidCard({ node, index }) {
         position: 'relative'
       }}
     >
-      {/* Masking Tape */}
       <div style={{
         position: 'absolute',
         top: -15,
@@ -93,7 +91,6 @@ function PolaroidCard({ node, index }) {
         borderRight: '2px dashed rgba(0,0,0,0.1)'
       }} />
 
-      {/* The Polaroid Body */}
       <div style={{
         background: '#FDFBF7',
         padding: '16px 16px 40px 16px',
@@ -103,7 +100,6 @@ function PolaroidCard({ node, index }) {
         zIndex: 5
       }}>
         
-        {/* Media */}
         {node.mediaUrl ? (
           <div style={{ 
             width: '100%', 
@@ -134,7 +130,6 @@ function PolaroidCard({ node, index }) {
           </div>
         )}
 
-        {/* Text Content */}
         <div style={{ textAlign: 'center' }}>
           <h3 style={{ 
             fontFamily: "'Playfair Display', serif", 
@@ -169,7 +164,6 @@ function PolaroidCard({ node, index }) {
           </p>
         </div>
 
-        {/* Author Tag */}
         <div style={{
           position: 'absolute',
           bottom: 12,
@@ -192,14 +186,13 @@ function PolaroidCard({ node, index }) {
   );
 }
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+// Displays the family memory timeline page
 function FamilyTimelinePage() {
   const { user }    = useAuth();
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading]       = useState(true);
   const handleBackgroundExport = async () => {
     try {
-      // Direct client-side generation
       exporterRef.current?.generatePDF();
     } catch (err) {
       console.error(err);
@@ -208,7 +201,6 @@ function FamilyTimelinePage() {
 
   const exporterRef = useRef();
 
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -236,11 +228,8 @@ function FamilyTimelinePage() {
   return (
     <div style={{ minHeight: '100vh', paddingBottom: 140, position: 'relative' }}>
       
-      {/* Background Texture (already in index.css, but we can ensure no comic graphics here) */}
-      
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 20px', position: 'relative', zIndex: 10 }}>
         
-        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 80 }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }}
@@ -252,10 +241,8 @@ function FamilyTimelinePage() {
           </p>
         </div>
 
-        {/* Hidden PDF exporter */}
         <LegacyBookExporter ref={exporterRef} milestones={milestones} circleName="Our Family"/>
 
-        {/* Timeline Container */}
         {loading ? (
           <LoadingState/>
         ) : milestones.length === 0 ? (
@@ -267,12 +254,10 @@ function FamilyTimelinePage() {
             alignItems: 'center',
             position: 'relative'
           }}>
-            {/* The memories cascading down */}
             {currentMilestones.map((node, index) => (
               <PolaroidCard key={node._id} node={node} index={index} />
             ))}
             
-            {/* ── VINTAGE PAGINATION ── */}
             {totalPages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 24, marginTop: 40, width: '100%', maxWidth: 500 }}>
                 <button 
@@ -298,7 +283,6 @@ function FamilyTimelinePage() {
         )}
       </div>
 
-      {/* FAB: Download Memories */}
       {milestones.length > 0 && (
         <motion.button
           onClick={handleBackgroundExport}

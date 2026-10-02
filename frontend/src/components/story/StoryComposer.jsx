@@ -15,7 +15,6 @@ const GLOBAL_STYLES = `
   .sc-textarea::-webkit-scrollbar-thumb { background: rgba(62,39,35,0.3); border-radius: 4px; }
   .sc-textarea::placeholder, .sc-input::placeholder { color: rgba(140, 123, 107, 0.6); font-family: 'Courier Prime', monospace; font-style: italic; }
 
-  /* DatePicker vintage override */
   .vault-dp-wrap .react-datepicker-wrapper, .vault-dp-wrap .react-datepicker__input-container { width: 100%; }
   .vault-dp-wrap .react-datepicker__input-container input {
     width: 100%; padding: 12px 16px;
@@ -41,6 +40,7 @@ const GLOBAL_STYLES = `
   .react-datepicker__time-list-item--selected { background: #3E2723 !important; color: #FFF !important; }
 `;
 
+// Renders a styled input or textarea component
 function TypewriterInput({ label, type = 'text', name, value, onChange, placeholder, icon: Icon, disabled, as: Tag = 'input', rows, maxLength, style: extraStyle }) {
   const [focused, setFocused] = useState(false);
   
@@ -78,6 +78,7 @@ function TypewriterInput({ label, type = 'text', name, value, onChange, placehol
   );
 }
 
+// Renders a vintage-style button
 function VintageButton({ children, onClick, type = 'button', disabled, fullWidth, primary }) {
   return (
     <motion.button
@@ -101,6 +102,7 @@ function VintageButton({ children, onClick, type = 'button', disabled, fullWidth
   );
 }
 
+// Renders a vintage-style toggle switch
 function VintageToggle({ checked, onChange, label, icon: Icon }) {
   return (
     <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
@@ -128,6 +130,7 @@ const TONES = [
   { value: 'Sarcastic & Witty',              label: 'Sarcastic' },
 ];
 
+// Main composer component for creating a story
 export default function StoryComposer({ activeCircleId, onPostStory, uploading }) {
   const [title, setTitle]           = useState('');
   const [content, setContent]       = useState('');
@@ -242,7 +245,6 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
     <>
       <style>{GLOBAL_STYLES}</style>
 
-      {/* Typewriter Paper Effect */}
       <div style={{ 
         background: '#FDFBF7', 
         border: '1px solid rgba(62,39,35,0.1)', 
@@ -254,7 +256,6 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
         backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.03\'/%3E%3C/svg%3E")'
       }}>
         
-        {/* Metal paper clip graphic */}
         <div style={{ position: 'absolute', top: -15, right: 60, width: 20, height: 50, border: '3px solid rgba(140,123,107,0.6)', borderRadius: 10, borderBottom: 'none', zIndex: 10, transform: 'rotate(12deg)' }}></div>
         <div style={{ position: 'absolute', top: -5, right: 64, width: 12, height: 35, border: '3px solid rgba(140,123,107,0.6)', borderRadius: 6, borderTop: 'none', zIndex: 11, transform: 'rotate(12deg)' }}></div>
 
@@ -265,7 +266,6 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-          {/* ── TITLE ── */}
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 250 }}>
               <TypewriterInput label="Header Title" name="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Type a title..." maxLength={150} disabled={!activeCircleId || uploading || aiLoading || compressing} icon={Type} />
@@ -277,11 +277,9 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
             </div>
           </div>
 
-          {/* ── CONTENT ── */}
           <div>
             <TypewriterInput label="Draft Body" as="textarea" value={content} onChange={e => setContent(e.target.value)} placeholder="Begin typing..." rows={8} maxLength={2000} disabled={!activeCircleId || uploading || aiLoading || compressing} icon={PenTool} />
             
-            {/* AI Toolbar (Vintage style) */}
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', padding: '12px 0', borderTop: '1px dashed rgba(62,39,35,0.1)' }}>
               <span style={{ fontFamily: "'Courier Prime', monospace", fontSize: 12, color: '#8C7B6B', textTransform: 'uppercase' }}><Sparkles size={14} style={{ verticalAlign: 'text-bottom' }}/> Edit with Ink:</span>
               <select value={tone} onChange={e => setTone(e.target.value)} disabled={aiLoading || compressing || !activeCircleId} style={{ padding: '6px 10px', borderRadius: 2, border: '1px solid rgba(62,39,35,0.2)', fontFamily: "'Courier Prime', monospace", fontSize: 13, outline: 'none', cursor: 'pointer', background: 'transparent', flex: 1, minWidth: 150, color: '#3E2723' }}>
@@ -294,10 +292,8 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
             </div>
           </div>
 
-          {/* ── TAGS ── */}
           <TypewriterInput label="Index Tags" name="tags" value={tags} onChange={e => setTags(e.target.value)} placeholder="e.g. vacation, 1999" disabled={!activeCircleId || uploading || aiLoading || compressing} icon={Tags} />
 
-          {/* ── MEDIA UPLOAD ── */}
           <div style={{ border: '1px solid rgba(62,39,35,0.2)', padding: '24px', background: 'rgba(255,255,255,0.3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px dashed rgba(62,39,35,0.2)', paddingBottom: 12 }}>
               <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 13, color: '#3E2723', textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -316,7 +312,6 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
               </div>
             </div>
 
-            {/* Polaroid Previews */}
             <AnimatePresence>
               {mediaPreviews.length > 0 && (
                 <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', paddingTop: 10 }}>
@@ -334,7 +329,6 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
             </AnimatePresence>
           </div>
 
-          {/* ── SETTINGS ── */}
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', borderTop: '1px solid rgba(62,39,35,0.1)', paddingTop: 20 }}>
             <div style={{ flex: 1, minWidth: 200 }}>
               <VintageToggle checked={isMilestone} onChange={() => setIsMilestone(v => !v)} label="Mark as Milestone" icon={Trophy} />
@@ -354,7 +348,6 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
             </div>
           </div>
 
-          {/* ── SUBMIT ── */}
           <div style={{ marginTop: 10 }}>
             <VintageButton type="submit" fullWidth primary disabled={uploading || aiLoading || compressing || !activeCircleId}>
               <Pin size={16} /> {uploading ? 'Filing...' : 'File Entry'}
@@ -363,7 +356,6 @@ export default function StoryComposer({ activeCircleId, onPostStory, uploading }
         </form>
       </div>
 
-      {/* Collage Maker Portal */}
       {createPortal(
         <AnimatePresence>
           {showCollageMaker && (

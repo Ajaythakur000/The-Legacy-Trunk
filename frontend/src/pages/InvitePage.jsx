@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { joinViaInviteApi } from '../api/circleApi';
 import { motion } from 'framer-motion';
 
+// Handles family invite link routing and joining
 function InvitePage() {
   const { token } = useParams(); 
   const navigate = useNavigate();
@@ -33,7 +34,6 @@ function InvitePage() {
     processInvite();
   }, [token, isAuthenticated, loading, navigate]);
 
-  // Comic Loading State
   if (processing || loading) {
     return (
       <div style={{ 
@@ -55,7 +55,6 @@ function InvitePage() {
     );
   }
 
-  // Comic Error State
   return (
     <div style={{ 
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', 

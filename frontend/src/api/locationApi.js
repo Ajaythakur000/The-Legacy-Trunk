@@ -1,33 +1,24 @@
 import api from './axios';
 
-/**
- * Logged-in user ki current location details lane ke liye
- */
+// Gets the current user's location
 export const getMyLocationApi = async () => {
   const response = await api.get('/location/me');
   return response.data;
 };
 
-/**
- * Same family ke members ka radar data lane ke liye
- */
+// Fetches the family radar data
 export const getFamilyRadarApi = async () => {
   const response = await api.get('/location/family-radar');
   return response.data;
 };
 
-/**
- * Ghost mode ON/OFF karne ke liye
- * input: true or false
- */
+// Toggles ghost mode on or off
 export const toggleGhostModeApi = async (isGhostModeOn) => {
   const response = await api.put('/location/ghost-mode', { isGhostModeOn });
   return response.data;
 };
 
-/**
- * User ki live location update karne ke liye
- */
+// Updates the user's live location
 export const updateMyLocationApi = async ({ latitude, longitude }) => {
   const response = await api.put('/location/update', { latitude, longitude });
   return response.data;

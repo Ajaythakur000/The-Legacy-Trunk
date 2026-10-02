@@ -20,7 +20,7 @@ const messageSchema = new Schema(
     },
     senderAvatar: {
       type: String,
-      default: '', //  Ab refresh karne pe photo gayab nahi hogi
+      default: '',
     },
     text: {
       type: String,

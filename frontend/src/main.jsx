@@ -9,7 +9,7 @@ import 'leaflet/dist/leaflet.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ErrorBoundary> {/* 🔥 APP CRASH HONE PAR WHITE SCREEN NAHI, HAMARA PREMIUM UI AAYEGA */}
+    <ErrorBoundary>
       <AuthProvider>
         <BrowserRouter>
           <App />

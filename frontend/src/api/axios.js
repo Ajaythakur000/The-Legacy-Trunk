@@ -1,8 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-//  backend routes '/api/...' pe mounted hain
-// Isliye base URL me '/api' ensure 
+// Helper to construct the base API URL
 const getApiBaseUrl = () => {
   const raw =
     import.meta.env.VITE_API_URL ||
@@ -32,23 +31,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // 🔥 THE FIX: Global 401 handler
     if (error.response?.status === 401) {
-      // Local storage clear karo
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 
-      // login/signup/invite pages par redirect skip
       const p = window.location.pathname;
       const isPublic = p === '/login' || p === '/signup' || p.startsWith('/invite/');
 
       if (!isPublic) {
-        // hard reload se race/flicker aati thi
         window.history.replaceState({}, '', '/login');
         window.dispatchEvent(new PopStateEvent('popstate'));
       }
     }
-    // Baaki ke existing error handlers
     else if (!error.response && error.code !== 'ECONNABORTED') {
       toast.error('Network Error: The vault is currently unreachable. Check your internet! 🌐', { id: 'net-err' });
     } else if (error.code === 'ECONNABORTED') {

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { getUpcomingEventsApi } from '../../api/circleApi';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Displays a widget with upcoming family events
 function UpcomingEventsWidget({ circleId }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,6 @@ function UpcomingEventsWidget({ circleId }) {
     return `In ${diffDays} days`;
   };
 
-  // Compact button on Dashboard
   if (!isModalOpen) {
     return (
       <motion.div
@@ -65,7 +65,6 @@ function UpcomingEventsWidget({ circleId }) {
     );
   }
 
-  // Expanded Modal
   return createPortal(
     <AnimatePresence>
       <motion.div
@@ -77,7 +76,6 @@ function UpcomingEventsWidget({ circleId }) {
           initial={{ scale: 0.8, y: 30, rotate: 2 }} animate={{ scale: 1, y: 0, rotate: -1 }} exit={{ scale: 0.8, y: 30, rotate: 2 }} transition={{ type: 'spring', bounce: 0.5 }}
           style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, width: '100%', maxWidth: 500, position: 'relative', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
         >
-          {/* Header */}
           <div style={{ padding: '24px', borderBottom: '6px solid #3E2723', background: '#C89B3C', borderTopLeftRadius: 18, borderTopRightRadius: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723' }}>
               📅 CALENDAR
@@ -87,7 +85,6 @@ function UpcomingEventsWidget({ circleId }) {
             </button>
           </div>
 
-          {/* Body */}
           <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
             {loading ? (
               <div style={{ textAlign: 'center', fontFamily: "'Playfair Display', serif", fontSize: 24, padding: '40px 0' }}>LOADING DATES...</div>

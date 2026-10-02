@@ -4,11 +4,13 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// 🔮 Oracle Route
+// Asks the AI oracle a question
 router.post('/ask-oracle', protect, askOracle);
 
-// ✨ AI Copilot Routes
+// Enhances a story using AI
 router.post('/enhance-story', protect, enhanceStory);
+
+// Generates a title using AI
 router.post('/generate-title', protect, generateTitle);
 
 export default router;

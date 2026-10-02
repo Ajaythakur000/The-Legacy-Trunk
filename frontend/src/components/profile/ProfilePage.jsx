@@ -8,13 +8,14 @@ import ActivityHeatmap from './ActivityHeatmap';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Safely formats a date string
 const getSafeDateString = (dateStr) => {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
 };
 
-// ─── Comic Background Elements ─────────────────────────────────────────────────
+// Renders a fun comic-style background
 function ComicBackground() {
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
@@ -25,11 +26,11 @@ function ComicBackground() {
   );
 }
 
-// ─── Logo Badge ────────────────────────────────────────────────────────────────
+// Displays the main app logo badge
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden', /* removed spin */ }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden' }}>
         <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
       <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -41,7 +42,7 @@ function LogoBadge({ size = 90 }) {
   );
 }
 
-// ─── Comic Input ───────────────────────────────────────────────────────────────
+// Custom input field with a comic look
 function ComicInput({ label, type = 'text', name, value, onChange, placeholder, icon, as: Tag = 'input', rows, maxLength, children }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -73,7 +74,7 @@ function ComicInput({ label, type = 'text', name, value, onChange, placeholder, 
   );
 }
 
-// ─── Main ProfilePage ─────────────────────────────────────────────────────────
+// Main profile page component
 function ProfilePage() {
   const { user, fetchFreshProfile } = useAuth();
   const location = useLocation();
@@ -154,7 +155,6 @@ function ProfilePage() {
 
       <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 10, padding: '0 20px' }}>
 
-        {/* ── Page Header ── */}
         <div style={{ textAlign: 'center', padding: '60px 20px 40px' }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
@@ -166,7 +166,6 @@ function ProfilePage() {
           </p>
         </div>
 
-        {/* ── Main Card ── */}
         <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.4 }}>
           <div style={{
               background: '#FFF', border: '6px solid #3E2723', borderRadius: 24,
@@ -174,7 +173,6 @@ function ProfilePage() {
               boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)',
             }}
           >
-            {/* ── LEFT: Profile ── */}
             <div style={{ flex: '1 1 360px', padding: '40px', borderRight: '6px solid #3E2723', position: 'relative', background: '#D4B895' }}>
               <button
                 onClick={() => setIsEditing(true)} title="Edit Profile"
@@ -185,7 +183,6 @@ function ProfilePage() {
                 ✏️
               </button>
 
-              {/* Avatar */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24, marginTop: 20 }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   {user?.avatar ? (
@@ -206,7 +203,6 @@ function ProfilePage() {
                 </div>
               </div>
 
-              {/* Bio */}
               <div style={{ background: '#FFF', border: '4px dashed #3E2723', borderRadius: 16, padding: 20, position: 'relative' }}>
                 <span style={{ position: 'absolute', top: -15, left: -10, fontSize: 32, transform: 'rotate(-10deg)' }}>💬</span>
                 <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', lineHeight: 1.6 }}>
@@ -215,20 +211,17 @@ function ProfilePage() {
               </div>
             </div>
 
-            {/* ── RIGHT: Legacy Card ── */}
             <div style={{ flex: '1 1 420px', padding: '40px', display: 'flex', alignItems: 'center', background: '#FFF' }}>
               <FamilyLegacyCard familyPoints={familyPoints} />
             </div>
           </div>
         </motion.div>
 
-        {/* ── Heatmap ── */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.4 }}>
           <ActivityHeatmap activityMap={user?.activityMap || user?.activityMapData || {}} maxStreak={user?.maxStreak || 0} />
         </motion.div>
       </div>
 
-      {/* ── Edit Modal ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isEditing && (
@@ -251,7 +244,6 @@ function ProfilePage() {
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {/* Avatar picker */}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
                     <div
                       onClick={() => fileInputRef.current.click()}

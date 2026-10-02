@@ -12,14 +12,15 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
+  // Generates Cloudinary upload parameters for a file
   params: async (req, file) => ({
     folder: 'legacy_trunk_stories',
     resource_type: 'auto',
     public_id: `story_${Date.now()}_${Math.round(Math.random() * 1e9)}`,
-    // ❌ remove allowed_formats here to avoid false rejects
   }),
 });
 
+// Filters uploaded files by checking their mimetype
 const fileFilter = (req, file, cb) => {
   const ok =
     file.mimetype.startsWith('image/') ||
@@ -32,7 +33,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  limits: { fileSize: 15 * 1024 * 1024 },
 });
 
 export default upload;

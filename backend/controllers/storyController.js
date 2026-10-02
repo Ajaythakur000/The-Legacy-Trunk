@@ -4,51 +4,40 @@ import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 import Notification from '../models/notificationModel.js';
-
 import { awardPoints, handleStoryPostStreak } from './gamificationService.js';
 
+// Checks if a user is allowed to access a specific story
 const hasStoryAccess = (story, user) => {
   if (!story || !user) return false;
-
   if (story.isGlobalPublic) return true;
-
   if (!story.originCircleId || !user.activeCircleId) return false;
-
   return String(story.originCircleId) === String(user.activeCircleId);
 };
 
+// Creates a new story with potential media files and handles gamification points
 const createStory = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-
   try {
     const { title, content, tags, isGlobalPublic, circleId, isMilestone, milestoneDate, tone } = req.body;
-    
     const targetCircleId = circleId || req.user?.activeCircleId;
-
     if (!targetCircleId) {
       return res.status(400).json({ message: 'No active circle selected for this user' });
     }
-
     if (!title || !content) {
       return res.status(400).json({ message: 'Title and content are required' });
     }
-
     let mediaUrls = [];
     let mediaType = 'text';
-
     if (req.files && req.files.length > 0) {
       mediaUrls = req.files.map(file => file.path || file.secure_url);
-      
       const firstMimeType = req.files[0].mimetype;
       if (firstMimeType?.startsWith('image')) mediaType = 'photo';
       else if (firstMimeType?.startsWith('video')) mediaType = 'video';
       else if (firstMimeType?.startsWith('audio')) mediaType = 'audio';
     }
-
     const primaryMediaUrl = mediaUrls.length > 0 ? mediaUrls[0] : '';
     const isThisAMilestone = isMilestone === 'true' || isMilestone === true;
-
     const story = new Story({
       title: String(title).trim(),
       content: String(content).trim(),
@@ -63,36 +52,27 @@ const createStory = async (req, res) => {
       isMilestone: isThisAMilestone, 
       milestoneDate: milestoneDate ? new Date(milestoneDate) : new Date()
     });
-
-    const [createdStory] = await story.save({ session }).then(doc => [doc]); // save with session array or just wait
-
+    const [createdStory] = await story.save({ session }).then(doc => [doc]);
     if (targetCircleId) {
       await awardPoints(req.user._id, targetCircleId, 10, session);
     }
-
     await handleStoryPostStreak(req.user._id, session);
-
     await session.commitTransaction();
     session.endSession();
-
     const populated = await Story.findById(createdStory._id)
       .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName familyCode');
-
     const io = req.app.get('io');
     if (io && targetCircleId) {
       io.to(String(targetCircleId)).emit('new_story_added', populated || createdStory);
     }
-
     if (redisClient) {
       try {
         await redisClient.del(`feed:${targetCircleId}:1:15`);
         await redisClient.del('global_leaderboard');
       } catch(err) { console.error('Redis Del Error:', err); }
     }
-
     return res.status(201).json(populated);
-    
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -101,25 +81,22 @@ const createStory = async (req, res) => {
   }
 };
 
+// Soft-deletes a story if the user is the author or circle admin
 const deleteStory = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
-
     const isAuthor = String(story.user) === String(req.user._id);
     const isCircleAdmin =
       req.user.role === 'admin' &&
       req.user.activeCircleId &&
       String(story.originCircleId) === String(req.user.activeCircleId);
-
     if (!isAuthor && !isCircleAdmin) {
       return res.status(403).json({ message: 'Not authorized to delete this story' });
     }
-
     if (story.originCircleId) {
       await awardPoints(story.user, story.originCircleId, -10);
     }
-
     await Story.findByIdAndUpdate(req.params.id, { isDeleted: true });
     return res.status(200).json({ message: 'Story removed successfully' });
   } catch (error) {
@@ -128,38 +105,31 @@ const deleteStory = async (req, res) => {
   }
 };
 
+// Toggles liking a story, awards points, and notifies the author
 const toggleLikeStory = async (req, res) => {
   try {
     const storyId = req.params.id;
     const userId = req.user._id.toString();
-
     const story = await Story.findById(storyId);
     if (!story) return res.status(404).json({ message: 'Story not found' });
-
     if (!hasStoryAccess(story, req.user)) {
       return res.status(403).json({ message: 'Access denied to this story' });
     }
-
     const storyOwnerId = story.user.toString();
     const alreadyLiked = story.likes.some((id) => id.toString() === userId);
-
     const isDifferentFamily = 
       story.originCircleId && 
       req.user.activeCircleId && 
       story.originCircleId.toString() !== req.user.activeCircleId.toString();
-
     const isGlobalLike = story.isGlobalPublic && isDifferentFamily;
     const pointsToAward = isGlobalLike ? 4 : 2;
-
     let updatedStory;
-
     if (alreadyLiked) {
       updatedStory = await Story.findByIdAndUpdate(
         storyId,
         { $pull: { likes: req.user._id } },
         { new: true }
       );
-      
       if (userId !== storyOwnerId && story.originCircleId) {
         await awardPoints(req.user._id, story.originCircleId, -pointsToAward);
       }
@@ -169,11 +139,9 @@ const toggleLikeStory = async (req, res) => {
         { $addToSet: { likes: req.user._id } },
         { new: true }
       );
-
       if (userId !== storyOwnerId && story.originCircleId) {
         await awardPoints(req.user._id, story.originCircleId, pointsToAward);
       }
-
       if (userId !== storyOwnerId) {
         const io = req.app.get('io');
         const newNotif = await Notification.create({
@@ -186,14 +154,12 @@ const toggleLikeStory = async (req, res) => {
         if (io) io.to(storyOwnerId).emit('new_notification', newNotif);
       }
     }
-
     if (redisClient && story.originCircleId) {
       try {
         await redisClient.del(`feed:${story.originCircleId}:1:15`);
         await redisClient.del('global_leaderboard');
       } catch(err) { console.error('Redis Del Error:', err); }
     }
-    
     return res.status(200).json({
       message: alreadyLiked ? 'Story unliked' : 'Story liked',
       likesCount: updatedStory.likes.length,
@@ -205,31 +171,25 @@ const toggleLikeStory = async (req, res) => {
   }
 };
 
+// Adds a comment to a story and updates notifications/points
 const addCommentToStory = async (req, res) => {
   try {
     const { text } = req.body;
-
     if (!text || !String(text).trim()) {
       return res.status(400).json({ message: 'Comment text is required' });
     }
-
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
-
     if (!hasStoryAccess(story, req.user)) {
       return res.status(403).json({ message: 'Access denied to this story' });
     }
-
     story.comments.push({
       user: req.user._id,
       text: String(text).trim(),
     });
-
     await story.save();
-
     const userId = req.user._id.toString();
     const storyOwnerId = story.user.toString();
-
     if (userId !== storyOwnerId) {
       const io = req.app.get('io');
       const newNotif = await Notification.create({
@@ -241,19 +201,15 @@ const addCommentToStory = async (req, res) => {
       });
       if (io) io.to(storyOwnerId).emit('new_notification', newNotif);
     }
-
     const isDifferentFamily = story.originCircleId && req.user.activeCircleId && story.originCircleId.toString() !== req.user.activeCircleId.toString();
     const isGlobalComment = story.isGlobalPublic && isDifferentFamily;
     const pointsToAward = isGlobalComment ? 8 : 4;
-
     if (userId !== storyOwnerId && story.originCircleId) {
       await awardPoints(req.user._id, story.originCircleId, pointsToAward);
     }
-
     const populatedStory = await Story.findById(story._id)
       .populate('comments.user', 'name avatar')
       .populate('user', 'name avatar');
-
     return res.status(201).json({
       message: 'Comment added successfully',
       commentsCount: populatedStory.comments.length,
@@ -265,29 +221,27 @@ const addCommentToStory = async (req, res) => {
   }
 };
 
+// Fetches paginated stories for a specific circle, trying cache first
 const getCircleFeed = async (req, res) => {
   try {
     const circleId = req.query.circleId || req.user?.activeCircleId;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 15;
     const skip = (page - 1) * limit;
-
     if (!circleId) {
       return res.status(400).json({ message: 'No active circle selected' });
     }
-
     const CACHE_KEY = `feed:${circleId}:${page}:${limit}`;
     if (redisClient) {
       try {
         const cachedData = await redisClient.get(CACHE_KEY);
         if (cachedData) {
-          console.log('🟢 CACHE HIT: getCircleFeed', CACHE_KEY);
+          console.log('CACHE HIT: getCircleFeed', CACHE_KEY);
           return res.status(200).json(cachedData);
         }
       } catch (err) { console.error('Redis Get Error:', err); }
     }
-    console.log('🔴 CACHE MISS: getCircleFeed', CACHE_KEY);
-
+    console.log('CACHE MISS: getCircleFeed', CACHE_KEY);
     const stories = await Story.find({ originCircleId: circleId, isDeleted: { $ne: true } })
       .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName')
@@ -295,7 +249,6 @@ const getCircleFeed = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit); 
-
     return res.status(200).json(stories);
   } catch (error) {
     console.error("Get Circle Feed Error:", error.message);
@@ -303,16 +256,15 @@ const getCircleFeed = async (req, res) => {
   }
 };
 
+// Gets stories belonging to or shared with the user's active circle
 const getMyFamilyStories = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 15;
     const skip = (page - 1) * limit;
-
     if (!req.user?.activeCircleId) {
       return res.status(400).json({ message: 'No active circle selected' });
     }
-
     const stories = await Story.find({
       isDeleted: { $ne: true },
       $or: [
@@ -324,7 +276,6 @@ const getMyFamilyStories = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit); 
-
     return res.status(200).json(stories);
   } catch (error) {
     console.error("Get My Family Stories Error:", error.message);
@@ -332,19 +283,18 @@ const getMyFamilyStories = async (req, res) => {
   }
 };
 
+// Fetches publicly shared stories from across all circles
 const getGlobalStories = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const skip = (page - 1) * limit;
-
     const stories = await Story.find({ isGlobalPublic: true, isDeleted: { $ne: true } })
       .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit); 
-
     return res.status(200).json(stories);
   } catch (error) {
     console.error("Get Global Stories Error:", error.message);
@@ -352,19 +302,17 @@ const getGlobalStories = async (req, res) => {
   }
 };
 
+// Retrieves a specific story by its ID if the user has access to it
 const getStoryById = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id)
       .populate('user', 'name email relationToAdmin avatar')
       .populate('originCircleId', 'circleName')
       .populate('comments.user', 'name avatar'); 
-
     if (!story) return res.status(404).json({ message: 'Story not found' });
-
     if (!hasStoryAccess(story, req.user)) {
       return res.status(403).json({ message: 'Access denied to this story' });
     }
-
     return res.status(200).json(story);
   } catch (error) {
     console.error("Get Story By Id Error:", error.message);
@@ -372,32 +320,27 @@ const getStoryById = async (req, res) => {
   }
 };
 
+// Updates a story's content, tags, or visibility if allowed
 const updateStory = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id);
     if (!story) return res.status(404).json({ message: 'Story not found' });
-
     const isAuthor = String(story.user) === String(req.user._id);
     const isCircleAdmin =
       req.user.role === 'admin' &&
       req.user.activeCircleId &&
       String(story.originCircleId) === String(req.user.activeCircleId);
-
     if (!isAuthor && !isCircleAdmin) {
       return res.status(403).json({ message: 'Not authorized to edit this story' });
     }
-
     story.title = req.body.title ?? story.title;
     story.content = req.body.content ?? story.content;
-
     if (req.body.tags !== undefined) {
       story.tags = String(req.body.tags).split(',').map((t) => t.trim()).filter(Boolean);
     }
-
     if (req.body.isGlobalPublic !== undefined) {
       story.isGlobalPublic = req.body.isGlobalPublic === 'true' || req.body.isGlobalPublic === true;
     }
-
     const updatedStory = await story.save();
     return res.status(200).json(updatedStory);
   } catch (error) {
@@ -406,12 +349,12 @@ const updateStory = async (req, res) => {
   }
 };
 
+// Gets the list of stories authored by the current user
 const getMyStories = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 15;
     const skip = (page - 1) * limit;
-
     const stories = await Story.find({ user: req.user._id, isDeleted: { $ne: true } })
       .populate('user', 'name avatar')
       .populate('originCircleId', 'circleName')
@@ -419,7 +362,6 @@ const getMyStories = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
     return res.status(200).json(stories);
   } catch (error) {
     console.error("Get My Stories Error:", error.message);

@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
+// Provides authentication state and methods to the app
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
 
@@ -20,6 +21,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     let mounted = true;
 
+    // Sets up auth and fetches profile on mount
     const initializeAuth = async () => {
       setIsInitializing(true);
 
@@ -40,6 +42,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, [token]);
 
+  // Retrieves latest user data from the server
   const fetchFreshProfile = async () => {
     try {
       const response = await api.get('/users/profile');
@@ -56,9 +59,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Handles user login and stores token
   const login = async (email, password) => {
     setLoading(true);
-    setIsInitializing(true); // ✅ prevent post-login flicker/stuck during auth re-init
+    setIsInitializing(true); 
     try {
       const data = await loginApi({ email, password });
 
@@ -75,7 +79,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, data };
     } catch (error) {
-      setIsInitializing(false); // ✅ release lock on failed login
+      setIsInitializing(false); 
       const message = error?.response?.data?.message || error.message || 'Login failed';
       return { success: false, message, errorData: error?.response?.data };
     } finally {
@@ -83,6 +87,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Registers a new user and sets session
   const signup = async (payload) => {
     setLoading(true);
     try {
@@ -110,6 +115,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Clears session and logs user out
   const logout = () => {
     disconnectSocket();
     setToken(null);
@@ -119,6 +125,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  // Changes the active family circle for the user
   const switchActiveCircle = async (circleId) => {
     if (!user) return;
 
@@ -160,6 +167,7 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// Custom hook to access auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used inside AuthProvider');

@@ -22,12 +22,10 @@ const CSS = `
   }
   .fr-content { position: relative; z-index: 10; max-width: 1280px; margin: 0 auto; padding: 40px 20px; }
 
-  /* HEADER */
   .fr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
   .fr-page-title { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 48px); color: #FDFBF7; margin: 0 0 6px;   letter-spacing: 2px; }
   .fr-page-sub { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 18px; color: #3E2723; margin: 0; background: #D4B895; display: inline-block; padding: 4px 16px; border: none; border-radius: 8px; transform: rotate(-2deg); box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
 
-  /* GHOST BUTTON */
   .fr-ghost-btn {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 24px;
@@ -40,7 +38,6 @@ const CSS = `
   .fr-ghost-btn:hover {  box-shadow: 6px 6px 15px 0px rgba(0,0,0,0.45); }
   .fr-ghost-btn:active {  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
 
-  /* STATUS BAR */
   .fr-status-bar { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; padding: 16px 20px; background: #FFF; border: none; border-radius: 16px; flex-wrap: wrap; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); }
   .fr-status-item { display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif; font-size: 16px; color: #3E2723; }
   .fr-status-dot { width: 14px; height: 14px; border-radius: 50%; border: none; }
@@ -48,10 +45,8 @@ const CSS = `
   .fr-status-dot.fr-sd-warning { background: #D4B895; }
   .fr-status-dot.fr-sd-error   { background: #1E352F; }
 
-  /* GRID */
   .fr-grid { display: grid; grid-template-columns: minmax(0,1.5fr) 400px; gap: 32px; margin-bottom: 40px; }
 
-  /* MAP CHAMBER */
   .fr-map-chamber {
     position: relative; border-radius: 24px; overflow: hidden;
     border: 6px solid #3E2723; background: #FFF;
@@ -59,7 +54,6 @@ const CSS = `
   }
   .fr-map-inner { height: 600px; position: relative; }
   
-  /* Dark Map CSS Filter using Standard OSM */
   .fr-map-inner .leaflet-container { 
     height: 100%; width: 100%; background: #111 !important; 
   }
@@ -91,7 +85,6 @@ const CSS = `
     box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45);
   }
 
-  /* PANEL */
   .fr-panel { display: flex; flex-direction: column; background: #C89B3C; border: 6px solid #3E2723; border-radius: 24px; overflow: hidden; box-shadow: 16px 16px 15px 0px rgba(0,0,0,0.45); position: relative; }
   .fr-panel-header { padding: 24px; border-bottom: 6px solid #3E2723; display: flex; align-items: center; justify-content: space-between; background: #FFF; }
   .fr-panel-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #3E2723; }
@@ -99,7 +92,6 @@ const CSS = `
   .fr-panel-body::-webkit-scrollbar { width: 8px; }
   .fr-panel-body::-webkit-scrollbar-thumb { background: #3E2723; border-radius: 4px; }
 
-  /* MEMBER CARD */
   .fr-member-card {
     padding: 16px; background: #FFF; border: none;
     border-radius: 16px; margin-bottom: 16px; transition: all 0.1s; position: relative;
@@ -110,7 +102,6 @@ const CSS = `
   .fr-member-card.fr-ghost-card { opacity: 0.6; }
   .fr-member-card-top { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
 
-  /* ORB */
   .fr-orb-wrap { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
   .fr-orb {
     width: 48px; height: 48px; border-radius: 50%;
@@ -134,7 +125,6 @@ const CSS = `
   .fr-empty { padding: 40px; text-align: center; font-family: 'Playfair Display', serif; font-size: 24px; color: #3E2723; }
   .fr-error-bar { padding: 16px; margin-bottom: 24px; background: #1E352F; border: none; border-radius: 12px; color: #FFF; font-family: 'Playfair Display', serif; font-size: 18px; display: flex; alignItems: center; gap: 12px; box-shadow: 4px 4px 15px 0px rgba(0,0,0,0.45); }
 
-  /* LEAFLET POPUP OVERRIDE */
   .fr-root .leaflet-popup-content-wrapper { background: #FFF !important; border: none !important; border-radius: 16px !important; padding: 0 !important; box-shadow: 8px 8px 15px 0px rgba(0,0,0,0.45); }
   .fr-root .leaflet-popup-tip { background: #FFF !important; border: none !important; }
   .fr-root .leaflet-popup-content { margin: 0 !important; }
@@ -142,7 +132,7 @@ const CSS = `
   @media (max-width: 900px) { .fr-grid{grid-template-columns: 1fr;} .fr-map-inner{height: 400px;} }
 `;
 
-// ── Leaflet icons (Sleek Radar Style) ─────────────────────────────────────────
+// Creates a custom map icon for users
 const radarIcon = (name, isMe, isOnline, isGhost) => L.divIcon({
   className: '', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15],
   html: `
@@ -155,7 +145,7 @@ const radarIcon = (name, isMe, isOnline, isGhost) => L.divIcon({
   `
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Handles map panning with a touchpad
 function TouchpadPanHandler() {
   const map = useMap();
   useEffect(() => {
@@ -166,6 +156,7 @@ function TouchpadPanHandler() {
   },[map]); return null;
 }
 
+// Renders the content inside a map popup
 function PopupContent({ name, isMe, isOnline, isGhost, distance, time }) {
   return (
     <div style={{ padding: '16px', minWidth: 180, textAlign: 'center' }}>
@@ -184,9 +175,7 @@ function PopupContent({ name, isMe, isOnline, isGhost, distance, time }) {
   );
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// MAIN
-// ═════════════════════════════════════════════════════════════════════════════
+// Displays the live radar map showing family members
 function FamilyRadarPage() {
   const { user } = useAuth();
   const myUserId       = String(user?._id||'');
@@ -222,7 +211,6 @@ function FamilyRadarPage() {
       return{_id:String(m?._id||m?.memberId||`member-${idx}`),name:m?.name||m?.memberName||'Unknown',latitude:typeof latR==='number'?latR:Number(latR),longitude:typeof lngR==='number'?lngR:Number(lngR),isOnline:Boolean(m?.isOnline),isGhostModeOn:Boolean(m?.isGhostModeOn),updatedAt:m?.updatedAt||m?.lastLocationUpdatedAt||m?.lastSeenAt||null};
     }).filter(m=>{
       if (m._id===myUserId) return false;
-      // ZOMBIE FILTER: Remove if no last seen, or > 30 days
       if (!m.updatedAt) return false;
       const days = (now - new Date(m.updatedAt).getTime()) / (1000 * 60 * 60 * 24);
       if (days > 30) return false;
@@ -319,7 +307,6 @@ function FamilyRadarPage() {
 
       <motion.div className="fr-content" initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{type: 'spring', bounce: 0.4}}>
 
-        {/* HEADER */}
         <div className="fr-header">
           <div>
             <div className="fr-page-sub">LIVE TRACKING</div>
@@ -331,7 +318,6 @@ function FamilyRadarPage() {
           </button>
         </div>
 
-        {/* STATUS BAR */}
         <div className="fr-status-bar">
           <div className="fr-status-item"><span className={`fr-status-dot ${myLocation?'fr-sd-online':loadingLoc?'fr-sd-warning':'fr-sd-error'}`}/><span>GPS: {myLocation?'LOCKED':loadingLoc?'SCANNING':'ERROR'}</span></div>
           <div className="fr-status-item"><span className={`fr-status-dot ${radarLoading?'fr-sd-warning':'fr-sd-online'}`}/><span>RADAR: {radarLoading?'SYNCING':'ACTIVE'}</span></div>
@@ -344,10 +330,8 @@ function FamilyRadarPage() {
           {radarError&&<motion.div className="fr-error-bar" initial={{opacity:0,y:-8}} animate={{opacity:1,y:0}} exit={{opacity:0}}>⚠️ {radarError}</motion.div>}
         </AnimatePresence>
 
-        {/* MAIN GRID */}
         <div className="fr-grid">
 
-          {/* MAP */}
           <div className="fr-map-chamber">
             <div className="fr-map-label">LIVE FEED</div>
             <div className="fr-map-inner" ref={chamberRef}>
@@ -373,11 +357,9 @@ function FamilyRadarPage() {
             <div className="fr-member-hud">👨‍👩‍👧‍👦 {visibleMembers.length} MEMBERS</div>
           </div>
 
-          {/* PANEL */}
           <div className="fr-panel">
             <div className="fr-panel-header"><span className="fr-panel-title">FAMILY ONLINE</span><span className="fr-panel-count" style={{fontFamily:"'Playfair Display', serif", color:'#3E2723'}}>{members.length+1} TOTAL</span></div>
             <div className="fr-panel-body">
-              {/* Self */}
               <motion.div className="fr-member-card fr-me" initial={{opacity:0,x:-12}} animate={{opacity:1,x:0}} transition={{delay:0.1}}>
                 <div className="fr-member-card-top">
                   <div className="fr-orb-wrap">

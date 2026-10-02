@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ─── Comic Background / Motes ─────────────────────────────────────────────────
+// Shows little floating dust specks
 function DustMotes() {
   const motes = Array.from({ length: 10 }, (_, i) => ({
     id: i,
@@ -31,7 +31,7 @@ function DustMotes() {
   );
 }
 
-// ─── STAT BAR (Comic Health Bar) ─────────────────────────────────────────────
+// Draws a progress bar for stats
 function StatBar({ label, value, max = 100, color = '#C89B3C', delay = 0 }) {
   const pct = Math.min((value / max) * 100, 100);
   return (
@@ -52,9 +52,7 @@ function StatBar({ label, value, max = 100, color = '#C89B3C', delay = 0 }) {
   );
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT
-// ═════════════════════════════════════════════════════════════════════════════
+// Main modal to show off a champion
 function ChampionDetailModal({ onClose, champion }) {
   const handleBackdrop = (e) => { if (e.target === e.currentTarget) onClose(); };
   
@@ -98,7 +96,6 @@ function ChampionDetailModal({ onClose, champion }) {
             overflow: 'hidden', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)',
           }}
         >
-          {/* Close Button */}
           <button
             onClick={onClose}
             style={{
@@ -111,17 +108,14 @@ function ChampionDetailModal({ onClose, champion }) {
             }}
           >✕</button>
 
-          {/* ── SCROLLABLE CONTENT ── */}
           <div className="lt-custom-scrollbar" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
             
-            {/* HERO SECTION */}
             <div style={{ padding: '40px 24px 24px', background: '#D4B895', borderBottom: '6px solid #3E2723', textAlign: 'center', position: 'relative' }}>
               
               <div style={{ position: 'absolute', top: 16, left: 16, background: '#C89B3C', border: 'none', padding: '4px 12px', borderRadius: 8, fontFamily: "'Playfair Display', serif", fontSize: 14, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-5deg)' }}>
                 #1 CHAMPION 👑
               </div>
 
-              {/* Avatar Box */}
               <div style={{ width: 110, height: 110, margin: '20px auto 16px', borderRadius: '50%', background: '#FFF', border: 'none', overflow: 'hidden', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {avatar ? (
                   <img src={avatar} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -139,7 +133,6 @@ function ChampionDetailModal({ onClose, champion }) {
               </div>
             </div>
 
-            {/* ── STATS SECTION ── */}
             <div style={{ padding: '24px' }}>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
@@ -156,14 +149,12 @@ function ChampionDetailModal({ onClose, champion }) {
                 ))}
               </div>
 
-              {/* Progress bars */}
               <div style={{ background: '#F5F5F5', border: 'none', borderRadius: 16, padding: 16, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)' }}>
                 <StatBar label="STORY POWER" value={stories} max={100} color="#D4B895" delay={0} />
                 <StatBar label="COMMUNITY LOVE" value={likes} max={200} color="#1E352F" delay={0.1} />
                 <StatBar label="FIRE STREAK" value={streak} max={30} color="#C89B3C" delay={0.2} />
               </div>
 
-              {/* Action Button */}
               <div style={{ marginTop: 24 }}>
                 <motion.button
                   onClick={onClose}

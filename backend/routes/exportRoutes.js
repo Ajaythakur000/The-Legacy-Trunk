@@ -4,7 +4,7 @@ import exportController from '../controllers/exportController.js';
 const { exportToPdf } = exportController;
 import { protect } from '../middleware/authMiddleware.js';
 
-// POST /api/export/pdf - Protected route to generate and download a PDF of selected stories.
+// Exports stories to a PDF file
 router.route('/pdf').post(protect, exportToPdf);
 
 export default router;

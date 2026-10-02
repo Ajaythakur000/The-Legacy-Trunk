@@ -1,11 +1,11 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+// Wraps routes to ensure only authenticated users can access them
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isInitializing } = useAuth(); 
   const location = useLocation();
 
-  // Show the comic halftone background while verifying auth status
   if (isInitializing) {
     return (
       <div style={{ 
@@ -16,12 +16,10 @@ function ProtectedRoute({ children }) {
     );
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // Render the page if authenticated
   return children;
 }
 

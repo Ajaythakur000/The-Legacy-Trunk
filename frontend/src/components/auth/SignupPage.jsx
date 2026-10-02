@@ -5,7 +5,7 @@ import { joinViaInviteApi } from '../../api/circleApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import OTPVerificationModal from './OTPVerificationModal';
 
-// ─── Logo Component ──────────────────────────────────────────────────────────
+// Renders the sticker logo
 function StickerLogo() {
   return (
     <div style={{ position: 'relative', width: 90, height: 90, margin: '0 auto 16px', zIndex: 2 }}>
@@ -33,7 +33,7 @@ function StickerLogo() {
   );
 }
 
-// ─── Comic Input Field ───────────────────────────────────────────────────────
+// Renders a styled text input
 function ComicInput({ type = 'text', name, placeholder, value, onChange, required, icon, label }) {
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -67,7 +67,7 @@ function ComicInput({ type = 'text', name, placeholder, value, onChange, require
   );
 }
 
-// ─── Vintage Role Toggle ──────────────────────────────────────────────────────
+// Renders options to pick user role
 function VintageRoleToggle({ label, name, value, onChange, options }) {
   return (
     <div style={{ textAlign: 'left', marginBottom: '16px' }}>
@@ -104,7 +104,7 @@ function VintageRoleToggle({ label, name, value, onChange, options }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// Main sign up page component
 function SignupPage() {
   const navigate = useNavigate();
   const location = useLocation();

@@ -2,11 +2,7 @@ import Story from '../models/storyModel.js';
 import Timeline from '../models/timelineModel.js';
 import FamilyMember from '../models/familyMember.js';
 
-/**
- * @desc    Search across stories, timeline events, and family members
- * @route   GET /api/search?q=keyword
- * @access  Private
- */
+// Searches across stories, timeline events, and family members for the given query
 const searchContent = async (req, res) => {
   try {
     const { q } = req.query;
@@ -17,7 +13,6 @@ const searchContent = async (req, res) => {
 
     const keyword = String(q).trim();
 
-    //  Minimal perf/safety guard
     if (keyword.length > 80) {
       return res.status(400).json({ message: 'Search query too long (max 80 chars)' });
     }
@@ -27,11 +22,9 @@ const searchContent = async (req, res) => {
       return res.status(400).json({ message: 'No active circle selected' });
     }
 
-    //  Escape regex special chars (keeps behavior, avoids unsafe regex patterns)
-    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\$&');
     const regex = new RegExp(escaped, 'i');
 
-    // 1) Stories: private family + global searchable
     const storiesQuery = Story.find({
       $and: [
         {
@@ -46,7 +39,6 @@ const searchContent = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(25);
 
-    // 2) Timeline events: private family + global searchable
     const timelinesQuery = Timeline.find({
       $and: [
         {
@@ -61,7 +53,6 @@ const searchContent = async (req, res) => {
       .sort({ year: 1, eventDate: 1, createdAt: 1 })
       .limit(25);
 
-    // 3) Family members: only from same family circle (privacy first)
     const membersQuery = FamilyMember.find({
       $and: [
         {

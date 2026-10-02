@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
+// Renders a heatmap grid of user activity
 function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -61,9 +62,8 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
     return { monthsData: data, totalPoints: total, activeDays: activeCount, currentYear: cYear };
   }, [activityMap]);
 
-  // Comic Color Palette for pixels
   const getColor = (level, isFuture) => {
-    if (isFuture) return '#F5F5F5'; // Future days have the same background as the board
+    if (isFuture) return '#F5F5F5';
     const colors = ['#F5F5F5', '#D4B895', '#A0522D', '#1E352F', '#C89B3C'];
     return colors[level];
   };
@@ -71,7 +71,6 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
   return (
     <div style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '40px', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)', position: 'relative' }}>
       
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24, marginBottom: 32 }}>
         <div>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: '#3E2723', margin: '0 0 8px' }}>
@@ -83,7 +82,6 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
         </div>
 
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* Stat cards */}
           {[
             { val: totalPoints.toLocaleString(), lbl: 'TOTAL PTS', color: '#FDFBF7' },
             { val: activeDays, lbl: 'ACTIVE DAYS', color: '#C89B3C' },
@@ -95,7 +93,6 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
             </div>
           ))}
 
-          {/* Period dropdown */}
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} style={{ background: '#FFF', border: 'none', padding: '12px 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723', boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transition: 'transform 0.1s' }}>
               CURRENT 📅
@@ -110,9 +107,7 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
         </div>
       </div>
 
-      {/* Heatmap grid */}
       <div style={{ width: '100%', overflowX: 'auto', paddingBottom: 16 }}>
-        {/* CHANGED: Removed dashed border and fixed width. Changed to inline-flex so background wraps correctly */}
         <div style={{ display: 'inline-flex', gap: 16, background: '#F5F5F5', padding: '24px', borderRadius: '16px', minWidth: '100%', boxSizing: 'border-box' }}>
           {monthsData.map((month, mIndex) => (
             <div key={mIndex} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -133,7 +128,6 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
                           }}
                         />
                       ) : (
-                        // Empty slot placeholder
                         <div key={`e-${mIndex}-${wIndex}-${dIndex}`} style={{ width: 16, height: 16, boxSizing: 'border-box', border: '2px dashed rgba(23,23,25,0.15)', borderRadius: 4 }} />
                       )
                     )}
@@ -148,7 +142,6 @@ function ActivityHeatmap({ activityMap, maxStreak = 0 }) {
         </div>
       </div>
 
-      {/* Legend */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
         <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: '#3E2723' }}>LAZY</span>
         {['#F5F5F5', '#D4B895', '#A0522D', '#1E352F', '#C89B3C'].map((c, i) => (

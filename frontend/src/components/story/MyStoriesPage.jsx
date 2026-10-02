@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { BookOpen, FolderOpen, Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
 
+// Renders the filter tabs
 function FilterTabs({ filters, activeFilter, onFilterChange }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', borderBottom: '1px solid rgba(62,39,35,0.2)' }}>
@@ -42,6 +43,7 @@ function FilterTabs({ filters, activeFilter, onFilterChange }) {
   );
 }
 
+// Shows a message when there are no stories
 function EmptyState({ hasStories }) {
   return (
     <motion.div
@@ -74,13 +76,13 @@ function EmptyState({ hasStories }) {
   );
 }
 
+// Main page for user stories
 function MyStoriesPage() {
   const { user } = useAuth();
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
   
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -105,7 +107,7 @@ function MyStoriesPage() {
   useEffect(() => { loadMyStories(); }, []);
 
   useEffect(() => {
-    setCurrentPage(1); // Reset page on filter change
+    setCurrentPage(1); 
   }, [activeFilter]);
 
   const handleLike = async (id) => {
@@ -160,14 +162,12 @@ function MyStoriesPage() {
     return stories;
   }, [stories, activeFilter]);
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredStories.length / itemsPerPage);
   const currentStories = filteredStories.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div style={{ minHeight: '100vh', paddingBottom: 100, position: 'relative' }}>
       
-      {/* ── HEADER ── */}
       <div style={{ textAlign: 'center', padding: '60px 20px', marginBottom: 20 }}>
         <BookOpen size={48} color="#C89B3C" strokeWidth={1} style={{ marginBottom: 20 }} />
         
@@ -186,14 +186,12 @@ function MyStoriesPage() {
         </motion.div>
       </div>
 
-      {/* ── FILTER TABS ── */}
       {!loading && stories.length > 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: 680, margin: '0 auto 40px', padding: '0 20px' }}>
           <FilterTabs filters={filters} activeFilter={activeFilter} onFilterChange={setActiveFilter} />
         </motion.div>
       )}
 
-      {/* ── FEED ── */}
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 20px' }}>
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
@@ -214,7 +212,6 @@ function MyStoriesPage() {
               ))}
             </AnimatePresence>
 
-            {/* ── VINTAGE PAGINATION ── */}
             {totalPages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 40, paddingTop: 20, borderTop: '1px solid rgba(62,39,35,0.1)' }}>
                 <button 

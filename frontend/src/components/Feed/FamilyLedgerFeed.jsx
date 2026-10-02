@@ -7,6 +7,7 @@ import { getSocket } from '../../services/socket.js';
 import StoryCard from '../story/StoryCard';
 import StorySkeleton from '../shared/StorySkeleton';
 
+// Renders the family feed with stories and updates
 export default function FamilyLedgerFeed() {
   const { user } = useAuth();
   const activeCircleId = user?.activeCircleId || null;
@@ -95,7 +96,6 @@ export default function FamilyLedgerFeed() {
 
   const sortedStories = useMemo(() => [...stories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [stories]);
 
-  // NEW COMIC UI FOR EMPTY/LOCKED STATES
   if (!activeCircleId) {
     return (
       <div style={{ textAlign: 'center', background: '#FFF', padding: '40px', borderRadius: 24, border: '6px solid #3E2723', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)' }}>

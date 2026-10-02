@@ -18,25 +18,31 @@ const {
   deleteCircle,
 } = circleController;
 
-// GET /api/circles
-// POST /api/circles
+// Handles creating and fetching circles
 router.route('/').post(protect, createCircle).get(protect, getMyCircles);
 
-// specific routes must be above /:id
+// Fetches the leaderboard
 router.route('/leaderboard').get(protect, getLeaderboard);
+
+// Joins a circle via invite link
 router.route('/join-invite').post(protect, joinViaInvite);
+
+// Fetches the top contributor for a circle
 router.route('/:id/top-contributor').get(protect, getTopContributor);
+
+// Fetches upcoming events for a circle
 router.route('/:id/upcoming-events').get(protect, getUpcomingEvents);
+
+// Generates an invite link for a circle
 router.route('/:id/invite-link').post(protect, generateInviteLink);
 
-// GET /api/circles/:id
-// DELETE /api/circles/:id
+// Handles fetching and deleting a specific circle
 router.route('/:id').get(protect, getCircleById).delete(protect, deleteCircle);
 
-// POST /api/circles/:id/members
+// Sends a family invite to a circle
 router.route('/:id/members').post(protect, sendFamilyInvite);
 
-// DELETE /api/circles/:circleId/members/:memberId
+// Removes a member from a circle
 router.route('/:circleId/members/:memberId').delete(protect, removeMemberFromCircle);
 
 export default router;

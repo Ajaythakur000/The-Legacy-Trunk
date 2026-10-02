@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+// Card showing family points and rank
 function FamilyLegacyCard({ familyPoints }) {
   const getFamilyBadge = (points) => {
     if (points < 500) return {
@@ -30,12 +31,10 @@ function FamilyLegacyCard({ familyPoints }) {
 
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      {/* Eyebrow label */}
       <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', marginBottom: 16 }}>
         FAMILY RANK 🏆
       </div>
 
-      {/* Points number */}
       <motion.div key={familyPoints} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
         <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 80, color: '#C89B3C', lineHeight: 1 }}>
           {familyPoints.toLocaleString()}
@@ -45,7 +44,6 @@ function FamilyLegacyCard({ familyPoints }) {
         </span>
       </motion.div>
 
-      {/* Badge pill */}
       <motion.div whileHover={{ scale: 1.05, rotate: -2 }}
         style={{
           display: 'inline-block', padding: '8px 24px', borderRadius: 12, marginBottom: 24,
@@ -57,12 +55,10 @@ function FamilyLegacyCard({ familyPoints }) {
         {badge.title}
       </motion.div>
 
-      {/* Message */}
       <p style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 700, fontSize: 18, color: '#3E2723', lineHeight: '1.5', marginBottom: 32, background: '#F5F5F5', padding: 16, border: '4px dashed #3E2723', borderRadius: 16 }}>
         "{badge.msg}"
       </p>
 
-      {/* Progress section */}
       {badge.next !== 'MAX' ? (
         <div style={{ background: '#FFF', border: 'none', borderRadius: 16, padding: 24, boxShadow: '8px 8px 15px 0px rgba(0,0,0,0.45)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontFamily: "'Playfair Display', serif", fontSize: 16, color: '#3E2723' }}>
@@ -70,7 +66,6 @@ function FamilyLegacyCard({ familyPoints }) {
             <span>{familyPoints.toLocaleString()} / {badge.next.toLocaleString()}</span>
           </div>
 
-          {/* Comic Health Bar */}
           <div style={{ height: 24, background: '#FFF', borderRadius: 12, border: 'none', overflow: 'hidden', position: 'relative' }}>
             <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercent}%` }} transition={{ duration: 1, type: 'spring' }}
               style={{ height: '100%', background: '#00C853', borderRight: '4px solid #3E2723' }}

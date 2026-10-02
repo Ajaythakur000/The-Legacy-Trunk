@@ -5,6 +5,7 @@ import StoryCard from '../story/StoryCard';
 import StorySkeleton from '../shared/StorySkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Renders a feed of public stories from strangers
 export default function StrangersMemoriesFeed() {
   const { user } = useAuth();
   const [stories, setStories] = useState([]);
@@ -45,7 +46,6 @@ export default function StrangersMemoriesFeed() {
     } catch (err) { console.error('Comment failed', err); }
   };
 
-  // NEW COMIC UI FOR LOADING/EMPTY STATES
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 20 }}>

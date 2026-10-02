@@ -23,12 +23,9 @@ const familyMemberSchema = new Schema(
       select: false,
     },
 
-    // ==============================
-    // 🛡️ OTP & SECURITY FIELDS
-    // ==============================
     isVerified: {
       type: Boolean,
-      default: true, // Purane users by default verified rahenge
+      default: true,
     },
 
     otp: {
@@ -55,9 +52,6 @@ const familyMemberSchema = new Schema(
       select: false,
     },
 
-    // ==============================
-    // 👤 USER PROFILE FIELDS
-    // ==============================
     avatar: {
       type: String,
       default: 'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg',
@@ -74,9 +68,6 @@ const familyMemberSchema = new Schema(
       default: null,
     },
 
-    // ==============================
-    // 🛡️ ROLES & RELATIONSHIPS
-    // ==============================
     role: {
       type: String,
       enum: ['admin', 'member', 'restricted'],
@@ -104,9 +95,6 @@ const familyMemberSchema = new Schema(
       ref: 'FamilyCircle',
     },
 
-    // ==============================
-    // 📡 FAMILY RADAR FIELDS
-    // ==============================
     currentLocation: {
       type: {
         type: String,
@@ -114,7 +102,7 @@ const familyMemberSchema = new Schema(
         default: 'Point',
       },
       coordinates: {
-        type: [Number], // [lng, lat]
+        type: [Number],
         default: [0, 0],
       },
     },
@@ -129,9 +117,6 @@ const familyMemberSchema = new Schema(
       default: false,
     },
 
-    // ==============================
-    // 🔥 GAMIFICATION & STREAKS
-    // ==============================
     currentStreak: {
       type: Number,
       default: 0,
@@ -171,6 +156,7 @@ const familyMemberSchema = new Schema(
 
 familyMemberSchema.index({ currentLocation: '2dsphere' });
 
+// hashes the password before saving
 familyMemberSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
@@ -181,6 +167,7 @@ familyMemberSchema.pre('save', async function (next) {
   return next();
 });
 
+// checks if the entered password matches the hashed one
 familyMemberSchema.methods.matchPassword = async function (enteredPassword) {
   return compare(enteredPassword, this.password);
 };

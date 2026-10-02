@@ -1,32 +1,26 @@
-// controllers/otpmsg.js
-
-// Email-safe Pop-Art Color Palette
 const theme = {
-  bgOuter: '#FFF6E5',      // Cream comic page background
-  bgInner: '#FFFFFF',      // White panel background
-  primary: '#FFD23F',      // Yellow action color
-  secondary: '#3FE0FF',    // Cyan action color
-  accent: '#FF3D81',       // Pink action color
-  black: '#171719',        // Ink black for borders/text
-  gray: '#F5F5F5',         // Light gray for inset panels
-  fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif", // Safest fallback
-  headingFont: "Impact, 'Arial Black', Arial, sans-serif", // Blocky comic feel
+  bgOuter: '#FFF6E5',      
+  bgInner: '#FFFFFF',      
+  primary: '#FFD23F',      
+  secondary: '#3FE0FF',    
+  accent: '#FF3D81',       
+  black: '#171719',        
+  gray: '#F5F5F5',         
+  fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif", 
+  headingFont: "Impact, 'Arial Black', Arial, sans-serif", 
   monoFont: "'Courier New', Courier, monospace"
 };
 
-// 1. Template for New Registration (Welcome)
+// Generates an HTML email template for a new user registration OTP
 export const getWelcomeOtpTemplate = (name, otp) => `
 <div style="background-color: ${theme.bgOuter}; padding: 40px 10px; font-family: ${theme.fontFamily}; color: ${theme.black};">
   
-  <!-- Outer Shadow Table (Fakes the box-shadow) -->
   <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;">
     <tr>
       <td style="background-color: ${theme.black}; padding: 8px 8px 0px 8px; border-radius: 20px;">
         
-        <!-- Inner Card Table -->
         <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${theme.bgInner}; border: 4px solid ${theme.black}; border-radius: 16px; text-align: center;">
           
-          <!-- Header Banner -->
           <tr>
             <td style="background-color: ${theme.primary}; padding: 30px 20px; border-bottom: 4px solid ${theme.black}; border-radius: 12px 12px 0 0;">
               <div style="font-size: 50px; margin-bottom: 10px; line-height: 1;">👋</div>
@@ -36,14 +30,12 @@ export const getWelcomeOtpTemplate = (name, otp) => `
             </td>
           </tr>
 
-          <!-- Body -->
           <tr>
             <td style="padding: 30px 20px;">
               <p style="font-size: 18px; font-weight: bold; line-height: 1.5; margin: 0 0 25px 0;">
                 Welcome to the Scrapbook! You're almost in. Use this super-secret code to unlock your account.
               </p>
 
-              <!-- Code Box -->
               <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; background-color: ${theme.gray}; border: 3px dashed ${theme.black};">
                 <tr>
                   <td style="padding: 20px 30px;">
@@ -54,7 +46,6 @@ export const getWelcomeOtpTemplate = (name, otp) => `
                 </tr>
               </table>
 
-              <!-- Warning Tag -->
               <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 25px auto 0 auto; background-color: ${theme.black}; color: ${theme.primary}; border-radius: 8px;">
                 <tr>
                   <td style="padding: 10px 15px; font-weight: bold; font-size: 14px; text-transform: uppercase;">
@@ -65,7 +56,6 @@ export const getWelcomeOtpTemplate = (name, otp) => `
             </td>
           </tr>
           
-          <!-- Footer -->
           <tr>
             <td style="padding: 20px; border-top: 4px solid ${theme.black}; background-color: ${theme.bgOuter}; border-radius: 0 0 12px 12px;">
               <div style="font-family: ${theme.headingFont}; font-size: 18px; color: ${theme.black};">
@@ -83,7 +73,7 @@ export const getWelcomeOtpTemplate = (name, otp) => `
 </div>
 `;
 
-// 2. Template for Login (Unverified User)
+// Generates an HTML email template for an unverified user login OTP
 export const getLoginOtpTemplate = (name, otp) => `
 <div style="background-color: ${theme.bgOuter}; padding: 40px 10px; font-family: ${theme.fontFamily}; color: ${theme.black};">
   
@@ -146,7 +136,7 @@ export const getLoginOtpTemplate = (name, otp) => `
 </div>
 `;
 
-// 3. Template for Password Reset
+// Generates an HTML email template with an OTP for resetting a password
 export const getResetPasswordTemplate = (name, otp) => `
 <div style="background-color: ${theme.bgOuter}; padding: 40px 10px; font-family: ${theme.fontFamily}; color: ${theme.black};">
   

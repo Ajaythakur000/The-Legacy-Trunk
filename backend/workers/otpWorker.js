@@ -3,10 +3,10 @@ import { redisConnection } from '../config/bullmq.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Processes background jobs to dispatch OTP emails asynchronously
 export const otpWorker = new Worker('otp-email-dispatch', async (job) => {
     console.log(`[Worker] Started OTP Async Email Job ${job.id} to ${job.data.to}`);
     const { to, subject, otpHtml } = job.data;
-
     try {
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
@@ -25,14 +25,11 @@ export const otpWorker = new Worker('otp-email-dispatch', async (job) => {
                 htmlContent: otpHtml
             })
         });
-
         const result = await response.json();
-
         if (!response.ok) {
             console.error("[OTP Worker] Brevo API Error:", result);
             throw new Error(result.message || "Failed to send email via Brevo");
         }
-
         console.log(`[Worker] OTP Email sent asynchronously to ${to}!`);
     } catch (err) {
         console.error(`[Worker] Job ${job.id} failed:`, err.message);

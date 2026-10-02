@@ -9,26 +9,16 @@ import {
 
 const router = Router();
 
-/**
- * PUT /api/location/update
- * body: { latitude, longitude }
- */
+// Updates the user's location
 router.put('/update', protect, updateMyLocation);
 
-/**
- * GET /api/location/me
- */
+// Fetches the user's location
 router.get('/me', protect, getMyLocation);
 
-/**
- * GET /api/location/family-radar
- */
+// Fetches the family radar
 router.get('/family-radar', protect, getFamilyRadar);
 
-/**
- * PUT /api/location/ghost-mode
- * body: { isGhostModeOn: true/false }
- */
+// Toggles ghost mode for the user
 router.put('/ghost-mode', protect, toggleGhostMode);
 
 export default router;

@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Search, Sparkles, Home, Bell, Flame, Snowflake, Crown, PenSquare, BookImage, LogOut, Heart, MessageSquare, Mail, Pin } from 'lucide-react';
 import Sidebar, { LogoRing } from './Sidebar';
 
-// ─── GLOBAL NEO-BRUTALIST STYLES ──────────────────────────────────────────────
 const GLOBAL_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
@@ -34,7 +33,6 @@ const GLOBAL_CSS = `
   }
   .lt-sb-overlay.lt-sb-vis { opacity: 1; visibility: visible; pointer-events: auto; }
 
-  /* ═══════ SIDEBAR PRE-STYLING (For next block) ═══════ */
   .lt-sidebar {
     position: relative; flex-shrink: 0; display: flex; flex-direction: column;
     background: #FFF; border-right: 4px solid #3E2723; overflow: hidden; white-space: nowrap; z-index: 50;
@@ -64,14 +62,8 @@ const GLOBAL_CSS = `
   .lt-sb-logout { display:flex; align-items:center; gap:10px; padding:10px; border-radius:8px; cursor:pointer; background:#FFF; width:100%; border: none; transition:all 0.2s; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
   .lt-sb-logout:hover { background:#1E352F; color:#FFF;  box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
 
-  /* ═══════════════════════════════════════
-     MAIN COLUMN
-  ═══════════════════════════════════════ */
   .lt-main-col { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; background: transparent; }
 
-  /* ═══════════════════════════════════════
-     TOP HEADER — NEO-BRUTALISM
-  ═══════════════════════════════════════ */
   .lt-top-header {
     height: 76px; flex-shrink: 0;
     background: #FFF;
@@ -84,7 +76,6 @@ const GLOBAL_CSS = `
   .lt-nb-left  { display:flex; align-items:center; gap:16px; }
   .lt-nb-right { display:flex; align-items:center; gap:12px; flex-shrink:0; }
 
-  /* ── Hamburger ── */
   .lt-ham-btn {
     width:44px; height:44px; border-radius:8px;
     background:#D4B895; border: none;
@@ -95,7 +86,6 @@ const GLOBAL_CSS = `
   .lt-ham-btn:hover {  box-shadow: 4px 8px 16px rgba(0,0,0,0.1); }
   .lt-ham-btn:active {  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
 
-  /* ── Header brand ── */
   .lt-header-brand { display:flex; align-items:center; gap:12px; user-select:none; }
   .lt-header-brand-sub { display:block; font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; line-height:1; margin-bottom:2px; }
   .lt-header-brand-name {
@@ -104,7 +94,6 @@ const GLOBAL_CSS = `
     
   }
 
-  /* ── Search bar ── */
   .lt-search-form {
     display:flex; align-items:center; gap:9px;
     background:#FFF; border: none;
@@ -116,7 +105,6 @@ const GLOBAL_CSS = `
   .lt-search-input::placeholder { color:rgba(23,23,25,0.4); font-family:'Playfair Display', serif; font-size:12px; }
   .lt-search-icon { color:#3E2723; flex-shrink:0; display:flex; align-items:center; font-size:16px; }
 
-  /* ── Oracle button ── */
   .lt-oracle-btn {
     display:flex; align-items:center;
     background:#C89B3C; border: none;
@@ -130,7 +118,6 @@ const GLOBAL_CSS = `
   .lt-oracle-text { max-width:0; opacity:0; font-size:14px; color:#3E2723; white-space:nowrap; overflow:hidden; transition:all 0.2s; font-family:'Playfair Display', serif; }
   .lt-oracle-btn:hover .lt-oracle-text { max-width:130px; opacity:1; margin-left:10px; }
 
-  /* ── Hub (circle switcher) ── */
   .lt-hub-btn {
     display:flex; align-items:center; gap:10px; padding:8px 16px;
     background:#D4B895; border: none; border-radius:8px;
@@ -143,7 +130,6 @@ const GLOBAL_CSS = `
   .lt-hub-arrow { font-size:10px; transition:transform 0.2s; color:#3E2723; }
   .lt-hub-btn.lt-open .lt-hub-arrow { transform:rotate(180deg); }
 
-  /* ── Dropdowns ── */
   .lt-dark-dropdown {
     background:#FFF; border: none; border-radius:12px;
     box-shadow: 4px 12px 30px rgba(0,0,0,0.15); overflow:hidden; min-width:240px; padding:12px; position:relative;
@@ -158,7 +144,6 @@ const GLOBAL_CSS = `
   .lt-dd-item:hover { background: #C89B3C; border: 1px solid #C89B3C; box-shadow: 2px 4px 12px rgba(0,0,0,0.08);  }
   .lt-dd-item.lt-dd-active { background: #D4B895; border: 1px solid #D4B895; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); }
 
-  /* ── Icon button (bell etc.) ── */
   .lt-icon-btn {
     width:44px; height:44px; border-radius:8px;
     background:#FFF; border: none;
@@ -170,7 +155,6 @@ const GLOBAL_CSS = `
   .lt-icon-btn:active {  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
   .lt-notif-badge { position:absolute; top:-6px; right:-6px; background:#D4B895; color:#3E2723; font-family:'Playfair Display', serif; font-size:12px; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; border: none; }
 
-  /* ── Streak wrap ── */
   .lt-streak-wrap {
     display:flex; align-items:center; gap:8px; padding:6px 14px;
     background:#FFF; border: none; border-radius:8px;
@@ -181,7 +165,6 @@ const GLOBAL_CSS = `
   .lt-streak-wrap.lt-streak-lit .lt-streak-num { color:#FFF;  }
   .lt-streak-label { font-family:'Playfair Display', serif; font-size:12px; color:#3E2723; }
 
-  /* ── Avatar button ── */
   .lt-avatar-btn {
     width:44px; height:44px; border-radius:8px; padding:0;
     background:#C89B3C; border: none; cursor:pointer;
@@ -192,7 +175,6 @@ const GLOBAL_CSS = `
   .lt-avatar-btn:active {  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.45); }
   .lt-avatar-inner { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display', serif; font-size:18px; color:#3E2723; }
 
-  /* ── Profile dropdown ── */
   .lt-profile-wrap { position:relative; }
   .lt-profile-dd { visibility:hidden; opacity:0; transform:translateY(-10px); transition:all 0.2s; position:absolute; top:calc(100% + 14px); right:0; z-index:100; }
   .lt-profile-wrap:hover .lt-profile-dd { visibility:visible; opacity:1; transform:translateY(0); }
@@ -226,7 +208,7 @@ const GLOBAL_CSS = `
   }
 `;
 
-// ─── COMIC FLAME STREAK ───────────────────────────────────────────────────────
+// Renders the comic flame icon for user streaks
 function ComicFlame({ lit, streak = 0 }) {
   const scale = lit ? Math.min(1.2, 0.8 + (streak * 0.05)) : 0.8;
   return (
@@ -236,9 +218,7 @@ function ComicFlame({ lit, streak = 0 }) {
   );
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// MAIN COMPONENT — ALL ORIGINAL LOGIC 100% UNCHANGED
-// ═════════════════════════════════════════════════════════════════════════════
+// Main navigation bar with sidebar, search, and user profile options
 function Navbar({ children }) {
   const { isAuthenticated, user, logout, switchActiveCircle } = useAuth();
   const navigate  = useNavigate();
@@ -349,7 +329,6 @@ function Navbar({ children }) {
               </button>
 
               <div className="lt-header-brand lt-desktop-only">
-                {/* Simplified Logo rendering for header until Sidebar provides LogoRing */}
                 <div style={{width: 44, height: 44, background: '#D4B895', borderRadius: '50%', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>
                   <img src="/finall_logo.png" alt="Logo" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                 </div>
@@ -403,7 +382,6 @@ function Navbar({ children }) {
                   <Bell size={20} strokeWidth={1.5} />
                   {unreadCount>0 && <span className="lt-notif-badge">{unreadCount}</span>}
                 </button>
-                {/* Note: Full notif dropdown logic left intact, CSS updated above */}
                 <AnimatePresence>
                   {isNotifOpen && (
                     <motion.div style={{position:'absolute',top:'calc(100% + 12px)',right:0,zIndex:100}}

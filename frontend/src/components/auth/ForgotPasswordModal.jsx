@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { forgotPasswordApi, resetPasswordApi } from '../../api/authApi';
 
-// ─── Comic Single OTP Box ───────────────────────────────────────────────────
+// Renders a single character box for the OTP code
 function ComicRuneBox({ index, value, inputRef, onChange, onKeyDown, onPaste }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -21,7 +21,7 @@ function ComicRuneBox({ index, value, inputRef, onChange, onKeyDown, onPaste }) 
   );
 }
 
-// ─── Comic Dark Input ─────────────────────────────────────────────────────────
+// Renders a styled input field
 function ComicDarkInput({ type = 'text', placeholder, value, onChange, required, icon }) {
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -45,7 +45,7 @@ function ComicDarkInput({ type = 'text', placeholder, value, onChange, required,
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// Shows the forgot password popup
 function ForgotPasswordModal({ onClose }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -85,7 +85,6 @@ function ForgotPasswordModal({ onClose }) {
     const finalEmail = email.trim();
     const finalPassword = newPassword.trim();
 
-    // 🔥 DEBUG LOGGER (Check Browser Console - F12)
     console.log("🚀 SENDING TO BACKEND:", { email: finalEmail, otp: finalOtp, newPassword: finalPassword });
 
     try {

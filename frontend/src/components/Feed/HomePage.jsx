@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import FamilyLedgerFeed from './FamilyLedgerFeed';
 import StrangersMemoriesFeed from './StrangersMemoriesFeed';
 
-/* ─── Dust motes (stable, generated once) ─── */
 const MOTES = Array.from({ length: 14 }, (_, i) => ({
   id: i,
   size: Math.random() * 70 + 25,
@@ -16,7 +15,7 @@ const MOTES = Array.from({ length: 14 }, (_, i) => ({
   gold: Math.random() > 0.45,
 }));
 
-/* ─── Star canvas hook ─── */
+// Manages canvas star animation
 function useStars(ref) {
   useEffect(() => {
     const canvas = ref.current;
@@ -50,10 +49,9 @@ function useStars(ref) {
   }, [ref]);
 }
 
-/* ─── Animated rune sequence ─── */
 const RUNES = ['ᚦ','ᛖ','ᛚ','ᛖ','ᚷ','ᚨ','ᚲ','ᛃ','ᛏ','ᚱ','ᚢ','ᚾ','ᚲ'];
 
-// ─── NEW COMIC UI COMPONENTS ───
+// Renders background decorations
 function ComicBackground() {
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
@@ -64,10 +62,11 @@ function ComicBackground() {
   );
 }
 
+// Renders the logo badge component
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden', /* removed spin */ }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden' }}>
         <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
       <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -79,10 +78,10 @@ function LogoBadge({ size = 90 }) {
   );
 }
 
+// Main home page component displaying feeds
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('family');
   const canvasRef = useRef(null);
-  // Keeping the hook call to avoid unused variable errors, but canvas is hidden in new UI
   useStars(canvasRef);
 
   const comicTabs = [
@@ -92,14 +91,12 @@ export default function HomePage() {
 
   return (
     <div style={{ minHeight: '100vh', paddingBottom: 80, position: 'relative' }}>
-      {/* Hidden old canvas to keep useStars hook working without error */}
       <canvas ref={canvasRef} style={{ display: 'none' }} />
       
       <ComicBackground />
 
       <div style={{ position: 'relative', zIndex: 10, maxWidth: 720, margin: '0 auto', padding: '48px 20px 0' }}>
 
-        {/* ════ HERO HEADER ════ */}
         <motion.div initial={{ opacity: 0, y: 48 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }} style={{ textAlign: 'center', marginBottom: 40 }}>
           
           <LogoBadge size={100} />
@@ -117,7 +114,6 @@ export default function HomePage() {
 
         </motion.div>
 
-        {/* ════ TAB SWITCHER ════ */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ display: 'flex', gap: 16, marginBottom: 40 }}>
           {comicTabs.map(tab => {
             const isActive = activeTab === tab.id;
@@ -141,7 +137,6 @@ export default function HomePage() {
           })}
         </motion.div>
 
-        {/* ════ FEED AREA ════ */}
         <AnimatePresence mode="wait">
           <motion.div key={activeTab} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -24 }} transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}>
             {activeTab === 'family' ? <FamilyLedgerFeed /> : <StrangersMemoriesFeed />}

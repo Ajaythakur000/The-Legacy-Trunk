@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Displays which users are currently typing
 function TypingIndicator({ typingUsers = [] }) {
   const names = typingUsers.map(u => {
     if (typeof u === 'object') return u?.senderName || u?.name || 'Someone';

@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 
-// ─── Comic page transition variants ──────────────────────────────────────────
 const variants = {
   vaultDoor: {
     initial: { opacity: 0, scale: 0.8, rotate: -4 },
@@ -25,7 +24,7 @@ const variants = {
   },
 };
 
-// ─── Comic Action Burst on page enter ─────────────────────────────────────────
+// Handles the burst particle effect when entering a page
 function ComicBurst() {
   const canvasRef = useRef(null);
 
@@ -76,7 +75,6 @@ function ComicBurst() {
         ctx.strokeStyle = '#3E2723';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        // Draw a rough star/burst shape
         for (let i = 0; i < 5; i++) {
           ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * p.size, -Math.sin((18 + i * 72) * Math.PI / 180) * p.size);
           ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (p.size/2), -Math.sin((54 + i * 72) * Math.PI / 180) * (p.size/2));
@@ -103,7 +101,7 @@ function ComicBurst() {
   return <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }} />;
 }
 
-// ─── Pop-Art screen wipe on transition ───────────────────────────────────────
+// Renders the pop-art wipe transition between screens
 function ComicWipe() {
   const [hidden, setHidden] = useState(false);
 
@@ -134,7 +132,7 @@ function ComicWipe() {
   );
 }
 
-// ─── Main AnimatedPage ────────────────────────────────────────────────────────
+// Main wrapper component that applies comic-style transition animations
 function AnimatedPage({ children, variant = 'runeRise', showBurst = false, showRuneFlash = true, duration = 0.5 }) {
   const chosen = variants[variant] || variants.runeRise;
 

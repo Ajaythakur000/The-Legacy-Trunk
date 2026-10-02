@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { uploadChatMediaApi } from '../../api/messageApi';
 
+// Provides an input field for sending messages and media
 function MessageInput({ onSend, onTyping, disabled }) {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -72,7 +73,6 @@ function MessageInput({ onSend, onTyping, disabled }) {
       >
         <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
 
-        {/* Attach */}
         <motion.button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUIDisabled}
           whileHover={!isUIDisabled ? { scale: 1.1 } : {}} whileTap={!isUIDisabled ? { scale: 0.9 } : {}}
           style={{ background: '#D4B895', border: 'none', borderRadius: '50%', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isUIDisabled ? 'not-allowed' : 'pointer', fontSize: 24, boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)', flexShrink: 0 }}
@@ -80,7 +80,6 @@ function MessageInput({ onSend, onTyping, disabled }) {
           📎
         </motion.button>
 
-        {/* Input */}
         <input
           type="text" value={text} placeholder={isRecording ? '🎙️ RECORDING...' : isUIDisabled ? 'UPLOADING...' : 'TYPE SOMETHING...'}
           onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}
@@ -89,7 +88,6 @@ function MessageInput({ onSend, onTyping, disabled }) {
           style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 20, color: '#3E2723', fontFamily: "'Courier Prime', monospace", fontWeight: 400 }}
         />
 
-        {/* Mic */}
         <AnimatePresence>
           {!text.trim() && (
             <motion.button type="button" onClick={isRecording ? stopRecording : startRecording} disabled={disabled || uploading}
@@ -101,7 +99,6 @@ function MessageInput({ onSend, onTyping, disabled }) {
           )}
         </AnimatePresence>
 
-        {/* Send */}
         <motion.button type="submit" disabled={!canSend}
           whileHover={canSend ? { scale: 1.1 } : {}} whileTap={canSend ? { scale: 0.9, boxShadow: '0px 0px 15px 0px rgba(0,0,0,0.45)' } : {}}
           style={{ width: 56, height: 56, borderRadius: '50%', background: canSend ? '#C89B3C' : '#F5F5F5', border: 'none', cursor: canSend ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: canSend ? '2px 4px 12px rgba(0,0,0,0.2)' : 'none', fontSize: 24, flexShrink: 0 }}

@@ -14,7 +14,6 @@ const notificationSchema = new Schema(
     },
     type: {
       type: String,
-      // 🔥 'invite' yahan add kiya hai
       enum: ['like', 'comment', 'post', 'milestone', 'system', 'invite'],
       required: true,
     },
@@ -22,7 +21,6 @@ const notificationSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Story', 
     },
-    // 🔥 NEW: circleId field for invite notifications
     circleId: {
       type: Schema.Types.ObjectId,
       ref: 'FamilyCircle',

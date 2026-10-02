@@ -16,7 +16,7 @@ import upload from '../middleware/uploadMiddleware.js';
 
 const router = Router();
 
-// 🔥 CHANGED: .single('media') is now .array('media', 5) to allow up to 5 photos!
+// Handles uploading media files for a story
 const uploadStoryMedia = (req, res, next) => {
   upload.array('media', 5)(req, res, (err) => {
     if (err) {
@@ -31,22 +31,28 @@ const uploadStoryMedia = (req, res, next) => {
   });
 };
 
-// Create story
+// Creates a new story
 router.route('/').post(protect, uploadStoryMedia, createStory);
 
-// Active circle feed
+// Fetches the active circle feed
 router.route('/feed').get(protect, getCircleFeed);
 
-// Existing static endpoints
+// Fetches my family stories
 router.route('/my-family').get(protect, getMyFamilyStories);
+
+// Fetches global stories
 router.route('/global').get(protect, getGlobalStories);
 
-// 🔥 ROUTE FIXED: Isey dynamic `/:id` routes se upar rkhna jarruui hai!
+// Fetches my stories
 router.route('/mine').get(protect, getMyStories);
 
-// Dynamic endpoints (Ye hamesha last mein aane chahiye)
+// Toggles like on a story
 router.route('/:id/like').put(protect, toggleLikeStory);
+
+// Adds a comment to a story
 router.route('/:id/comments').post(protect, addCommentToStory);
+
+// Handles fetching, updating, and deleting a story by ID
 router.route('/:id')
   .get(protect, getStoryById)
   .put(protect, updateStory)

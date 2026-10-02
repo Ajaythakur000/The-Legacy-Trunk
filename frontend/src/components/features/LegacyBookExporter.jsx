@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import toast from 'react-hot-toast';
 
+// Exports family milestones as a PDF scrapbook
 const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
   const printRef = useRef();
   const [isExporting, setIsExporting] = useState(false);
@@ -84,9 +85,6 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
     <div style={{ position: 'fixed', top: 0, left: '-20000px', zIndex: -9999 }}>
       <div ref={printRef}>
 
-        {/* ══════════════════════════════════════════════
-            PAGE 1 — COVER (VINTAGE)
-        ══════════════════════════════════════════════ */}
         <div className="pdf-page" style={pageBase}>
           <div style={{ position: 'absolute', inset: 40, border: '2px solid #D4B895', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 60, textAlign: 'center' }}>
             
@@ -114,9 +112,6 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
           </div>
         </div>
 
-        {/* ══════════════════════════════════════════════
-            CHAPTER PAGES
-        ══════════════════════════════════════════════ */}
         {milestones.map((node, index) => {
           const dateObj   = new Date(node.milestoneDate);
           const fullDate  = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -127,7 +122,6 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
             <div key={node._id} className="pdf-page" style={pageBase}>
               <div style={{ position: 'absolute', inset: 40, padding: 40, display: 'flex', flexDirection: 'column' }}>
 
-                {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #EEDEC1', paddingBottom: 20, marginBottom: 40 }}>
                   <div style={{ fontSize: 14, fontFamily: typewriterFont, color: '#8C7B6B', letterSpacing: 1 }}>
                     Entry No. {index + 1}
@@ -137,28 +131,24 @@ const LegacyBookExporter = forwardRef(({ milestones, circleName }, ref) => {
                   </div>
                 </div>
 
-                {/* Title */}
                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
                   <div style={{ fontSize: 36, fontFamily: serifFont, color: '#3E2723', lineHeight: 1.2, fontWeight: 700 }}>
                     {node.title}
                   </div>
                 </div>
 
-                {/* Image (Polaroid Style) */}
                 {hasImage && (
                   <div style={{ margin: '0 auto 40px', background: '#FFF', padding: '16px 16px 40px 16px', boxShadow: '2px 4px 12px rgba(0,0,0,0.08)', transform: 'rotate(-1deg)', width: '80%' }}>
                     <img src={node.mediaUrl} alt={node.title} crossOrigin="anonymous" style={{ width: '100%', height: 'auto', maxHeight: 400, objectFit: 'cover', display: 'block', filter: 'sepia(0.2) contrast(1.1)' }} />
                   </div>
                 )}
 
-                {/* Content */}
                 <div style={{ flex: 1, padding: 24, position: 'relative' }}>
                   <p style={{ fontSize: 24, lineHeight: 1.8, color: '#3E2723', fontFamily: cursiveFont, margin: 0, whiteSpace: 'pre-wrap' }}>
                     {node.content}
                   </p>
                 </div>
 
-                {/* Footer */}
                 <div style={{ marginTop: 'auto', paddingTop: 20, textAlign: 'right', borderTop: '1px solid #EEDEC1' }}>
                   <div style={{ fontSize: 14, fontFamily: typewriterFont, color: '#8C7B6B' }}>
                     Penned by {addedBy}

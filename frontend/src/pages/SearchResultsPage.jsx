@@ -5,6 +5,7 @@ import StoryCard from '../components/story/StoryCard';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 
+// Displays search results based on the provided query
 function SearchResultsPage() {
   const { user } = useAuth();
   const location = useLocation();
@@ -33,7 +34,6 @@ function SearchResultsPage() {
   return (
     <div style={{ maxWidth: '850px', margin: '0 auto', padding: '40px 20px' }}>
       
-      {/* ── HEADER ── */}
       <div style={{ marginBottom: '40px', paddingBottom: '20px', borderBottom: '6px solid #3E2723' }}>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '48px', color: '#FDFBF7', margin: '0 0 12px 0', letterSpacing: '2px' }}>
           SEARCH RESULTS
@@ -43,7 +43,6 @@ function SearchResultsPage() {
         </p>
       </div>
 
-      {/* ── RESULTS ── */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0', fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#3E2723' }}>
           <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} style={{ display: 'inline-block', marginBottom: 10 }}>🔍</motion.div>

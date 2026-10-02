@@ -2,15 +2,15 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Story from '../models/storyModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 
-// Basic HTML Stripper for Defense in Depth
+// Removes simple HTML tags from a string to help prevent basic XSS
 const stripHtml = (html) => {
   return html.replace(/<[^>]*>?/gm, '');
 };
 
-// 🔒 SECURITY FIX: In-Memory Rate Limiter to protect Gemini API Quota
 const aiRateLimits = new Map();
-const RATE_LIMIT_WINDOW_MS = 10000; // 10 seconds cooldown per user
+const RATE_LIMIT_WINDOW_MS = 10000; 
 
+// Enforces a 10-second wait between AI requests per user to save quota
 const checkRateLimit = (userId) => {
   const now = Date.now();
   const lastReq = aiRateLimits.get(String(userId)) || 0;
@@ -21,9 +21,7 @@ const checkRateLimit = (userId) => {
   aiRateLimits.set(String(userId), now);
 };
 
-// ==============================================
-// 🔮 1. THE FAMILY ORACLE (Chat with History)
-// ==============================================
+// Answers questions based on family history using the Gemini API
 export const askOracle = async (req, res) => {
   try {
     if (!process.env.GEMINI_API_KEY) {
@@ -38,12 +36,10 @@ export const askOracle = async (req, res) => {
       return res.status(400).json({ message: "Circle ID and Question are required!" });
     }
 
-    // SECURITY FIX: Payload Size Limit (Token Protection)
     if (String(question).trim().length > 300) {
       return res.status(400).json({ message: "Question is too long (Max 300 characters)." });
     }
 
-    // 🔒 SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const isMember = await FamilyCircle.exists({ _id: circleId, members: req.user._id });
@@ -101,9 +97,7 @@ export const askOracle = async (req, res) => {
   }
 };
 
-// ==============================================
-// 🪄 2. AI COPILOT: ENHANCE STORY (DYNAMIC FIX)
-// ==============================================
+// Enhances or rewrites a rough story text into a polished version based on the selected tone
 export const enhanceStory = async (req, res) => {
   try {
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ message: "Internal server error" });
@@ -113,17 +107,14 @@ export const enhanceStory = async (req, res) => {
 
     if (!text) return res.status(400).json({ message: "Rough text is required!" });
 
-    // 🔒 SECURITY FIX: Payload Size Limit
     if (String(text).trim().length > 3000) {
       return res.status(400).json({ message: "Text is too long for enhancement (Max 3000 characters)." });
     }
 
-    // 🔒 SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const selectedTone = tone || "Nostalgic and Warm";
     
-    // 🔥 DYNAMIC INSTRUCTIONS BASED ON SELECTED OPTION 🔥
     let toneInstructions = "";
 
     if (selectedTone.includes("Correct Grammar")) {
@@ -147,7 +138,6 @@ export const enhanceStory = async (req, res) => {
       4. Ensure perfect grammar and clear sentence structure.`;
     } 
     else {
-      // For creative tones (Funny, Emotional, Sarcastic, etc.)
       toneInstructions = `
       1. Rewrite and polish the notes to perfectly match the "${selectedTone}" tone.
       2. Make it highly engaging, expressive, and impactful.
@@ -182,9 +172,7 @@ export const enhanceStory = async (req, res) => {
   }
 };
 
-// ==============================================
-// 🏷️ 3. AI COPILOT: GENERATE TITLE
-// ==============================================
+// Uses AI to generate a short, catchy title for a given story text
 export const generateTitle = async (req, res) => {
   try {
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ message: "Internal server error" });
@@ -194,12 +182,10 @@ export const generateTitle = async (req, res) => {
 
     if (!storyText) return res.status(400).json({ message: "Story text is required to generate a title!" });
 
-    // 🔒 SECURITY FIX: Payload Size Limit
     if (String(storyText).trim().length > 5000) {
       return res.status(400).json({ message: "Story is too long for title generation (Max 5000 characters)." });
     }
 
-    // 🔒 SECURITY FIX: Apply Rate Limiter
     checkRateLimit(req.user._id);
 
     const prompt = `Read the following family story and generate exactly ONE short, catchy, and emotional title for it. 

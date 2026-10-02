@@ -28,6 +28,7 @@ const LAYOUTS = [
   { id: '5',      label: 'Mosaic',  cols: '1fr 1fr', rows: '1fr 1fr 1fr', n: 5, spans: { 0: '1 / span 2' } },
 ];
 
+// Slider input component for numeric adjustments
 const SliderRow = ({ label, value, min, max, unit = '', onChange }) => (
   <div style={{ marginBottom: 20 }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontFamily: "'Courier Prime', monospace", color: '#8C7B6B', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
@@ -38,6 +39,7 @@ const SliderRow = ({ label, value, min, max, unit = '', onChange }) => (
   </div>
 );
 
+// Draggable and zoomable image slot component
 function ImageSlot({ src, onRemove, filterCss, borderRadius, frameActive }) {
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const isDragging = useRef(false);
@@ -97,6 +99,7 @@ function ImageSlot({ src, onRemove, filterCss, borderRadius, frameActive }) {
   );
 }
 
+// Main component for creating image collages
 function CollageMaker({ onClose, onSave }) {
   const [layout, setLayout]             = useState('3');
   const [slotImages, setSlotImages]     = useState({});
@@ -154,16 +157,13 @@ function CollageMaker({ onClose, onSave }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '85vh', maxHeight: '750px', width: '100%', background: '#FDFBF7', overflow: 'hidden' }}>
       
-      {/* ── HEADER ── */}
       <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(62,39,35,0.1)', background: '#FDFBF7', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
         <Camera size={24} color="#3E2723" />
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#3E2723', fontStyle: 'italic' }}>The Darkroom Studio</div>
       </div>
 
-      {/* ── BODY ── */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         
-        {/* PREVIEW (Dark Wood Desk) */}
         <div style={{ flex: '1.5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30, background: '#2D1A11', backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E")', boxShadow: 'inset -10px 0 20px rgba(0,0,0,0.5)' }}>
           <div style={{ width: '100%', maxWidth: 400, aspectRatio: '1/1', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', background: 'transparent' }}>
             <div ref={collageRef} style={{ width: '100%', height: '100%', transition: 'all .3s ease', ...currentFrame.style }}>
@@ -186,10 +186,8 @@ function CollageMaker({ onClose, onSave }) {
           </div>
         </div>
 
-        {/* CONTROLS (Manila Folder Style) */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#FDFBF7', minHeight: 0 }}>
           
-          {/* Tabs */}
           <div style={{ display: 'flex', background: '#EEDEC1', borderBottom: '1px solid rgba(62,39,35,0.2)', flexShrink: 0, padding: '10px 10px 0 10px', gap: 4 }}>
             {TABS.map(tab => {
               const Icon = tab.icon;
@@ -252,7 +250,6 @@ function CollageMaker({ onClose, onSave }) {
             </AnimatePresence>
           </div>
 
-          {/* ACTIONS */}
           <div style={{ padding: '20px 24px', borderTop: '1px solid rgba(62,39,35,0.1)', display: 'flex', gap: 16, background: '#FDFBF7', flexShrink: 0 }}>
             <button onClick={onClose} style={{ flex: 1, padding: '14px', background: 'transparent', border: '1px solid rgba(62,39,35,0.3)', borderRadius: 4, color: '#3E2723', fontFamily: "'Courier Prime', monospace", fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, cursor: 'pointer' }}>Cancel</button>
             <button onClick={handleSaveCollage} disabled={isProcessing} style={{ flex: 2, padding: '14px', background: '#3E2723', color: '#FDFBF7', border: 'none', borderRadius: 4, fontFamily: "'Courier Prime', monospace", fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'opacity 0.2s' }}>
@@ -264,6 +261,7 @@ function CollageMaker({ onClose, onSave }) {
     </div>
   );
 
+  // Checks if the layout is active
   function activeLayout(id) { return layout === id; }
 }
 

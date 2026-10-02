@@ -1,12 +1,8 @@
 import Message from '../models/messageModel.js';
 import FamilyMember from '../models/familyMember.js';
-import FamilyCircle from '../models/familyCircleModel.js'; // 🔥 Added to check membership
+import FamilyCircle from '../models/familyCircleModel.js'; 
 
-/**
- * @desc    Get chat history of a family vault
- * @route   GET /api/messages/:familyCircleId?limit=50
- * @access  Private
- */
+// Retrieves the most recent chat messages for a specific family circle
 const getFamilyMessages = async (req, res) => {
   try {
     const { familyCircleId } = req.params;
@@ -16,8 +12,6 @@ const getFamilyMessages = async (req, res) => {
       return res.status(400).json({ message: 'familyCircleId is required' });
     }
 
-    //  SECURITY FIX: Membership Check
-    // Ab koi url mein random id daal kar doosro ki chat nahi padh sakta
     const circle = await FamilyCircle.findOne({ _id: familyCircleId, members: req.user._id });
     if (!circle) {
       return res.status(403).json({ message: 'Access denied: You are not a member of this vault.' });
@@ -36,17 +30,12 @@ const getFamilyMessages = async (req, res) => {
       messages: messages.reverse(),
     });
   } catch (error) {
-    //  HIDDEN BUG FIX: Prevented internal DB info leak (Finding 14)
     console.error("getFamilyMessages Error:", error.message); 
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-/**
- * @desc    Upload media (image/audio) for chat
- * @route   POST /api/messages/upload
- * @access  Private
- */
+// Processes a media upload for chat messages and returns the file URL
 const uploadChatMedia = async (req, res) => {
   try {
     if (!req.file) {

@@ -7,22 +7,30 @@ import upload from '../middleware/uploadMiddleware.js';
 const router = Router();
 
 const authLimiter = rateLimit({
-  windowMs: 2 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per `window`
+  windowMs: 2 * 60 * 1000,
+  max: 5,
   message: { message: 'Too many requests from this IP, please try again after 2 minutes' }
 });
 
-// Public routes
+// Registers a new user
 router.post('/register', registerUser);
+
+// Verifies a user's OTP
 router.post('/verify-otp', authLimiter, verifyOTP);
+
+// Logs in a user
 router.post('/login', authLimiter, loginUser); 
 
-// 🔥 NEW: Password Reset Routes
+// Initiates a password reset
 router.post('/forgot-password', authLimiter, forgotPassword);
+
+// Resets a user's password
 router.post('/reset-password', authLimiter, resetPassword);
 
-// Private Routes
+// Fetches the user's profile
 router.get('/profile', protect, getUserProfile);
+
+// Updates the user's profile
 router.put('/profile', protect, upload.single('avatar'), updateUserProfile);
 
 export default router;

@@ -1,5 +1,6 @@
 import React from 'react';
 
+// Catches app crashes and shows a fallback error screen
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);

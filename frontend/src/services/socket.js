@@ -3,13 +3,13 @@ import { io } from 'socket.io-client';
 let socket = null;
 let connecting = false;
 
-// 🔴 IMPORTANT: normalize URL to avoid trailing slash mismatch
+// Normalizes the URL by removing trailing slashes
 const normalizeUrl = (url) => (url || '').trim().replace(/\/+$/, '');
 
+// Determines the correct socket URL based on environment variables
 const getSocketUrl = () => {
   if (import.meta.env.VITE_SOCKET_URL) return normalizeUrl(import.meta.env.VITE_SOCKET_URL);
   if (import.meta.env.VITE_API_URL) {
-    // remove trailing /api if present
     return normalizeUrl(import.meta.env.VITE_API_URL).replace(/\/api$/, '');
   }
   return 'http://localhost:8000';
@@ -17,6 +17,7 @@ const getSocketUrl = () => {
 
 const SOCKET_URL = getSocketUrl();
 
+// Establishes a socket connection using the provided token
 export const connectSocket = (token) => {
   if (socket?.connected) return socket;
   if (socket && connecting) return socket;
@@ -30,7 +31,7 @@ export const connectSocket = (token) => {
   connecting = true;
 
   socket = io(SOCKET_URL, {
-    path: '/socket.io', // 🔴 IMPORTANT FIX: backend socket path sync
+    path: '/socket.io',
     transports: ['websocket', 'polling'],
     withCredentials: true,
     autoConnect: true,
@@ -59,8 +60,10 @@ export const connectSocket = (token) => {
   return socket;
 };
 
+// Returns the current socket instance
 export const getSocket = () => socket;
 
+// Disconnects and cleans up the socket connection
 export const disconnectSocket = () => {
   connecting = false;
 

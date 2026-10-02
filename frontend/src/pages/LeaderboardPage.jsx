@@ -3,6 +3,7 @@ import { getLeaderboardApi } from '../api/circleApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Medal, Award, Crown, ChevronLeft, ChevronRight, Landmark } from 'lucide-react';
 
+// Determines the appropriate family badge based on points
 const getFamilyBadge = (points) => {
   if (points < 500) return { title: 'ROOKIES', color: '#8C7B6B', border: '#D4B895' };
   if (points < 2000) return { title: 'HISTORIANS', color: '#3E2723', border: '#C89B3C' };
@@ -10,6 +11,7 @@ const getFamilyBadge = (points) => {
   return { title: 'ARCHIVISTS', color: '#FDFBF7', border: '#3E2723', bg: '#3E2723' };
 };
 
+// Displays the top 3 families on a podium
 function PodiumCard({ family, rank, delay }) {
   const badge = getFamilyBadge(family.familyBondPoints);
   
@@ -31,18 +33,13 @@ function PodiumCard({ family, rank, delay }) {
       transition={{ delay, type: 'spring', bounce: 0.4 }}
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: rank === 1 ? '0 0 260px' : '0 0 200px', zIndex: rank === 1 ? 10 : 1, position: 'relative' }}
     >
-      {/* Vintage Medal / Ribbon above frame */}
       <motion.div animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: rank === 1 ? 3 : 4 }} style={{ marginBottom: -15, zIndex: 20, color: cfg.color, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}>
         <Icon size={rank === 1 ? 64 : 48} strokeWidth={1} />
       </motion.div>
 
-      {/* Ornate Frame Avatar */}
       <div style={{ position: 'relative', marginBottom: 20, zIndex: 10, width: rank === 1 ? 130 : 100, height: rank === 1 ? 160 : 130 }}>
-        {/* Frame Outer */}
         <div style={{ position: 'absolute', inset: 0, background: '#3E2723', padding: 8, boxShadow: '0 10px 30px rgba(0,0,0,0.4)', borderRadius: 2 }}>
-          {/* Frame Inner Matting */}
           <div style={{ position: 'absolute', inset: 8, background: '#FDFBF7', padding: 4, border: `2px solid ${cfg.color}` }}>
-            {/* The Photo */}
             <div style={{ width: '100%', height: '100%', background: '#EEDEC1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {avatarUrl ? (
                 <img src={avatarUrl} alt={avatarName} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'sepia(0.4) contrast(1.1)' }} />
@@ -53,13 +50,11 @@ function PodiumCard({ family, rank, delay }) {
           </div>
         </div>
         
-        {/* Label Tape */}
         <div style={{ position: 'absolute', bottom: -12, left: '50%', transform: 'translateX(-50%) rotate(-2deg)', background: '#FDFBF7', border: '1px solid rgba(0,0,0,0.1)', padding: '2px 8px', fontFamily: "'Courier Prime', monospace", fontSize: 10, color: '#3E2723', whiteSpace: 'nowrap', boxShadow: '1px 2px 4px rgba(0,0,0,0.1)' }}>
           {cfg.label}
         </div>
       </div>
 
-      {/* Wooden Podium Pillar */}
       <div
         style={{
           width: '100%', height: cfg.height,
@@ -97,6 +92,7 @@ function PodiumCard({ family, rank, delay }) {
   );
 }
 
+// Displays a single row in the leaderboard ledger
 function LedgerRow({ family, rank, index }) {
   const badge = getFamilyBadge(family.familyBondPoints);
   const avatarUrl = family.championAvatar;
@@ -135,6 +131,7 @@ function LedgerRow({ family, rank, index }) {
   );
 }
 
+// Shows a loading indicator while fetching leaderboard data
 function LoadingScreen() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', background: '#2D1A11' }}>
@@ -144,12 +141,12 @@ function LoadingScreen() {
   );
 }
 
+// Main component for the family leaderboard page
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
@@ -170,7 +167,6 @@ export default function LeaderboardPage() {
   const top3 = leaderboard.slice(0, 3);
   const restOfList = leaderboard.slice(3);
   
-  // Pagination Logic
   const totalPages = Math.ceil(restOfList.length / itemsPerPage);
   const currentChallengers = restOfList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -179,12 +175,10 @@ export default function LeaderboardPage() {
   return (
     <div style={{ minHeight: '100vh', paddingBottom: 80, position: 'relative', background: '#2D1A11' }}>
       
-      {/* Faint wood grain / dark texture overlay */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', opacity: 0.05, backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
 
       <div style={{ maxWidth: 960, margin: '0 auto', padding: '60px 20px', position: 'relative', zIndex: 10 }}>
 
-        {/* ── PAGE HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} style={{ textAlign: 'center', marginBottom: 80 }}>
           <Landmark size={48} color="#D4AF37" strokeWidth={1} style={{ marginBottom: 20 }} />
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(40px, 6vw, 64px)', color: '#FDFBF7', margin: '0 0 20px', fontWeight: 400, textShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
@@ -192,7 +186,6 @@ export default function LeaderboardPage() {
           </h1>
           
           <div style={{ position: 'relative', display: 'inline-block' }}>
-            {/* Masking tape background */}
             <div style={{ position: 'absolute', inset: -4, background: '#EEDEC1', transform: 'rotate(-1deg)', boxShadow: '1px 2px 4px rgba(0,0,0,0.2)' }}></div>
             <p style={{ position: 'relative', fontFamily: "'Courier Prime', monospace", fontSize: 14, color: '#3E2723', margin: 0, padding: '4px 16px', textTransform: 'uppercase', letterSpacing: 1 }}>
               Honoring the families preserving the most memories
@@ -200,17 +193,14 @@ export default function LeaderboardPage() {
           </div>
         </motion.div>
 
-        {/* Error */}
         {error && (
           <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', padding: '20px', textAlign: 'center', marginBottom: 40 }}>
             <div style={{ fontFamily: "'Courier Prime', monospace", fontSize: 14, color: '#FDFBF7' }}>{error}</div>
           </div>
         )}
 
-        {/* ── PODIUM SECTION ── */}
         {top3.length > 0 ? (
           <div style={{ marginBottom: 80 }}>
-            {/* Wooden shelf base */}
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 10, borderBottom: '16px solid #1A0F0A', paddingBottom: 0, boxShadow: '0 20px 30px rgba(0,0,0,0.8)' }}>
               {top3[1] && <PodiumCard family={top3[1]} rank={2} delay={0.2} />}
               {top3[0] && <PodiumCard family={top3[0]} rank={1} delay={0} />}
@@ -223,7 +213,6 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        {/* ── LEDGER BOOK (4+) ── */}
         {restOfList.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} style={{ maxWidth: 700, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 30 }}>
@@ -232,10 +221,8 @@ export default function LeaderboardPage() {
               </span>
             </div>
             
-            {/* Paper Ledger */}
             <div style={{ background: '#FDFBF7', boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 0 40px rgba(140, 123, 107, 0.1)', padding: '20px 0', position: 'relative' }}>
               
-              {/* Red vertical margin line of a ledger */}
               <div style={{ position: 'absolute', top: 0, bottom: 0, left: 60, width: 1, background: 'rgba(216, 27, 96, 0.3)' }}></div>
               <div style={{ position: 'absolute', top: 0, bottom: 0, left: 64, width: 1, background: 'rgba(216, 27, 96, 0.1)' }}></div>
 
@@ -245,7 +232,6 @@ export default function LeaderboardPage() {
                 ))}
               </div>
 
-              {/* ── VINTAGE PAGINATION ── */}
               {totalPages > 1 && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 24, padding: '30px 20px 10px', borderTop: '1px solid rgba(62,39,35,0.1)', marginTop: 20 }}>
                   <button 

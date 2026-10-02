@@ -1,19 +1,12 @@
 import api from './axios';
 
-/**
- * Chat history lane ke liye API
- * familyCircleId = jis vault ka chat chahiye
- * limit = kitne messages lane hain (default 50)
- */
+// Fetches chat history for a family circle
 export const getMessagesApi = async (familyCircleId, limit = 50) => {
   const response = await api.get(`/messages/${familyCircleId}?limit=${limit}`);
   return response.data;
 };
 
-/**
- * Chat Media Upload karne ki API
- * file = image ya audio file ka object
- */
+// Uploads media for a chat message
 export const uploadChatMediaApi = async (file) => {
   const formData = new FormData();
   formData.append('media', file);

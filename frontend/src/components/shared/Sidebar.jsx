@@ -1,7 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Zap, ScrollText, Image as ImageIcon, Trophy, MessageSquare, Route, Radar, LogOut } from 'lucide-react';
 
-// ─── NAV DATA ─────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
   { to:'/home',          icon: <Home size={18} strokeWidth={1.5} />, label:'HOME',          sub:null },
   { to:'/dashboard',     icon: <Zap size={18} strokeWidth={1.5} />, label:'DASHBOARD',     sub:'MEMORY UNIVERSE' },
@@ -16,7 +15,7 @@ const TOOL_LINKS = [
   { to:'/radar',       icon: <Radar size={18} strokeWidth={1.5} />, label:'FAMILY RADAR', sub:'LIVE LOCATIONS' },
 ];
 
-// ─── SIDEBAR LINK ─────────────────────────────────────────────────────────────
+// Renders an individual navigation link in the sidebar
 function SbLink({ to, icon, label, sub, active, onClick }) {
   return (
     <Link to={to} onClick={onClick} className={`lt-sb-link${active ? ' lt-active' : ''}`}>
@@ -31,7 +30,7 @@ function SbLink({ to, icon, label, sub, active, onClick }) {
   );
 }
 
-// ─── COMIC LOGO RING ──────────────────────────────────────────────────────────
+// Renders the stylized circular logo for the sidebar header
 export function LogoRing({ size = 48 }) {
   return (
     <div style={{ position:'relative', width:size, height:size, flexShrink:0 }}>
@@ -40,9 +39,7 @@ export function LogoRing({ size = 48 }) {
         background:'#D4B895', border: 'none',
         borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center',
         boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', overflow:'hidden',
-        /* animation removed */
       }}>
-        {/* Jagged sunburst overlay inside */}
         <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
       <div style={{
@@ -64,7 +61,7 @@ export function LogoRing({ size = 48 }) {
   );
 }
 
-// ─── MAIN SIDEBAR ─────────────────────────────────────────────────────────────
+// Main sidebar component for navigation and user menus
 export default function Sidebar({
   isSidebarOpen,
   setIsSidebarOpen,
@@ -80,13 +77,10 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Mobile overlay */}
       <div className={`lt-sb-overlay${isSidebarOpen ? ' lt-sb-vis' : ''}`} onClick={() => setIsSidebarOpen(false)} />
 
-      {/* ══════ SIDEBAR ══════ */}
       <aside className={`lt-sidebar${isSidebarOpen ? ' lt-sb-open' : ' lt-sb-closed'}`}>
 
-        {/* ── HEAD: user card ── */}
         <div className="lt-sb-head">
           <div className="lt-sb-user" onClick={() => navigate('/profile')}>
             <div className="lt-sb-avatar">
@@ -104,10 +98,8 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* ── SCROLLABLE BODY ── */}
         <div style={{ flex:1, minHeight: 0, overflowY:'auto', overflowX:'hidden', paddingBottom: 20 }}>
 
-          {/* Mobile search */}
           <div className="lt-mobile-search">
             <form onSubmit={handleSearch} className="lt-mobile-search-form">
               <span style={{ fontSize: 16 }}>🔍</span>
@@ -120,7 +112,6 @@ export default function Sidebar({
             </form>
           </div>
 
-          {/* Main menu */}
           <div className="lt-sb-section">
             <div className="lt-sec-label">MAIN MENU</div>
             {NAV_LINKS.map(({ to, icon, label, sub }) => (
@@ -128,7 +119,6 @@ export default function Sidebar({
             ))}
           </div>
 
-          {/* Family tools */}
           <div className="lt-sb-section" style={{ marginTop:8 }}>
             <div className="lt-sec-label">FAMILY TOOLS</div>
             {TOOL_LINKS.map(({ to, icon, label, sub }) => (
@@ -137,7 +127,6 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* ── FOOTER ── */}
         <div className="lt-sb-foot">
           <button className="lt-sb-logout" onClick={handleLogout}>
             <div className="lt-sb-icon-wrap" style={{ border: "none", background: "transparent", color: "#FDFBF7", display: "flex", alignItems: "center", justifyContent: "center" }}><LogOut size={20} strokeWidth={1.5} /></div>
@@ -149,15 +138,13 @@ export default function Sidebar({
 
       </aside>
 
-      {/* ══════ ALL SIDEBAR CSS ══════ */}
       <style>{`
         @keyframes ltComicSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         @keyframes ltActivePop  { 0% { transform: scale(0.95); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-        /* ── Sidebar shell (Leather Spine) ── */
         .lt-sidebar {
           position: relative; height: 100%; width: 280px; flex-shrink: 0;
-          background: #2a1610; /* Dark Leather */
+          background: #2a1610;
           border-right: 8px solid #1a0d09;
           box-shadow: inset -10px 0 20px rgba(0,0,0,0.5), 8px 0px 15px 0px rgba(0,0,0,0.45);
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
@@ -165,23 +152,19 @@ export default function Sidebar({
           transition: width 0.2s, transform 0.2s;
         }
 
-        /* Desktop close logic */
         @media (min-width: 769px) { .lt-sidebar.lt-sb-closed { width: 0px; border-right: none; } }
-        /* Mobile open/close logic */
         @media (max-width: 768px) {
           .lt-sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px !important; }
           .lt-sb-closed { transform: translateX(-100%); }
           .lt-sb-open   { transform: translateX(0); }
         }
 
-        /* ── Overlay ── */
         .lt-sb-overlay {
           display: none; position: fixed; inset: 0;
           background: rgba(23,23,25,0.8); backdrop-filter: blur(4px); z-index: 49;
         }
         .lt-sb-overlay.lt-sb-vis { display: block; }
 
-        /* ── Head: user card ── */
         .lt-sb-head { padding: 20px 16px 16px; border-bottom: 2px solid rgba(212, 184, 149, 0.2); background: transparent; }
 
         .lt-sb-user {
@@ -213,14 +196,12 @@ export default function Sidebar({
           background: #00C853; border: none; flex-shrink: 0;
         }
 
-        /* ── Section headers ── */
         .lt-sb-section { padding: 16px 16px 4px; }
         .lt-sec-label {
           font-family: 'Playfair Display', serif; font-size: 14px;
           color: #D4B895; padding: 0 8px; margin-bottom: 12px;
         }
 
-        /* ── Nav link ── */
         .lt-sb-link {
           display: flex; align-items: center; gap: 12px; padding: 10px 12px;
           border-radius: 8px; text-decoration: none; margin-bottom: 8px;
@@ -230,7 +211,6 @@ export default function Sidebar({
         .lt-sb-link:hover { background: rgba(212,184,149,0.1); border: 1px solid rgba(212,184,149,0.2); }
         .lt-sb-link.lt-active { background: rgba(212,184,149,0.15); border: 1px solid rgba(212,184,149,0.3); box-shadow: inset 0 2px 8px rgba(0,0,0,0.2); }
 
-        /* ── Icon wrap ── */
         .lt-sb-icon-wrap {
           width: 38px; height: 38px; border-radius: 8px;
           display: flex; align-items: center; justify-content: center;
@@ -238,11 +218,9 @@ export default function Sidebar({
         }
         .lt-sb-icon { font-size: 18px; line-height: 1; }
 
-        /* ── Link labels ── */
         .lt-sb-lbl { font-family: 'Playfair Display', serif; font-size: 15px; color: #D4B895; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .lt-sb-sublbl { font-family: 'Baloo 2', sans-serif; font-size: 11px; font-weight: 700; color: #D4B895; margin-top: 2px; }
 
-        /* ── Mobile search ── */
         .lt-mobile-search { display: none; padding: 16px 16px 4px; }
         @media (max-width: 768px) { .lt-mobile-search { display: block; } }
         .lt-mobile-search-form {
@@ -253,7 +231,6 @@ export default function Sidebar({
         .lt-mobile-search-input { background: transparent; border: none; outline: none; color: #D4B895; font-family: 'Playfair Display', serif; font-size: 14px; width: 100%; }
         .lt-mobile-search-input::placeholder { color: rgba(23,23,25,0.4); font-family: 'Playfair Display', serif; }
 
-        /* ── Footer ── */
         .lt-sb-foot { padding: 16px; border-top: 1px dashed rgba(62,39,35,0.2); background: #3E2723; }
         .lt-sb-logout {
           display: flex; align-items: center; gap: 12px; padding: 12px; width: 100%;

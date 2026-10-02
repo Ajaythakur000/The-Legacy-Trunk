@@ -12,7 +12,7 @@ import {
 } from '../../api/circleApi';
 import UpcomingEventsWidget from './UpcomingEventsWidget';
 
-// ─── Comic Background Elements ─────────────────────────────────────────────────
+// Renders comic style background elements
 function ComicBackground() {
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
@@ -23,11 +23,11 @@ function ComicBackground() {
   );
 }
 
-// ─── Logo Badge ────────────────────────────────────────────────────────────────
+// Displays the main logo badge
 function LogoBadge({ size = 90 }) {
   return (
     <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden', /* removed spin */ }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#D4B895', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', overflow: 'hidden' }}>
         <div style={{ width: '120%', height: '120%', background: '#C89B3C', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' }} />
       </div>
       <div style={{ position: 'absolute', top: 6, left: 6, right: 6, bottom: 6, borderRadius: '50%', background: '#FFF', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -39,7 +39,7 @@ function LogoBadge({ size = 90 }) {
   );
 }
 
-// ─── Comic Input ───────────────────────────────────────────────────────────────
+// Renders a custom styled input field
 function ComicInput({ type = 'text', placeholder, value, onChange, icon, disabled, name }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -51,7 +51,7 @@ function ComicInput({ type = 'text', placeholder, value, onChange, icon, disable
   );
 }
 
-// ─── Nav Room Card ────────────────────────────────────────────────────────────
+// Renders a navigation card for different rooms
 function RoomCard({ to, icon, title, desc, color = '#D4B895', delay = 0 }) {
   return (
     <Link to={to} style={{ textDecoration: 'none' }}>
@@ -76,7 +76,7 @@ function RoomCard({ to, icon, title, desc, color = '#D4B895', delay = 0 }) {
   );
 }
 
-// ─── Member Row ───────────────────────────────────────────────────────────────
+// Renders a single member row in the list
 function MemberRow({ m, isSelf, isAdmin, isRemoving, canRemove, onRemove, activeAction }) {
   return (
     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
@@ -109,7 +109,7 @@ function MemberRow({ m, isSelf, isAdmin, isRemoving, canRemove, onRemove, active
   );
 }
 
-// ─── Section Card ─────────────────────────────────────────────────────────────
+// Wraps content in a styled section card
 function SectionCard({ children, style: extraStyle }) {
   return (
     <div style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '32px', position: 'relative', boxShadow: '12px 12px 15px 0px rgba(0,0,0,0.45)', ...extraStyle }}>
@@ -118,7 +118,7 @@ function SectionCard({ children, style: extraStyle }) {
   );
 }
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
+// Main dashboard component for managing family circles
 function DashboardPage() {
   const { user, switchActiveCircle } = useAuth();
   const [circles, setCircles] = useState([]);
@@ -130,7 +130,6 @@ function DashboardPage() {
   const [loadingCircleDetails, setLoadingCircleDetails] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
   
-  // Modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
@@ -248,7 +247,6 @@ function DashboardPage() {
 
       <div style={{ maxWidth: 1140, margin: '0 auto', padding: '0 20px', position: 'relative', zIndex: 10 }}>
         
-        {/* ── HERO HEADER ── */}
         <div style={{ textAlign: 'center', padding: '60px 20px 40px' }}>
           <LogoBadge size={100} />
           <motion.h1 initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
@@ -271,15 +269,12 @@ function DashboardPage() {
           )}
         </div>
 
-        {/* ── ROOM CARDS ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, margin: '20px 0 60px' }}>
           {roomCards.map((card, i) => <RoomCard key={i} {...card} />)}
         </div>
 
-        {/* ── MAIN GRID ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 32 }}>
 
-          {/* Members Panel */}
           <SectionCard style={{ background: '#C89B3C' }}>
             <div style={{ marginBottom: 24, background: '#FFF', border: 'none', padding: 16, borderRadius: 16, boxShadow: '4px 4px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(1deg)' }}>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', marginBottom: 4 }}>
@@ -308,7 +303,6 @@ function DashboardPage() {
             )}
           </SectionCard>
 
-          {/* Right Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
 
             {selectedCircleId && <UpcomingEventsWidget circleId={selectedCircleId} />}
@@ -405,7 +399,6 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* ── CUSTOM DELETE MODAL ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {showDeleteModal && (
@@ -423,7 +416,6 @@ function DashboardPage() {
         document.body
       )}
 
-      {/* ── CUSTOM REMOVE MODAL ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {memberToRemove && (
@@ -444,7 +436,6 @@ function DashboardPage() {
         document.body
       )}
 
-      {/* ── INVITE MODAL ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {showInviteModal && (

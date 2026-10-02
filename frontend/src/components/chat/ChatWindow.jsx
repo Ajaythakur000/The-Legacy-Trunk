@@ -1,8 +1,8 @@
-
 import { useEffect, useRef } from 'react';
 import ChatMessage from './ChatMessage';
 import { motion } from 'framer-motion'; 
 
+// Displays a scrollable list of chat messages
 function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, loading }) {
   const bottomRef = useRef(null);
 
@@ -17,7 +17,6 @@ function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, 
     <div style={{ flex: 1, overflowY: 'auto', padding: '28px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 10 }}>
       <div style={{ width: '100%', maxWidth: '860px', padding: '0 24px', display: 'flex', flexDirection: 'column' }}>
 
-        {/* Loading Comic Skeleton */}
         {loading && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '20px 0' }}>
             {[1, 2, 3].map(i => (
@@ -29,7 +28,6 @@ function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, 
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && messages.length === 0 && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", bounce: 0.5 }}
@@ -45,11 +43,9 @@ function ChatWindow({ messages, currentUserId, currentUserName, familyCircleId, 
           </motion.div>
         )}
 
-        {/* Messages */}
         {!loading && messages.map((msg, index) => {
           let sId = String(msg?.senderId?._id || msg?.senderId || msg?.sender?._id || msg?.sender || msg?.userId || '');
           let sName = String(msg?.senderName || msg?.sender?.name || '').toLowerCase().trim();
-          // Strictly match by ID first to avoid same-name bugs. Only fallback to name if ID is somehow completely missing
           const isMe = sId ? (sId === meId) : (meName && sName === meName);
           return (
             <ChatMessage key={msg?._id || msg?.clientMsgId || index} msg={msg} isMe={isMe} currentUserId={meId} familyCircleId={familyCircleId} />

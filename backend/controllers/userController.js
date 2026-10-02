@@ -5,60 +5,20 @@ import { handleDailyLogin } from './gamificationService.js';
 import bcrypt from 'bcryptjs';
 import { otpQueue } from '../config/bullmq.js';
 import path from 'path';
-
-// Import templates from your new file
 import { 
   getWelcomeOtpTemplate, 
   getLoginOtpTemplate, 
   getResetPasswordTemplate 
 } from './otpmsg.js';
 
-// 🔥 BREVO API EMAIL FUNCTION (No Nodemailer needed)
-const sendOtpEmail = async ({ to, subject, otpHtml, otpPlain }) => {
-  try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        sender: {
-          name: "The Legacy Trunk",
-          email: process.env.EMAIL_USER // Tera verified Gmail id
-        },
-        to: [{ email: to }],
-        subject: subject,
-        htmlContent: otpHtml
-      })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      console.error("Brevo API Error Details:", result);
-      throw new Error(result.message || "Failed to send email via Brevo");
-    }
-
-    console.log("-> Brevo Success: Mail sent successfully to", to);
-    return { ok: true };
-
-  } catch (err) {
-    console.error('OTP Mail Error (Brevo):', err.message);
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`🔐 DEV OTP for ${to}: ${otpPlain}`);
-    }
-    return { ok: false, error: err };
-  }
-};
-
+// Generates a short-lived JWT token for authentication
 const generateToken = (id) => {
   return jwt.sign({ id, type: 'auth' }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_ACCESS_EXPIRES || '30d',
   });
 };
 
+// Creates a unique family invite code for a new family circle
 const generateFamilyCode = async () => {
   let code = '';
   let found = true;
@@ -70,6 +30,7 @@ const generateFamilyCode = async () => {
   return code;
 };
 
+// Constructs the standard user payload returned on login or profile fetching
 const buildUserResponse = (user, bondPoints = 0) => ({
   _id: user._id,
   name: user.name,
@@ -96,30 +57,21 @@ const buildUserResponse = (user, bondPoints = 0) => ({
   token: generateToken(user._id),
 });
 
+// Registers a new user, optionally creates a family circle, and sends an OTP email
 const registerUser = async (req, res) => {
   try {
     let { name, email, password, role, familyCode, relationToAdmin } = req.body;
-    
-    // LOG 1: Start
     console.log(`\n--- REGISTRATION FLOW STARTED FOR: ${email} ---`);
-
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'name, email and password are required' });
     }
-
     name = name.trim();
     email = email.trim().toLowerCase();
-
     role = role ? role.trim().toLowerCase() : 'member';
     if (role !== 'admin' && role !== 'member') role = 'member';
-
     relationToAdmin = relationToAdmin ? relationToAdmin.trim() : '';
-
     let userExists = await FamilyMember.findOne({ email });
-    
-    // LOG 2: Existing User Check
     console.log("-> 1. Checked existing user. Exists?", !!userExists);
-
     if (userExists && userExists.isVerified) {
       return res.status(400).json({ message: 'User already exists' });
     } else if (userExists && !userExists.isVerified) {
@@ -131,10 +83,8 @@ const registerUser = async (req, res) => {
       await FamilyMember.deleteOne({ email });
       console.log("-> 1.5. Cleaned up unverified existing user.");
     }
-
     let circleId;
     let finalFamilyCode;
-
     if (role === 'admin') {
       finalFamilyCode = await generateFamilyCode();
     } else {
@@ -149,17 +99,11 @@ const registerUser = async (req, res) => {
       circleId = existingCircle._id;
       finalFamilyCode = normalizedCode;
     }
-
-    // LOG 3: Setup done, moving to DB creation
     console.log("-> 2. Role & Circle setup done. Role:", role);
-
     const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const salt = await bcrypt.genSalt(10);
     const hashedOtp = await bcrypt.hash(plainOtp, salt);
-
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
-
-    // LOG 4: DB Creation start
     console.log("-> 3. Creating user in Database...");
     const user = await FamilyMember.create({
       name,
@@ -175,9 +119,7 @@ const registerUser = async (req, res) => {
       otpAttempts: 0,
       otpBlockedUntil: null,
     });
-    // LOG 5: DB Creation success
     console.log("-> 4. User created in DB successfully. ID:", user._id);
-
     if (role === 'admin') {
       const newCircle = await FamilyCircle.create({
         circleName: `${name}'s Family Vault`,
@@ -192,29 +134,19 @@ const registerUser = async (req, res) => {
         $addToSet: { members: user._id },
       });
     }
-
-    // LOG 6: Before sending email
-    console.log("-> 5. Attempting to send OTP email via Brevo API...");
-    
-    //  Using Premium Welcome Template
-    const mailResult = await sendOtpEmail({
+    console.log("-> 5. Queuing OTP email via BullMQ...");
+    await otpQueue.add('send-otp-email', {
       to: user.email,
       subject: '🗝️ Your Key to The Legacy Trunk',
-      otpPlain: plainOtp,
       otpHtml: getWelcomeOtpTemplate(user.name, plainOtp),
     });
-
-    // LOG 7: After sending email
-    console.log("-> 6. Email send process finished. Result:", mailResult.ok);
+    console.log("-> 6. Email job added to queue successfully.");
     console.log("--- REGISTRATION FLOW ENDED ---\n");
-
     return res.status(201).json({
-      message: mailResult.ok
-        ? 'OTP sent to email. Please verify.'
-        : 'OTP generated but email delivery failed. Please retry.',
+      message: 'OTP queued for delivery. Please verify.',
       email: user.email,
       requireOtp: true,
-      mailSent: mailResult.ok,
+      mailSent: true,
     });
   } catch (error) {
     console.error('Register Error (Caught in Catch Block):', error.message);
@@ -222,31 +154,25 @@ const registerUser = async (req, res) => {
   }
 };
 
+// Verifies the user's OTP to complete signup or login processes
 const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
     if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
-
     const user = await FamilyMember.findOne({ email }).select('+otp +otpAttempts +otpBlockedUntil +otpExpires');
     if (!user) return res.status(404).json({ message: 'User not found' });
     if (user.isVerified) return res.status(400).json({ message: 'User is already verified' });
-
     const now = Date.now();
-
     if (user.otpBlockedUntil && user.otpBlockedUntil.getTime() > now) {
       const minutesLeft = Math.ceil((user.otpBlockedUntil.getTime() - now) / 60000);
       return res.status(429).json({ message: `Too many failed attempts. Try again in ${minutesLeft} minutes.` });
     }
-
     if (!user.otp || !user.otpExpires || user.otpExpires.getTime() < now) {
       return res.status(400).json({ message: 'OTP has expired or does not exist. Please request a new one.' });
     }
-
     const isMatch = await bcrypt.compare(String(otp), user.otp);
-
     if (!isMatch) {
       user.otpAttempts = (user.otpAttempts || 0) + 1;
-
       if (user.otpAttempts >= 5) {
         user.otpBlockedUntil = new Date(now + 10 * 60 * 1000);
         user.otp = null;
@@ -254,24 +180,19 @@ const verifyOTP = async (req, res) => {
         await user.save();
         return res.status(429).json({ message: 'Verification locked for 10 minutes due to too many failed attempts.' });
       }
-
       await user.save();
       const attemptsLeft = 5 - user.otpAttempts;
       return res.status(400).json({ message: `Invalid OTP. ${attemptsLeft} attempts remaining.` });
     }
-
     user.isVerified = true;
     user.otp = null;
     user.otpExpires = null;
     user.otpAttempts = 0;
     user.otpBlockedUntil = null;
     await user.save();
-
     await handleDailyLogin(user._id, user.activeCircleId);
-
     const freshUser = await FamilyMember.findById(user._id).populate('activeCircleId', 'familyBondPoints');
     const bondPoints = freshUser?.activeCircleId?.familyBondPoints || 0;
-
     return res.status(200).json(buildUserResponse(freshUser, bondPoints));
   } catch (error) {
     console.error('VerifyOTP Error:', error.message);
@@ -279,53 +200,41 @@ const verifyOTP = async (req, res) => {
   }
 };
 
+// Logs in an existing user and handles unverified accounts by sending a new OTP
 const loginUser = async (req, res) => {
   try {
     let { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: 'email and password are required' });
     }
-
     email = email.trim().toLowerCase();
     const user = await FamilyMember.findOne({ email }).select('+password');
-
     if (user && (await user.matchPassword(password))) {
       if (!user.isVerified) {
         const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
         const salt = await bcrypt.genSalt(10);
-
         user.otp = await bcrypt.hash(plainOtp, salt);
         user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
         user.otpAttempts = 0;
         user.otpBlockedUntil = null;
         await user.save();
-
-        // 🔥 Using Premium Login Template
-        const mailResult = await sendOtpEmail({
+        await otpQueue.add('send-otp-email', {
           to: user.email,
           subject: '🗝️ Your NEW Key to The Legacy Trunk',
-          otpPlain: plainOtp,
           otpHtml: getLoginOtpTemplate(user.name, plainOtp),
         });
-
         return res.status(403).json({
-          message: mailResult.ok
-            ? 'Account not verified. A new OTP has been sent to your email.'
-            : 'Account not verified. OTP mail failed, please retry in a moment.',
+          message: 'Account not verified. A new OTP is being sent to your email.',
           requireOtp: true,
           email: user.email,
-          mailSent: mailResult.ok,
+          mailSent: true,
         });
       }
-
       await handleDailyLogin(user._id, user.activeCircleId);
-
       const freshUser = await FamilyMember.findById(user._id).populate('activeCircleId', 'familyBondPoints');
       const bondPoints = freshUser?.activeCircleId?.familyBondPoints || 0;
-
       return res.json(buildUserResponse(freshUser, bondPoints));
     }
-
     return res.status(401).json({ message: 'Invalid email or password' });
   } catch (error) {
     console.error('Login Error:', error.message);
@@ -333,18 +242,17 @@ const loginUser = async (req, res) => {
   }
 };
 
+// Returns the full profile details for the currently logged-in user
 const getUserProfile = async (req, res) => {
   try {
     const userWithCircle = await FamilyMember.findById(req.user._id).populate('activeCircleId', 'familyBondPoints');
     if (!userWithCircle) return res.status(404).json({ message: 'User not found' });
-
     let activityMapPlain = {};
     if (userWithCircle.activityMap instanceof Map) {
       activityMapPlain = Object.fromEntries(userWithCircle.activityMap);
     } else if (userWithCircle.activityMap && typeof userWithCircle.activityMap === 'object') {
       activityMapPlain = { ...userWithCircle.activityMap };
     }
-
     return res.json({
       _id: userWithCircle._id,
       name: userWithCircle.name,
@@ -369,42 +277,35 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// Updates the user's profile info such as name, bio, and avatar
 const updateUserProfile = async (req, res) => {
   try {
     const user = await FamilyMember.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-
     if (req.body.role || req.body.isVerified || req.body.email || req.body.otp) {
       return res.status(403).json({ message: 'Attempt to update restricted fields blocked.' });
     }
-
     if (req.body.name) user.name = req.body.name.trim();
     if (req.body.bio) user.bio = req.body.bio.trim();
     if (req.body.dateOfBirth) user.dateOfBirth = req.body.dateOfBirth;
     if (req.body.password) user.password = req.body.password;
-
     if (req.body.activeCircleId) {
       const targetCircle = await FamilyCircle.findById(req.body.activeCircleId);
       if (!targetCircle) return res.status(404).json({ message: 'Target circle not found' });
-
       const isMember = targetCircle.members.some((memberId) => String(memberId) === String(user._id));
       if (!isMember) {
         return res.status(403).json({ message: 'You are not a member of this circle.' });
       }
       user.activeCircleId = req.body.activeCircleId;
     }
-
     if (req.file) {
       user.avatar = req.file.path || req.file.secure_url;
     } else if (req.body.avatar && typeof req.body.avatar === 'string') {
       user.avatar = req.body.avatar;
     }
-
     await user.save();
-
     const freshUser = await FamilyMember.findById(user._id).populate('activeCircleId', 'familyBondPoints');
     const bondPoints = freshUser?.activeCircleId?.familyBondPoints || 0;
-
     return res.json(buildUserResponse(freshUser, bondPoints));
   } catch (error) {
     console.error('Profile Update Error:', error.message);
@@ -412,75 +313,56 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+// Initiates the password recovery flow by sending an OTP to the user's email
 const forgotPassword = async (req, res) => {
   try {
     let { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email is required' });
-
     email = email.trim().toLowerCase();
     const user = await FamilyMember.findOne({ email });
-
     if (!user) {
       return res.status(404).json({ message: 'No account found with this email' });
     }
-
     const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const salt = await bcrypt.genSalt(10);
-
     user.otp = await bcrypt.hash(plainOtp, salt);
     user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
     user.otpAttempts = 0;
     user.otpBlockedUntil = null;
     await user.save();
-
-    //  Using Premium Recovery Template
-    const mailResult = await sendOtpEmail({
+    await otpQueue.add('send-otp-email', {
       to: user.email,
       subject: '🗝️ Password Reset Key for The Legacy Trunk',
-      otpPlain: plainOtp,
       otpHtml: getResetPasswordTemplate(user.name, plainOtp),
     });
-
-    if (!mailResult.ok) {
-      return res.status(500).json({ message: 'Failed to send recovery email. Try again later.' });
-    }
-
-    return res.status(200).json({ message: 'Recovery key sent to your email.' });
+    return res.status(200).json({ message: 'Recovery key is being sent to your email.' });
   } catch (error) {
     console.error('Forgot Password Error:', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
+// Resets the user's password using the OTP and a new password input
 const resetPassword = async (req, res) => {
   try {
     let { email, otp, newPassword } = req.body;
-
     if (!email || !otp || !newPassword) {
       return res.status(400).json({ message: 'Email, OTP, and new password are required' });
     }
-
     email = email.trim().toLowerCase();
     const user = await FamilyMember.findOne({ email }).select('+otp +otpAttempts +otpBlockedUntil +otpExpires');
-
     if (!user) return res.status(404).json({ message: 'User not found' });
-
     const now = Date.now();
-
     if (user.otpBlockedUntil && user.otpBlockedUntil.getTime() > now) {
       const minutesLeft = Math.ceil((user.otpBlockedUntil.getTime() - now) / 60000);
       return res.status(429).json({ message: `Too many failed attempts. Try again in ${minutesLeft} minutes.` });
     }
-
     if (!user.otp || !user.otpExpires || user.otpExpires.getTime() < now) {
       return res.status(400).json({ message: 'OTP has expired or does not exist. Please request a new one.' });
     }
-
     const isMatch = await bcrypt.compare(String(otp), user.otp);
-
     if (!isMatch) {
       user.otpAttempts = (user.otpAttempts || 0) + 1;
-
       if (user.otpAttempts >= 5) {
         user.otpBlockedUntil = new Date(now + 10 * 60 * 1000);
         user.otp = null;
@@ -488,21 +370,17 @@ const resetPassword = async (req, res) => {
         await user.save();
         return res.status(429).json({ message: 'Verification locked for 10 minutes.' });
       }
-
       await user.save();
       const attemptsLeft = 5 - user.otpAttempts;
       return res.status(400).json({ message: `Invalid OTP. ${attemptsLeft} attempts remaining.` });
     }
-
     user.password = newPassword;
     user.otp = null;
     user.otpExpires = null;
     user.otpAttempts = 0;
     user.otpBlockedUntil = null;
     user.isVerified = true; 
-
     await user.save();
-
     return res.status(200).json({ message: 'Password has been successfully forged anew. You may now unlock the vault.' });
   } catch (error) {
     console.error('Reset Password Error:', error.message);

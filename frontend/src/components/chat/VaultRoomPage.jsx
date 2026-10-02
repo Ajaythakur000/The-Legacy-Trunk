@@ -1,5 +1,3 @@
-
-
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getMessagesApi } from '../../api/messageApi';
@@ -10,6 +8,7 @@ import TypingIndicator from './TypingIndicator';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
+// Modal for confirming vault erasure
 function ConfirmModal({ isOpen, onClose, onConfirm, message }) {
   if (!isOpen) return null;
   return createPortal(
@@ -30,6 +29,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, message }) {
   );
 }
 
+// Main chat room page component
 function VaultRoomPage() {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -143,7 +143,6 @@ function VaultRoomPage() {
         {showClearModal && <ConfirmModal isOpen={showClearModal} onClose={() => setShowClearModal(false)} onConfirm={executeClearChat} message="This will permanently erase ALL vault transmissions for everyone. Proceed?" />}
       </AnimatePresence>
 
-      {/* ── HEADER ── */}
       <header style={{ position: 'relative', zIndex: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 36px', background: '#261914', borderBottom: '1px solid rgba(253,251,247,0.1)', boxShadow: '0px 4px 20px rgba(0,0,0,0.3)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 48, height: 48, borderRadius: '12px', background: '#D4B895', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 8px rgba(0,0,0,0.2)', transform: 'rotate(-2deg)' }}>

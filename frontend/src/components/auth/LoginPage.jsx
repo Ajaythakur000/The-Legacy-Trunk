@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import OTPVerificationModal from './OTPVerificationModal';
 import ForgotPasswordModal from './ForgotPasswordModal';
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
 const S = {
   root: {
     minHeight: '100vh',
@@ -31,7 +30,7 @@ const S = {
   },
 };
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
+// Displays the main sticker logo
 function StickerLogo() {
   return (
     <div style={{ position: 'relative', width: 100, height: 100, margin: '0 auto 16px', zIndex: 2 }}>
@@ -62,7 +61,6 @@ function StickerLogo() {
           LT
         </div>
       </motion.div>
-      {/* Decorative Comic Badges */}
       <div style={{
         position: 'absolute', bottom: -10, right: -20,
         background: '#1E352F', color: '#FFF',
@@ -76,6 +74,7 @@ function StickerLogo() {
   );
 }
 
+// Renders a form input field
 function InputField({ label, type, placeholder, value, onChange, icon }) {
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -136,7 +135,7 @@ function InputField({ label, type, placeholder, value, onChange, icon }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// Main login page
 function LoginPage() {
   const navigate = useNavigate();
   const { login, loading } = useAuth();

@@ -2,6 +2,7 @@ import Notification from '../models/notificationModel.js';
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 
+// Fetches the 30 most recent notifications for the currently logged-in user
 export const getMyNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({ recipient: req.user._id })
@@ -15,6 +16,7 @@ export const getMyNotifications = async (req, res) => {
   }
 };
 
+// Marks a single specific notification as read in the database
 export const markAsRead = async (req, res) => {
   try {
     const notification = await Notification.findOneAndUpdate(
@@ -31,6 +33,7 @@ export const markAsRead = async (req, res) => {
   }
 };
 
+// Updates all unread notifications for the current user to read status
 export const markAllAsRead = async (req, res) => {
   try {
     await Notification.updateMany(
@@ -43,9 +46,7 @@ export const markAllAsRead = async (req, res) => {
   }
 };
 
-// ==========================================
-//  ACCEPT INVITE LOGIC
-// ==========================================
+// Handles a user accepting an invite to join a family circle
 export const acceptInvite = async (req, res) => {
   try {
     const notification = await Notification.findOne({ _id: req.params.id, recipient: req.user._id });
@@ -57,22 +58,19 @@ export const acceptInvite = async (req, res) => {
     const circle = await FamilyCircle.findById(notification.circleId);
     if (!circle) return res.status(404).json({ message: 'Family Circle no longer exists' });
 
-    // Check if already a member
     if (!circle.members.some(m => String(m) === String(req.user._id))) {
       circle.members.push(req.user._id);
       await circle.save();
     }
 
-    // Set as active circle
     await FamilyMember.findByIdAndUpdate(req.user._id, {
       activeCircleId: circle._id,
       familyCode: circle.familyCode,
     });
 
-    // Mark notification as read and change message
     notification.isRead = true;
     notification.message = `You joined ${circle.circleName}`;
-    notification.type = 'system'; // Change type so buttons disappear
+    notification.type = 'system'; 
     await notification.save();
 
     return res.status(200).json({ message: 'Welcome to the family!', circleId: circle._id });
@@ -81,9 +79,7 @@ export const acceptInvite = async (req, res) => {
   }
 };
 
-// ==========================================
-// ❌ REJECT INVITE LOGIC
-// ==========================================
+// Handles a user rejecting a family circle invite
 export const rejectInvite = async (req, res) => {
   try {
     const notification = await Notification.findOne({ _id: req.params.id, recipient: req.user._id });
@@ -92,7 +88,6 @@ export const rejectInvite = async (req, res) => {
       return res.status(404).json({ message: 'Invite not found or invalid' });
     }
 
-    // Mark as read and change message to show it was rejected
     notification.isRead = true;
     notification.message = 'Invite rejected';
     notification.type = 'system'; 

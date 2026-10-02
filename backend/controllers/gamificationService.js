@@ -1,7 +1,7 @@
 import FamilyCircle from '../models/familyCircleModel.js';
 import FamilyMember from '../models/familyMember.js';
 
-//  HELPER: Get strict YYYY-MM-DD date in Indian Time
+// Returns the current date in YYYY-MM-DD format for Indian Standard Time
 const getISTDateStr = () => {
   const date = new Date();
   const options = { timeZone: 'Asia/Kolkata' };
@@ -11,7 +11,7 @@ const getISTDateStr = () => {
   return `${year}-${month}-${day}`;
 };
 
-//  HELPER: Calculate difference in days (Timezone agnostic)
+// Calculates the absolute difference in days between two date strings
 const getDiffDays = (date1Str, date2Str) => {
   if (!date1Str || !date2Str) return 0;
   const [y1, m1, d1] = date1Str.split('-').map(Number);
@@ -21,9 +21,7 @@ const getDiffDays = (date1Str, date2Str) => {
   return Math.max(0, Math.floor((utc1 - utc2) / (1000 * 60 * 60 * 24)));
 };
 
-/**
- * Handle Daily Login Points (ONLY HEATMAP, NO STREAK)
- */
+// Tracks a user's daily login for their activity map and resets streak if they missed a post day
 export const handleDailyLogin = async (userId, familyCircleId) => {
   try {
     const user = await FamilyMember.findById(userId);
@@ -32,7 +30,6 @@ export const handleDailyLogin = async (userId, familyCircleId) => {
     const todayStr = getISTDateStr();
     const lastLoginStr = user.lastLoginDate;
 
-    //  IF USER LOGS IN AND MISSED POSTING YESTERDAY -> RESET STREAK TO 0
     if (user.lastPostDate) {
       const diffPost = getDiffDays(todayStr, user.lastPostDate);
       if (diffPost > 1) {
@@ -61,9 +58,7 @@ export const handleDailyLogin = async (userId, familyCircleId) => {
   }
 };
 
-/**
- *  NEW STREAK LOGIC (Triggered ONLY when user posts a story)
- */
+// Updates a user's current and maximum posting streak when they post a new story
 export const handleStoryPostStreak = async (userId, session = null) => {
   try {
     let query = FamilyMember.findById(userId);
@@ -75,33 +70,25 @@ export const handleStoryPostStreak = async (userId, session = null) => {
     const todayStr = getISTDateStr();
     const lastPostStr = user.lastPostDate;
 
-    // Ensure streak is numeric
     user.currentStreak = Number(user.currentStreak) || 0;
     user.maxStreak = Number(user.maxStreak) || 0;
 
     if (!lastPostStr) {
-      // SCENARIO 1: First post ever
       user.currentStreak = 1;
     } else if (lastPostStr !== todayStr) {
       const diffDays = getDiffDays(todayStr, lastPostStr);
       
       if (diffDays === 1) {
-        // SCENARIO 2: Posted yesterday, posting again today -> Increment!
         user.currentStreak += 1; 
       } else if (diffDays > 1) {
-        // SCENARIO 3: Missed a day -> Restart streak from 1
         user.currentStreak = 1; 
       }
     }
-    // SCENARIO 4: Already posted today. (lastPostStr === todayStr)
-    // Do nothing. Streak remains whatever it was.
 
-    // Update Max Streak
     if (user.currentStreak > user.maxStreak) {
       user.maxStreak = user.currentStreak;
     }
     
-    // Save today as the last post date
     user.lastPostDate = todayStr;
     const saveOptions = session ? { session } : {};
     await user.save(saveOptions);
@@ -110,9 +97,7 @@ export const handleStoryPostStreak = async (userId, session = null) => {
   }
 };
 
-/**
- * Handle Points for Actions (Post, Like, Comment)
- */
+// Awards contribution points to a user and bond points to their family circle for taking actions
 export const awardPoints = async (userId, familyCircleId, points, session = null) => {
   try {
     if (!userId || !familyCircleId || !points) return;
@@ -137,7 +122,6 @@ export const awardPoints = async (userId, familyCircleId, points, session = null
       await user.save(saveOptions);
     }
 
-    // ✅ floor familyBondPoints at 0 (prevents negative values)
     const updateOptions = session ? { session } : {};
     
     await FamilyCircle.findByIdAndUpdate(

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
+// Shows the modal to verify the OTP code
 function OTPVerificationModal({ email, onSuccess, onClose }) {
   const { setUser, setToken } = useAuth();
   const [otp, setOtp] = useState(new Array(6).fill(''));
@@ -157,6 +158,7 @@ function OTPVerificationModal({ email, onSuccess, onClose }) {
   );
 }
 
+// Renders a single input box for the OTP
 function OtpBox({ index, value, isLocked, success, inputRef, onChange, onKeyDown, onPaste }) {
   const [focused, setFocused] = useState(false);
   return (

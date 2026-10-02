@@ -6,7 +6,7 @@ import StoryExportTemplate from './StoryExportTemplate';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Flower2, MessageCircle, Share, Printer, Trash2, Stamp } from 'lucide-react';
 
-// ── Vintage Action Button ───────────────────────────────────────────────────────
+// Renders a vintage-style action button
 function VintageActionBtn({ onClick, active, icon: Icon, label, color }) {
   return (
     <motion.button
@@ -31,6 +31,7 @@ function VintageActionBtn({ onClick, active, icon: Icon, label, color }) {
   );
 }
 
+// Main component for displaying a story card
 function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
   const isAuthor = Boolean(currentUser?._id && story?.user?._id && String(story.user._id) === String(currentUser._id));
   const storyCircleId = typeof story?.originCircleId === 'object' && story?.originCircleId?._id ? story.originCircleId._id : story?.originCircleId || null;
@@ -99,12 +100,11 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
     return url.replace('/upload/', '/upload/q_auto,f_auto/');
   };
 
-  const isOldStory = story?.createdAt && new Date() - new Date(story.createdAt) > 1000 * 60 * 60 * 24 * 365; // > 1 year
+  const isOldStory = story?.createdAt && new Date() - new Date(story.createdAt) > 1000 * 60 * 60 * 24 * 365; 
   
   const renderMediaGrid = () => {
     if (images.length === 0) return null;
     
-    // Determine filter for vintage feel
     const vintageFilter = isOldStory ? 'sepia(0.5) contrast(1.1) brightness(0.95)' : 'sepia(0.2) contrast(1.05)';
 
     if (story?.mediaType === 'video') {
@@ -160,7 +160,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
         marginBottom: 50,
       }}
     >
-      {/* Masking Tape */}
       <div style={{
         position: 'absolute',
         top: -12,
@@ -175,17 +174,14 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
         borderRight: '3px dashed rgba(62,39,35,0.1)'
       }} />
 
-      {/* Milestone stamp */}
       {story.isMilestone && (
         <div style={{ position: 'absolute', top: 20, right: -10, display: 'flex', alignItems: 'center', gap: 6, color: '#8B0000', fontFamily: "'Courier Prime', monospace", fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', transform: 'rotate(15deg)', opacity: 0.8, border: '1px dashed #8B0000', padding: '4px 8px', borderRadius: 4 }}>
           <Stamp size={14} /> MILESTONE
         </div>
       )}
 
-      {/* ── HEADER ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 30, borderBottom: '1px solid rgba(62,39,35,0.1)', paddingBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {/* Avatar */}
           <div style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid #D4B895', background: '#FDFBF7', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             {story?.user?.avatar ? (
               <img src={story.user.avatar} alt={story?.user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'sepia(0.3)' }} />
@@ -203,7 +199,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
           </div>
         </div>
 
-        {/* Delete */}
         {canManage && (
           <button onClick={() => setShowDeleteModal(true)} style={{ background: 'none', border: 'none', color: '#8C7B6B', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.5}>
             <Trash2 size={18} strokeWidth={1.5} />
@@ -212,21 +207,17 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
       </div>
 
       <div>
-        {/* Title */}
         <h3 style={{ margin: '0 0 16px', fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', fontWeight: 400 }}>
           {story.title}
         </h3>
 
-        {/* Content - Handwriting Font for Nostalgia */}
         <p style={{ margin: 0, fontFamily: "'Caveat', cursive", fontSize: 28, lineHeight: 1.6, color: '#3E2723', whiteSpace: 'pre-wrap', transform: 'rotate(-0.5deg)' }}>
           {story.content}
         </p>
       </div>
 
-      {/* Media */}
       {renderMediaGrid()}
 
-      {/* ── ACTION BAR (STAMPS) ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 40, borderTop: '1px solid rgba(62,39,35,0.1)', paddingTop: 16, flexWrap: 'wrap' }}>
         <VintageActionBtn onClick={() => typeof onLike === 'function' && onLike(story._id)} active={isLikedByMe} icon={Flower2} label={story?.likes?.length || 0} color="#D81B60" />
         <VintageActionBtn onClick={() => setShowComments(!showComments)} active={showComments} icon={MessageCircle} label={story?.comments?.length || 0} color="#3E2723" />
@@ -238,7 +229,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
         )}
       </div>
 
-      {/* Comments */}
       <AnimatePresence>
         {showComments && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden', marginTop: 16 }}>
@@ -249,7 +239,6 @@ function StoryCard({ story, currentUser, onLike, onComment, onDelete }) {
 
       <StoryExportTemplate ref={exportRef} story={story} />
 
-      {/* ── CUSTOM DELETE MODAL ── */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {showDeleteModal && (

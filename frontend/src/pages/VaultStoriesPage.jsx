@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import StoryComposer from '../components/story/StoryComposer';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ─── Decorative Comic Stickers ─────────────────────────────────────────────
+// Decorative floating stickers for the page background
 function ComicStickers() {
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
@@ -16,6 +16,7 @@ function ComicStickers() {
   );
 }
 
+// Page for creating and adding new memories to the family vault
 function VaultStoriesPage() {
   const { user, fetchFreshProfile } = useAuth();
   const activeCircleId = user?.activeCircleId || null;
@@ -54,7 +55,6 @@ function VaultStoriesPage() {
 
       <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 10 }}>
 
-        {/* ── PAGE HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', bounce: 0.5 }} style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ width: 100, height: 100, margin: '0 auto 20px', background: '#C89B3C', border: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 50, boxShadow: '6px 6px 15px 0px rgba(0,0,0,0.45)', transform: 'rotate(-5deg)' }}>
             📖
@@ -76,7 +76,6 @@ function VaultStoriesPage() {
           )}
         </motion.div>
 
-        {/* ── ALERTS ── */}
         <AnimatePresence>
           {error && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
@@ -92,7 +91,6 @@ function VaultStoriesPage() {
           )}
         </AnimatePresence>
 
-        {/* ── NO VAULT ── */}
         {!activeCircleId ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} style={{ background: '#FFF', border: '6px solid #3E2723', borderRadius: 24, padding: '60px 40px', textAlign: 'center', boxShadow: '16px 16px 15px 0px rgba(0,0,0,0.45)' }}>
             <div style={{ fontSize: 60, marginBottom: 16 }}>🤷‍♂️</div>

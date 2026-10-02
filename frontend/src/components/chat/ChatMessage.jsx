@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSocket } from '../../services/socket';
 
+// Renders a single chat message bubble
 function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -39,7 +40,6 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
   const myReaction = (msg.reactions || []).find(r => String(r.userId) === String(currentUserId))?.emoji;
   const timeStr = msg?.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
-  // WhatsApp-like smooth colors
   const bubbleColor = isMe ? '#E3F2FD' : '#FFF';
   const textColor = '#1E1E1E';
 
@@ -50,15 +50,12 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
       <div style={{ display: 'flex', flexDirection: isMe ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: 12, maxWidth: '85%' }}
         onMouseEnter={() => setShowOptions(true)} onMouseLeave={() => { setShowOptions(false); setShowEmojiPicker(false); }}>
         
-        {/* Avatar */}
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <img src={avatarUrl} alt="Avatar" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: 'none', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }} />
         </div>
 
-        {/* Message Column */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', position: 'relative' }}>
 
-          {/* Name Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 13, color: '#666', fontWeight: 700 }}>
               {isMe ? 'YOU' : (msg?.senderName || 'FAMILY')}
@@ -68,10 +65,8 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
             </span>
           </div>
 
-          {/* Chat Bubble */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12, flexDirection: isMe ? 'row-reverse' : 'row' }}>
 
-            {/* INSTAGRAM STYLE FLOATING EMOJI PICKER */}
             <AnimatePresence>
               {showEmojiPicker && (
                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -85,7 +80,6 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
               )}
             </AnimatePresence>
 
-            {/* THE BUBBLE */}
             <div onMouseEnter={() => !isMe && setShowEmojiPicker(true)}
               style={{
                 padding: (msg?.imageUrl || msg?.audioUrl) ? 6 : '12px 16px',
@@ -96,7 +90,6 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
                 position: 'relative', overflow: 'hidden'
               }}>
               
-              {/* Image */}
               {msg?.imageUrl && (
                 <div style={{ position: 'relative', overflow: 'hidden', borderRadius: isMe ? '12px 12px 0 12px' : '12px 12px 12px 0', border: 'none' }}>
                   {!imgLoaded && <div style={{ width: 240, height: 160, background: '#F5F5F5' }} />}
@@ -104,7 +97,6 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
                 </div>
               )}
 
-              {/* Audio player */}
               {msg?.audioUrl && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', background: '#FFF', border: 'none', borderRadius: 12, margin: 4 }}>
                   <button onClick={togglePlay} style={{ background: '#2196F3', border: 'none', width: 40, height: 40, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#FFF' }}>
@@ -114,11 +106,9 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
                 </div>
               )}
 
-              {/* Text */}
               {msg?.text && <div style={{ padding: (msg?.imageUrl || msg?.audioUrl) ? '8px 10px' : 0 }}>{msg.text}</div>}
             </div>
 
-            {/* Hover Actions */}
             <AnimatePresence>
               {showOptions && (
                 <motion.div initial={{ opacity: 0, x: isMe ? 8 : -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: isMe ? 8 : -8 }} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -129,7 +119,6 @@ function ChatMessage({ msg, isMe, currentUserId, familyCircleId }) {
             </AnimatePresence>
           </div>
 
-          {/* Reaction Pills & Seen Status */}
           {(Object.keys(reactionCounts).length > 0 || (isMe && msg?.seenBy?.length > 1)) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexDirection: isMe ? 'row-reverse' : 'row' }}>
               {Object.entries(reactionCounts).map(([emoji, count]) => (

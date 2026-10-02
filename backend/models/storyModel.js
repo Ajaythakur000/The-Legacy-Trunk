@@ -1,6 +1,5 @@
 import { Schema, model } from 'mongoose';
 
-// Subdocument Schema for Comments
 const commentSchema = new Schema(
   {
     user: {
@@ -41,20 +40,14 @@ const storySchema = new Schema(
       type: String,
       default: '',
     },
-    
-    // ==========================================
-    // 🔥 NEW: MULTI-FILE & COLLAGE SUPPORT
-    // ==========================================
     mediaUrls: {
       type: [String],
       default: [],
     },
     tone: {
       type: String,
-      default: '', // Stores 'Nostalgic and Warm', etc.
+      default: '', 
     },
-    // ==========================================
-
     mediaType: {
       type: String,
       enum: ['text', 'photo', 'audio', 'video'],
@@ -69,20 +62,14 @@ const storySchema = new Schema(
       type: Boolean,
       default: false,
     },
-    
-    // ==========================================
-    // 🔥 NEW: MEMORY LANE (MILESTONE) FEATURES
-    // ==========================================
     isMilestone: {
       type: Boolean,
-      default: false, // Normal story by default
+      default: false, 
     },
     milestoneDate: {
       type: Date,
-      default: Date.now, // Agar date nahi di, toh aaj ki set hogi
+      default: Date.now, 
     },
-    // ==========================================
-
     likes: [
       {
         type: Schema.Types.ObjectId,
@@ -106,10 +93,7 @@ const storySchema = new Schema(
   }
 );
 
-// Fast feed query: by circle + latest first
 storySchema.index({ originCircleId: 1, createdAt: -1 });
-
-// 🔥 KACHRA GONE: Auto-delete wala index yahan se hata diya gaya hai!
 
 const Story = model('Story', storySchema);
 

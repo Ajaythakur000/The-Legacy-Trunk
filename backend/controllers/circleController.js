@@ -6,6 +6,7 @@ import FamilyMember from '../models/familyMember.js';
 import Story from '../models/storyModel.js';
 import Notification from '../models/notificationModel.js'; 
 
+// Generates a random 6-character code for family circles
 const generateFamilyCode = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let rand = '';
@@ -13,6 +14,7 @@ const generateFamilyCode = () => {
   return `TRUNK-${rand}`;
 };
 
+// Ensures the generated family code is completely unique in the database
 const createUniqueFamilyCode = async () => {
   let code = generateFamilyCode();
   while (await FamilyCircle.findOne({ familyCode: code })) {
@@ -21,6 +23,7 @@ const createUniqueFamilyCode = async () => {
   return code;
 };
 
+// Creates a new family circle and sets the creator as the admin
 const createCircle = async (req, res) => {
   try {
     const { circleName } = req.body;
@@ -52,6 +55,7 @@ const createCircle = async (req, res) => {
   }
 };
 
+// Fetches all family circles the current user belongs to
 const getMyCircles = async (req, res) => {
   try {
     const circles = await FamilyCircle.find({ members: req.user._id })
@@ -64,6 +68,7 @@ const getMyCircles = async (req, res) => {
   }
 };
 
+// Gets a specific family circle by ID if the user is a member
 const getCircleById = async (req, res) => {
   try {
     const circle = await FamilyCircle.findById(req.params.id)
@@ -81,9 +86,7 @@ const getCircleById = async (req, res) => {
   }
 };
 
-// ==========================================
-//  MODIFIED: SEND INVITE NOTIFICATION (Spam Protection Added)
-// ==========================================
+// Sends an invite notification to another user to join the family circle
 const sendFamilyInvite = async (req, res) => {
   try {
     const { id: circleId } = req.params;
@@ -134,6 +137,7 @@ const sendFamilyInvite = async (req, res) => {
   }
 };
 
+// Removes a specific member from the family circle if requested by the admin
 const removeMemberFromCircle = async (req, res) => {
   try {
     const { circleId, memberId } = req.params;
@@ -169,7 +173,7 @@ const removeMemberFromCircle = async (req, res) => {
   }
 };
 
-//  FIX: Calculate and attach the top contributor (champion) avatar for each family
+// Fetches the global top families leaderboard, attempting to hit a Redis cache first
 const getLeaderboard = async (req, res) => {
   try {
     const CACHE_KEY = 'global_leaderboard';
@@ -190,9 +194,8 @@ const getLeaderboard = async (req, res) => {
       .limit(10)
       .populate('admin', 'name avatar') 
       .select('circleName familyCode familyBondPoints admin members')
-      .lean(); // Lean to manipulate the object freely
+      .lean();
 
-    // Array to hold promises for finding the champion of each family
     const familiesWithChampions = await Promise.all(
       topFamilies.map(async (family) => {
         const topContributorData = await Story.aggregate([
@@ -210,7 +213,6 @@ const getLeaderboard = async (req, res) => {
           championAvatar = championUser?.avatar || null;
           championName = championUser?.name || '';
         } else {
-          // Fallback to admin if no stories exist
           championAvatar = family.admin?.avatar || null;
           championName = family.admin?.name || '';
         }
@@ -236,6 +238,7 @@ const getLeaderboard = async (req, res) => {
   }
 };
 
+// Retrieves the user with the most stories in a specific circle
 const getTopContributor = async (req, res) => {
   try {
     const circleId = req.params.id;
@@ -263,6 +266,7 @@ const getTopContributor = async (req, res) => {
   }
 };
 
+// Gathers upcoming birthdays and milestones for members in the family circle
 const getUpcomingEvents = async (req, res) => {
   try {
     const circleId = req.params.id;
@@ -329,6 +333,7 @@ const getUpcomingEvents = async (req, res) => {
   }
 };
 
+// Generates an expiring JWT invite link for people to join the circle
 const generateInviteLink = async (req, res) => {
   try {
     const circleId = req.params.id;
@@ -356,6 +361,7 @@ const generateInviteLink = async (req, res) => {
   }
 };
 
+// Processes an invite token and adds the user to the family circle if valid
 const joinViaInvite = async (req, res) => {
   try {
     const { token } = req.body;
@@ -399,6 +405,7 @@ const joinViaInvite = async (req, res) => {
   }
 };
 
+// Deletes the family circle and removes references to it from all members
 const deleteCircle = async (req, res) => {
   try {
     const circleId = req.params.id;

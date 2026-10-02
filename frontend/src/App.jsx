@@ -8,28 +8,25 @@ import ProtectedRoute from './components/shared/ProtectedRoute';
 import AnimatedPage from './components/shared/AnimatedPage';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 
-// Auth Pages
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 import InvitePage from './pages/InvitePage';
 
-// Core Pages
 import HomePage from './components/Feed/HomePage';
 import DashboardPage from './components/dashboard/DashboardPage';
 import ProfilePage from './components/profile/ProfilePage';
 
-// Feature Pages
 import VaultRoomPage from './components/chat/VaultRoomPage';
 import FamilyRadarPage from './components/radar/FamilyRadarPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 
-// Stories Pages
 import VaultStoriesPage from './pages/VaultStoriesPage';
 import MyStoriesPage from './components/story/MyStoriesPage';
 import FamilyTimelinePage from './pages/FamilyTimelinePage';
 import FamilyOraclePage from './pages/FamilyOraclePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 
+// Wraps protected routes with the standard navbar layout
 function ProtectedLayout() {
   const location = useLocation(); 
   return (
@@ -45,12 +42,13 @@ function ProtectedLayout() {
   );
 }
 
+// Main app entry point with routing and global toast config
 function App() {
   const location = useLocation();
   const { isInitializing } = useAuth();
 
   if (isInitializing) {
-    return <div style={{ background: '#FDFBF7', minHeight: '100vh', backgroundImage: 'none',  }} />;
+    return <div style={{ background: '#FDFBF7', minHeight: '100vh', backgroundImage: 'none' }} />;
   }
 
   return (
@@ -92,12 +90,10 @@ function App() {
           <Routes location={location}> 
             <Route path="/" element={<Navigate to="/login" replace />} />
 
-            {/* Public Routes */}
             <Route path="/login" element={<AnimatedPage showRuneFlash={false} showBurst={false}><LoginPage /></AnimatedPage>} />
             <Route path="/signup" element={<AnimatedPage showRuneFlash={false} showBurst={false}><SignupPage /></AnimatedPage>} />
             <Route path="/invite/:token" element={<AnimatedPage showRuneFlash={false} showBurst={false}><InvitePage /></AnimatedPage>} />
 
-            {/* Protected Routes Wrapper */}
             <Route element={<ProtectedLayout />}>
               <Route path="/home" element={<AnimatedPage><HomePage /></AnimatedPage>} />
               <Route path="/dashboard" element={<AnimatedPage><DashboardPage /></AnimatedPage>} />

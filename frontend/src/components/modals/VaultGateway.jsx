@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ─── Slide content definitions ────────────────────────────────────────────────
 const SLIDES = [
   {
     icon: '📸',
@@ -62,7 +61,7 @@ const SLIDES = [
   },
 ];
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// Welcome screen for the vault
 function VaultGateway({ onClose }) {
   const [step, setStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -124,7 +123,6 @@ function VaultGateway({ onClose }) {
         }}
       >
         <div style={{ position: 'relative', zIndex: 2 }}>
-          {/* SUCCESS STATE */}
           <AnimatePresence>
             {done && (
               <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center', padding: '20px 0' }}>
@@ -137,7 +135,6 @@ function VaultGateway({ onClose }) {
 
           {!done && (
             <>
-              {/* Icon / Avatar */}
               <div style={{ width: 80, height: 80, margin: '0 auto 20px', position: 'relative' }}>
                 <motion.div
                   key={step} initial={{ scale: 0.5, opacity: 0, rotate: -20 }} animate={{ scale: 1, opacity: 1, rotate: Math.random() * 10 - 5 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}
@@ -147,7 +144,6 @@ function VaultGateway({ onClose }) {
                 </motion.div>
               </div>
 
-              {/* Slide content */}
               <AnimatePresence mode="wait">
                 <motion.div key={step} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.2 }}>
                   <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: '#3E2723', textAlign: 'center', margin: '0 0 12px' }}>
@@ -160,7 +156,6 @@ function VaultGateway({ onClose }) {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Comic Progress Bar */}
               <div style={{ width: '100%', height: 12, background: '#FFF', border: 'none', borderRadius: 6, margin: '24px 0 20px', position: 'relative', overflow: 'hidden', boxShadow: '2px 2px 15px 0px rgba(0,0,0,0.45)' }}>
                 <motion.div
                   animate={{ width: `${((step + 1) / SLIDES.length) * 100}%`, background: SLIDES[step].color }}
@@ -169,7 +164,6 @@ function VaultGateway({ onClose }) {
                 />
               </div>
 
-              {/* Buttons */}
               <AnimatePresence mode="wait">
                 {!isLast ? (
                   <motion.div key="step-btns" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', gap: 16 }}>

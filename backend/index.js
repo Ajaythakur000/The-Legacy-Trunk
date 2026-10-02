@@ -1,6 +1,5 @@
 import 'dotenv/config';
-import './workers/pdfWorker.js';
-import './workers/otpWorker.js'; // Start BullMQ Worker
+import './workers/otpWorker.js';
 
 import express from 'express';
 import cors from 'cors';
@@ -8,7 +7,6 @@ import mongoose from 'mongoose';
 import http from 'http';
 import { Server } from 'socket.io';
 
-// Routes Imports
 import userRoutes from './routes/userRoutes.js';
 import storyRoutes from './routes/storyRoutes.js';
 import timelineRoutes from './routes/timelineRoutes.js';
@@ -24,20 +22,17 @@ import { initializeSocket } from './socket/socketHandler.js';
 
 const app = express();
 
-// dY" Fix rate limiting behind Render Proxy
 app.set('trust proxy', 1);
 
-// 🟢 FIX 1: Strict Allowed Origins (Sirf inhi links se request aayegi)
 const allowedOrigins = [
-  'http://localhost:5173',               //  local frontend
-  'http://localhost:5174',               // Backup local port
-  'https://the-legacy-trunk.vercel.app'  // Live Vercel Frontend
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://the-legacy-trunk.vercel.app'
 ];
 
-// 🟢 FIX 2: Secure Express CORS with Credentials
 const corsOptions = {
+  // Handles CORS origin verification
   origin: function (origin, callback) {
-    // Agar origin nahi hai (jaise Postman ya server-to-server), ya phir allowed list mein hai
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -46,7 +41,7 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  credentials: true, // IMPORTANT: Iske bina Login/Cookies kaam nahi karenge
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -57,7 +52,6 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 const PORT = process.env.PORT || 8000;
 const MONGO_URI = process.env.MONGO_URI;
 
-// REST APIs
 app.use('/api/users', userRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/timeline', timelineRoutes);
@@ -69,11 +63,12 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// Responds with a welcome message
 app.get('/', (req, res) => {
   res.send('Welcome to The Legacy Trunk API! Vault is Secured. 🔒');
 });
 
-// Global Error Handler
+// Handles global server errors
 app.use((err, req, res, next) => {
   console.error('🔥 Global Server Error Caught:', err.message);
   if (err.message === 'Not allowed by CORS') {
@@ -82,6 +77,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal Server Error' });
 });
 
+// Connects to the MongoDB database
 const connectDB = async () => {
   try {
     await mongoose.connect(MONGO_URI);
@@ -94,22 +90,19 @@ const connectDB = async () => {
 
 const server = http.createServer(app);
 
-//  FIX 3: Secure Socket.IO CORS with Credentials
 export const io = new Server(server, {
   path: '/socket.io',
   cors: {
-    origin: allowedOrigins, // Sirf allowed links hi connect honge
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
-    credentials: true       // Socket ke liye bhi cookies allow karna zaroori hai
+    credentials: true
   },
 });
 
 app.set('io', io);
 
-// initialize all socket events
 initializeSocket(io);
 
-// start
 connectDB().then(() => {
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

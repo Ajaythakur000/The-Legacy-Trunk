@@ -1,21 +1,19 @@
 import { Schema, model } from 'mongoose';
 
 const eventSchema = new Schema({
-    eventName: { // [cite: 107]
+    eventName: {
         type: String,
         required: true,
         trim: true,
     },
-    eventDate: { // [cite: 108]
+    eventDate: {
         type: Date,
         required: true,
     },
-    description: { // [cite: 109]
+    description: {
         type: String,
         required: true,
     },
-    // Har event ek timeline se juda hoga.
-    // Yeh field uss parent timeline ki ID store karegi.
     timeline: {
         type: Schema.Types.ObjectId,
         required: true,
